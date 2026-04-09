@@ -1,5 +1,14 @@
 /* ── OTP Verification — Mobile-First, no scroll ─────────────────── */
 
+@keyframes otp-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes otp-badge-in {
+  from { opacity: 0; transform: scale(0.75) rotate(-12deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
 .otp-root {
   background: #faf9f7;
   height: 100dvh;
@@ -90,9 +99,10 @@
 /* ── Icon badge ─────────────────────────────────────────────────── */
 .otp-icon-badge {
   position: relative;
-  width: 140px;
-  height: 140px;
+  width: 120px;
+  height: 120px;
   flex-shrink: 0;
+  animation: otp-badge-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
 }
 
 .otp-badge-back {
@@ -116,7 +126,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 52px;
+  font-size: 44px;
   line-height: 1;
 }
 
@@ -139,11 +149,17 @@
 }
 
 /* ── Copy ───────────────────────────────────────────────────────── */
-.otp-copy { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.otp-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  animation: otp-fade-up 0.4s 0.2s ease both;
+}
 
 .otp-heading {
   font-weight: 400;
-  font-size: clamp(32px, 9vw, 40px);
+  font-size: clamp(28px, 8vw, 36px);
   letter-spacing: -2px;
   color: #2e2f2e;
   line-height: 1;
@@ -168,24 +184,25 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   width: 100%;
+  animation: otp-fade-up 0.4s 0.3s ease both;
 }
 
 .otp-boxes {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   justify-content: center;
 }
 
 .otp-box {
-  width: 52px;
-  height: 64px;
+  width: 46px;
+  height: 56px;
   border: 2px solid #dad4c8;
-  border-radius: 16px;
+  border-radius: 14px;
   background: #fff;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   color: #2e2f2e;
   text-align: center;
@@ -193,6 +210,7 @@
   box-shadow: rgba(0,0,0,0.06) 0 1px 2px;
   transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
   caret-color: #38671a;
+  -webkit-text-size-adjust: 100%;
 }
 .otp-box:focus {
   border-color: #38671a;
@@ -224,7 +242,7 @@
   background: #5d3fd3;
   border: none;
   border-radius: 9999px;
-  padding: 18px;
+  padding: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -233,7 +251,7 @@
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
   color: #f6f0ff;
 }
@@ -279,11 +297,11 @@
 
 /* Very small phones */
 @media (max-height: 680px) {
-  .otp-icon-badge { width: 100px; height: 100px; }
-  .otp-badge-front { font-size: 36px; }
-  .otp-heading { font-size: 28px; }
-  .otp-main { gap: 18px; }
-  .otp-box { width: 44px; height: 54px; font-size: 22px; }
+  .otp-icon-badge { width: 90px; height: 90px; }
+  .otp-badge-front { font-size: 32px; }
+  .otp-heading { font-size: 24px; }
+  .otp-main { gap: 14px; }
+  .otp-box { width: 40px; height: 50px; font-size: 20px; }
 }
 
 /* ── Desktop ─────────────────────────────────────────────────────── */

@@ -1,13 +1,23 @@
 /* ── Login Screen — Mobile-First ─────────────────────────────────── */
 
+@keyframes login-fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes login-pop-in {
+  from { opacity: 0; transform: scale(0.88) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 .login-root {
   background: #f7f6f4;
-  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px;
+  padding: 24px 24px;
   position: relative;
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
@@ -52,12 +62,13 @@
 .login-wordmark {
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-weight: 400;
-  font-size: 26px;
+  font-size: 22px;
   letter-spacing: -2px;
   text-transform: uppercase;
   color: #2e2f2e;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   text-align: center;
+  animation: login-fade-up 0.4s ease both;
 }
 
 /* ── Card ───────────────────────────────────────────────────────── */
@@ -66,18 +77,19 @@
   border: 2px solid #dad4c8;
   border-radius: 12px;
   box-shadow: -7px 7px 0 #2e2f2e;
-  padding: 32px 28px 28px;
+  padding: 24px 24px 20px;
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 18px;
+  animation: login-pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
 }
 
 /* Heading */
-.login-heading { display: flex; flex-direction: column; gap: 6px; }
+.login-heading { display: flex; flex-direction: column; gap: 4px; }
 .login-title {
   font-weight: 400;
-  font-size: clamp(32px, 9vw, 40px);
+  font-size: clamp(26px, 7vw, 36px);
   letter-spacing: -1.8px;
   color: #2e2f2e;
   line-height: 1;
@@ -91,7 +103,7 @@
 }
 
 /* ── Form ───────────────────────────────────────────────────────── */
-.login-form { display: flex; flex-direction: column; gap: 16px; }
+.login-form { display: flex; flex-direction: column; gap: 12px; }
 
 .login-field { position: relative; }
 
@@ -115,13 +127,14 @@
   background: #f1f1ef;
   border: 2px solid #dad4c8;
   border-radius: 9999px;
-  padding: 16px 52px 16px 22px;
-  margin-top: 14px;
+  padding: 13px 50px 13px 20px;
+  margin-top: 12px;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 15px;
+  font-size: 16px;
   color: #2e2f2e;
   outline: none;
   transition: border-color 0.2s, background 0.2s;
+  -webkit-text-size-adjust: 100%;
 }
 .login-input::placeholder { color: rgba(91, 92, 90, 0.4); }
 .login-input:focus {
@@ -133,7 +146,7 @@
 .login-input-icon {
   position: absolute;
   right: 18px;
-  bottom: 14px;
+  bottom: 12px;
   cursor: pointer;
   color: #adadab;
   display: flex;
@@ -173,9 +186,9 @@
   background: #38671a;
   border: none;
   border-radius: 9999px;
-  padding: 18px;
+  padding: 15px;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
   color: #d6ffb7;
   text-align: center;
@@ -237,7 +250,7 @@
   background: #fff;
   border: 2px solid #dad4c8;
   border-radius: 9999px;
-  padding: 14px;
+  padding: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -261,9 +274,10 @@
 .login-footer-link {
   display: flex;
   gap: 4px;
-  margin-top: 20px;
+  margin-top: 14px;
   font-size: 13px;
   align-items: center;
+  animation: login-fade-up 0.4s 0.35s ease both;
 }
 .login-footer-link span { color: #5b5c5a; }
 .login-footer-link button {
@@ -406,13 +420,19 @@
 
 /* ── Tablet ──────────────────────────────────────────────────────── */
 @media (min-width: 481px) and (max-width: 767px) {
-  .login-card { padding: 32px 28px; }
-  .login-wordmark { margin-bottom: 32px; }
-  .login-title { font-size: 44px; }
+  .login-card { padding: 24px 24px; }
+  .login-wordmark { margin-bottom: 16px; }
+  .login-title { font-size: 32px; }
 }
 
 /* ── Mobile ──────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
-  .login-card { padding: 32px 24px 24px; }
-  .login-wordmark { margin-bottom: 20px; }
+  .login-card { padding: 20px 20px 16px; }
+  .login-wordmark { margin-bottom: 12px; font-size: 20px; }
+  .login-title { font-size: 26px; }
+  .login-form { gap: 10px; }
+  .login-input { padding: 12px 46px 12px 18px; }
+  .login-btn { padding: 13px; font-size: 15px; }
+  .login-google-btn { padding: 10px; }
+  .login-footer-link { margin-top: 10px; }
 }

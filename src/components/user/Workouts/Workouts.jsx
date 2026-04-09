@@ -92,7 +92,7 @@ const CALENDAR_DAYS = ['Mo','Tu','We','Th','Fr','Sa','Su'];
 const HISTORY_SESSIONS = [
   {
     day: 2,  dot: 'green',  session: {
-      name: 'Push Day',  duration: '62m', volume: '3.8k kg', sets: 16,
+      name: 'Push Day',  duration: '62m', volume: '3.8k kg', sets: 16, sessionNote: 'Overall strong day, managed fatigue well',
       exercises: [
         { name: 'Barbell Bench Press', sets: [{ weight: 80, reps: 10 }, { weight: 82, reps: 9 }, { weight: 85, reps: 8 }, { weight: 85, reps: 8 }], note: 'Felt strong, good chest activation' },
         { name: 'Overhead Press',       sets: [{ weight: 50, reps: 8 }, { weight: 50, reps: 8 }, { weight: 47, reps: 9 }], note: '' },
@@ -102,7 +102,7 @@ const HISTORY_SESSIONS = [
   },
   {
     day: 4,  dot: 'purple', session: {
-      name: 'Pull Day',  duration: '71m', volume: '4.1k kg', sets: 18,
+      name: 'Pull Day',  duration: '71m', volume: '4.1k kg', sets: 18, sessionNote: 'Great back day with new PR on rows!',
       exercises: [
         { name: 'Barbell Row',   sets: [{ weight: 85, reps: 8 }, { weight: 85, reps: 8 }, { weight: 82, reps: 9 }, { weight: 80, reps: 10 }], note: 'New PR on first set!' },
         { name: 'Pull-up',       sets: [{ weight: 0, reps: 10 }, { weight: 0, reps: 9 }, { weight: 0, reps: 8 }], note: '' },
@@ -112,7 +112,7 @@ const HISTORY_SESSIONS = [
   },
   {
     day: 9,  dot: 'green',  session: {
-      name: 'Push Day',  duration: '72m', volume: '4.2k kg', sets: 18,
+      name: 'Push Day',  duration: '72m', volume: '4.2k kg', sets: 18, sessionNote: '',
       exercises: [
         { name: 'Barbell Bench Press', sets: [{ weight: 85, reps: 8 }, { weight: 85, reps: 8 }, { weight: 83, reps: 9 }, { weight: 80, reps: 10 }], note: '' },
         { name: 'Weighted Dips',       sets: [{ weight: 20, reps: 10 }, { weight: 20, reps: 9 }, { weight: 20, reps: 8 }], note: 'Added weight this week' },
@@ -121,7 +121,7 @@ const HISTORY_SESSIONS = [
   },
   {
     day: 11, dot: 'green',  session: {
-      name: 'Push Day',  duration: '58m', volume: '3.5k kg', sets: 14,
+      name: 'Push Day',  duration: '58m', volume: '3.5k kg', sets: 14, sessionNote: 'Shorter session but very intense',
       exercises: [
         { name: 'Incline DB Press', sets: [{ weight: 30, reps: 12 }, { weight: 30, reps: 11 }, { weight: 28, reps: 12 }], note: 'Upper chest pump was crazy' },
         { name: 'Tricep Pushdown',  sets: [{ weight: 35, reps: 15 }, { weight: 35, reps: 14 }, { weight: 33, reps: 15 }], note: '' },
@@ -130,7 +130,7 @@ const HISTORY_SESSIONS = [
   },
   {
     day: 13, dot: 'purple', session: {
-      name: 'Pull Day',  duration: '68m', volume: '4.0k kg', sets: 17,
+      name: 'Pull Day',  duration: '68m', volume: '4.0k kg', sets: 17, sessionNote: 'Solid foundation session, form over weight',
       exercises: [
         { name: 'Deadlift',      sets: [{ weight: 120, reps: 5 }, { weight: 120, reps: 5 }, { weight: 115, reps: 6 }], note: 'Back tight, focused on form' },
         { name: 'Cable Row',     sets: [{ weight: 65, reps: 12 }, { weight: 65, reps: 12 }, { weight: 62, reps: 13 }], note: '' },
@@ -347,7 +347,7 @@ function AddExerciseModal({ onClose, onAdd }) {
               <label className="wk-form-label">Equipment</label>
               <input className="wk-form-input" placeholder="e.g. Barbell" value={form.equipment} onChange={e => setForm(f => ({ ...f, equipment: e.target.value }))} />
             </div>
-            <button className="wk-create-btn" style={{ width: '100%', marginTop: 8 }} onClick={handleCreate}>
+            <button className="wk-create-btn" onClick={handleCreate}>
               <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span>
               Add Exercise
             </button>
@@ -361,12 +361,27 @@ function AddExerciseModal({ onClose, onAdd }) {
 function ProgramPreview({ program, onBack, onStart, onProgramUpdate }) {
   const [exercises, setExercises] = useState(program.exerciseList);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingExIndex, setEditingExIndex] = useState(null);
 
   function handleAddExercise(ex) {
-    const updated = [...exercises, ex];
+    if (editingExIndex !== null) {
+      const updated = [...exercises];
+      updated[editingExIndex] = ex;
+      setExercises(updated);
+      onProgramUpdate({ ...program, exerciseList: updated });
+      setEditingExIndex(null);
+    } else {
+      const updated = [...exercises, ex];
+      setExercises(updated);
+      onProgramUpdate({ ...program, exerciseList: updated, exerciseCount: updated.length });
+    }
+    setShowAddModal(false);
+  }
+
+  function handleDeleteExercise(i) {
+    const updated = exercises.filter((_, idx) => idx !== i);
     setExercises(updated);
     onProgramUpdate({ ...program, exerciseList: updated, exerciseCount: updated.length });
-    setShowAddModal(false);
   }
 
   return (
@@ -418,11 +433,30 @@ function ProgramPreview({ program, onBack, onStart, onProgramUpdate }) {
                   <h4 className="wk-ex-name">{ex.name}</h4>
                 </div>
               </div>
-              {ex.pr && (
-                <div className="wk-ex-pr" style={{ background: program.accentColor }}>
-                  PR: {ex.pr}
-                </div>
-              )}
+              <div className="wk-ex-actions">
+                {ex.pr && (
+                  <div className="wk-ex-pr" style={{ background: program.accentColor }}>
+                    PR: {ex.pr}
+                  </div>
+                )}
+                <button
+                  className="wk-ex-action-btn"
+                  onClick={() => {
+                    setEditingExIndex(i);
+                    setShowAddModal(true);
+                  }}
+                  title="Edit exercise"
+                >
+                  <span className="material-symbols-outlined">edit</span>
+                </button>
+                <button
+                  className="wk-ex-action-btn wk-ex-action-btn--delete"
+                  onClick={() => handleDeleteExercise(i)}
+                  title="Delete exercise"
+                >
+                  <span className="material-symbols-outlined">delete</span>
+                </button>
+              </div>
             </div>
             <div className="wk-ex-grid">
               <div className="wk-ex-stat">
@@ -572,16 +606,24 @@ function CreateProgramModal({ onClose, onCreate }) {
 }
 
 function LibraryView({ programs, onAddProgram, onCreateProgram, onBrowseProgram }) {
-  const [libTab, setLibTab] = useState('programs'); // 'programs' | 'exercises'
+  const [libTab, setLibTab] = useState('my-programs'); // 'my-programs' | 'programs'
   const [search, setSearch] = useState('');
-  const [cat, setCat]       = useState('All');
 
-  const filtered = LIBRARY_EXERCISES.filter(ex => {
-    const matchesCat    = cat === 'All' || ex.cat === cat;
-    const matchesSearch = ex.name.toLowerCase().includes(search.toLowerCase()) ||
-                          ex.muscle.toLowerCase().includes(search.toLowerCase());
-    return matchesCat && matchesSearch;
-  });
+  // Built-in library programs (sample data)
+  const BUILTIN_PROGRAMS = [
+    { id: 'lib-push', name: 'Upper Body Push', tag: 'HYPERTROPHY', tagColor: 'green', accentColor: '#38671a', exerciseList: [], duration: 50 },
+    { id: 'lib-pull', name: 'Full Back Focus', tag: 'STRENGTH', tagColor: 'purple', accentColor: '#5d3fd3', exerciseList: [], duration: 60 },
+    { id: 'lib-legs', name: 'Lower Body Power', tag: null, tagColor: null, accentColor: '#b02500', exerciseList: [], duration: 55 },
+    { id: 'lib-full', name: 'Full Body Blast', tag: 'HYPERTROPHY', tagColor: 'green', accentColor: '#38671a', exerciseList: [], duration: 75 },
+  ];
+
+  const filteredMyPrograms = programs.filter(p =>
+    p.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const filteredLibPrograms = BUILTIN_PROGRAMS.filter(p =>
+    p.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="wk-view">
@@ -592,85 +634,99 @@ function LibraryView({ programs, onAddProgram, onCreateProgram, onBrowseProgram 
         </div>
       </div>
 
+      {/* Search */}
+      <div className="wk-search-wrap" style={{ marginBottom: 16 }}>
+        <span className="material-symbols-outlined wk-search-icon">search</span>
+        <input className="wk-search" type="text" placeholder="Search programs..." value={search} onChange={e => setSearch(e.target.value)} />
+        {search && (
+          <button className="wk-search-clear" onClick={() => setSearch('')}>
+            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
+          </button>
+        )}
+      </div>
+
       {/* Library tabs */}
       <div className="wk-lib-tabs">
+        <button className={`wk-lib-tab${libTab === 'my-programs' ? ' wk-lib-tab--active' : ''}`} onClick={() => setLibTab('my-programs')}>
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>favorite</span>
+          My Programs
+        </button>
         <button className={`wk-lib-tab${libTab === 'programs' ? ' wk-lib-tab--active' : ''}`} onClick={() => setLibTab('programs')}>
           <span className="material-symbols-outlined" style={{ fontSize: 16 }}>grid_view</span>
           Programs
         </button>
-        <button className={`wk-lib-tab${libTab === 'exercises' ? ' wk-lib-tab--active' : ''}`} onClick={() => setLibTab('exercises')}>
-          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>fitness_center</span>
-          Exercises
-        </button>
       </div>
 
-      {libTab === 'programs' ? (
+      {libTab === 'my-programs' ? (
         <>
           <div className="wk-lib-programs">
-            {programs.map((prog, i) => (
-              <div key={prog.id} className="wk-lib-prog-card" onClick={() => onBrowseProgram(prog)}>
-                <div className="wk-lib-prog-stripe" style={{ background: prog.accentColor }} />
-                <div className="wk-lib-prog-info">
-                  <h4 className="wk-lib-prog-name">{prog.name}</h4>
-                  <p className="wk-lib-prog-meta">
-                    {prog.exerciseList.length} exercises · {prog.duration} mins
-                  </p>
-                </div>
-                {prog.tag && (
-                  <span className="wk-card-tag" style={{
-                    background: prog.tagColor === 'green' ? '#c3fb9c' : prog.tagColor === 'purple' ? '#b4a5ff' : '#e8e2d6',
-                    color: prog.tagColor === 'green' ? '#214f01' : prog.tagColor === 'purple' ? '#180058' : '#2e2f2e',
-                    fontSize: 9,
-                  }}>
-                    {prog.tag}
-                  </span>
-                )}
-                <button
-                  className="wk-lib-prog-add"
-                  onClick={e => { e.stopPropagation(); onAddProgram(prog); }}
-                  title="Add to My Programs"
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>add</span>
-                </button>
+            {filteredMyPrograms.length === 0 ? (
+              <div className="wk-empty" style={{ padding: '40px 20px', textAlign: 'center' }}>
+                <span className="material-symbols-outlined wk-empty-icon">library_books</span>
+                <p>No programs created yet.</p>
               </div>
-            ))}
+            ) : (
+              filteredMyPrograms.map((prog, i) => (
+                <div key={prog.id} className="wk-lib-prog-card" onClick={() => onBrowseProgram(prog)}>
+                  <div className="wk-lib-prog-stripe" style={{ background: prog.accentColor }} />
+                  <div className="wk-lib-prog-info">
+                    <h4 className="wk-lib-prog-name">{prog.name}</h4>
+                    <p className="wk-lib-prog-meta">
+                      {prog.exerciseList.length} exercises · {prog.duration} mins
+                    </p>
+                  </div>
+                  {prog.tag && (
+                    <span className="wk-card-tag" style={{
+                      background: prog.tagColor === 'green' ? '#c3fb9c' : prog.tagColor === 'purple' ? '#b4a5ff' : '#e8e2d6',
+                      color: prog.tagColor === 'green' ? '#214f01' : prog.tagColor === 'purple' ? '#180058' : '#2e2f2e',
+                      fontSize: 9,
+                    }}>
+                      {prog.tag}
+                    </span>
+                  )}
+                </div>
+              ))
+            )}
           </div>
-          <button className="wk-create-btn" style={{ width: '100%', marginTop: 16 }} onClick={onCreateProgram}>
+          <button className="wk-create-btn" onClick={onCreateProgram}>
             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span>
             Create Program
           </button>
         </>
       ) : (
         <>
-          <div className="wk-search-wrap">
-            <span className="material-symbols-outlined wk-search-icon">search</span>
-            <input className="wk-search" type="text" placeholder="Search exercises..." value={search} onChange={e => setSearch(e.target.value)} />
-            {search && (
-              <button className="wk-search-clear" onClick={() => setSearch('')}>
-                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
-              </button>
-            )}
-          </div>
-          <div className="wk-cat-chips">
-            {LIB_CATS.map(c => (
-              <button key={c} className={`wk-cat-chip${cat === c ? ' wk-cat-chip--active' : ''}`} onClick={() => setCat(c)}>{c}</button>
-            ))}
-          </div>
-          <div className="wk-lib-list">
-            {filtered.length === 0 ? (
-              <div className="wk-empty">
+          <div className="wk-lib-programs">
+            {filteredLibPrograms.length === 0 ? (
+              <div className="wk-empty" style={{ padding: '40px 20px', textAlign: 'center' }}>
                 <span className="material-symbols-outlined wk-empty-icon">search_off</span>
-                <p>No exercises found.</p>
+                <p>No programs found.</p>
               </div>
             ) : (
-              filtered.map((ex, i) => (
-                <div key={i} className="wk-lib-item">
-                  <div className="wk-lib-icon">{ex.icon}</div>
-                  <div className="wk-lib-info">
-                    <span className="wk-lib-name">{ex.name}</span>
-                    <span className="wk-lib-muscle">{ex.muscle} · {ex.equipment}</span>
+              filteredLibPrograms.map((prog, i) => (
+                <div key={prog.id} className="wk-lib-prog-card">
+                  <div className="wk-lib-prog-stripe" style={{ background: prog.accentColor }} />
+                  <div className="wk-lib-prog-info">
+                    <h4 className="wk-lib-prog-name">{prog.name}</h4>
+                    <p className="wk-lib-prog-meta">
+                      {prog.exerciseList.length || '?'} exercises · {prog.duration} mins
+                    </p>
                   </div>
-                  <span className={`wk-lib-cat wk-lib-cat--${ex.cat.toLowerCase()}`}>{ex.cat}</span>
+                  {prog.tag && (
+                    <span className="wk-card-tag" style={{
+                      background: prog.tagColor === 'green' ? '#c3fb9c' : prog.tagColor === 'purple' ? '#b4a5ff' : '#e8e2d6',
+                      color: prog.tagColor === 'green' ? '#214f01' : prog.tagColor === 'purple' ? '#180058' : '#2e2f2e',
+                      fontSize: 9,
+                    }}>
+                      {prog.tag}
+                    </span>
+                  )}
+                  <button
+                    className="wk-lib-prog-add"
+                    onClick={() => onAddProgram(prog)}
+                    title="Add to My Programs"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>add</span>
+                  </button>
                 </div>
               ))
             )}
@@ -924,10 +980,41 @@ function ActiveSession({ program, onFinish }) {
   );
 }
 
+// ── Discard Confirmation Modal ────────────────────────────────────────
+
+function DiscardModal({ onCancel, onConfirm }) {
+  return (
+    <div className="wk-discard-overlay" onClick={e => e.target === e.currentTarget && onCancel()}>
+      <div className="wk-discard-modal">
+        <div className="wk-discard-icon" aria-hidden="true">
+          <span className="material-symbols-outlined"
+            style={{ fontVariationSettings: "'FILL' 1", fontSize: 28, color: '#b02500' }}>
+            delete_forever
+          </span>
+        </div>
+        <h3 className="wk-discard-title">Discard Session?</h3>
+        <p className="wk-discard-body">
+          All your logged sets and data for this session will be permanently lost.
+        </p>
+        <div className="wk-discard-actions">
+          <button className="wk-discard-cancel" onClick={onCancel}>
+            Keep Going
+          </button>
+          <button className="wk-discard-confirm" onClick={onConfirm}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete_forever</span>
+            Discard
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Workout Summary ───────────────────────────────────────────────────
 
 function WorkoutSummary({ program, sessionData, onClose }) {
   const [notes, setNotes] = useState('');
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
   const totalSets   = sessionData ? sessionData.reduce((a, ex) => a + ex.sets.filter(s => s.done).length, 0) : 16;
   const doneSets    = sessionData ? sessionData.reduce((a, ex) => a + ex.sets.filter(s => s.done).length, 0) : 16;
@@ -1033,8 +1120,16 @@ function WorkoutSummary({ program, sessionData, onClose }) {
           Save Workout
           <span className="material-symbols-outlined">send</span>
         </button>
-        <button className="wk-discard-btn" onClick={onClose}>Discard Session</button>
+        <button className="wk-discard-btn" onClick={() => setShowDiscardConfirm(true)}>Discard Session</button>
       </div>
+
+      {/* Discard Confirmation Modal */}
+      {showDiscardConfirm && (
+        <DiscardModal
+          onCancel={() => setShowDiscardConfirm(false)}
+          onConfirm={onClose}
+        />
+      )}
     </div>
   );
 }
@@ -1194,6 +1289,17 @@ function HistoryView() {
               );
             })}
           </div>
+
+          {/* Session Notes */}
+          {selectedSession.sessionNote && (
+            <div className="wk-sess-notes-card">
+              <div className="wk-sess-notes-header">
+                <span className="material-symbols-outlined">notes</span>
+                <h4 className="wk-eyebrow">Session Notes</h4>
+              </div>
+              <p className="wk-sess-notes-text">{selectedSession.sessionNote}</p>
+            </div>
+          )}
 
           {/* Volume chart */}
           <div className="wk-vol-card">

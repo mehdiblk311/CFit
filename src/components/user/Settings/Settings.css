@@ -152,11 +152,12 @@
   border-radius: 9999px;
   padding: 10px 20px;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: #2e2f2e;
   outline: none;
   transition: border-color 0.2s;
+  -webkit-text-size-adjust: 100%;
 }
 .st-input:focus { border-color: #38671a; }
 
@@ -308,12 +309,13 @@
   border-radius: 9999px;
   padding: 10px 20px;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: #2e2f2e;
   outline: none;
   appearance: none;
   cursor: pointer;
+  -webkit-text-size-adjust: 100%;
 }
 
 .st-freq-row {
