@@ -23,6 +23,7 @@ export function AuthProvider({ children }) {
 
   const isAuthenticated = Boolean(user);
   const isOnboarded    = user?.onboarded ?? false;
+  const isAdmin        = user?.role === 'admin';
 
   // ── Login ────────────────────────────────────────────────────────────
   const login = useCallback(async (email, _password) => {
@@ -31,10 +32,18 @@ export function AuthProvider({ children }) {
 
     // Re-hydrate existing user by email (mock: same device = same user)
     const stored = loadFromStorage();
+    const isAdminEmail = email.toLowerCase().includes('admin');
     const userData =
       stored?.email === email
         ? stored
-        : { id: Date.now(), email, name: email.split('@')[0], onboarded: false, profile: {} };
+        : {
+            id: Date.now(),
+            email,
+            name: email.split('@')[0],
+            onboarded: false,
+            profile: {},
+            role: isAdminEmail ? 'admin' : 'user',
+          };
 
     saveToStorage(userData);
     setUser(userData);
@@ -88,6 +97,7 @@ export function AuthProvider({ children }) {
       user,
       isAuthenticated,
       isOnboarded,
+      isAdmin,
       login,
       signup,
       logout,

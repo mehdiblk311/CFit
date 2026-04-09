@@ -285,3 +285,8 @@
   .otp-main { gap: 18px; }
   .otp-box { width: 44px; height: 54px; font-size: 22px; }
 }
+
+/* ── Desktop ─────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .otp-main, .rp-main, .pc-main { max-width: 480px; margin: 0 auto; padding-left: 48px; padding-right: 48px; }
+}

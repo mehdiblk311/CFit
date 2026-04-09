@@ -49,6 +49,32 @@ export default function Login({ onForgotPassword, onSignup }) {
       <div className="login-container">
         <div className="login-wordmark">UM6P_FIT</div>
 
+        {/* Desktop hero — only visible on md+ */}
+        <div className="login-desktop-hero">
+          <div className="login-desktop-sticker" aria-hidden="true">
+            <span className="login-desktop-sticker-icon">⚡</span>
+            <span>READY TO TRAIN?</span>
+          </div>
+          <h2 className="login-desktop-hero-title">
+            Your kinetic<br/>fitness<br/>journal.
+          </h2>
+          <p className="login-desktop-hero-subtitle">
+            Track workouts, fuel with precision, and unlock your performance data — all in one artisanal space built for UM6P athletes.
+          </p>
+          <div className="login-desktop-features">
+            {[
+              { icon: '🏋️', text: 'Personalized workout programs with PR tracking' },
+              { icon: '🥗', text: 'Smart nutrition logging and macro analysis' },
+              { icon: '🤖', text: 'AI coaching with real-time performance insights' },
+            ].map((f, i) => (
+              <div className="login-desktop-feature" key={i}>
+                <span className="login-desktop-feature-emoji">{f.icon}</span>
+                <span className="login-desktop-feature-text">{f.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div className="login-card">
           {/* Heading */}
           <div className="login-heading">

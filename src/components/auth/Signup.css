@@ -313,3 +313,26 @@
   cursor: pointer;
   padding: 0;
 }
+
+/* ── Desktop ─────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .su-root {
+    align-items: center;
+    padding-bottom: 64px;
+  }
+
+  .su-header {
+    max-width: 100%;
+    padding: 0 48px;
+  }
+
+  .su-main {
+    max-width: 560px;
+    padding: 64px 48px;
+    width: 100%;
+  }
+
+  .su-title { font-size: 52px; }
+  .su-blob-green { width: 500px; height: 500px; filter: blur(80px); left: -100px; opacity: 0.15; }
+  .su-blob-purple { width: 400px; height: 400px; filter: blur(70px); right: -100px; opacity: 0.15; }
+}

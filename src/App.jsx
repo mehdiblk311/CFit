@@ -22,6 +22,9 @@ import Nutrition    from './components/user/Nutrition/Nutrition';
 import AIAssistant  from './components/user/AIAssistant/AIAssistant';
 import Settings     from './components/user/Settings/Settings';
 
+// ── Admin ─────────────────────────────────────────────────────────
+import Admin        from './components/admin/Admin';
+
 // ── Screen name constants ─────────────────────────────────────────
 const S = {
   LOGIN:    'login',
@@ -36,7 +39,7 @@ const STEP = { BASIC: 1, GOALS: 2, PLAN: 3 };
 
 // ── Root App ──────────────────────────────────────────────────────
 export default function App() {
-  const { isAuthenticated, isOnboarded } = useAuth();
+  const { isAuthenticated, isOnboarded, isAdmin } = useAuth();
 
   const [screen,      setScreen]      = useState(S.LOGIN);
   const [resetEmail,  setResetEmail]  = useState('');
@@ -125,6 +128,11 @@ export default function App() {
         />
       );
     }
+  }
+
+  // ── Admin users → Admin Panel ────────────────────────────────
+  if (isAdmin) {
+    return <Admin onExit={() => {}} />;
   }
 
   // ── Fully authenticated + onboarded → Main App ───────────────
