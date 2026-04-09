@@ -46,3 +46,31 @@ Skills directory for Claude agents (local rules for development):
 - **web-design-guidelines/** — Figma design standards
 
 These rules guide code quality and design consistency during development.
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm or yarn
+
+### Installation & Running the App
+
+1. **Clone the repository** (if you haven't already):
+   ```bash
+   git clone https://github.com/mehdiblk311/CFit.git
+   cd CFit
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server**:
+   ```bash
+   npm run dev
+   ```
+
+4. **Open your browser**:
+   Navigate to `http://localhost:5173` (or the URL provided in your terminal) to view the app.
