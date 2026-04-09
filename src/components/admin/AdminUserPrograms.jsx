@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FormSelect } from './AdminExerciseLibrary';
 
 const PROGRAM_TAGS = ['ALL', 'HYPERTROPHY', 'STRENGTH', 'ENDURANCE', 'BEGINNER', 'ADVANCED'];
 
@@ -11,7 +12,6 @@ const INITIAL_PROGRAMS = [
     tagText: '#214f01',
     level: 'BEGINNER',
     days: 6,
-    weeks: 12,
     exercises: 18,
     assignedUsers: 142,
     status: 'ACTIVE',
@@ -25,7 +25,6 @@ const INITIAL_PROGRAMS = [
     tagText: '#180058',
     level: 'ADVANCED',
     days: 4,
-    weeks: 16,
     exercises: 12,
     assignedUsers: 67,
     status: 'ACTIVE',
@@ -39,7 +38,6 @@ const INITIAL_PROGRAMS = [
     tagText: '#9d6a09',
     level: 'BEGINNER',
     days: 3,
-    weeks: 8,
     exercises: 9,
     assignedUsers: 289,
     status: 'ACTIVE',
@@ -53,7 +51,6 @@ const INITIAL_PROGRAMS = [
     tagText: '#0089ad',
     level: 'INTERMEDIATE',
     days: 5,
-    weeks: 6,
     exercises: 8,
     assignedUsers: 98,
     status: 'DRAFT',
@@ -67,7 +64,6 @@ const INITIAL_PROGRAMS = [
     tagText: '#214f01',
     level: 'INTERMEDIATE',
     days: 4,
-    weeks: 10,
     exercises: 14,
     assignedUsers: 176,
     status: 'ACTIVE',
@@ -81,7 +77,6 @@ const INITIAL_PROGRAMS = [
     tagText: '#520c00',
     level: 'ADVANCED',
     days: 5,
-    weeks: 8,
     exercises: 20,
     assignedUsers: 34,
     status: 'DRAFT',
@@ -99,11 +94,35 @@ const STATUS_CHIP = {
   DRAFT:  { bg: '#e8e2d6', color: '#5b5c5a' },
 };
 
+function getStyleChip({ bg, color }) {
+  return {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '4px 10px',
+    borderRadius: 9999,
+    background: bg,
+    color,
+    fontFamily: "'Space Mono', monospace",
+    fontSize: 9,
+    fontWeight: 700,
+    letterSpacing: '1px',
+    textTransform: 'uppercase',
+  };
+}
+
+const TAG_META = {
+  HYPERTROPHY: { bg: '#c3fb9c', text: '#214f01' },
+  STRENGTH:    { bg: '#b4a5ff', text: '#180058' },
+  ENDURANCE:   { bg: '#3bd3fd', text: '#0089ad' },
+  BEGINNER:    { bg: '#f8cc65', text: '#9d6a09' },
+  ADVANCED:    { bg: '#f95630', text: '#520c00' },
+};
+
 function ProgramModal({ program, onClose, onSave }) {
   const [form, setForm] = useState(
     program
-      ? { name: program.name, tag: program.tag, level: program.level, days: program.days, weeks: program.weeks, description: program.description, status: program.status }
-      : { name: '', tag: 'HYPERTROPHY', level: 'BEGINNER', days: 3, weeks: 8, description: '', status: 'DRAFT' }
+      ? { name: program.name, tag: program.tag, level: program.level, days: program.days, exercises: program.exercises, description: program.description, status: program.status }
+      : { name: '', tag: 'HYPERTROPHY', level: 'BEGINNER', days: 3, exercises: 0, description: '', status: 'DRAFT' }
   );
   function set(k, v) { setForm(f => ({ ...f, [k]: v })); }
 
@@ -117,49 +136,75 @@ function ProgramModal({ program, onClose, onSave }) {
 
         <div className="adm-form-field">
           <label className="adm-form-label">Program Name</label>
-          <input className="adm-form-input" value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. PPL Hypertrophy" />
+          <input
+            className="adm-form-input"
+            value={form.name}
+            onChange={e => set('name', e.target.value)}
+            placeholder="e.g. PPL Hypertrophy"
+          />
         </div>
+
         <div className="adm-grid-2">
           <div className="adm-form-field">
             <label className="adm-form-label">Tag / Focus</label>
-            <select className="adm-form-select" value={form.tag} onChange={e => set('tag', e.target.value)}>
-              {['HYPERTROPHY', 'STRENGTH', 'ENDURANCE', 'BEGINNER', 'ADVANCED'].map(t => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
+            <FormSelect
+              value={form.tag}
+              onChange={v => set('tag', v)}
+              options={['HYPERTROPHY', 'STRENGTH', 'ENDURANCE', 'BEGINNER', 'ADVANCED']}
+            />
           </div>
           <div className="adm-form-field">
             <label className="adm-form-label">Level</label>
-            <select className="adm-form-select" value={form.level} onChange={e => set('level', e.target.value)}>
-              {['BEGINNER', 'INTERMEDIATE', 'ADVANCED'].map(l => (
-                <option key={l} value={l}>{l}</option>
-              ))}
-            </select>
+            <FormSelect
+              value={form.level}
+              onChange={v => set('level', v)}
+              options={['BEGINNER', 'INTERMEDIATE', 'ADVANCED']}
+            />
           </div>
           <div className="adm-form-field">
             <label className="adm-form-label">Days per Week</label>
-            <input className="adm-form-input" type="number" min={1} max={7} value={form.days} onChange={e => set('days', Number(e.target.value))} />
+            <input
+              className="adm-form-input"
+              type="number" min={1} max={7}
+              value={form.days}
+              onChange={e => set('days', Number(e.target.value))}
+            />
           </div>
           <div className="adm-form-field">
-            <label className="adm-form-label">Duration (weeks)</label>
-            <input className="adm-form-input" type="number" min={1} max={52} value={form.weeks} onChange={e => set('weeks', Number(e.target.value))} />
+            <label className="adm-form-label">Number of Exercises</label>
+            <input
+              className="adm-form-input"
+              type="number" min={0} max={200}
+              value={form.exercises}
+              onChange={e => set('exercises', Number(e.target.value))}
+            />
           </div>
           <div className="adm-form-field">
             <label className="adm-form-label">Status</label>
-            <select className="adm-form-select" value={form.status} onChange={e => set('status', e.target.value)}>
-              <option value="ACTIVE">ACTIVE</option>
-              <option value="DRAFT">DRAFT</option>
-            </select>
+            <FormSelect
+              value={form.status}
+              onChange={v => set('status', v)}
+              options={['ACTIVE', 'DRAFT']}
+            />
           </div>
         </div>
+
         <div className="adm-form-field">
           <label className="adm-form-label">Description</label>
-          <textarea className="adm-form-textarea" value={form.description} onChange={e => set('description', e.target.value)} placeholder="Briefly describe the program goals and methodology..." />
+          <textarea
+            className="adm-form-textarea"
+            value={form.description}
+            onChange={e => set('description', e.target.value)}
+            placeholder="Briefly describe the program goals and methodology..."
+          />
         </div>
 
         <div className="adm-form-actions">
           <button className="adm-btn-ghost" onClick={onClose}>Cancel</button>
-          <button className="adm-btn-primary" onClick={() => { if (form.name.trim()) onSave(form); }}>
+          <button
+            className="adm-btn-primary"
+            onClick={() => { if (form.name.trim()) onSave(form); }}
+          >
             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>save</span>
             {program ? 'Save Changes' : 'Create Program'}
           </button>
@@ -170,11 +215,11 @@ function ProgramModal({ program, onClose, onSave }) {
 }
 
 export default function AdminUserPrograms() {
-  const [programs, setPrograms]   = useState(INITIAL_PROGRAMS);
-  const [search, setSearch]       = useState('');
+  const [programs,  setPrograms]  = useState(INITIAL_PROGRAMS);
+  const [search,    setSearch]    = useState('');
   const [tagFilter, setTagFilter] = useState('ALL');
-  const [modal, setModal]         = useState(null);
-  const [toDelete, setToDelete]   = useState(null);
+  const [modal,     setModal]     = useState(null);
+  const [toDelete,  setToDelete]  = useState(null);
 
   const filtered = programs.filter(p => {
     if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
@@ -183,19 +228,27 @@ export default function AdminUserPrograms() {
   });
 
   function handleSave(form) {
-    const tagMeta = { HYPERTROPHY: { bg: '#c3fb9c', text: '#214f01' }, STRENGTH: { bg: '#b4a5ff', text: '#180058' }, ENDURANCE: { bg: '#3bd3fd', text: '#0089ad' }, BEGINNER: { bg: '#f8cc65', text: '#9d6a09' }, ADVANCED: { bg: '#f95630', text: '#520c00' } };
-    const meta = tagMeta[form.tag] ?? tagMeta.HYPERTROPHY;
+    const meta = TAG_META[form.tag] ?? TAG_META.HYPERTROPHY;
     if (modal?.id) {
-      setPrograms(ps => ps.map(p => p.id === modal.id ? { ...p, ...form, tagColor: meta.bg, tagText: meta.text } : p));
+      setPrograms(ps => ps.map(p => p.id === modal.id
+        ? { ...p, ...form, tagColor: meta.bg, tagText: meta.text }
+        : p
+      ));
     } else {
-      setPrograms(ps => [...ps, { id: Date.now(), ...form, tagColor: meta.bg, tagText: meta.text, exercises: 0, assignedUsers: 0 }]);
+      setPrograms(ps => [...ps, {
+        id: Date.now(),
+        ...form,
+        tagColor: meta.bg,
+        tagText: meta.text,
+        assignedUsers: 0,
+      }]);
     }
     setModal(null);
   }
 
   return (
     <div>
-      {/* Header */}
+      {/* ── Header ────────────────────────────────────────────── */}
       <div className="adm-page-header">
         <div>
           <p className="adm-page-eyebrow">// WORKOUT_PROGRAMS</p>
@@ -204,7 +257,12 @@ export default function AdminUserPrograms() {
         <div className="adm-page-actions">
           <div className="adm-search-wrap">
             <span className="material-symbols-outlined adm-search-icon">search</span>
-            <input className="adm-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search programs..." />
+            <input
+              className="adm-search"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search programs..."
+            />
           </div>
           <button className="adm-btn-primary" onClick={() => setModal({})}>
             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add_circle</span>
@@ -213,7 +271,7 @@ export default function AdminUserPrograms() {
         </div>
       </div>
 
-      {/* Tag filter */}
+      {/* ── Tag filter ────────────────────────────────────────── */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
         {PROGRAM_TAGS.map(t => (
           <button
@@ -240,18 +298,18 @@ export default function AdminUserPrograms() {
         ))}
       </div>
 
-      {/* Summary */}
+      {/* ── Summary chips ─────────────────────────────────────── */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 24, flexWrap: 'wrap' }}>
         <span className="adm-chip adm-chip--oat">{programs.length} programs total</span>
         <span className="adm-chip adm-chip--green">{programs.filter(p => p.status === 'ACTIVE').length} active</span>
         <span className="adm-chip adm-chip--purple">{programs.reduce((sum, p) => sum + p.assignedUsers, 0)} total assignments</span>
       </div>
 
-      {/* Program cards grid */}
+      {/* ── Program card grid ─────────────────────────────────── */}
       <div className="adm-grid-3">
         {filtered.map(p => (
           <div key={p.id} className="adm-card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {/* Header */}
+            {/* Top row: tag + actions */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
               <div style={{
                 background: p.tagColor,
@@ -275,7 +333,7 @@ export default function AdminUserPrograms() {
               </div>
             </div>
 
-            {/* Name */}
+            {/* Program name */}
             <h3 style={{ fontWeight: 700, fontSize: 16, letterSpacing: '-0.4px', lineHeight: 1.3, marginBottom: 8 }}>
               {p.name}
             </h3>
@@ -285,7 +343,7 @@ export default function AdminUserPrograms() {
               {p.description}
             </p>
 
-            {/* Chips row */}
+            {/* Level + Status chips */}
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
               <span style={{ ...getStyleChip(LEVEL_CHIP[p.level]) }}>{p.level}</span>
               <span style={{ ...getStyleChip(STATUS_CHIP[p.status]) }}>{p.status}</span>
@@ -293,16 +351,18 @@ export default function AdminUserPrograms() {
 
             <hr className="adm-divider" style={{ margin: '0 0 14px' }} />
 
-            {/* Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', textAlign: 'center', gap: 0 }}>
+            {/* Stats: Days/wk, Exercises, Users */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', textAlign: 'center' }}>
               {[
-                { label: 'Days/wk', val: p.days },
-                { label: 'Weeks',   val: p.weeks },
-                { label: 'Users',   val: p.assignedUsers },
+                { label: 'Days/wk',   val: p.days          },
+                { label: 'Exercises', val: p.exercises      },
+                { label: 'Users',     val: p.assignedUsers  },
               ].map(s => (
                 <div key={s.label}>
                   <p style={{ fontWeight: 800, fontSize: 20, letterSpacing: '-0.5px', color: '#2e2f2e' }}>{s.val}</p>
-                  <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, letterSpacing: '0.8px', textTransform: 'uppercase', color: '#767775' }}>{s.label}</p>
+                  <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, letterSpacing: '0.8px', textTransform: 'uppercase', color: '#767775' }}>
+                    {s.label}
+                  </p>
                 </div>
               ))}
             </div>
@@ -337,7 +397,7 @@ export default function AdminUserPrograms() {
         </button>
       </div>
 
-      {/* Modals */}
+      {/* ── Modals ────────────────────────────────────────────── */}
       {modal !== null && (
         <ProgramModal
           program={modal?.id ? modal : null}
@@ -355,7 +415,11 @@ export default function AdminUserPrograms() {
             </p>
             <div className="adm-form-actions" style={{ justifyContent: 'center' }}>
               <button className="adm-btn-ghost" onClick={() => setToDelete(null)}>Cancel</button>
-              <button className="adm-btn-primary" style={{ background: '#b02500', boxShadow: '-4px 4px 0 #2e2f2e' }} onClick={() => { setPrograms(ps => ps.filter(p => p.id !== toDelete.id)); setToDelete(null); }}>
+              <button
+                className="adm-btn-primary"
+                style={{ background: '#b02500', boxShadow: '-4px 4px 0 #2e2f2e' }}
+                onClick={() => { setPrograms(ps => ps.filter(p => p.id !== toDelete.id)); setToDelete(null); }}
+              >
                 Delete
               </button>
             </div>
@@ -364,20 +428,4 @@ export default function AdminUserPrograms() {
       )}
     </div>
   );
-}
-
-function getStyleChip({ bg, color }) {
-  return {
-    display: 'inline-flex',
-    alignItems: 'center',
-    padding: '4px 10px',
-    borderRadius: 9999,
-    background: bg,
-    color,
-    fontFamily: "'Space Mono', monospace",
-    fontSize: 9,
-    fontWeight: 700,
-    letterSpacing: '1px',
-    textTransform: 'uppercase',
-  };
 }

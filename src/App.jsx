@@ -39,7 +39,7 @@ const STEP = { BASIC: 1, GOALS: 2, PLAN: 3 };
 
 // ── Root App ──────────────────────────────────────────────────────
 export default function App() {
-  const { isAuthenticated, isOnboarded, isAdmin } = useAuth();
+  const { isAuthenticated, isOnboarded, isAdmin, logout } = useAuth();
 
   const [screen,      setScreen]      = useState(S.LOGIN);
   const [resetEmail,  setResetEmail]  = useState('');
@@ -132,7 +132,7 @@ export default function App() {
 
   // ── Admin users → Admin Panel ────────────────────────────────
   if (isAdmin) {
-    return <Admin onExit={() => {}} />;
+    return <Admin onExit={logout} />;
   }
 
   // ── Fully authenticated + onboarded → Main App ───────────────

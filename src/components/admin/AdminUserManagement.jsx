@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FormSelect, PillSelect } from './AdminExerciseLibrary';
 
 const INITIAL_USERS = [
   { id: 1, name: 'Mehdi Alami',    handle: '@mehdi_alami',   email: 'm.alami@um6p.ma',      role: 'admin', joined: 'OCT 12, 2023', lastActive: '2 mins ago',  status: 'active' },
@@ -54,18 +55,26 @@ function UserModal({ user, onClose, onSave }) {
         <div className="adm-grid-2">
           <div className="adm-form-field">
             <label className="adm-form-label">Role</label>
-            <select className="adm-form-select" value={form.role} onChange={e => set('role', e.target.value)}>
-              <option value="user">User</option>
-              <option value="coach">Coach</option>
-              <option value="admin">Admin</option>
-            </select>
+            <FormSelect
+              value={form.role}
+              onChange={v => set('role', v)}
+              options={[
+                { value: 'user',  label: 'User'  },
+                { value: 'coach', label: 'Coach' },
+                { value: 'admin', label: 'Admin' },
+              ]}
+            />
           </div>
           <div className="adm-form-field">
             <label className="adm-form-label">Status</label>
-            <select className="adm-form-select" value={form.status} onChange={e => set('status', e.target.value)}>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+            <FormSelect
+              value={form.status}
+              onChange={v => set('status', v)}
+              options={[
+                { value: 'active',   label: 'Active'   },
+                { value: 'inactive', label: 'Inactive' },
+              ]}
+            />
           </div>
         </div>
 
@@ -155,17 +164,25 @@ export default function AdminUserManagement() {
               onChange={e => setSearch(e.target.value)}
             />
           </div>
-          <select className="adm-select" value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
-            <option value="ALL">ROLE: ALL</option>
-            <option value="ADMIN">ADMIN</option>
-            <option value="COACH">COACH</option>
-            <option value="USER">USER</option>
-          </select>
-          <select className="adm-select" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-            <option value="ALL">STATUS: ALL</option>
-            <option value="ACTIVE">ACTIVE</option>
-            <option value="INACTIVE">INACTIVE</option>
-          </select>
+          <PillSelect
+            value={roleFilter}
+            onChange={setRoleFilter}
+            options={[
+              { value: 'ALL',   label: 'Role: All' },
+              { value: 'ADMIN', label: 'Admin'     },
+              { value: 'COACH', label: 'Coach'     },
+              { value: 'USER',  label: 'User'      },
+            ]}
+          />
+          <PillSelect
+            value={statusFilter}
+            onChange={setStatusFilter}
+            options={[
+              { value: 'ALL',      label: 'Status: All' },
+              { value: 'ACTIVE',   label: 'Active'      },
+              { value: 'INACTIVE', label: 'Inactive'    },
+            ]}
+          />
           <button
             className="adm-btn-primary"
             onClick={() => { setEditUser({}); setShowModal(true); }}
