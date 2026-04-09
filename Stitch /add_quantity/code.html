@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Quantity Input - UM6P_FIT</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Space+Grotesk:wght@300..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #faf9f7;
+        }
+
+        .font-roobert {
+            font-family: 'Plus Jakarta Sans', sans-serif; /* Fallback for Roobert */
+            letter-spacing: -0.02em;
+        }
+
+        .font-space-mono {
+            font-family: 'Space Mono', monospace;
+        }
+
+        .signature-shadow {
+            box-shadow: -7px 7px 0px 0px rgba(46, 47, 46, 1);
+        }
+
+        .hard-shadow-sm {
+            box-shadow: -4px 4px 0px 0px rgba(46, 47, 46, 1);
+        }
+
+        .inset-glow {
+            box-shadow: inset 2px 2px 0px rgba(255, 255, 255, 0.5);
+        }
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                "error": "#b02500",
+                "on-surface-variant": "#5b5c5a",
+                "surface-container-high": "#e2e3e0",
+                "on-primary-fixed": "#214f01",
+                "error-dim": "#b92902",
+                "surface-dim": "#d4d5d2",
+                "on-tertiary": "#f6f0ff",
+                "secondary": "#5f5b52",
+                "primary-fixed": "#c3fb9c",
+                "surface-container-low": "#f1f1ef",
+                "on-secondary-fixed-variant": "#5f5b52",
+                "on-secondary-fixed": "#423f36",
+                "secondary-container": "#e8e2d6",
+                "tertiary-fixed-dim": "#a694ff",
+                "outline": "#767775",
+                "on-tertiary-fixed-variant": "#3a03b1",
+                "tertiary": "#5d3fd3",
+                "on-tertiary-fixed": "#180058",
+                "on-background": "#2e2f2e",
+                "primary-dim": "#2c5a0d",
+                "surface-container": "#e8e8e6",
+                "on-tertiary-container": "#31009b",
+                "on-surface": "#2e2f2e",
+                "on-error": "#ffefec",
+                "tertiary-fixed": "#b4a5ff",
+                "on-error-container": "#520c00",
+                "on-primary-container": "#336215",
+                "tertiary-dim": "#5130c6",
+                "surface": "#f7f6f4",
+                "primary": "#38671a",
+                "error-container": "#f95630",
+                "surface-container-lowest": "#ffffff",
+                "surface-container-highest": "#dddddb",
+                "on-primary": "#d6ffb7",
+                "surface-variant": "#dddddb",
+                "background": "#f7f6f4",
+                "secondary-fixed-dim": "#dad4c8",
+                "inverse-primary": "#c5fe9e",
+                "inverse-on-surface": "#9d9d9b",
+                "primary-container": "#c3fb9c",
+                "secondary-fixed": "#e8e2d6",
+                "tertiary-container": "#b4a5ff",
+                "secondary-dim": "#534f46",
+                "primary-fixed-dim": "#b5ec8f",
+                "surface-bright": "#f7f6f4",
+                "on-secondary": "#f9f2e5",
+                "on-secondary-container": "#555148",
+                "on-primary-fixed-variant": "#3d6c1f",
+                "outline-variant": "#adadab",
+                "inverse-surface": "#0d0e0e",
+                "surface-tint": "#38671a"
+              },
+              "borderRadius": {
+                "DEFAULT": "1rem",
+                "lg": "2rem",
+                "xl": "3rem",
+                "full": "9999px"
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- Top AppBar (Derived from Shared Component Logic) -->
+<header class="fixed top-0 w-full z-50 bg-[#faf9f7] dark:bg-stone-950 border-b-2 border-dashed border-[#dad4c8] dark:border-stone-800 shadow-[-7px_7px_0px_0px_rgba(46,47,46,1)] flex items-center justify-between px-6 py-4 w-full">
+<div class="flex items-center gap-3">
+<button class="hover:rotate-[-2deg] transition-transform active:scale-95">
+<span class="material-symbols-outlined text-primary text-2xl">arrow_back</span>
+</button>
+<h1 class="font-roobert font-black text-primary uppercase tracking-tighter text-xl">The Kinetic Craft</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-background opacity-70">calendar_today</span>
+<div class="w-10 h-10 rounded-full border-2 border-primary overflow-hidden">
+<img alt="User" class="w-full h-full object-cover" data-alt="Close up portrait of a smiling young athletic man with short hair in soft studio lighting against a neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB928bAhtDtvNPoBAcrprqRcJbY1bNsPPWB13YiedSC9fT9LoEIx5D1gT6qJKFzq0FLf-f5MMFejy2hsF5qr6NinAQkWrB5mDLn9fxpiNxzuAAgC_3g2W3Oq-zBs-x-euoBK3RVQV2AVJ3BLkSKAXGORHyo7k7n1NllWdAkYeRiKIF3LA1NpJZ4GUQiMmxoT65XXGl5QYAO-Yt_63k9sJAgCvLgYRZuy-gYZrf26ULXlHkxTQ_5Lda7HN5AhHXRAJx9syd0Bmr-cU0i"/>
+</div>
+</div>
+</header>
+<main class="pt-28 px-6 max-w-2xl mx-auto">
+<!-- Hero Section -->
+<section class="mb-12">
+<div class="flex items-end justify-between mb-2">
+<h2 class="font-roobert text-6xl font-bold tracking-[-3.2px] text-primary">Oatmeal</h2>
+<div class="bg-primary-container text-primary font-space-mono text-[10px] tracking-widest px-3 py-1 rounded-full uppercase">Ref: 100g</div>
+</div>
+<p class="font-space-mono text-xs text-on-surface-variant uppercase tracking-wider mb-8">Whole grain scottish oats, water processed</p>
+<!-- Reference Nutrition Card (Nested Layering) -->
+<div class="bg-surface-container-low border-2 border-dashed border-secondary-fixed-dim rounded-xl p-4 flex justify-between">
+<div class="flex flex-col">
+<span class="font-space-mono text-[10px] text-on-surface-variant uppercase">Per 100g</span>
+<span class="font-roobert font-bold text-lg">170 kcal</span>
+</div>
+<div class="flex gap-6">
+<div class="text-right">
+<span class="block font-space-mono text-[10px] text-on-surface-variant uppercase">P</span>
+<span class="font-bold">6g</span>
+</div>
+<div class="text-right">
+<span class="block font-space-mono text-[10px] text-on-surface-variant uppercase">C</span>
+<span class="font-bold">28g</span>
+</div>
+<div class="text-right">
+<span class="block font-space-mono text-[10px] text-on-surface-variant uppercase">F</span>
+<span class="font-bold">3g</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Main Input Canvas -->
+<section class="bg-surface-container-lowest border-2 border-secondary-fixed-dim rounded-xl signature-shadow p-8 mb-12 relative overflow-hidden">
+<!-- Decorative Sticker -->
+<div class="absolute -top-2 -right-2 bg-tertiary text-on-tertiary font-space-mono text-[10px] tracking-widest px-4 py-2 rounded-full rotate-6 shadow-md z-10">
+                FRESH BATCH
+            </div>
+<div class="flex flex-col items-center justify-center text-center py-6">
+<label class="font-space-mono text-xs uppercase tracking-[2px] text-on-surface-variant mb-4">Select Quantity</label>
+<div class="flex items-baseline justify-center gap-2">
+<input class="w-48 text-center font-roobert font-bold text-8xl bg-transparent border-none focus:ring-0 text-on-background p-0 m-0" type="text" value="150"/>
+<span class="font-roobert font-bold text-4xl text-primary">g</span>
+</div>
+<div class="w-32 h-1 bg-primary-container rounded-full mt-2"></div>
+</div>
+<!-- Quick Amount Chips -->
+<div class="flex flex-wrap justify-center gap-3 mt-8">
+<button class="bg-surface-container text-on-background font-space-mono text-xs px-6 py-3 rounded-full hover:bg-secondary-fixed-dim transition-colors active:scale-95">50g</button>
+<button class="bg-surface-container text-on-background font-space-mono text-xs px-6 py-3 rounded-full hover:bg-secondary-fixed-dim transition-colors active:scale-95">100g</button>
+<button class="bg-primary text-on-primary font-space-mono text-xs px-6 py-3 rounded-full hard-shadow-sm active:scale-95">150g</button>
+<button class="bg-surface-container text-on-background font-space-mono text-xs px-6 py-3 rounded-full hover:bg-secondary-fixed-dim transition-colors active:scale-95">200g</button>
+<button class="bg-surface-container text-on-background font-space-mono text-xs px-6 py-3 rounded-full hover:bg-secondary-fixed-dim transition-colors active:scale-95">250g</button>
+</div>
+</section>
+<!-- Live Calculation Bento Grid -->
+<section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+<div class="bg-primary-container rounded-lg p-5 flex flex-col border-2 border-secondary-fixed-dim hard-shadow-sm">
+<span class="font-space-mono text-[10px] uppercase tracking-widest text-on-primary-container opacity-70 mb-1">Calories</span>
+<span class="font-roobert font-bold text-2xl text-on-primary-container leading-none">256 <span class="text-xs uppercase font-normal">kcal</span></span>
+</div>
+<div class="bg-surface-container-low rounded-lg p-5 flex flex-col border-2 border-secondary-fixed-dim">
+<span class="font-space-mono text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">Protein</span>
+<span class="font-roobert font-bold text-2xl text-on-surface leading-none">22 <span class="text-xs uppercase font-normal">g</span></span>
+</div>
+<div class="bg-surface-container-low rounded-lg p-5 flex flex-col border-2 border-secondary-fixed-dim">
+<span class="font-space-mono text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">Carbs</span>
+<span class="font-roobert font-bold text-2xl text-on-surface leading-none">30 <span class="text-xs uppercase font-normal">g</span></span>
+</div>
+<div class="bg-surface-container-low rounded-lg p-5 flex flex-col border-2 border-secondary-fixed-dim">
+<span class="font-space-mono text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">Fats</span>
+<span class="font-roobert font-bold text-2xl text-on-surface leading-none">8 <span class="text-xs uppercase font-normal">g</span></span>
+</div>
+</section>
+<!-- Visual Context Card -->
+<div class="w-full h-48 rounded-xl overflow-hidden border-2 border-secondary-fixed-dim signature-shadow relative group">
+<img alt="Oatmeal Bowl" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Overhead shot of a rustic ceramic bowl filled with warm oatmeal topped with fresh blueberries, nuts, and a drizzle of honey on a light wooden surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbk0yEthYk53p4v1Huv-gLyKD-t8gEJF-HR7M3ZkKopFQkXukel9QNVCZpr--hVqO6D80dgfkoKodpd9bO-WxEKMrg6RNAzXA0sgWSO5px5gM_9g0azmzv1L5h2RH0LdvptlaX_AhN6lyY9I79Ou8LWhsK7OsB2PPV14czmQJ0Bp7WfiicKwgzsdaG8HUoI2juT82Sxg8ywIJeJH8b3Bmj4scToR26uEwpthDPPiGcQZIPdLVT5nlILkriukWtvMEXt2oDu7YgF6G1"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-background/60 to-transparent"></div>
+<div class="absolute bottom-4 left-6">
+<p class="text-surface font-roobert font-bold text-xl">Morning Fuel Choice</p>
+<p class="text-surface/80 font-space-mono text-[10px] uppercase tracking-widest">Complex Carbs • Sustained Energy</p>
+</div>
+</div>
+</main>
+<!-- Sticky CTA (Action Anchor) -->
+<div class="fixed bottom-0 left-0 w-full p-6 bg-background/80 backdrop-blur-md border-t-2 border-secondary-fixed-dim z-50">
+<div class="max-w-2xl mx-auto">
+<button class="w-full py-5 bg-primary text-on-primary rounded-full font-roobert font-bold text-lg uppercase tracking-tight signature-shadow hover:rotate-[-2deg] hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-3">
+<span class="material-symbols-outlined">add_circle</span>
+                Add to Breakfast
+            </button>
+</div>
+</div>
+</body></html>

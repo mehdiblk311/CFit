@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<!-- Using Google Fonts alternatives for the Roobert and Space Mono aesthetic described in the system -->
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed": "#b4a5ff",
+                      "on-background": "#2e2f2e",
+                      "inverse-primary": "#c5fe9e",
+                      "on-primary-container": "#336215",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary": "#d6ffb7",
+                      "surface-dim": "#d4d5d2",
+                      "on-surface": "#2e2f2e",
+                      "background": "#f7f6f4",
+                      "secondary-dim": "#534f46",
+                      "surface-container-low": "#f1f1ef",
+                      "on-secondary-container": "#555148",
+                      "on-primary-fixed": "#214f01",
+                      "secondary-fixed": "#e8e2d6",
+                      "primary-fixed": "#c3fb9c",
+                      "error-dim": "#b92902",
+                      "secondary-container": "#e8e2d6",
+                      "tertiary-container": "#b4a5ff",
+                      "inverse-on-surface": "#9d9d9b",
+                      "outline": "#767775",
+                      "primary-fixed-dim": "#b5ec8f",
+                      "on-tertiary": "#f6f0ff",
+                      "on-secondary": "#f9f2e5",
+                      "primary-dim": "#2c5a0d",
+                      "on-tertiary-container": "#31009b",
+                      "on-secondary-fixed": "#423f36",
+                      "surface-container": "#e8e8e6",
+                      "outline-variant": "#adadab",
+                      "secondary-fixed-dim": "#dad4c8",
+                      "inverse-surface": "#0d0e0e",
+                      "primary": "#38671a",
+                      "tertiary-fixed-dim": "#a694ff",
+                      "surface-tint": "#38671a",
+                      "primary-container": "#c3fb9c",
+                      "tertiary": "#5d3fd3",
+                      "error-container": "#f95630",
+                      "on-secondary-fixed-variant": "#5f5b52",
+                      "error": "#b02500",
+                      "on-error": "#ffefec",
+                      "on-primary-fixed-variant": "#3d6c1f",
+                      "surface-container-high": "#e2e3e0",
+                      "on-error-container": "#520c00",
+                      "on-surface-variant": "#5b5c5a",
+                      "surface-variant": "#dddddb",
+                      "secondary": "#5f5b52",
+                      "tertiary-dim": "#5130c6",
+                      "on-tertiary-fixed-variant": "#3a03b1",
+                      "on-tertiary-fixed": "#180058",
+                      "surface": "#f7f6f4",
+                      "surface-container-highest": "#dddddb",
+                      "surface-bright": "#f7f6f4"
+              },
+              "borderRadius": {
+                      "DEFAULT": "1rem",
+                      "lg": "2rem",
+                      "xl": "3rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Plus Jakarta Sans"],
+                      "body": ["Plus Jakarta Sans"],
+                      "label": ["Space Grotesk"],
+                      "mono": ["Space Mono"]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .font-roobert { font-family: 'Plus Jakarta Sans', sans-serif; } /* Proxy for Roobert */
+        .font-space-mono { font-family: 'Space Mono', monospace; }
+        .hard-shadow { box-shadow: -7px 7px 0px 0px rgba(46,47,46,1); }
+        .hard-shadow-sm { box-shadow: -4px 4px 0px 0px rgba(46,47,46,1); }
+        .inner-glow { box-shadow: inset 2px 2px 0px 0px rgba(255,255,255,0.4); }
+        .dashed-border { border: 2px dashed #dad4c8; }
+        .active-nav-shadow { box-shadow: -4px 4px 0px 0px rgba(0,0,0,1); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-[#faf9f7] dark:bg-stone-900 border-b-2 border-dashed border-[#dad4c8] shadow-[-7px_7px_0px_0px_rgba(46,47,46,1)]">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#38671a] dark:text-lime-500 hover:rotate-[-2deg] hover:-translate-y-1 transition-transform cursor-pointer">menu</span>
+<h1 class="text-2xl font-bold text-[#2e2f2e] dark:text-stone-100 font-roobert tracking-[-1px] uppercase">Artisanal Fitness</h1>
+</div>
+<div class="w-10 h-10 rounded-full bg-secondary-container border-2 border-secondary-fixed-dim overflow-hidden hover:rotate-[-2deg] hover:-translate-y-1 transition-transform cursor-pointer">
+<img class="w-full h-full object-cover" data-alt="close-up portrait of a fit woman with a confident expression in soft morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwZrayHJ5Tm6KSsXTwatrK3VwJinip9ysXPWlG5_eJX7wVSO0zz8cuLeiqoS3CKFC7AcquKjKl60ZjMoTloh9_QTVWRZIza3eRnTDzczS1cKemv0UbySfH7SPiuxIyt7wPdOzry7ULB4DUGLPcxyQiMtZLib_B8TZI0rCGXA0Z7VqBl5jW7FNVQklnqPeJVNEHRGvQSV_P19tBdcQOt41aQq531zA_LMjrrsG5rR3sDKEgOPiDy5ku-aMT79quY2gJ2QFbmno9TG-w"/>
+</div>
+</header>
+<main class="pt-24 px-4 max-w-2xl mx-auto space-y-8">
+<!-- Hero Summary Section -->
+<section class="text-center space-y-4">
+<div class="inline-flex items-center justify-center w-20 h-20 bg-primary-container rounded-full border-2 border-primary border-dashed mb-2">
+<span class="material-symbols-outlined text-primary text-4xl" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<h2 class="text-[3.5rem] font-extrabold font-roobert leading-[1] tracking-[-3.2px] text-on-surface">Great Session!</h2>
+<div class="inline-block bg-tertiary text-on-tertiary font-mono text-xs px-4 py-1 rounded-full uppercase tracking-widest rotate-[-2deg] hard-shadow-sm">
+                Pull Day
+            </div>
+</section>
+<!-- Bento Stats Grid -->
+<div class="grid grid-cols-2 gap-4">
+<div class="col-span-2 bg-surface-container-low p-6 rounded-xl border-2 border-secondary-fixed-dim hard-shadow relative overflow-hidden">
+<div class="flex justify-between items-end relative z-10">
+<div>
+<p class="font-mono text-xs uppercase tracking-wider text-on-surface-variant mb-1">Total Volume</p>
+<p class="text-4xl font-bold font-roobert tracking-tight">12,450 <span class="text-lg">kg</span></p>
+</div>
+<span class="material-symbols-outlined text-primary-dim opacity-20 text-6xl absolute -right-2 -bottom-2">fitness_center</span>
+</div>
+</div>
+<div class="bg-surface-container p-6 rounded-xl border-2 border-secondary-fixed-dim hard-shadow">
+<p class="font-mono text-xs uppercase tracking-wider text-on-surface-variant mb-1">Duration</p>
+<p class="text-3xl font-bold font-roobert tracking-tight">1h 12m</p>
+</div>
+<div class="bg-primary-fixed p-6 rounded-xl border-2 border-primary-dim hard-shadow">
+<p class="font-mono text-xs uppercase tracking-wider text-on-primary-fixed-variant mb-1">Exercises</p>
+<p class="text-3xl font-bold font-roobert tracking-tight text-on-primary-fixed">5/6</p>
+</div>
+</div>
+<!-- PR Sticker Section -->
+<div class="relative py-4">
+<div class="bg-surface-container-lowest border-2 border-secondary-fixed-dim rounded-lg p-6 hard-shadow relative">
+<h3 class="font-mono text-xs uppercase tracking-wider text-on-surface-variant mb-4">Milestones Reached</h3>
+<div class="flex items-center gap-4 bg-tertiary-container/30 p-4 rounded-md border-2 border-dashed border-tertiary/40">
+<div class="w-12 h-12 bg-tertiary rounded-full flex items-center justify-center flex-shrink-0 hard-shadow-sm rotate-6">
+<span class="material-symbols-outlined text-on-tertiary">military_tech</span>
+</div>
+<div>
+<p class="font-roobert font-bold text-lg">Bench Press: 85kg x 8</p>
+<p class="font-mono text-[10px] uppercase text-tertiary-dim font-bold">New PR! +5% since last week</p>
+</div>
+</div>
+<!-- Floating Decorative "Sticker" -->
+<div class="absolute -top-4 -right-2 bg-inverse-primary text-on-primary-fixed px-3 py-1 rounded-full font-mono text-[10px] font-bold uppercase rotate-12 hard-shadow-sm border border-primary-dim">
+                    Heavy Hitter
+                </div>
+</div>
+</div>
+<!-- Notes Area -->
+<div class="space-y-3">
+<label class="font-mono text-xs uppercase tracking-widest px-2">Session Notes</label>
+<div class="bg-surface-container-low rounded-lg p-1 border-2 border-secondary-fixed-dim hard-shadow">
+<textarea class="w-full bg-transparent border-none focus:ring-0 font-body text-sm min-h-[100px] p-4 placeholder:text-outline-variant" placeholder="How did you feel today? Any fatigue or highlights?"></textarea>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col gap-4 pt-4">
+<button class="w-full bg-[#38671a] text-[#faf9f7] rounded-full py-5 px-8 font-roobert font-bold text-xl hard-shadow hover:rotate-[-2deg] hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-2">
+                Save Workout
+                <span class="material-symbols-outlined">send</span>
+</button>
+<button class="w-full text-on-surface-variant font-mono text-xs uppercase tracking-[0.2em] py-2 hover:text-error transition-colors">
+                Discard Session
+            </button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-[#faf9f7] rounded-t-[3rem] border-t-2 border-[#dad4c8] shadow-[-7px_-7px_0px_0px_rgba(46,47,46,0.05)]">
+<div class="flex flex-col items-center justify-center text-[#2e2f2e] opacity-70 font-mono uppercase tracking-wider text-[10px] hover:rotate-[2deg] hover:-translate-y-2 transition-all cursor-pointer">
+<span class="material-symbols-outlined">fitness_center</span>
+<span>Programs</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#2e2f2e] opacity-70 font-mono uppercase tracking-wider text-[10px] hover:rotate-[2deg] hover:-translate-y-2 transition-all cursor-pointer">
+<span class="material-symbols-outlined">search</span>
+<span>Library</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#38671a] text-[#faf9f7] rounded-full px-6 py-2 rotate-[-3deg] active-nav-shadow font-mono uppercase tracking-wider text-[10px] cursor-pointer">
+<span class="material-symbols-outlined">play_circle</span>
+<span>Workout</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#2e2f2e] opacity-70 font-mono uppercase tracking-wider text-[10px] hover:rotate-[2deg] hover:-translate-y-2 transition-all cursor-pointer">
+<span class="material-symbols-outlined">calendar_month</span>
+<span>History</span>
+</div>
+</nav>
+</body></html>

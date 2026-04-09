@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nutrition History | UM6P_FIT</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Roobert (simulated with Plus Jakarta), Space Mono -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "error": "#b02500",
+                    "on-surface-variant": "#5b5c5a",
+                    "surface-container-high": "#e2e3e0",
+                    "on-primary-fixed": "#214f01",
+                    "error-dim": "#b92902",
+                    "surface-dim": "#d4d5d2",
+                    "on-tertiary": "#f6f0ff",
+                    "secondary": "#5f5b52",
+                    "primary-fixed": "#c3fb9c",
+                    "surface-container-low": "#f1f1ef",
+                    "on-secondary-fixed-variant": "#5f5b52",
+                    "on-secondary-fixed": "#423f36",
+                    "secondary-container": "#e8e2d6",
+                    "tertiary-fixed-dim": "#a694ff",
+                    "outline": "#767775",
+                    "on-tertiary-fixed-variant": "#3a03b1",
+                    "tertiary": "#5d3fd3",
+                    "on-tertiary-fixed": "#180058",
+                    "on-background": "#2e2f2e",
+                    "primary-dim": "#2c5a0d",
+                    "surface-container": "#e8e8e6",
+                    "on-tertiary-container": "#31009b",
+                    "on-surface": "#2e2f2e",
+                    "on-error": "#ffefec",
+                    "tertiary-fixed": "#b4a5ff",
+                    "on-error-container": "#520c00",
+                    "on-primary-container": "#336215",
+                    "tertiary-dim": "#5130c6",
+                    "surface": "#f7f6f4",
+                    "primary": "#38671a",
+                    "error-container": "#f95630",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-highest": "#dddddb",
+                    "on-primary": "#d6ffb7",
+                    "surface-variant": "#dddddb",
+                    "background": "#f7f6f4",
+                    "secondary-fixed-dim": "#dad4c8",
+                    "inverse-primary": "#c5fe9e",
+                    "inverse-on-surface": "#9d9d9b",
+                    "primary-container": "#c3fb9c",
+                    "secondary-fixed": "#e8e2d6",
+                    "tertiary-container": "#b4a5ff",
+                    "secondary-dim": "#534f46",
+                    "primary-fixed-dim": "#b5ec8f",
+                    "surface-bright": "#f7f6f4",
+                    "on-secondary": "#f9f2e5",
+                    "on-secondary-container": "#555148",
+                    "on-primary-fixed-variant": "#3d6c1f",
+                    "outline-variant": "#adadab",
+                    "inverse-surface": "#0d0e0e",
+                    "surface-tint": "#38671a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Space Mono"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .aggressive-crop {
+            letter-spacing: -3.2px;
+            line-height: 0.9;
+        }
+        .signature-shadow {
+            box-shadow: -7px 7px 0px 0px rgba(46, 47, 46, 1);
+        }
+        .signature-shadow-sm {
+            box-shadow: -4px 4px 0px 0px rgba(46, 47, 46, 1);
+        }
+        .dashed-border {
+            border: 2px dashed #dad4c8;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body min-h-screen pb-32">
+<!-- Top Navigation Anchor (Manual for History sub-page) -->
+<nav class="fixed top-0 w-full z-50 bg-[#faf9f7] dark:bg-stone-950 border-b-2 border-dashed border-[#dad4c8] shadow-[-7px_7px_0px_0px_rgba(46,47,46,1)] px-6 py-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<button class="w-12 h-12 flex items-center justify-center rounded-full bg-secondary-container text-on-secondary-container hover:rotate-[-2deg] hover:-translate-y-1 transition-transform active:scale-95">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline font-bold text-2xl aggressive-crop text-primary">Nutrition History</h1>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Logged</span>
+<div class="w-10 h-10 rounded-full border-2 border-[#dad4c8] overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="close-up portrait of a fitness enthusiast with natural lighting and neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD59QI77AETcAmXoJLVOPJUbJuvKJX298TNCGZHJJUGrqWHfv2fsWvsfrqlwgUAZ9XUwBlZT1gdBxFqO6R_CKon3Ue-7oFVlm4TqegudpZy-4GtDj2PgGx99hjjCyIIyF5ltTBkEVbG7oOv1rTrevW24H7zTNnhkyqbPcL8r-whNmrntLFrehFuY3n3UDdJG6oZw7dgHSFpIYsvQ1ysDD4_QAZnrAOJcuPwcdotR229U6vBkURpXZH_An5pBTFK65cigWPqv_Ebxh9R"/>
+</div>
+</div>
+</nav>
+<main class="pt-28 px-6 space-y-8 max-w-4xl mx-auto">
+<!-- Calendar Section: Bento-inspired layout -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<div class="md:col-span-7 bg-surface-container-low rounded-xl p-6 signature-shadow border-2 border-secondary-fixed-dim">
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline font-extrabold text-xl aggressive-crop uppercase text-on-surface">October 2023</h2>
+<div class="flex gap-2">
+<button class="p-2 rounded-full border-2 border-secondary-fixed-dim hover:bg-secondary-container transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="p-2 rounded-full border-2 border-secondary-fixed-dim hover:bg-secondary-container transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-7 gap-2 text-center">
+<!-- Days of Week -->
+<div class="font-label text-[10px] uppercase text-on-surface-variant pb-2">Mo</div>
+<div class="font-label text-[10px] uppercase text-on-surface-variant pb-2">Tu</div>
+<div class="font-label text-[10px] uppercase text-on-surface-variant pb-2">We</div>
+<div class="font-label text-[10px] uppercase text-on-surface-variant pb-2">Th</div>
+<div class="font-label text-[10px] uppercase text-on-surface-variant pb-2">Fr</div>
+<div class="font-label text-[10px] uppercase text-on-surface-variant pb-2">Sa</div>
+<div class="font-label text-[10px] uppercase text-on-surface-variant pb-2">Su</div>
+<!-- Calendar Grid (Truncated example) -->
+<div class="h-12 flex items-center justify-center font-label text-on-surface-variant/30">25</div>
+<div class="h-12 flex items-center justify-center font-label text-on-surface-variant/30">26</div>
+<div class="h-12 flex items-center justify-center font-label text-on-surface-variant/30">27</div>
+<div class="h-12 flex items-center justify-center font-label text-on-surface-variant/30">28</div>
+<div class="h-12 flex items-center justify-center font-label text-on-surface-variant/30">29</div>
+<div class="h-12 flex items-center justify-center font-label text-on-surface-variant/30">30</div>
+<button class="h-12 rounded-lg bg-primary text-on-primary font-label flex flex-col items-center justify-center relative group active:scale-90 transition-all">
+                        1
+                        <span class="w-1.5 h-1.5 bg-on-primary rounded-full mt-1"></span>
+</button>
+<!-- Days 2-7 -->
+<button class="h-12 rounded-lg hover:bg-secondary-container font-label flex flex-col items-center justify-center relative transition-all">
+                        2
+                        <span class="w-1.5 h-1.5 bg-primary rounded-full mt-1"></span>
+</button>
+<button class="h-12 rounded-lg hover:bg-secondary-container font-label flex flex-col items-center justify-center relative transition-all">
+                        3
+                        <span class="w-1.5 h-1.5 bg-primary rounded-full mt-1"></span>
+</button>
+<button class="h-12 rounded-lg bg-tertiary text-on-tertiary font-label flex flex-col items-center justify-center signature-shadow-sm transition-all rotate-1">
+                        4
+                        <span class="w-1.5 h-1.5 bg-on-tertiary rounded-full mt-1"></span>
+</button>
+<button class="h-12 rounded-lg hover:bg-secondary-container font-label flex flex-col items-center justify-center relative transition-all">5</button>
+<button class="h-12 rounded-lg hover:bg-secondary-container font-label flex flex-col items-center justify-center relative transition-all">
+                        6
+                        <span class="w-1.5 h-1.5 bg-primary rounded-full mt-1"></span>
+</button>
+<button class="h-12 rounded-lg hover:bg-secondary-container font-label flex flex-col items-center justify-center relative transition-all">
+                        7
+                        <span class="w-1.5 h-1.5 bg-primary rounded-full mt-1"></span>
+</button>
+</div>
+</div>
+<!-- Selection Summary -->
+<div class="md:col-span-5 bg-surface-container-highest rounded-xl p-6 signature-shadow border-2 border-on-background flex flex-col justify-between">
+<div>
+<span class="font-label text-[10px] uppercase text-primary font-bold tracking-widest">Selected Date</span>
+<h3 class="font-headline font-black text-3xl aggressive-crop mt-2">Oct 04, 2023</h3>
+<div class="mt-6 space-y-4">
+<div class="flex items-center justify-between">
+<span class="font-label text-xs">Total Calories</span>
+<span class="font-headline font-bold text-xl">2,140 kcal</span>
+</div>
+<div class="w-full bg-secondary-fixed-dim h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[85%]"></div>
+</div>
+<div class="grid grid-cols-3 gap-2">
+<div class="bg-primary-container p-2 rounded-lg text-center">
+<span class="font-label text-[8px] block uppercase">Prot</span>
+<span class="font-headline font-bold text-sm">160g</span>
+</div>
+<div class="bg-tertiary-container p-2 rounded-lg text-center">
+<span class="font-label text-[8px] block uppercase">Carb</span>
+<span class="font-headline font-bold text-sm">210g</span>
+</div>
+<div class="bg-secondary-container p-2 rounded-lg text-center">
+<span class="font-label text-[8px] block uppercase">Fat</span>
+<span class="font-headline font-bold text-sm">72g</span>
+</div>
+</div>
+</div>
+</div>
+<button class="mt-6 w-full py-3 bg-primary text-on-primary rounded-full font-label text-xs uppercase tracking-widest signature-shadow-sm hover:rotate-[-2deg] hover:-translate-y-1 transition-transform active:scale-95">
+                    View Full Journal
+                </button>
+</div>
+</section>
+<!-- Charts Section -->
+<section class="space-y-6">
+<!-- Time Range Selector -->
+<div class="flex justify-center">
+<div class="inline-flex bg-surface-container rounded-full p-1 border-2 border-secondary-fixed-dim">
+<button class="px-6 py-2 rounded-full font-label text-[10px] uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors">1W</button>
+<button class="px-6 py-2 rounded-full font-label text-[10px] uppercase tracking-widest bg-primary text-on-primary signature-shadow-sm">1M</button>
+<button class="px-6 py-2 rounded-full font-label text-[10px] uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors">3M</button>
+</div>
+</div>
+<!-- Analytics Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Daily Calories Line Chart Mockup -->
+<div class="bg-surface-container-low rounded-xl p-6 signature-shadow border-2 border-secondary-fixed-dim">
+<div class="flex items-center justify-between mb-6">
+<h4 class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Daily Calories</h4>
+<span class="material-symbols-outlined text-primary">show_chart</span>
+</div>
+<!-- Mock Chart Visualization -->
+<div class="relative h-48 w-full flex items-end justify-between px-2">
+<div class="absolute inset-0 flex flex-col justify-between opacity-10 py-2">
+<div class="border-t border-on-background w-full"></div>
+<div class="border-t border-on-background w-full"></div>
+<div class="border-t border-on-background w-full"></div>
+</div>
+<!-- Animated "Dots" and SVG Line Path would go here, using CSS bars as mockup -->
+<div class="w-2 bg-primary/20 h-[60%] rounded-t-full relative group">
+<div class="absolute -top-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 font-label text-[8px] bg-on-background text-surface px-1 rounded">1.9k</div>
+</div>
+<div class="w-2 bg-primary/20 h-[75%] rounded-t-full"></div>
+<div class="w-2 bg-primary/20 h-[55%] rounded-t-full"></div>
+<div class="w-2 bg-primary/40 h-[85%] rounded-t-full"></div>
+<div class="w-2 bg-primary/20 h-[70%] rounded-t-full"></div>
+<div class="w-2 bg-primary h-[90%] rounded-t-full signature-shadow-sm"></div>
+<div class="w-2 bg-primary/20 h-[65%] rounded-t-full"></div>
+<div class="w-2 bg-primary/20 h-[50%] rounded-t-full"></div>
+</div>
+<div class="flex justify-between mt-4 px-2 font-label text-[8px] text-on-surface-variant uppercase">
+<span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+</div>
+</div>
+<!-- Macro Breakdown Stacked Area Chart Mockup -->
+<div class="bg-surface-container-low rounded-xl p-6 signature-shadow border-2 border-secondary-fixed-dim">
+<div class="flex items-center justify-between mb-6">
+<h4 class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Macro Breakdown</h4>
+<span class="material-symbols-outlined text-tertiary">donut_small</span>
+</div>
+<!-- Stacked Area Mockup using colored bars -->
+<div class="h-48 w-full flex items-end justify-around">
+<div class="flex flex-col-reverse w-8 h-full space-y-reverse space-y-0.5">
+<div class="h-[40%] bg-primary rounded-t-md"></div>
+<div class="h-[30%] bg-tertiary"></div>
+<div class="h-[20%] bg-secondary-container rounded-b-md"></div>
+</div>
+<div class="flex flex-col-reverse w-8 h-full space-y-reverse space-y-0.5">
+<div class="h-[45%] bg-primary rounded-t-md"></div>
+<div class="h-[25%] bg-tertiary"></div>
+<div class="h-[25%] bg-secondary-container rounded-b-md"></div>
+</div>
+<div class="flex flex-col-reverse w-8 h-full space-y-reverse space-y-0.5">
+<div class="h-[35%] bg-primary rounded-t-md"></div>
+<div class="h-[35%] bg-tertiary"></div>
+<div class="h-[20%] bg-secondary-container rounded-b-md"></div>
+</div>
+<div class="flex flex-col-reverse w-8 h-full space-y-reverse space-y-0.5">
+<div class="h-[50%] bg-primary rounded-t-md"></div>
+<div class="h-[20%] bg-tertiary"></div>
+<div class="h-[15%] bg-secondary-container rounded-b-md"></div>
+</div>
+</div>
+<div class="flex justify-center gap-4 mt-6">
+<div class="flex items-center gap-1">
+<div class="w-2 h-2 bg-primary rounded-full"></div>
+<span class="font-label text-[8px] uppercase">Protein</span>
+</div>
+<div class="flex items-center gap-1">
+<div class="w-2 h-2 bg-tertiary rounded-full"></div>
+<span class="font-label text-[8px] uppercase">Carbs</span>
+</div>
+<div class="flex items-center gap-1">
+<div class="w-2 h-2 bg-secondary-container rounded-full"></div>
+<span class="font-label text-[8px] uppercase">Fats</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Meal Stickers Section -->
+<section class="space-y-4">
+<h4 class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant px-2">Recent Insights</h4>
+<div class="flex flex-wrap gap-4 overflow-visible py-4">
+<div class="bg-surface-container-highest p-4 rounded-lg border-2 border-secondary-fixed-dim rotate-[-2deg] signature-shadow-sm flex items-center gap-3 w-fit">
+<span class="material-symbols-outlined text-primary">eco</span>
+<p class="font-headline font-bold text-sm">Fiber Goal Met 5/7 Days</p>
+</div>
+<div class="bg-tertiary-container p-4 rounded-lg border-2 border-tertiary rotate-[3deg] signature-shadow-sm flex items-center gap-3 w-fit">
+<span class="material-symbols-outlined text-tertiary">water_drop</span>
+<p class="font-headline font-bold text-sm">Hydration Peak: 3.2L</p>
+</div>
+<div class="bg-primary-container p-4 rounded-lg border-2 border-primary rotate-[-1deg] signature-shadow-sm flex items-center gap-3 w-fit">
+<span class="material-symbols-outlined text-on-primary-container">restaurant</span>
+<p class="font-headline font-bold text-sm">Balanced Breakfasts Streak</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 bg-[#faf9f7]/90 dark:bg-stone-900/90 backdrop-blur-md rounded-t-[3rem] border-t-2 border-[#dad4c8] shadow-[0_-7px_0px_0px_rgba(46,47,46,0.05)] z-50">
+<a class="flex flex-col items-center justify-center bg-[#38671a] text-[#faf9f7] rounded-full px-6 py-2 shadow-[-4px_4px_0px_0px_rgba(46,47,46,1)] active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+<span class="font-label uppercase text-[10px] tracking-widest mt-0.5">Journal</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#2e2f2e] px-4 py-2 hover:bg-[#dad4c8] hover:rounded-full transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-label uppercase text-[10px] tracking-widest mt-0.5">Recipes</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#2e2f2e] px-4 py-2 hover:bg-[#dad4c8] hover:rounded-full transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+<span class="font-label uppercase text-[10px] tracking-widest mt-0.5">Trends</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#2e2f2e] px-4 py-2 hover:bg-[#dad4c8] hover:rounded-full transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label uppercase text-[10px] tracking-widest mt-0.5">Settings</span>
+</a>
+</nav>
+</body></html>

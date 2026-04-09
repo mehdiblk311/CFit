@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Space+Grotesk:wght@400;500;700&amp;family=Space+Mono:wght@400;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-fixed": "#b4a5ff",
+                        "on-background": "#2e2f2e",
+                        "inverse-primary": "#c5fe9e",
+                        "on-primary-container": "#336215",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary": "#d6ffb7",
+                        "surface-dim": "#d4d5d2",
+                        "on-surface": "#2e2f2e",
+                        "background": "#f7f6f4",
+                        "secondary-dim": "#534f46",
+                        "surface-container-low": "#f1f1ef",
+                        "on-secondary-container": "#555148",
+                        "on-primary-fixed": "#214f01",
+                        "secondary-fixed": "#e8e2d6",
+                        "primary-fixed": "#c3fb9c",
+                        "error-dim": "#b92902",
+                        "secondary-container": "#e8e2d6",
+                        "tertiary-container": "#b4a5ff",
+                        "inverse-on-surface": "#9d9d9b",
+                        "outline": "#767775",
+                        "primary-fixed-dim": "#b5ec8f",
+                        "on-tertiary": "#f6f0ff",
+                        "on-secondary": "#f9f2e5",
+                        "primary-dim": "#2c5a0d",
+                        "on-tertiary-container": "#31009b",
+                        "on-secondary-fixed": "#423f36",
+                        "surface-container": "#e8e8e6",
+                        "outline-variant": "#adadab",
+                        "secondary-fixed-dim": "#dad4c8",
+                        "inverse-surface": "#0d0e0e",
+                        "primary": "#38671a",
+                        "tertiary-fixed-dim": "#a694ff",
+                        "surface-tint": "#38671a",
+                        "primary-container": "#c3fb9c",
+                        "tertiary": "#5d3fd3",
+                        "error-container": "#f95630",
+                        "on-secondary-fixed-variant": "#5f5b52",
+                        "error": "#b02500",
+                        "on-error": "#ffefec",
+                        "on-primary-fixed-variant": "#3d6c1f",
+                        "surface-container-high": "#e2e3e0",
+                        "on-error-container": "#520c00",
+                        "on-surface-variant": "#5b5c5a",
+                        "surface-variant": "#dddddb",
+                        "secondary": "#5f5b52",
+                        "tertiary-dim": "#5130c6",
+                        "on-tertiary-fixed-variant": "#3a03b1",
+                        "on-tertiary-fixed": "#180058",
+                        "surface": "#f7f6f4",
+                        "surface-container-highest": "#dddddb",
+                        "surface-bright": "#f7f6f4"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans", "sans-serif"],
+                        "body": ["Plus Jakarta Sans", "sans-serif"],
+                        "label": ["Space Mono", "monospace"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .roobert-heading {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-feature-settings: 'ss01' 1, 'ss03' 1, 'ss10' 1, 'ss11' 1, 'ss12' 1;
+        }
+        .kinetic-shadow {
+            box-shadow: -7px 7px 0px 0px rgba(46, 47, 46, 1);
+        }
+        .kinetic-shadow-soft {
+            box-shadow: -7px 7px 0px 0px rgba(46, 47, 46, 0.05);
+        }
+        .inner-glow {
+            box-shadow: inset 2px 2px 0px rgba(255, 255, 255, 0.5), -7px 7px 0px 0px rgba(46, 47, 46, 1);
+        }
+        .fab-glow {
+            box-shadow: -4px 4px 0px 0px rgba(0,0,0,1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen font-body">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-[#faf9f7] dark:bg-stone-900 border-b-2 border-dashed border-[#dad4c8] shadow-[-7px_7px_0px_0px_rgba(46,47,46,1)]">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-[#38671a] dark:text-lime-500 hover:rotate-[-2deg] hover:-translate-y-1 transition-transform">menu</button>
+<h1 class="text-2xl font-bold text-[#2e2f2e] dark:text-stone-100 font-['Plus_Jakarta_Sans'] tracking-[-1.5px] uppercase">Artisanal Fitness</h1>
+</div>
+<div class="w-10 h-10 rounded-full border-2 border-secondary-fixed-dim overflow-hidden hover:rotate-[-2deg] hover:-translate-y-1 transition-transform">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="close-up portrait of a fitness professional with a clean, editorial look and soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-fomdb_a-CGBxZhUvEX-1AeIu_qWM18ZyvmedvhwDmrRoqPVlkcYBpztLxRaevOoYzAFuK8tIJmTEuiYr1xxk6dUYQKQwerGGbnlmGiG2jrdXsGqlGCO54QJ56iln5L8-fc4evFiDr0cWZguPNiSKAQHuaT-Uo-J20KS5VYbcJTojngqyWUU8rtYbZ1dcgaA3l0q9TGYLFuP4-kwfeBODOaabxEult9RflynrFqflo6pZUx7ffDVoSU5h3e1X4ZmRG6gzXuDEWICH"/>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-2xl mx-auto">
+<!-- Section Header -->
+<div class="flex justify-between items-end mb-10">
+<div>
+<span class="font-label text-[10px] uppercase tracking-[2px] text-outline mb-2 block">Your Regimen</span>
+<h2 class="roobert-heading text-[3.5rem] leading-[0.9] font-extrabold tracking-[-3.2px] text-on-surface">Workouts</h2>
+</div>
+<button class="w-14 h-14 rounded-full bg-surface-container-low border-2 border-secondary-fixed-dim flex items-center justify-center hover:rotate-[-8deg] hover:-translate-y-1 transition-all group">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">history</span>
+</button>
+</div>
+<!-- Bento Layout / Workout Cards -->
+<div class="grid grid-cols-1 gap-8">
+<!-- Card 1: Push Day -->
+<div class="relative group">
+<div class="bg-surface-container-lowest rounded-xl border-2 border-secondary-fixed-dim inner-glow p-8 flex gap-6 hover:rotate-[-1deg] transition-transform">
+<div class="w-3 h-auto rounded-full bg-primary shrink-0"></div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-4">
+<h3 class="roobert-heading text-3xl font-bold tracking-tight">Push Day</h3>
+<span class="font-label text-[11px] bg-primary-container text-on-primary-fixed px-3 py-1 rounded-full rotate-3">HYPERTROPHY</span>
+</div>
+<div class="flex items-center gap-6 mb-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-lg">fitness_center</span>
+<span class="font-label text-xs uppercase tracking-wider">6 exercises</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-lg">schedule</span>
+<span class="font-label text-xs uppercase tracking-wider">55 mins</span>
+</div>
+</div>
+<p class="font-label text-[10px] text-outline-variant uppercase">Last: 2 days ago</p>
+</div>
+<div class="flex flex-col justify-center">
+<button class="w-12 h-12 rounded-full bg-primary text-on-primary flex items-center justify-center hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</div>
+</div>
+<!-- Activity Sticker -->
+<div class="absolute -top-3 -right-3 bg-tertiary text-on-tertiary px-4 py-1 rounded-full font-label text-[10px] uppercase tracking-widest rotate-6 kinetic-shadow-soft">PR STREAK</div>
+</div>
+<!-- Card 2: Pull Day -->
+<div class="relative group">
+<div class="bg-surface-container-low rounded-xl border-2 border-secondary-fixed-dim inner-glow p-8 flex gap-6 hover:rotate-[1deg] transition-transform">
+<div class="w-3 h-auto rounded-full bg-tertiary shrink-0"></div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-4">
+<h3 class="roobert-heading text-3xl font-bold tracking-tight text-on-surface">Pull Day</h3>
+<span class="font-label text-[11px] bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full -rotate-2">STRENGTH</span>
+</div>
+<div class="flex items-center gap-6 mb-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-lg">fitness_center</span>
+<span class="font-label text-xs uppercase tracking-wider">8 exercises</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-lg">schedule</span>
+<span class="font-label text-xs uppercase tracking-wider">65 mins</span>
+</div>
+</div>
+<p class="font-label text-[10px] text-outline-variant uppercase">Last: 4 days ago</p>
+</div>
+<div class="flex flex-col justify-center">
+<button class="w-12 h-12 rounded-full border-2 border-tertiary text-tertiary flex items-center justify-center hover:bg-tertiary hover:text-on-tertiary transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 3: Leg Day -->
+<div class="relative group">
+<div class="bg-surface-container-lowest rounded-xl border-2 border-secondary-fixed-dim inner-glow p-8 flex gap-6 hover:rotate-[-1deg] transition-transform">
+<div class="w-3 h-auto rounded-full bg-error shrink-0"></div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-4">
+<h3 class="roobert-heading text-3xl font-bold tracking-tight">Leg Day</h3>
+</div>
+<div class="flex items-center gap-6 mb-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-lg">fitness_center</span>
+<span class="font-label text-xs uppercase tracking-wider">5 exercises</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-lg">schedule</span>
+<span class="font-label text-xs uppercase tracking-wider">45 mins</span>
+</div>
+</div>
+<p class="font-label text-[10px] text-outline-variant uppercase">Last: 1 week ago</p>
+</div>
+<div class="flex flex-col justify-center">
+<button class="w-12 h-12 rounded-full bg-error text-on-error flex items-center justify-center hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</div>
+</div>
+<!-- Sticker -->
+<div class="absolute -bottom-2 right-12 bg-on-secondary-fixed text-on-secondary px-4 py-1 rounded-full font-label text-[10px] uppercase tracking-widest -rotate-3 border border-secondary-fixed-dim">DREAD IT</div>
+</div>
+</div>
+<!-- Create New Banner -->
+<div class="mt-12 bg-primary-container rounded-xl p-8 border-2 border-dashed border-primary/30 flex flex-col items-center text-center">
+<h4 class="roobert-heading text-xl font-bold text-on-primary-container mb-2">Ready for a new craft?</h4>
+<p class="font-label text-[10px] text-on-primary-fixed uppercase tracking-wider mb-6">Explore professional templates or build from scratch</p>
+<div class="flex gap-4">
+<button class="bg-primary text-on-primary font-label text-[11px] uppercase tracking-widest px-6 py-3 rounded-full hover:rotate-[-4deg] hover:-translate-y-1 transition-all kinetic-shadow">Browse Templates</button>
+</div>
+</div>
+</main>
+<!-- FAB -->
+<button class="fixed bottom-28 right-6 w-16 h-16 bg-primary text-on-primary rounded-full flex items-center justify-center fab-glow hover:rotate-[-8deg] hover:-translate-y-2 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-40 flex justify-around items-center px-4 pb-8 pt-4 bg-[#faf9f7] rounded-t-[3rem] border-t-2 border-[#dad4c8] shadow-[-7px_-7px_0px_0px_rgba(46,47,46,0.05)]">
+<a class="flex flex-col items-center justify-center bg-[#38671a] text-[#faf9f7] rounded-full px-6 py-2 rotate-[-3deg] shadow-[-4px_4px_0px_0px_rgba(0,0,0,1)] active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+<span class="font-['Space_Mono'] uppercase tracking-wider text-[10px]">Programs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#2e2f2e] opacity-70 hover:rotate-[2deg] hover:-translate-y-2 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-['Space_Mono'] uppercase tracking-wider text-[10px]">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#2e2f2e] opacity-70 hover:rotate-[2deg] hover:-translate-y-2 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="play_circle">play_circle</span>
+<span class="font-['Space_Mono'] uppercase tracking-wider text-[10px]">Workout</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#2e2f2e] opacity-70 hover:rotate-[2deg] hover:-translate-y-2 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span class="font-['Space_Mono'] uppercase tracking-wider text-[10px]">History</span>
+</a>
+</nav>
+</body></html>

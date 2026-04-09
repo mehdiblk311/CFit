@@ -1,24 +1,48 @@
-# Cfit — React Architecture
+# Cfit — Fitness Web App
 
-A fitness web app for  students. Multilingual (AR/FR/EN), mobile-first, PWA-ready.
+A mobile-first fitness app for students with workout tracking, nutrition management, and AI assistance. Multilingual (AR/FR/EN), PWA-ready.
 
----
+## App Overview
 
+**Three user flows:**
+1. **Auth & Onboarding** — Login → Signup → 3-step onboarding (basic info → goals/activity → plan selection)
+2. **Main App** — Tab-based dashboard: Dashboard, Workouts, Nutrition, AI Assistant, Settings
+3. **Admin** — Manage users, exercises, food database, workout templates
 
 ## Folder Structure
 
 ```
 src/
-├── components/
-│   ├── common/        # Reusable UI: Button, Input, Card, Modal, Toast, Skeleton, Navigation
-│   ├── auth/          # LoginScreen, SignupScreen, OnboardingWizard
+├── components/        # All UI components
+│   ├── common/        # Reusable: Button, Input, Card, Modal, Navigation
+│   ├── auth/          # Login, Signup, Onboarding (3 steps), Password reset
 │   ├── user/          # Dashboard, Workouts, Nutrition, AIAssistant, Settings
-│   └── admin/         # Dashboard, UserManagement, ExerciseLibrary, FoodDatabase, WorkoutTemplates
-├── hooks/             # useAuth · useWorkout · useNutrition · useMacros · useLanguage
-├── context/           # AuthContext · UserDataContext · WorkoutContext · NutritionContext · ThemeContext
-├── services/          # api.js + one service file per domain (auth, workout, nutrition, ai, admin)
-├── utils/             # constants.js · formatters · calculations · validators
-├── styles/            # globals.css (CSS vars) · theme.css · responsive.css
-├── pages/             # UserLayout · AdminLayout · AuthLayout
-└── App.jsx            # Router root — wraps all contexts, splits routes by role
+│   └── admin/         # Admin dashboard, user/exercise/food/template management
+├── hooks/             # useAuth, useWorkout, useNutrition, useMacros, useLanguage
+├── context/           # AuthContext, UserDataContext, WorkoutContext, etc.
+├── services/          # API calls (auth, workout, nutrition, ai, admin)
+├── utils/             # Constants, formatters, calculations, validators
+├── styles/            # CSS variables, theme, responsive design
+└── App.jsx            # Main router — wraps contexts, manages screen/tab state
 ```
+
+## Stitch / — Design Exports
+
+Exported design screenshots and HTML code for 28 screens (from Figma via Stitch):
+- **Auth**: Login, Signup, Forgot password, Password reset, OTP
+- **Onboarding**: Basic info, Goals/activity, Your plan
+- **User**: Dashboard (mobile & desktop), Workouts, Nutrition, AI assistant, Settings, Exercise library, Food search
+- **Admin**: User management, Exercise/food library, Workout programs, Nutrition dashboard
+- **Workout**: Active session, Workout preview, History, Add quantity
+
+Each screen has: `screen.png` (screenshot) + `code.html` (reference HTML). Reference code to guide component implementation.
+
+## agents/ — Custom Skills & Best Practices
+
+Skills directory for Claude agents (local rules for development):
+- **frontend-design/** — Design system for polished UI components
+- **vercel-react-best-practices/** — 50+ React/JS optimization rules (async, rendering, bundling, performance)
+- **sleek-design-mobile-apps/** — Mobile-first design patterns
+- **web-design-guidelines/** — Figma design standards
+
+These rules guide code quality and design consistency during development.

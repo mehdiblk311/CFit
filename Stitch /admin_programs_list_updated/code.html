@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&amp;family=Space+Mono&amp;family=Space+Grotesk:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed-dim": "#dad4c8",
+                    "inverse-primary": "#c5fe9e",
+                    "inverse-on-surface": "#9d9d9b",
+                    "primary-container": "#c3fb9c",
+                    "primary": "#38671a",
+                    "error-container": "#f95630",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-highest": "#dddddb",
+                    "on-primary": "#d6ffb7",
+                    "surface-variant": "#dddddb",
+                    "background": "#f7f6f4",
+                    "tertiary-fixed": "#b4a5ff",
+                    "on-error-container": "#520c00",
+                    "on-primary-container": "#336215",
+                    "tertiary-dim": "#5130c6",
+                    "surface": "#f7f6f4",
+                    "primary-dim": "#2c5a0d",
+                    "surface-container": "#e8e8e6",
+                    "on-tertiary-container": "#31009b",
+                    "on-surface": "#2e2f2e",
+                    "on-error": "#ffefec",
+                    "surface-tint": "#38671a",
+                    "on-primary-fixed-variant": "#3d6c1f",
+                    "outline-variant": "#adadab",
+                    "inverse-surface": "#0d0e0e",
+                    "on-secondary-container": "#555148",
+                    "secondary-fixed": "#e8e2d6",
+                    "tertiary-container": "#b4a5ff",
+                    "secondary-dim": "#534f46",
+                    "primary-fixed-dim": "#b5ec8f",
+                    "surface-bright": "#f7f6f4",
+                    "on-secondary": "#f9f2e5",
+                    "error-dim": "#b92902",
+                    "surface-dim": "#d4d5d2",
+                    "on-tertiary": "#f6f0ff",
+                    "secondary": "#5f5b52",
+                    "surface-container-high": "#e2e3e0",
+                    "on-primary-fixed": "#214f01",
+                    "error": "#b02500",
+                    "on-surface-variant": "#5b5c5a",
+                    "on-tertiary-fixed": "#180058",
+                    "on-background": "#2e2f2e",
+                    "on-tertiary-fixed-variant": "#3a03b1",
+                    "tertiary": "#5d3fd3",
+                    "on-secondary-fixed": "#423f36",
+                    "secondary-container": "#e8e2d6",
+                    "tertiary-fixed-dim": "#a694ff",
+                    "outline": "#767775",
+                    "primary-fixed": "#c3fb9c",
+                    "surface-container-low": "#f1f1ef",
+                    "on-secondary-fixed-variant": "#5f5b52"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans", "sans-serif"],
+                    "body": ["Plus Jakarta Sans", "sans-serif"],
+                    "label": ["Space Mono", "monospace"],
+                    "brand": ["Plus Jakarta Sans", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .kinetic-shadow {
+            box-shadow: -7px 7px 0px 0px rgba(46, 47, 46, 1);
+        }
+        .kinetic-hover:hover {
+            transform: rotateZ(-2deg) translateY(-4px);
+            box-shadow: -7px 7px 0px 0px rgba(46, 47, 46, 1);
+        }
+        .kinetic-btn:hover {
+            transform: rotateZ(-8deg) translateY(-4px);
+            box-shadow: -7px 7px 0px 0px rgba(46, 47, 46, 1);
+        }
+        .aggressive-crop {
+            letter-spacing: -0.05em;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body min-h-screen">
+<!-- SideNavBar (Execution from JSON) -->
+<aside class="fixed left-0 top-0 h-full z-50 flex flex-col bg-stone-50 dark:bg-stone-900 h-screen w-20 hover:w-64 transition-all duration-300 border-r-2 border-stone-200 dark:border-stone-800 shadow-[-7px_7px_0px_0px_rgba(46,47,46,1)] group">
+<div class="flex items-center px-4 py-8 mb-6">
+<div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-on-primary font-brand font-black text-xl flex-shrink-0">F</div>
+<div class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap overflow-hidden">
+<p class="font-['Plus_Jakarta_Sans'] font-black text-lime-900 dark:text-lime-500 tracking-tighter text-xl">UM6P_FIT</p>
+<p class="font-['Space_Mono'] uppercase tracking-widest text-[10px] text-stone-500">Admin Console</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-4 px-3">
+<!-- Active: Programs -->
+<a class="flex items-center h-12 rounded-full transition-transform hover:rotate-[-2deg] hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400" href="#">
+<span class="material-symbols-outlined ml-3.5" data-icon="dashboard">dashboard</span>
+<span class="ml-6 opacity-0 group-hover:opacity-100 font-['Space_Mono'] uppercase tracking-widest text-xs">Dashboard</span>
+</a>
+<a class="flex items-center h-12 rounded-full transition-transform hover:rotate-[-2deg] hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400" href="#">
+<span class="material-symbols-outlined ml-3.5" data-icon="group">group</span>
+<span class="ml-6 opacity-0 group-hover:opacity-100 font-['Space_Mono'] uppercase tracking-widest text-xs">Users</span>
+</a>
+<a class="flex items-center h-12 rounded-full transition-transform hover:rotate-[-2deg] hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400" href="#">
+<span class="material-symbols-outlined ml-3.5" data-icon="fitness_center">fitness_center</span>
+<span class="ml-6 opacity-0 group-hover:opacity-100 font-['Space_Mono'] uppercase tracking-widest text-xs">Exercises</span>
+</a>
+<a class="flex items-center h-12 rounded-full transition-transform hover:rotate-[-2deg] hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400" href="#">
+<span class="material-symbols-outlined ml-3.5" data-icon="restaurant">restaurant</span>
+<span class="ml-6 opacity-0 group-hover:opacity-100 font-['Space_Mono'] uppercase tracking-widest text-xs">Foods</span>
+</a>
+<a class="flex items-center h-12 rounded-full text-lime-900 dark:text-lime-400 font-bold border-r-4 border-lime-800 bg-stone-100" href="#">
+<span class="material-symbols-outlined ml-3.5" data-icon="event_note">event_note</span>
+<span class="ml-6 opacity-0 group-hover:opacity-100 font-['Space_Mono'] uppercase tracking-widest text-xs">Programs</span>
+</a>
+</nav>
+<div class="p-4 mt-auto mb-8">
+<button class="w-full kinetic-btn bg-primary text-on-primary py-3 rounded-full flex items-center justify-center group-hover:px-6 transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+<span class="ml-2 hidden group-hover:block font-['Space_Mono'] uppercase tracking-widest text-xs whitespace-nowrap">New Program</span>
+</button>
+</div>
+</aside>
+<!-- TopAppBar (Execution from JSON) -->
+<header class="sticky top-0 w-full z-40 flex justify-between items-center px-8 py-4 ml-20 bg-stone-50/80 dark:bg-stone-900/80 backdrop-blur-md border-b-2 border-stone-200 dark:border-stone-800">
+<div class="flex items-center gap-8">
+<h1 class="text-xl font-black text-lime-900 dark:text-lime-500 font-brand">UM6P_FIT Workout Management</h1>
+<nav class="hidden md:flex gap-6">
+<a class="text-lime-900 dark:text-lime-400 border-b-2 border-lime-800 font-bold font-headline tracking-tight" href="#">Programs</a>
+<a class="text-stone-600 dark:text-stone-400 hover:text-lime-700 dark:hover:text-lime-300 underline-offset-4 hover:underline font-headline tracking-tight" href="#">Analytics</a>
+<a class="text-stone-600 dark:text-stone-400 hover:text-lime-700 dark:hover:text-lime-300 underline-offset-4 hover:underline font-headline tracking-tight" href="#">Archive</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border-2 border-secondary-fixed-dim rounded-full focus:ring-2 focus:ring-primary focus:border-primary outline-none font-label text-xs uppercase" placeholder="Search programs..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full border-2 border-primary-container overflow-hidden">
+<img alt="Admin Profile" class="w-full h-full object-cover" data-alt="professional portrait of a man in his 40s with a kind expression and modern glasses against a neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5XRtqSxb-b3udH1VtRFTFl90vP7OxvX70x3xpSt5UqwWFrUwDNEkVeBbfgxEXMhmF-bGWDOd_Kvzyo2TYPx_SktxI208qe6lYAq5v9B-mfmQ1eMdX9B7UKrCfdALRj-KK_B4VBM61HhygA9pyk-x4delVDgFHpcR7CZXiS4r3wlz1bNs_SGzCoG80vthcBX3qvS6V83l2fI8ZA1a5lMikeVKuzpdDNuRDeUv2ZmlBLLHXBz3fwvOxmOy82V9guIppdocmREl0iHHm"/>
+</div>
+</div>
+</div>
+</header>
+<main class="ml-20 p-8">
+<div class="max-w-7xl mx-auto">
+<!-- Hero / Header Section -->
+<div class="flex justify-between items-end mb-12">
+<div>
+<span class="font-label uppercase tracking-widest text-primary text-sm mb-2 block">Management Dashboard</span>
+<h2 class="text-6xl font-headline font-extrabold text-on-surface aggressive-crop leading-none">Workout Programs</h2>
+</div>
+<button class="kinetic-btn bg-primary text-on-primary px-8 py-4 rounded-full font-label uppercase tracking-widest flex items-center gap-3 transition-all">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+                    Create Program
+                </button>
+</div>
+<!-- Bento Grid of Program Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest p-8 rounded-xl border-2 border-secondary-fixed-dim kinetic-shadow kinetic-hover transition-all flex flex-col">
+<div class="flex justify-between items-start mb-6">
+<div class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full font-label text-[10px] uppercase tracking-wider">Active Program</div>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-surface-container rounded-full text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+<button class="p-2 hover:bg-error-container/10 rounded-full text-outline hover:text-error transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+<h3 class="text-2xl font-headline font-bold text-on-surface mb-3">PPL Hypertrophy — Beginner</h3>
+<p class="text-on-surface-variant text-sm mb-6 line-clamp-2">A comprehensive foundation program focusing on the classic Push, Pull, Legs split tailored for metabolic hypertrophy.</p>
+<div class="flex flex-wrap gap-2 mb-8">
+<span class="bg-lemon px-4 py-1.5 rounded-full border border-secondary-fixed-dim font-label text-[10px] uppercase">Beginner</span>
+<span class="bg-surface-container px-4 py-1.5 rounded-full border border-secondary-fixed-dim font-label text-[10px] uppercase">Hypertrophy</span>
+<span class="bg-surface-container px-4 py-1.5 rounded-full border border-secondary-fixed-dim font-label text-[10px] uppercase">3 Days/Week</span>
+</div>
+<div class="mt-auto border-t border-dashed border-secondary-fixed-dim pt-6 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="flex flex-col">
+<span class="font-label text-[10px] text-outline uppercase">Exercises</span>
+<span class="font-headline font-bold text-xl">48</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest p-8 rounded-xl border-2 border-secondary-fixed-dim kinetic-shadow kinetic-hover transition-all flex flex-col">
+<div class="flex justify-between items-start mb-6">
+<div class="bg-tertiary-container text-on-tertiary-container px-3 py-1 rounded-full font-label text-[10px] uppercase tracking-wider">Premium</div>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-surface-container rounded-full text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+<button class="p-2 hover:bg-error-container/10 rounded-full text-outline hover:text-error transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+<h3 class="text-2xl font-headline font-bold text-on-surface mb-3">Elite Strength Protocol</h3>
+<p class="text-on-surface-variant text-sm mb-6 line-clamp-2">High-intensity powerlifting routine designed for maximum neural adaptation and compound movement mastery.</p>
+<div class="flex flex-wrap gap-2 mb-8">
+<span class="bg-lemon px-4 py-1.5 rounded-full border border-secondary-fixed-dim font-label text-[10px] uppercase">Advanced</span>
+<span class="bg-surface-container px-4 py-1.5 rounded-full border border-secondary-fixed-dim font-label text-[10px] uppercase">Strength</span>
+<span class="bg-surface-container px-4 py-1.5 rounded-full border border-secondary-fixed-dim font-label text-[10px] uppercase">5 Days/Week</span>
+</div>
+<div class="mt-auto border-t border-dashed border-secondary-fixed-dim pt-6 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="flex flex-col">
+<span class="font-label text-[10px] text-outline uppercase">Exercises</span>
+<span class="font-headline font-bold text-xl">32</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest p-8 rounded-xl border-2 border-secondary-fixed-dim kinetic-shadow kinetic-hover transition-all flex flex-col">
+<div class="flex justify-between items-start mb-6">
+<div class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full font-label text-[10px] uppercase tracking-wider">Archived</div>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-surface-container rounded-full text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+<button class="p-2 hover:bg-error-container/10 rounded-full text-outline hover:text-error transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+<h3 class="text-2xl font-headline font-bold text-on-surface mb-3">Morning Mobility Flow</h3>
+<p class="text-on-surface-variant text-sm mb-6 line-clamp-2">Low impact functional mobility drills designed to increase range of motion and decrease sedentary stiffness.</p>
+<div class="flex flex-wrap gap-2 mb-8">
+<span class="bg-lemon px-4 py-1.5 rounded-full border border-secondary-fixed-dim font-label text-[10px] uppercase">Any Level</span>
+<span class="bg-surface-container px-4 py-1.5 rounded-full border border-secondary-fixed-dim font-label text-[10px] uppercase">Mobility</span>
+<span class="bg-surface-container px-4 py-1.5 rounded-full border border-secondary-fixed-dim font-label text-[10px] uppercase">Daily</span>
+</div>
+<div class="mt-auto border-t border-dashed border-secondary-fixed-dim pt-6 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="flex flex-col">
+<span class="font-label text-[10px] text-outline uppercase">Exercises</span>
+<span class="font-headline font-bold text-xl">14</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+<!-- Card 4 (Clay Aesthetic Highlight) -->
+<div class="bg-lime-50 p-8 rounded-xl border-2 border-lime-200 kinetic-shadow kinetic-hover transition-all flex flex-col relative overflow-hidden">
+<div class="absolute -top-4 -right-4 w-24 h-24 bg-lime-100 rounded-full blur-2xl opacity-50"></div>
+<div class="flex justify-between items-start mb-6 relative z-10">
+<div class="bg-primary text-on-primary px-3 py-1 rounded-full font-label text-[10px] uppercase tracking-wider">Top Rated</div>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-primary/10 rounded-full text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+</div>
+</div>
+<h3 class="text-2xl font-headline font-bold text-primary mb-3 relative z-10">Dumbbell Only Home Burn</h3>
+<p class="text-on-primary-container text-sm mb-6 line-clamp-2 relative z-10">Minimal equipment required. Maximum caloric expenditure focusing on high-volume supersets.</p>
+<div class="flex flex-wrap gap-2 mb-8 relative z-10">
+<span class="bg-white/80 px-4 py-1.5 rounded-full border border-lime-200 font-label text-[10px] uppercase text-primary">Intermediate</span>
+<span class="bg-white/80 px-4 py-1.5 rounded-full border border-lime-200 font-label text-[10px] uppercase text-primary">Fat Loss</span>
+<span class="bg-white/80 px-4 py-1.5 rounded-full border border-lime-200 font-label text-[10px] uppercase text-primary">4 Days/Week</span>
+</div>
+<div class="mt-auto border-t border-dashed border-lime-300 pt-6 flex items-center justify-between relative z-10">
+<div class="flex items-center gap-4">
+<div class="flex flex-col">
+<span class="font-label text-[10px] text-primary/60 uppercase">Exercises</span>
+<span class="font-headline font-bold text-xl text-primary">56</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Empty State / Add New Placeholder -->
+<div class="border-4 border-dashed border-secondary-fixed-dim rounded-xl p-8 flex flex-col items-center justify-center text-center bg-surface-container-low/30 hover:bg-surface-container-low transition-colors group cursor-pointer">
+<div class="w-16 h-16 rounded-full bg-secondary-fixed-dim flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-on-surface-variant text-3xl" data-icon="library_add">library_add</span>
+</div>
+<h3 class="text-xl font-headline font-bold text-on-surface">New Template</h3>
+<p class="text-outline text-sm font-label uppercase mt-2">Draft from Scratch</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Meta-Data (Artisanal Detail) -->
+<footer class="ml-20 mt-16 p-8 border-t border-secondary-fixed-dim flex justify-between items-center">
+<div class="flex items-center gap-8">
+<div class="flex flex-col">
+<span class="font-label text-[10px] text-outline uppercase tracking-widest">Database Sync</span>
+<span class="font-label text-xs text-primary">Status: Stable</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label text-[10px] text-outline uppercase tracking-widest">Active Programs</span>
+<span class="font-label text-xs text-on-surface">24 Total</span>
+</div>
+</div>
+<div class="font-label text-[10px] text-outline uppercase tracking-widest">
+            © 2024 UM6P_FIT Kinetic System
+        </div>
+</footer>
+</body></html>

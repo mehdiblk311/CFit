@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UM6P_FIT - Create Account</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Space+Mono:wght@400;700&amp;family=Space+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-fixed-variant": "#3d6c1f",
+                    "secondary": "#5f5b52",
+                    "on-primary": "#d6ffb7",
+                    "secondary-dim": "#534f46",
+                    "surface-bright": "#f7f6f4",
+                    "surface": "#f7f6f4",
+                    "on-tertiary-fixed": "#180058",
+                    "tertiary-container": "#b4a5ff",
+                    "background": "#f7f6f4",
+                    "surface-dim": "#d4d5d2",
+                    "surface-variant": "#dddddb",
+                    "outline-variant": "#adadab",
+                    "on-primary-container": "#336215",
+                    "error-dim": "#b92902",
+                    "on-tertiary": "#f6f0ff",
+                    "secondary-fixed-dim": "#dad4c8",
+                    "secondary-container": "#e8e2d6",
+                    "surface-container-low": "#f1f1ef",
+                    "on-secondary-fixed": "#423f36",
+                    "tertiary": "#5d3fd3",
+                    "on-surface": "#2e2f2e",
+                    "on-primary-fixed": "#214f01",
+                    "inverse-primary": "#c5fe9e",
+                    "tertiary-fixed-dim": "#a694ff",
+                    "error": "#b02500",
+                    "primary-dim": "#2c5a0d",
+                    "surface-tint": "#38671a",
+                    "on-tertiary-container": "#31009b",
+                    "surface-container": "#e8e8e6",
+                    "primary": "#38671a",
+                    "on-secondary-fixed-variant": "#5f5b52",
+                    "outline": "#767775",
+                    "secondary-fixed": "#e8e2d6",
+                    "tertiary-dim": "#5130c6",
+                    "primary-fixed": "#c3fb9c",
+                    "inverse-surface": "#0d0e0e",
+                    "error-container": "#f95630",
+                    "on-error-container": "#520c00",
+                    "on-error": "#ffefec",
+                    "on-secondary-container": "#555148",
+                    "on-surface-variant": "#5b5c5a",
+                    "surface-container-high": "#e2e3e0",
+                    "primary-fixed-dim": "#b5ec8f",
+                    "surface-container-highest": "#dddddb",
+                    "on-secondary": "#f9f2e5",
+                    "tertiary-fixed": "#b4a5ff",
+                    "on-tertiary-fixed-variant": "#3a03b1",
+                    "surface-container-lowest": "#ffffff",
+                    "on-background": "#2e2f2e",
+                    "inverse-on-surface": "#9d9d9b",
+                    "primary-container": "#c3fb9c"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Space Grotesk"],
+                    "mono": ["Space Mono"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .kinetic-shadow {
+            box-shadow: -7px 7px 0px 0px rgba(46, 47, 46, 1);
+        }
+        .kinetic-hover:hover {
+            transform: rotate(-2deg) translateY(-4px);
+            box-shadow: -7px 7px 0px 0px rgba(46, 47, 46, 1);
+        }
+        .inner-glow {
+            box-shadow: inset 2px 2px 0px rgba(255, 255, 255, 0.4);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface min-h-screen selection:bg-primary-fixed">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-20 bg-[#faf9f7] dark:bg-stone-900 border-b-2 border-dashed border-[#dad4c8] dark:border-stone-700 shadow-[-4px_4px_0px_0px_rgba(46,47,46,1)]">
+<button class="w-12 h-12 flex items-center justify-center rounded-full border-2 border-secondary-fixed-dim hover:-rotate-2 hover:-translate-y-1 transition-transform active:scale-95 duration-200 ease-out text-[#38671a] dark:text-[#7DB15B]">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="text-2xl font-black text-[#2e2f2e] dark:text-[#faf9f7] tracking-[-1.5px] font-['Plus_Jakarta_Sans']">
+            UM6P_FIT
+        </div>
+<div class="w-12"></div> <!-- Spacer for balance -->
+</header>
+<main class="pt-32 pb-16 px-6 max-w-lg mx-auto">
+<!-- Heading Section -->
+<div class="mb-12">
+<h1 class="text-[44px] font-semibold tracking-tight text-on-surface leading-tight font-headline">
+                Create Account
+            </h1>
+<p class="text-on-surface-variant mt-2 font-mono uppercase text-xs tracking-widest">
+                Start your kinetic journey
+            </p>
+</div>
+<!-- Signup Form -->
+<form class="space-y-8">
+<!-- Full Name -->
+<div class="space-y-2">
+<label class="font-mono uppercase text-xs tracking-widest ml-4 text-on-surface-variant">Full Name</label>
+<div class="relative group">
+<input class="w-full h-16 px-6 rounded-full bg-surface-container-lowest border-2 border-secondary-fixed-dim focus:border-primary focus:ring-0 transition-all placeholder:text-outline-variant outline-none" placeholder="Alex Rivera" type="text"/>
+</div>
+</div>
+<!-- Email -->
+<div class="space-y-2">
+<label class="font-mono uppercase text-xs tracking-widest ml-4 text-on-surface-variant">Email Address</label>
+<div class="relative group">
+<input class="w-full h-16 px-6 rounded-full bg-surface-container-lowest border-2 border-secondary-fixed-dim focus:border-primary focus:ring-0 transition-all placeholder:text-outline-variant outline-none" placeholder="alex@student.um6p.ma" type="email"/>
+</div>
+</div>
+<!-- Password & Strength -->
+<div class="space-y-4">
+<div class="space-y-2">
+<label class="font-mono uppercase text-xs tracking-widest ml-4 text-on-surface-variant">Password</label>
+<div class="relative group">
+<input class="w-full h-16 px-6 rounded-full bg-surface-container-lowest border-2 border-secondary-fixed-dim focus:border-primary focus:ring-0 transition-all placeholder:text-outline-variant outline-none" placeholder="••••••••••••" type="password"/>
+<span class="material-symbols-outlined absolute right-6 top-1/2 -translate-y-1/2 text-on-surface-variant cursor-pointer" data-icon="visibility">visibility</span>
+</div>
+</div>
+<!-- Password Requirements Card -->
+<div class="bg-secondary-container/50 rounded-lg p-6 border-2 border-dashed border-secondary-fixed-dim">
+<div class="flex items-center gap-2 mb-4">
+<div class="h-1.5 flex-1 bg-primary rounded-full"></div>
+<div class="h-1.5 flex-1 bg-primary rounded-full"></div>
+<div class="h-1.5 flex-1 bg-surface-dim rounded-full"></div>
+<div class="h-1.5 flex-1 bg-surface-dim rounded-full"></div>
+<span class="font-mono text-[10px] ml-2 text-primary font-bold">FAIR</span>
+</div>
+<ul class="space-y-2 font-mono text-[10px] uppercase tracking-wider text-on-surface-variant">
+<li class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-xs" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                            At least 8 characters
+                        </li>
+<li class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-xs" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                            One capital letter
+                        </li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xs" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+                            One special character
+                        </li>
+</ul>
+</div>
+</div>
+<!-- Confirm Password -->
+<div class="space-y-2">
+<label class="font-mono uppercase text-xs tracking-widest ml-4 text-on-surface-variant">Confirm Password</label>
+<div class="relative group">
+<input class="w-full h-16 px-6 rounded-full bg-surface-container-lowest border-2 border-secondary-fixed-dim focus:border-primary focus:ring-0 transition-all placeholder:text-outline-variant outline-none" placeholder="••••••••••••" type="password"/>
+</div>
+</div>
+<!-- CTA Primary -->
+<button class="w-full h-16 rounded-full bg-primary text-on-primary font-bold text-lg kinetic-hover inner-glow transition-all active:scale-95 flex items-center justify-center gap-2 mt-4" type="submit">
+                Create Account
+                <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</form>
+<!-- Divider -->
+<div class="relative my-12 flex items-center justify-center">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t-2 border-dashed border-secondary-fixed-dim"></div>
+</div>
+<span class="relative px-6 bg-surface font-mono text-xs text-on-surface-variant uppercase tracking-[0.2em]">or</span>
+</div>
+<!-- Social Login -->
+<button class="w-full h-16 rounded-full bg-surface-container-lowest border-2 border-secondary-fixed-dim flex items-center justify-center gap-4 hover:-rotate-1 hover:-translate-y-1 transition-all active:scale-95 group">
+<img alt="Google Logo" class="w-6 h-6 grayscale group-hover:grayscale-0 transition-all" data-alt="Official Google G logo in bright primary colors with a subtle shadow and clean vectors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2B30SqJRRE-cE0FBrwLmOh_WZVL9xcaPHVBoRGo7G7nRd81LFPL725acsxMoefISjxb892KOoLmNFycfHWIE8nMNGR0YpFc_VJ43FiiuTmVuznrC91nAqVhR9InbEXVBV67Ps2JKY05V_QvyYk6Z8S1pTyE9rC9BMAgL-CD55DUtw2kGPQrpVnWEhJTD2MnNE-S5zBjXL_NPejaFrwYVGSAPoYbq-19_6_1uL91tjy5r_aFDJ94qvvC9JySRlvX-AMhVjpraoNr30"/>
+<span class="font-headline font-bold text-on-surface">Continue with Google</span>
+</button>
+<!-- Login Link -->
+<div class="mt-12 text-center">
+<p class="text-on-surface-variant font-medium">
+                Already have an account? 
+                <a class="text-primary font-bold underline underline-offset-4 hover:text-primary-dim transition-colors ml-1" href="#">Sign in</a>
+</p>
+</div>
+<!-- Activity Sticker (Decorative) -->
+<div class="fixed bottom-10 -right-4 rotate-12 hidden lg:block">
+<div class="bg-tertiary-container text-on-tertiary-container p-4 rounded-full border-2 border-on-surface shadow-[-4px_4px_0px_rgba(0,0,0,1)] flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-mono text-[10px] font-bold uppercase">UM6P Exclusive</span>
+</div>
+</div>
+</main>
+<!-- Background Decoration -->
+<div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none opacity-20">
+<div class="absolute top-20 left-10 w-64 h-64 bg-primary-container rounded-full blur-[100px]"></div>
+<div class="absolute bottom-20 right-10 w-96 h-96 bg-tertiary-container rounded-full blur-[120px]"></div>
+</div>
+</body></html>

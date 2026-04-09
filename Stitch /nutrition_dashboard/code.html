@@ -1,0 +1,293 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>UM6P_FIT | Nutrition Journal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@400;500;700&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "error": "#b02500",
+                    "on-surface-variant": "#5b5c5a",
+                    "surface-container-high": "#e2e3e0",
+                    "on-primary-fixed": "#214f01",
+                    "error-dim": "#b92902",
+                    "surface-dim": "#d4d5d2",
+                    "on-tertiary": "#f6f0ff",
+                    "secondary": "#5f5b52",
+                    "primary-fixed": "#c3fb9c",
+                    "surface-container-low": "#f1f1ef",
+                    "on-secondary-fixed-variant": "#5f5b52",
+                    "on-secondary-fixed": "#423f36",
+                    "secondary-container": "#e8e2d6",
+                    "tertiary-fixed-dim": "#a694ff",
+                    "outline": "#767775",
+                    "on-tertiary-fixed-variant": "#3a03b1",
+                    "tertiary": "#5d3fd3",
+                    "on-tertiary-fixed": "#180058",
+                    "on-background": "#2e2f2e",
+                    "primary-dim": "#2c5a0d",
+                    "surface-container": "#e8e8e8",
+                    "on-tertiary-container": "#31009b",
+                    "on-surface": "#2e2f2e",
+                    "on-error": "#ffefec",
+                    "tertiary-fixed": "#b4a5ff",
+                    "on-error-container": "#520c00",
+                    "on-primary-container": "#336215",
+                    "tertiary-dim": "#5130c6",
+                    "surface": "#f7f6f4",
+                    "primary": "#38671a",
+                    "error-container": "#f95630",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-highest": "#dddddb",
+                    "on-primary": "#d6ffb7",
+                    "surface-variant": "#dddddb",
+                    "background": "#f7f6f4",
+                    "secondary-fixed-dim": "#dad4c8",
+                    "inverse-primary": "#c5fe9e",
+                    "inverse-on-surface": "#9d9d9b",
+                    "primary-container": "#c3fb9c",
+                    "secondary-fixed": "#e8e2d6",
+                    "tertiary-container": "#b4a5ff",
+                    "secondary-dim": "#534f46",
+                    "primary-fixed-dim": "#b5ec8f",
+                    "surface-bright": "#f7f6f4",
+                    "on-secondary": "#f9f2e5",
+                    "on-secondary-container": "#555148",
+                    "on-primary-fixed-variant": "#3d6c1f",
+                    "outline-variant": "#adadab",
+                    "inverse-surface": "#0d0e0e",
+                    "surface-tint": "#38671a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Space Mono"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #faf9f7; }
+        .roobert-tight { font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -3.2px; font-weight: 800; }
+        .space-mono { font-family: 'Space Mono', monospace; letter-spacing: 1px; }
+        .signature-shadow { box-shadow: -7px 7px 0px 0px rgba(46,47,46,1); }
+        .sticker-rotate { transform: rotate(-3deg); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface pb-32">
+<!-- Top Navigation Anchor -->
+<header class="fixed top-0 w-full z-50 bg-[#faf9f7] border-b-2 border-dashed border-secondary-fixed-dim shadow-[-7px_7px_0px_0px_rgba(46,47,46,1)] px-6 py-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-tertiary-container flex items-center justify-center border-2 border-on-background overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait of a young male athlete with a friendly expression in soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUC0__-IUd4eAfOlm9Q-jMBRnncDjJSYuVFS_HiQjl5LuGJT4I_sgZyhfcCPK3XNemxV1z77uNGS1xx8hF5zrlBBQMFw-sbVJ1DBUffB93F7doTRbugZPxn6VMVpkCwRms07lZFVekB3BUhh0jRyaIjba6IwQvqlVbRTUg68ywouWXu0zOXM9ouXjwFNZRHGah0lxFPJGrvTjG-CC3Snvma4rsIIOMRdxGT6SbyjdoKgxZ0Pdl9Y98d-ho-coX7aEKjq2ChyIWpFav" style="">
+</div>
+<h1 class="roobert-tight text-3xl text-primary uppercase" style="">Nutrition</h1>
+</div>
+<div class="flex items-center gap-3">
+<div class="bg-secondary-container px-4 py-2 rounded-full border-2 border-on-background flex items-center gap-2">
+<span class="space-mono text-[10px] font-bold" style="">Today, April 4</span>
+<span class="material-symbols-outlined text-sm" style="">calendar_today</span>
+</div>
+<button class="w-12 h-12 bg-surface border-2 border-on-background rounded-full flex items-center justify-center hover:rotate-[-2deg] hover:-translate-y-1 transition-transform" style="">
+<span class="material-symbols-outlined" style="">history</span>
+</button>
+</div>
+</header>
+<main class="mt-32 px-6 max-w-2xl mx-auto space-y-10">
+<!-- Macro Dashboard: Kinetic Craft Style -->
+<section class="relative bg-surface-container-low border-2 border-on-background rounded-xl p-8 signature-shadow">
+<div class="flex flex-col md:flex-row items-center gap-10">
+<!-- Calorie Ring -->
+<div class="relative w-48 h-48 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle cx="96" cy="96" fill="transparent" r="88" stroke="#dad4c8" stroke-width="16"></circle>
+<circle cx="96" cy="96" fill="transparent" r="88" stroke="#38671a" stroke-dasharray="553" stroke-dashoffset="110" stroke-linecap="round" stroke-width="16"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="roobert-tight text-4xl" style="">1,840</span>
+<span class="space-mono text-[10px] opacity-60" style="">/ 2,300 KCAL</span>
+</div>
+<!-- Remaining Sticker -->
+<div class="absolute -bottom-4 bg-tertiary text-on-tertiary px-4 py-1 rounded-full space-mono text-[10px] sticker-rotate border-2 border-on-background shadow-sm" style="">
+                        460 KCAL LEFT
+                    </div>
+</div>
+<!-- Macro Bars -->
+<div class="flex-1 w-full space-y-6">
+<div class="space-y-2">
+<div class="flex justify-between space-mono text-[10px]">
+<span class="" style="">Protein</span>
+<span class="" style="">142g / 180g</span>
+</div>
+<div class="h-4 bg-secondary-fixed-dim rounded-full overflow-hidden border-2 border-on-background">
+<div class="h-full bg-primary" style="width: 78%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between space-mono text-[10px]">
+<span class="" style="">Carbs</span>
+<span class="" style="">185g / 240g</span>
+</div>
+<div class="h-4 bg-secondary-fixed-dim rounded-full overflow-hidden border-2 border-on-background">
+<div class="h-full bg-tertiary" style="width: 77%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between space-mono text-[10px]">
+<span class="" style="">Fats</span>
+<span class="" style="">52g / 65g</span>
+</div>
+<div class="h-4 bg-secondary-fixed-dim rounded-full overflow-hidden border-2 border-on-background">
+<div class="h-full bg-error-container" style="width: 80%"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Meal Slots: Bento Grid Concept -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Breakfast Card -->
+<div class="bg-surface-container-lowest border-2 border-on-background rounded-lg p-6 signature-shadow flex flex-col justify-between hover:rotate-[-1deg] transition-transform">
+<div>
+<div class="flex justify-between items-start mb-4">
+<h3 class="roobert-tight text-xl" style="">Breakfast</h3>
+<span class="space-mono text-[10px] bg-primary-container px-2 py-1 rounded-full border border-on-background" style="">420 KCAL</span>
+</div>
+<ul class="space-y-3">
+<li class="flex items-center gap-3" style="">
+<div class="w-8 h-8 rounded-md bg-secondary-container border border-on-background overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Close-up of fluffy scrambled eggs on an artisanal ceramic plate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4S8k-vthChUAXwg2clRyWTOha1mQOY8MTOVHMVhCG-FfiRkhjE1EiH7woVOkVgj4YZZviFTBmI1TSkSuk9ewQTDsZFD4P1cRgMl3FasGgQV3lckJSa5fVYdsjBpjuQJpctnOg3p4TQLitM2DBNflkGK5C0Lvvt8pJv_or6wQEVKPRijXsW8xpdncQqInjzpc9IxZtJdZdVyJ1w80CCdG6wLSlaj3AXG9dPZvMQnDZ8h9h2SN9uiyK-Qv9HrDK5w7oUJbQgZKRdCyi" style="">
+</div>
+<span class="text-sm font-medium" style="">Scrambled Eggs (3)</span>
+</li>
+<li class="flex items-center gap-3" style="">
+<div class="w-8 h-8 rounded-md bg-secondary-container border border-on-background overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Slice of whole grain toasted sourdough bread on a marble surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWiqPApwNEiJn1EVS9gDUL2YXWLmQfjBx-ERYQhmEvU0eX97cGr8yxxkvF8Lzj0mJkOoHYra92gUftlfCfqO2dMSeK3FeEMHgurpOAEeURKoAKo6lSluIHFYViiqgCytMCUbaTchGezPBoMxxaLzpWhcHKiqNvb2M__3k7MYOnLkJbIo_S8h1ZwaWiJLHh5NjiYHhhuUs7S_lINyh4Qv9mcX1dMeadE6ohBsk48IhakyEIx2UKGfR6t33BSykiyLEAudFRGxqAngr3" style="">
+</div>
+<span class="text-sm font-medium" style="">Whole Grain Toast</span>
+</li>
+</ul>
+</div>
+<button class="mt-6 flex items-center justify-center gap-2 space-mono text-[10px] font-bold border-2 border-dashed border-secondary-fixed-dim py-3 rounded-full hover:bg-surface-container-low transition-colors" style="">
+<span class="material-symbols-outlined text-sm" style="">add</span> ADD FOOD
+                </button>
+</div>
+<!-- Lunch Card -->
+<div class="bg-surface-container-lowest border-2 border-on-background rounded-lg p-6 signature-shadow flex flex-col justify-between hover:rotate-[1deg] transition-transform">
+<div>
+<div class="flex justify-between items-start mb-4">
+<h3 class="roobert-tight text-xl" style="">Lunch</h3>
+<span class="space-mono text-[10px] bg-primary-container px-2 py-1 rounded-full border border-on-background" style="">650 KCAL</span>
+</div>
+<ul class="space-y-3">
+<li class="flex items-center gap-3" style="">
+<div class="w-8 h-8 rounded-md bg-secondary-container border border-on-background overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Colorful mediterranean salad bowl with grilled chicken and fresh vegetables" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpx5Dj0mrSDl5hmdCH9MXwjU_sMSrtTT4QLdiHqzjAuw7d51-aTGTit0mPZQ3MoP53dUZ8P1fgOVuJI_4cWiofdG1LlOqWRH1kiDlWa7ZGiwQ1917tNaMQGmvVxODIEwzuHLhWQ2kW6Rx_NbRj9cbKhSBCIH9-Njefp8TNfr-d4AFmmWTO6As7llqgjG_zP5WKGQ9bCiAEiBjKAREPSBrVP0FqPuMAbSgauzsRw5FmuaDwDUmyw7TZYisjVqfC602dOE6eUmziK4GV" style="">
+</div>
+<span class="text-sm font-medium" style="">Chicken Quinoa Bowl</span>
+</li>
+</ul>
+</div>
+<button class="mt-6 flex items-center justify-center gap-2 space-mono text-[10px] font-bold border-2 border-dashed border-secondary-fixed-dim py-3 rounded-full hover:bg-surface-container-low transition-colors" style="">
+<span class="material-symbols-outlined text-sm" style="">add</span> ADD FOOD
+                </button>
+</div>
+<!-- Dinner (Empty) -->
+<div class="bg-surface border-2 border-dashed border-secondary-fixed-dim rounded-lg p-6 flex flex-col items-center justify-center min-h-[180px] group cursor-pointer hover:border-primary transition-colors">
+<h3 class="roobert-tight text-xl opacity-40 group-hover:opacity-100 transition-opacity" style="">Dinner</h3>
+<span class="space-mono text-[10px] opacity-40 mt-1" style="">NO ITEMS LOGGED</span>
+<button class="mt-4 w-12 h-12 rounded-full bg-secondary-fixed-dim flex items-center justify-center border-2 border-on-background group-hover:bg-primary-container transition-colors" style="">
+<span class="material-symbols-outlined" style="">add</span>
+</button>
+</div>
+<!-- Snacks (Empty) -->
+<div class="bg-surface border-2 border-dashed border-secondary-fixed-dim rounded-lg p-6 flex flex-col items-center justify-center min-h-[180px] group cursor-pointer hover:border-primary transition-colors">
+<h3 class="roobert-tight text-xl opacity-40 group-hover:opacity-100 transition-opacity" style="">Snacks</h3>
+<span class="space-mono text-[10px] opacity-40 mt-1" style="">NO ITEMS LOGGED</span>
+<button class="mt-4 w-12 h-12 rounded-full bg-secondary-fixed-dim flex items-center justify-center border-2 border-on-background group-hover:bg-primary-container transition-colors" style="">
+<span class="material-symbols-outlined" style="">add</span>
+</button>
+</div>
+</div>
+<!-- Weekly Weight Log Section -->
+<section class="bg-lemon border-2 border-on-background rounded-xl p-8 signature-shadow">
+<div class="flex flex-col md:flex-row items-center justify-between gap-6">
+<div class="flex-1">
+<h3 class="roobert-tight text-2xl" style="">Weekly&nbsp; &nbsp; &nbsp;Weight&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Log</h3>
+<p class="text-on-surface-variant text-sm mt-1" style="">Stay consistent with your progress tracking.</p>
+</div>
+<div class="flex items-center gap-3 w-full md:w-auto">
+<div class="relative flex-1 md:w-32">
+<input class="w-full bg-surface-container-lowest border-2 border-on-background rounded-full px-4 py-3 space-mono text-center focus:ring-0 focus:border-primary" placeholder="00.0" type="text">
+<span class="absolute right-4 top-1/2 -translate-y-1/2 space-mono text-[10px] opacity-40" style="">KG</span>
+</div>
+<button class="bg-primary text-on-primary px-6 py-3 rounded-full space-mono text-[10px] font-bold border-2 border-on-background signature-shadow hover:rotate-[-4deg] hover:-translate-y-1 transition-transform" style="">
+                        LOG WEIGHT
+                    </button>
+</div>
+</div>
+<!-- Weight Trend Chart Area -->
+<div class="mt-10 pt-6 border-t-2 border-dashed border-secondary-fixed-dim">
+<div class="flex justify-between items-end mb-4">
+<span class="space-mono text-[10px] font-bold" style="">1M TREND</span>
+<span class="space-mono text-[10px] text-primary" style="">-1.2 KG THIS MONTH</span>
+</div>
+<!-- Simulated Chart -->
+<div class="h-32 w-full flex items-end gap-1">
+<div class="flex-1 bg-secondary-fixed-dim rounded-t-lg h-[80%] border-x border-t border-on-background"></div>
+<div class="flex-1 bg-secondary-fixed-dim rounded-t-lg h-[85%] border-x border-t border-on-background"></div>
+<div class="flex-1 bg-secondary-fixed-dim rounded-t-lg h-[82%] border-x border-t border-on-background"></div>
+<div class="flex-1 bg-secondary-fixed-dim rounded-t-lg h-[75%] border-x border-t border-on-background"></div>
+<div class="flex-1 bg-secondary-fixed-dim rounded-t-lg h-[78%] border-x border-t border-on-background"></div>
+<div class="flex-1 bg-secondary-fixed-dim rounded-t-lg h-[70%] border-x border-t border-on-background"></div>
+<div class="flex-1 bg-primary rounded-t-lg h-[65%] border-x border-t border-on-background"></div>
+</div>
+<div class="flex justify-between mt-2 space-mono text-[8px] opacity-40">
+<span class="" style="">MAR 04</span>
+<span class="" style="">MAR 14</span>
+<span class="" style="">MAR 24</span>
+<span class="" style="">APR 04</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell (From JSON Authority) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 bg-[#faf9f7]/90 backdrop-blur-md rounded-t-[3rem] border-t-2 border-[#dad4c8] z-50 shadow-[0_-7px_0px_0px_rgba(46,47,46,0.05)]">
+<!-- Journal Active -->
+<a class="flex flex-col items-center justify-center bg-[#38671a] text-[#faf9f7] rounded-full px-6 py-2 shadow-[-4px_4px_0px_0px_rgba(46,47,46,1)] active:scale-90 transition-all" href="#" style="">
+<span class="material-symbols-outlined" data-icon="restaurant" style="font-variation-settings: &quot;FILL&quot; 1;">restaurant</span>
+<span class="font-['Space_Mono'] uppercase text-[10px] tracking-widest mt-1" style="">Journal</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#2e2f2e] px-4 py-2 hover:bg-[#dad4c8] hover:rounded-full transition-all active:scale-90" href="#" style="">
+<span class="material-symbols-outlined" data-icon="menu_book" style="">menu_book</span>
+<span class="font-['Space_Mono'] uppercase text-[10px] tracking-widest mt-1" style="">Recipes</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#2e2f2e] px-4 py-2 hover:bg-[#dad4c8] hover:rounded-full transition-all active:scale-90" href="#" style="">
+<span class="material-symbols-outlined" data-icon="query_stats" style="">query_stats</span>
+<span class="font-['Space_Mono'] uppercase text-[10px] tracking-widest mt-1" style="">Trends</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#2e2f2e] px-4 py-2 hover:bg-[#dad4c8] hover:rounded-full transition-all active:scale-90" href="#" style="">
+<span class="material-symbols-outlined" data-icon="settings" style="">settings</span>
+<span class="font-['Space_Mono'] uppercase text-[10px] tracking-widest mt-1" style="">Settings</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Space+Mono:wght@400;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "secondary-fixed": "#e8e2d6",
+                  "surface-dim": "#d4d5d2",
+                  "surface-variant": "#dddddb",
+                  "tertiary": "#5d3fd3",
+                  "tertiary-dim": "#5130c6",
+                  "on-secondary-container": "#555148",
+                  "inverse-on-surface": "#9d9d9b",
+                  "secondary-container": "#e8e2d6",
+                  "inverse-primary": "#c5fe9e",
+                  "outline": "#767775",
+                  "on-tertiary-container": "#31009b",
+                  "error-container": "#f95630",
+                  "surface-container-low": "#f1f1ef",
+                  "on-secondary-fixed-variant": "#5f5b52",
+                  "primary-fixed-dim": "#b5ec8f",
+                  "primary-container": "#c3fb9c",
+                  "surface-container-highest": "#dddddb",
+                  "primary": "#38671a",
+                  "surface-bright": "#f7f6f4",
+                  "on-tertiary": "#f6f0ff",
+                  "on-primary": "#d6ffb7",
+                  "error-dim": "#b92902",
+                  "surface-container-lowest": "#ffffff",
+                  "surface": "#f7f6f4",
+                  "on-tertiary-fixed-variant": "#3a03b1",
+                  "on-primary-container": "#336215",
+                  "background": "#f7f6f4",
+                  "on-secondary": "#f9f2e5",
+                  "on-primary-fixed-variant": "#3d6c1f",
+                  "on-error": "#ffefec",
+                  "outline-variant": "#adadab",
+                  "on-primary-fixed": "#214f01",
+                  "secondary": "#5f5b52",
+                  "on-error-container": "#520c00",
+                  "tertiary-fixed": "#b4a5ff",
+                  "on-secondary-fixed": "#423f36",
+                  "tertiary-fixed-dim": "#a694ff",
+                  "on-surface": "#2e2f2e",
+                  "surface-tint": "#38671a",
+                  "on-tertiary-fixed": "#180058",
+                  "surface-container-high": "#e2e3e0",
+                  "secondary-dim": "#534f46",
+                  "on-background": "#2e2f2e",
+                  "inverse-surface": "#0d0e0e",
+                  "surface-container": "#e8e8e6",
+                  "primary-dim": "#2c5a0d",
+                  "on-surface-variant": "#5b5c5a",
+                  "tertiary-container": "#b4a5ff",
+                  "error": "#b02500",
+                  "primary-fixed": "#c3fb9c",
+                  "secondary-fixed-dim": "#dad4c8"
+          },
+          "borderRadius": {
+                  "DEFAULT": "1rem",
+                  "lg": "2rem",
+                  "xl": "3rem",
+                  "full": "9999px"
+          },
+          "fontFamily": {
+                  "headline": ["Plus Jakarta Sans"],
+                  "body": ["Plus Jakarta Sans"],
+                  "label": ["Space Mono"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .clay-card {
+      box-shadow: -7px 7px 0px #2e2f2e;
+    }
+    .bounce-hover:hover {
+      transform: rotateZ(-4deg) translateY(-4px);
+    }
+    .aggressive-crop {
+      letter-spacing: -1.2px;
+    }
+  </style>
+</head>
+<body class="bg-[#faf9f7] text-on-surface font-body selection:bg-primary-container">
+<!-- SideNavBar Component -->
+<aside class="fixed left-0 top-0 h-full z-50 flex flex-col bg-[#faf9f7] h-screen w-20 hover:w-64 transition-all duration-300 border-r-2 border-[#dad4c8] group overflow-hidden">
+<div class="p-6 flex items-center gap-4">
+<div class="w-10 h-10 bg-primary flex items-center justify-center rounded-xl shrink-0">
+<span class="material-symbols-outlined text-on-primary" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+</div>
+<div class="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+<h1 class="text-2xl font-black text-[#2e2f2e] uppercase tracking-tighter">UM6P_FIT</h1>
+<p class="font-['Plus_Jakarta_Sans'] tracking-tight text-xs font-bold uppercase text-secondary">Admin Terminal</p>
+</div>
+</div>
+<nav class="mt-8 flex-grow">
+<a class="flex items-center gap-4 text-[#2e2f2e] hover:bg-[#dad4c8]/30 rounded-full px-4 py-3 m-2 transition-transform hover:rotate-[-2deg] hover:-translate-y-1" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase opacity-0 group-hover:opacity-100 transition-opacity">Dashboard</span>
+</a>
+<a class="flex items-center gap-4 text-[#2e2f2e] hover:bg-[#dad4c8]/30 rounded-full px-4 py-3 m-2 transition-transform hover:rotate-[-2deg] hover:-translate-y-1" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase opacity-0 group-hover:opacity-100 transition-opacity">Users</span>
+</a>
+<a class="flex items-center gap-4 bg-[#38671a] text-[#faf9f7] rounded-full px-4 py-3 m-2 transition-transform hover:rotate-[-2deg] hover:-translate-y-1" href="#">
+<span class="material-symbols-outlined">fitness_center</span>
+<span class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase opacity-0 group-hover:opacity-100 transition-opacity">Exercises</span>
+</a>
+<a class="flex items-center gap-4 text-[#2e2f2e] hover:bg-[#dad4c8]/30 rounded-full px-4 py-3 m-2 transition-transform hover:rotate-[-2deg] hover:-translate-y-1" href="#">
+<span class="material-symbols-outlined">restaurant</span>
+<span class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase opacity-0 group-hover:opacity-100 transition-opacity">Foods</span>
+</a>
+<a class="flex items-center gap-4 text-[#2e2f2e] hover:bg-[#dad4c8]/30 rounded-full px-4 py-3 m-2 transition-transform hover:rotate-[-2deg] hover:-translate-y-1" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase opacity-0 group-hover:opacity-100 transition-opacity">Workout Templates</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Shell -->
+<main class="ml-20 min-h-screen">
+<!-- TopAppBar Component -->
+<header class="w-full h-16 sticky top-0 z-40 flex justify-between items-center px-8 bg-[#faf9f7]/80 backdrop-blur-md border-b-2 border-[#dad4c8]">
+<div class="flex items-center gap-6">
+<div class="relative w-72">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+<input class="w-full bg-surface-container-low border-2 border-secondary-fixed-dim rounded-full py-1.5 pl-10 pr-4 font-label text-xs uppercase tracking-widest focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="SEARCH EXERCISES..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-8 w-[2px] bg-secondary-fixed-dim mx-2"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="font-label text-[10px] uppercase text-outline">ADMIN TERMINAL</p>
+<p class="font-bold text-xs">J. ANDERSON</p>
+</div>
+<img class="w-10 h-10 rounded-full border-2 border-primary object-cover" data-alt="close-up portrait of professional male fitness instructor with clean athletic look and soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAoe4SJK325qrVhMDIrFcGRveU9R2yaNpODTCXFX3h7-gVdEhKt9a-ly7VwP3SuYtxRsFsX1W9NMQ148R69uANLQZE3mWYoP4H94Yjlyovd2BdZLFHOeeAjJmVAJshayTOxn1hd8MiwwgJ5O0_b1MySQbPZFjBQ4vqr9Kh7bLwDEPR8g8tyAasqCNg7tEIjJM_EHQ2iDNvYF4FbIS1SOLmbFeqk6LhOMsXbfFPsm1q6lqfNv-ajMTK_KQ55dhe5TSNwUGLshf5Qs0Lb"/>
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<div class="p-12 max-w-7xl mx-auto">
+<!-- Header Section -->
+<section class="mb-12 flex flex-col md:flex-row justify-between items-end gap-6">
+<div>
+<span class="font-label text-xs uppercase tracking-[2px] text-primary mb-2 block">CURATED DIRECTORY</span>
+<h2 class="text-6xl font-black text-on-surface aggressive-crop leading-none">Exercise Library</h2>
+</div>
+<button class="bg-[#38671a] text-[#faf9f7] rounded-full px-8 py-4 font-['Plus_Jakarta_Sans'] font-bold text-sm uppercase flex items-center gap-3 transition-all duration-200 clay-card bounce-hover active:scale-95">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+          Add Exercise
+        </button>
+</section>
+<!-- Filters & Stats Bento -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+<div class="md:col-span-2 bg-surface-container-low rounded-xl p-6 border-2 border-dashed border-secondary-fixed-dim">
+<p class="font-label text-[10px] uppercase text-outline mb-4">Quick Filters</p>
+<div class="flex flex-wrap gap-3">
+<select class="bg-surface-bright border-2 border-secondary-fixed-dim rounded-full px-4 py-2 font-label text-[11px] uppercase tracking-wider focus:border-primary outline-none cursor-pointer">
+<option>Muscle Group: All</option>
+<option>Chest</option>
+<option>Back</option>
+<option>Legs</option>
+</select>
+<select class="bg-surface-bright border-2 border-secondary-fixed-dim rounded-full px-4 py-2 font-label text-[11px] uppercase tracking-wider focus:border-primary outline-none cursor-pointer">
+<option>Difficulty: All</option>
+<option>Beginner</option>
+<option>Intermediate</option>
+<option>Expert</option>
+</select>
+<button class="bg-surface-bright border-2 border-secondary-fixed-dim rounded-full px-4 py-2 font-label text-[11px] uppercase tracking-wider hover:bg-secondary-fixed-dim transition-colors">
+              Reset
+            </button>
+</div>
+</div>
+<div class="bg-primary-container rounded-xl p-6 flex flex-col justify-between">
+<p class="font-label text-[10px] uppercase text-on-primary-container">Total Exercises</p>
+<p class="text-4xl font-black text-on-primary-container leading-none">124</p>
+</div>
+<div class="bg-tertiary-container rounded-xl p-6 flex flex-col justify-between">
+<p class="font-label text-[10px] uppercase text-on-tertiary-container">Active Equipment</p>
+<p class="text-4xl font-black text-on-tertiary-container leading-none">42</p>
+</div>
+</section>
+<!-- Exercise List Table (Artisanal Design) -->
+<section class="bg-surface rounded-xl border-2 border-secondary-fixed-dim overflow-hidden clay-card">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low">
+<tr class="font-label text-[10px] uppercase tracking-[1.5px] text-outline border-b-2 border-secondary-fixed-dim">
+<th class="px-6 py-5 font-bold">Preview</th>
+<th class="px-6 py-5 font-bold">Exercise Name</th>
+<th class="px-6 py-5 font-bold">Muscle Group</th>
+<th class="px-6 py-5 font-bold">Equipment</th>
+<th class="px-6 py-5 font-bold text-center">Difficulty</th>
+<th class="px-6 py-5 font-bold">Added On</th>
+<th class="px-6 py-5 font-bold text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y-2 divide-secondary-fixed-dim">
+<!-- Row 1 -->
+<tr class="group hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4">
+<div class="w-16 h-16 rounded-[12px] overflow-hidden border-2 border-secondary-fixed-dim">
+<img class="w-full h-full object-cover" data-alt="overhead shot of a man performing dumbbell chest press on a weight bench in a minimalist gym setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6maS328WcPYqGHm1fNnQXIs0pLopOBO3gETQ1N6HAu_1_mOzG8dhbQVsCV8DZi3e_iqEhfJM7iJWUCPBP94Lbqh6VEcw1CizZTlrf-aWC6_9qXu5E1taIi5hBGQgmSussMXNyAWC7pg9xYd_k4UXjOuuRtmMdgBdZ-m2L2-dnQUbxMGL_f9yg5RUtM73PHQDqV70rzgC78xOkE_cwIFSbEyrcEXNsQar-8e7B0bf9fgQLSkLr4-XPhssS9pqQlbxSYR2LYLGiyIXo"/>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="font-bold text-lg text-on-surface leading-tight">Dumbbell Bench Press</p>
+<p class="font-label text-[10px] text-outline uppercase">Compound Movement</p>
+</td>
+<td class="px-6 py-4">
+<span class="inline-block bg-primary-container text-on-primary-container px-3 py-1 rounded-full font-label text-[10px] uppercase font-bold">Chest</span>
+</td>
+<td class="px-6 py-4">
+<span class="font-label text-xs uppercase text-secondary">Dumbbells, Bench</span>
+</td>
+<td class="px-6 py-4 text-center">
+<div class="flex justify-center gap-1">
+<div class="w-2 h-4 rounded-full bg-primary"></div>
+<div class="w-2 h-4 rounded-full bg-primary"></div>
+<div class="w-2 h-4 rounded-full bg-secondary-fixed-dim"></div>
+</div>
+</td>
+<td class="px-6 py-4 font-label text-[10px] uppercase text-outline">OCT 12, 2023</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-2">
+<button class="w-10 h-10 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:border-primary hover:text-primary transition-all active:scale-90">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+<button class="w-10 h-10 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:border-error hover:text-error transition-all active:scale-90">
+<span class="material-symbols-outlined text-sm">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="group hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4">
+<div class="w-16 h-16 rounded-[12px] overflow-hidden border-2 border-secondary-fixed-dim">
+<img class="w-full h-full object-cover" data-alt="close-up of kettlebells on a rubber gym floor with atmospheric lighting and slight grain texture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZS_A9KNsGrXIU1gSYSqdBJWiXGoLq5WOAGwYAAqEIOW7HaVmS_aqpw2mmoGpPMapjzlIVmGgSS2IObr8rXKyFNU0cY5dATbZBCDu9-xfJlJ8xSWmvqtjcnK2MyLh36BwZF_AI_EsU_SJP9WHwtmNwhyJMDKPreJyQit2UN9Q_32prC8gvRSkr1gLfu1vDrMMx9MxVxMsa1xAKdp4Ve6Xkbv95-IYNBUvx4SA6vRcWbqxImV5p_OJ6XTHeHWV0FrBTewWo7txlcW7b"/>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="font-bold text-lg text-on-surface leading-tight">Goblet Squat</p>
+<p class="font-label text-[10px] text-outline uppercase">Functional Power</p>
+</td>
+<td class="px-6 py-4">
+<span class="inline-block bg-tertiary-container text-on-tertiary-container px-3 py-1 rounded-full font-label text-[10px] uppercase font-bold">Legs</span>
+</td>
+<td class="px-6 py-4">
+<span class="font-label text-xs uppercase text-secondary">Kettlebell</span>
+</td>
+<td class="px-6 py-4 text-center">
+<div class="flex justify-center gap-1">
+<div class="w-2 h-4 rounded-full bg-primary"></div>
+<div class="w-2 h-4 rounded-full bg-secondary-fixed-dim"></div>
+<div class="w-2 h-4 rounded-full bg-secondary-fixed-dim"></div>
+</div>
+</td>
+<td class="px-6 py-4 font-label text-[10px] uppercase text-outline">NOV 04, 2023</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-2">
+<button class="w-10 h-10 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:border-primary hover:text-primary transition-all active:scale-90">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+<button class="w-10 h-10 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:border-error hover:text-error transition-all active:scale-90">
+<span class="material-symbols-outlined text-sm">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="group hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4">
+<div class="w-16 h-16 rounded-[12px] overflow-hidden border-2 border-secondary-fixed-dim">
+<img class="w-full h-full object-cover" data-alt="professional athlete performing a barbell deadlift in a moody industrial warehouse gym with dust motes in sunbeams" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsaWVv1c-4B3C27vCwJHowRbcMi6sUTHWb3QykidRCRnblLe00X19oaIpC57M5FeZT5VQEmgouKa_oYO7rngZswpfXH0nVD8weGKMpSamel94pem0oWlYbz0W4N55ZvC3nfjr1pDZCmiwLfG3ZJ9hM3KTjuA3X6GVKT0qqxuC659ytFM_Ls6ugYPz3EirNn1Mzsf-wab1GFFXDWkjYst-JekP_9ymNalaKO3WLi9UaVmarAVW_FypUJHyugiP7-PxT57Tci6EG9ei0"/>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="font-bold text-lg text-on-surface leading-tight">Deadlift (Standard)</p>
+<p class="font-label text-[10px] text-outline uppercase">Strength Pillar</p>
+</td>
+<td class="px-6 py-4">
+<span class="inline-block bg-primary-container text-on-primary-container px-3 py-1 rounded-full font-label text-[10px] uppercase font-bold">Back</span>
+</td>
+<td class="px-6 py-4">
+<span class="font-label text-xs uppercase text-secondary">Barbell, Plates</span>
+</td>
+<td class="px-6 py-4 text-center">
+<div class="flex justify-center gap-1">
+<div class="w-2 h-4 rounded-full bg-primary"></div>
+<div class="w-2 h-4 rounded-full bg-primary"></div>
+<div class="w-2 h-4 rounded-full bg-primary"></div>
+</div>
+</td>
+<td class="px-6 py-4 font-label text-[10px] uppercase text-outline">DEC 01, 2023</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-2">
+<button class="w-10 h-10 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:border-primary hover:text-primary transition-all active:scale-90">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+<button class="w-10 h-10 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:border-error hover:text-error transition-all active:scale-90">
+<span class="material-symbols-outlined text-sm">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<!-- Pagination / Footer Metadata -->
+<footer class="mt-8 flex justify-between items-center px-4">
+<p class="font-label text-[10px] uppercase text-outline tracking-widest">Showing 1-10 of 124 entries</p>
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:bg-secondary-fixed-dim transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-xs">1</button>
+<button class="w-10 h-10 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:bg-secondary-fixed-dim transition-colors font-bold text-xs">2</button>
+<button class="w-10 h-10 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:bg-secondary-fixed-dim transition-colors font-bold text-xs">3</button>
+<button class="w-10 h-10 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:bg-secondary-fixed-dim transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</footer>
+</div>
+</main>
+<!-- Activity Sticker (Decorative Floating Element) -->
+<div class="fixed bottom-12 right-12 rotate-[12deg] z-10 pointer-events-none hidden lg:block">
+<div class="bg-primary text-on-primary p-4 rounded-full shadow-xl flex items-center gap-3 border-2 border-[#dad4c8]">
+<span class="material-symbols-outlined">verified</span>
+<span class="font-label text-[10px] uppercase font-bold tracking-widest">Library Verified</span>
+</div>
+</div>
+</body></html>

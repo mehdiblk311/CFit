@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#b4a5ff",
+                    "on-background": "#2e2f2e",
+                    "inverse-primary": "#c5fe9e",
+                    "on-primary-container": "#336215",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary": "#d6ffb7",
+                    "surface-dim": "#d4d5d2",
+                    "on-surface": "#2e2f2e",
+                    "background": "#f7f6f4",
+                    "secondary-dim": "#534f46",
+                    "surface-container-low": "#f1f1ef",
+                    "on-secondary-container": "#555148",
+                    "on-primary-fixed": "#214f01",
+                    "secondary-fixed": "#e8e2d6",
+                    "primary-fixed": "#c3fb9c",
+                    "error-dim": "#b92902",
+                    "secondary-container": "#e8e2d6",
+                    "tertiary-container": "#b4a5ff",
+                    "inverse-on-surface": "#9d9d9b",
+                    "outline": "#767775",
+                    "primary-fixed-dim": "#b5ec8f",
+                    "on-tertiary": "#f6f0ff",
+                    "on-secondary": "#f9f2e5",
+                    "primary-dim": "#2c5a0d",
+                    "on-tertiary-container": "#31009b",
+                    "on-secondary-fixed": "#423f36",
+                    "surface-container": "#e8e8e6",
+                    "outline-variant": "#adadab",
+                    "secondary-fixed-dim": "#dad4c8",
+                    "inverse-surface": "#0d0e0e",
+                    "primary": "#38671a",
+                    "tertiary-fixed-dim": "#a694ff",
+                    "surface-tint": "#38671a",
+                    "primary-container": "#c3fb9c",
+                    "tertiary": "#5d3fd3",
+                    "error-container": "#f95630",
+                    "on-secondary-fixed-variant": "#5f5b52",
+                    "error": "#b02500",
+                    "on-error": "#ffefec",
+                    "on-primary-fixed-variant": "#3d6c1f",
+                    "surface-container-high": "#e2e3e0",
+                    "on-error-container": "#520c00",
+                    "on-surface-variant": "#5b5c5a",
+                    "surface-variant": "#dddddb",
+                    "secondary": "#5f5b52",
+                    "tertiary-dim": "#5130c6",
+                    "on-tertiary-fixed-variant": "#3a03b1",
+                    "on-tertiary-fixed": "#180058",
+                    "surface": "#f7f6f4",
+                    "surface-container-highest": "#dddddb",
+                    "surface-bright": "#f7f6f4"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Space Mono"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f7f6f4; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .roobert-heading { font-family: 'Plus Jakarta Sans'; letter-spacing: -3.2px; font-weight: 800; }
+        .space-mono-label { font-family: 'Space Mono'; text-transform: uppercase; letter-spacing: 1px; }
+        .signature-shadow { box-shadow: -7px 7px 0px 0px rgba(46,47,46,1); }
+        .signature-shadow-sm { box-shadow: -4px 4px 0px 0px rgba(46,47,46,1); }
+        .inner-glow { box-shadow: inset 2px 2px 0px 0px rgba(255,255,255,0.5); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface">
+<!-- Top Navigation -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-[#faf9f7] dark:bg-stone-900 border-b-2 border-dashed border-[#dad4c8] shadow-[-7px_7px_0px_0px_rgba(46,47,46,1)]">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-primary hover:rotate-[-2deg] transition-transform">arrow_back</button>
+<h1 class="text-2xl font-bold text-[#2e2f2e] dark:text-stone-100 roobert-heading uppercase">Workout History</h1>
+</div>
+<div class="w-10 h-10 rounded-full border-2 border-primary bg-primary-container overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="close-up portrait of a professional woman with a minimalist aesthetic and soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADzBHmxV-iL2-Hmo7U3Zhc0hXD0hi82dQ1VACRhJVSK4NLoX8l2T-98Lbjs1AWuG7ezCiMqsvOiTBjyQItjyVUFK_H8K7-yMTZ-Wt2W0IjNeo5MOt--NZ6KeiSyiZDCpknwELJsWZUxgKNaWBpfB8sLfR2rdzn4ESkS6qCf0Bti2gZkTsROAO03sXF1_0qpysZv33lyYgg7oCRm8AlLlBqlgJ459M5hVRd6XEIf_IYzAvMCku1dy7Mi7eZiqJ5y8CC1a-PEQgmRWgp"/>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-4xl mx-auto space-y-12">
+<!-- Calendar Section -->
+<section class="bg-surface-container-low border-2 border-secondary-fixed-dim rounded-xl p-6 inner-glow signature-shadow relative overflow-hidden">
+<div class="flex justify-between items-center mb-8">
+<div class="space-y-1">
+<span class="space-mono-label text-xs text-secondary">October 2023</span>
+<h2 class="text-4xl roobert-heading uppercase">The Routine</h2>
+</div>
+<div class="flex gap-2">
+<button class="p-2 bg-background rounded-full border-2 border-secondary-fixed-dim hover:-translate-y-1 transition-all"><span class="material-symbols-outlined">chevron_left</span></button>
+<button class="p-2 bg-background rounded-full border-2 border-secondary-fixed-dim hover:-translate-y-1 transition-all"><span class="material-symbols-outlined">chevron_right</span></button>
+</div>
+</div>
+<!-- Calendar Grid -->
+<div class="grid grid-cols-7 gap-2 text-center">
+<!-- Days of week -->
+<div class="space-mono-label text-[10px] pb-4">Mo</div>
+<div class="space-mono-label text-[10px] pb-4">Tu</div>
+<div class="space-mono-label text-[10px] pb-4">We</div>
+<div class="space-mono-label text-[10px] pb-4">Th</div>
+<div class="space-mono-label text-[10px] pb-4">Fr</div>
+<div class="space-mono-label text-[10px] pb-4">Sa</div>
+<div class="space-mono-label text-[10px] pb-4">Su</div>
+<!-- Calendar Days (Mockup) -->
+<div class="aspect-square flex flex-col items-center justify-center rounded-lg text-secondary/30">25</div>
+<div class="aspect-square flex flex-col items-center justify-center rounded-lg text-secondary/30">26</div>
+<div class="aspect-square flex flex-col items-center justify-center rounded-lg text-secondary/30">27</div>
+<div class="aspect-square flex flex-col items-center justify-center rounded-lg text-secondary/30">28</div>
+<div class="aspect-square flex flex-col items-center justify-center rounded-lg text-secondary/30">29</div>
+<div class="aspect-square flex flex-col items-center justify-center rounded-lg text-secondary/30">30</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg shadow-sm">1</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg relative">
+                    2 <div class="absolute bottom-1 flex gap-1"><div class="w-1.5 h-1.5 rounded-full bg-primary"></div></div>
+</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg">3</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg relative">
+                    4 <div class="absolute bottom-1 flex gap-1"><div class="w-1.5 h-1.5 rounded-full bg-tertiary"></div></div>
+</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg">5</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg relative">
+                    6 <div class="absolute bottom-1 flex gap-1"><div class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed"></div></div>
+</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg">7</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg">8</div>
+<!-- Active Selection -->
+<div class="aspect-square flex flex-col items-center justify-center bg-primary text-on-primary border-2 border-on-primary-fixed rounded-lg rotate-[-3deg] signature-shadow-sm scale-110 z-10">
+                    9 <div class="absolute bottom-1 flex gap-1"><div class="w-1.5 h-1.5 rounded-full bg-on-primary"></div></div>
+</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg">10</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg relative">
+                    11 <div class="absolute bottom-1 flex gap-1"><div class="w-1.5 h-1.5 rounded-full bg-primary"></div></div>
+</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg">12</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg relative">
+                    13 <div class="absolute bottom-1 flex gap-1"><div class="w-1.5 h-1.5 rounded-full bg-tertiary"></div></div>
+</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg">14</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg">15</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg">16</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg">17</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg">18</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg">19</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg">20</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg">21</div>
+<div class="aspect-square flex flex-col items-center justify-center bg-background border-2 border-secondary-fixed-dim rounded-lg">22</div>
+</div>
+<!-- Legend -->
+<div class="flex gap-4 mt-8 pt-6 border-t border-dashed border-secondary-fixed-dim justify-center">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<span class="space-mono-label text-[10px]">Strength</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-tertiary"></div>
+<span class="space-mono-label text-[10px]">Mobility</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-tertiary-fixed"></div>
+<span class="space-mono-label text-[10px]">Cardio</span>
+</div>
+</div>
+</section>
+<!-- Selected Session Details -->
+<section class="space-y-6">
+<div class="flex items-center justify-between">
+<h3 class="text-3xl roobert-heading uppercase">October 09 Details</h3>
+<span class="px-4 py-1 bg-tertiary-container text-on-tertiary-container rounded-full space-mono-label text-xs rotate-[2deg]">Strength Session</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Session Meta -->
+<div class="bg-surface-container-lowest border-2 border-secondary-fixed-dim rounded-lg p-6 signature-shadow relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 opacity-5 rotate-12 transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-9xl">fitness_center</span>
+</div>
+<h4 class="text-4xl roobert-heading mb-4 uppercase">Push Day</h4>
+<div class="flex gap-8">
+<div>
+<p class="space-mono-label text-[10px] text-secondary">Duration</p>
+<p class="text-2xl font-bold">72m</p>
+</div>
+<div>
+<p class="space-mono-label text-[10px] text-secondary">Volume</p>
+<p class="text-2xl font-bold">4.2k kg</p>
+</div>
+<div>
+<p class="space-mono-label text-[10px] text-secondary">Sets</p>
+<p class="text-2xl font-bold">18</p>
+</div>
+</div>
+</div>
+<!-- Exercise List -->
+<div class="bg-surface-container-lowest border-2 border-secondary-fixed-dim rounded-lg p-6 signature-shadow">
+<p class="space-mono-label text-xs text-secondary mb-4">Exercises Performed</p>
+<ul class="space-y-4">
+<li class="flex justify-between items-center pb-2 border-b border-dashed border-secondary-fixed-dim">
+<div>
+<p class="font-bold">Barbell Bench Press</p>
+<p class="space-mono-label text-[10px] text-secondary">4 Sets • 85kg Peak</p>
+</div>
+<span class="material-symbols-outlined text-primary">keyboard_arrow_down</span>
+</li>
+<li class="flex justify-between items-center pb-2 border-b border-dashed border-secondary-fixed-dim">
+<div>
+<p class="font-bold">Incline DB Press</p>
+<p class="space-mono-label text-[10px] text-secondary">3 Sets • 30kg Peak</p>
+</div>
+<span class="material-symbols-outlined text-primary">keyboard_arrow_down</span>
+</li>
+<li class="flex justify-between items-center">
+<div>
+<p class="font-bold">Overhead Press</p>
+<p class="space-mono-label text-[10px] text-secondary">3 Sets • 50kg Peak</p>
+</div>
+<span class="material-symbols-outlined text-primary">keyboard_arrow_down</span>
+</li>
+</ul>
+</div>
+</div>
+</section>
+<!-- Data Visualization -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Volume Trend -->
+<section class="md:col-span-2 bg-surface-container-low border-2 border-secondary-fixed-dim rounded-xl p-6 signature-shadow">
+<div class="flex justify-between items-center mb-6">
+<h4 class="space-mono-label text-sm font-bold">Volume Trend</h4>
+<div class="flex gap-2 bg-background p-1 rounded-full border border-secondary-fixed-dim">
+<button class="px-3 py-1 text-[10px] space-mono-label rounded-full">1W</button>
+<button class="px-3 py-1 text-[10px] space-mono-label rounded-full bg-primary text-on-primary">1M</button>
+<button class="px-3 py-1 text-[10px] space-mono-label rounded-full">3M</button>
+</div>
+</div>
+<!-- Mock Chart Area -->
+<div class="h-48 flex items-end gap-1 relative overflow-hidden bg-background/50 rounded-lg p-4">
+<div class="w-full h-full absolute inset-0 pointer-events-none opacity-10">
+<svg class="w-full h-full stroke-primary stroke-2 fill-none" viewbox="0 0 400 100">
+<path d="M0,80 Q50,40 100,70 T200,30 T300,50 T400,20"></path>
+</svg>
+</div>
+<!-- Hard-edged bar spikes for "artisanal" look -->
+<div class="flex-1 bg-primary/20 h-[40%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/20 h-[60%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/40 h-[45%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/30 h-[75%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary h-[85%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/50 h-[65%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/30 h-[50%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/40 h-[60%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/20 h-[40%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/40 h-[30%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary/60 h-[70%] rounded-t-sm"></div>
+<div class="flex-1 bg-primary h-[90%] rounded-t-sm border-x-2 border-background"></div>
+</div>
+<div class="flex justify-between mt-4">
+<span class="space-mono-label text-[10px] text-secondary">Sep 01</span>
+<span class="space-mono-label text-[10px] text-secondary">Oct 01</span>
+</div>
+</section>
+<!-- Muscle Distribution -->
+<section class="bg-surface-container-low border-2 border-secondary-fixed-dim rounded-xl p-6 signature-shadow">
+<h4 class="space-mono-label text-sm font-bold mb-6">Split Focus</h4>
+<div class="space-y-6">
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="space-mono-label text-[10px]">Chest</span>
+<span class="space-mono-label text-[10px] font-bold">42%</span>
+</div>
+<div class="w-full bg-background rounded-full h-3 border border-secondary-fixed-dim">
+<div class="bg-primary h-full rounded-full" style="width: 42%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="space-mono-label text-[10px]">Triceps</span>
+<span class="space-mono-label text-[10px] font-bold">28%</span>
+</div>
+<div class="w-full bg-background rounded-full h-3 border border-secondary-fixed-dim">
+<div class="bg-tertiary h-full rounded-full" style="width: 28%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="space-mono-label text-[10px]">Shoulders</span>
+<span class="space-mono-label text-[10px] font-bold">20%</span>
+</div>
+<div class="w-full bg-background rounded-full h-3 border border-secondary-fixed-dim">
+<div class="bg-tertiary-fixed h-full rounded-full" style="width: 20%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="space-mono-label text-[10px]">Legs</span>
+<span class="space-mono-label text-[10px] font-bold">10%</span>
+</div>
+<div class="w-full bg-background rounded-full h-3 border border-secondary-fixed-dim">
+<div class="bg-secondary h-full rounded-full" style="width: 10%"></div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-[#faf9f7] rounded-t-[3rem] border-t-2 border-[#dad4c8] shadow-[-7px_-7px_0px_0px_rgba(46,47,46,0.05)]">
+<a class="flex flex-col items-center justify-center text-[#2e2f2e] opacity-70 hover:rotate-[2deg] hover:-translate-y-2 transition-all" href="#">
+<span class="material-symbols-outlined">fitness_center</span>
+<span class="font-['Space_Mono'] uppercase tracking-wider text-[10px]">Programs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#2e2f2e] opacity-70 hover:rotate-[2deg] hover:-translate-y-2 transition-all" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="font-['Space_Mono'] uppercase tracking-wider text-[10px]">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#2e2f2e] opacity-70 hover:rotate-[2deg] hover:-translate-y-2 transition-all" href="#">
+<span class="material-symbols-outlined">play_circle</span>
+<span class="font-['Space_Mono'] uppercase tracking-wider text-[10px]">Workout</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#38671a] text-[#faf9f7] rounded-full px-6 py-2 rotate-[-3deg] shadow-[-4px_4px_0px_0px_rgba(0,0,0,1)] hover:rotate-[-5deg] transition-all" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-['Space_Mono'] uppercase tracking-wider text-[10px]">History</span>
+</a>
+</nav>
+</body></html>

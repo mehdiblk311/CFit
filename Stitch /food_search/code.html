@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UM6P_FIT - Food Search</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;family=Space+Grotesk:wght@300..700&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error": "#b02500",
+                        "on-surface-variant": "#5b5c5a",
+                        "surface-container-high": "#e2e3e0",
+                        "on-primary-fixed": "#214f01",
+                        "error-dim": "#b92902",
+                        "surface-dim": "#d4d5d2",
+                        "on-tertiary": "#f6f0ff",
+                        "secondary": "#5f5b52",
+                        "primary-fixed": "#c3fb9c",
+                        "surface-container-low": "#f1f1ef",
+                        "on-secondary-fixed-variant": "#5f5b52",
+                        "on-secondary-fixed": "#423f36",
+                        "secondary-container": "#e8e2d6",
+                        "tertiary-fixed-dim": "#a694ff",
+                        "outline": "#767775",
+                        "on-tertiary-fixed-variant": "#3a03b1",
+                        "tertiary": "#5d3fd3",
+                        "on-tertiary-fixed": "#180058",
+                        "on-background": "#2e2f2e",
+                        "primary-dim": "#2c5a0d",
+                        "surface-container": "#e8e8e6",
+                        "on-tertiary-container": "#31009b",
+                        "on-surface": "#2e2f2e",
+                        "on-error": "#ffefec",
+                        "tertiary-fixed": "#b4a5ff",
+                        "on-error-container": "#520c00",
+                        "on-primary-container": "#336215",
+                        "tertiary-dim": "#5130c6",
+                        "surface": "#f7f6f4",
+                        "primary": "#38671a",
+                        "error-container": "#f95630",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#dddddb",
+                        "on-primary": "#d6ffb7",
+                        "surface-variant": "#dddddb",
+                        "background": "#f7f6f4",
+                        "secondary-fixed-dim": "#dad4c8",
+                        "inverse-primary": "#c5fe9e",
+                        "inverse-on-surface": "#9d9d9b",
+                        "primary-container": "#c3fb9c",
+                        "secondary-fixed": "#e8e2d6",
+                        "tertiary-container": "#b4a5ff",
+                        "secondary-dim": "#534f46",
+                        "primary-fixed-dim": "#b5ec8f",
+                        "surface-bright": "#f7f6f4",
+                        "on-secondary": "#f9f2e5",
+                        "on-secondary-container": "#555148",
+                        "on-primary-fixed-variant": "#3d6c1f",
+                        "outline-variant": "#adadab",
+                        "inverse-surface": "#0d0e0e",
+                        "surface-tint": "#38671a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Space Grotesk"],
+                        "mono": ["Space Mono"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #faf9f7;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #2e2f2e;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .roobert-tight {
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+        }
+        .hard-shadow {
+            box-shadow: -7px 7px 0px 0px rgba(46, 47, 46, 1);
+        }
+        .hard-shadow-sm {
+            box-shadow: -4px 4px 0px 0px rgba(46, 47, 46, 1);
+        }
+        .custom-dashed {
+            background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='48' ry='48' stroke='%23DAD4C8FF' stroke-width='3' stroke-dasharray='8%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-32">
+<!-- Top Navigation Anchor -->
+<nav class="fixed top-0 w-full z-50 bg-[#faf9f7] dark:bg-stone-950 border-b-2 border-dashed border-[#dad4c8] dark:border-stone-800 shadow-[-7px_7px_0px_0px_rgba(46,47,46,1)] px-6 py-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<button class="w-12 h-12 flex items-center justify-center rounded-full bg-secondary-container hover:rotate-[-8deg] hover:-translate-y-1 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="font-headline font-bold text-2xl tracking-tight text-primary">Add to Breakfast</h1>
+</div>
+<div class="w-12 h-12 rounded-full overflow-hidden border-2 border-primary">
+<img alt="User" data-alt="Close up portrait of a smiling young man in a clean studio environment with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnmieAh0OCLuPV-mzU9vVcMxWOqZgyZYwFkgJAUMjOHFaW0zFgvJ2fweZjBhP5oEejw4jTdsPFhRPbgIbztQCh3r4SglQbQ755FyOv4MSh1BYRYkVe_gsvRuSlrcJnb7zYO1C1qxDOAIGNmSp_E_BA9-P-QRQlDVHlehAccHy7wb4JEJmux0AcQHX1xojUHpqEMafmlutX-r3zK36x6dkaWq5uMOJRQrtYpOjbrwDX7xVjIWDp9coJvSBdVsRysMRbBM9uMnKDFP28"/>
+</div>
+</nav>
+<main class="mt-28 px-6 space-y-8">
+<!-- Search & Filter Section -->
+<section class="space-y-6">
+<div class="relative">
+<div class="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-primary">search</span>
+</div>
+<input autofocus="" class="w-full bg-white border-2 border-primary rounded-full py-5 pl-16 pr-6 focus:ring-0 focus:outline-none text-lg font-medium placeholder-on-surface-variant hard-shadow-sm" placeholder="Search foods..." type="text"/>
+</div>
+<!-- Chips - Horizontal Scroll -->
+<div class="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
+<button class="whitespace-nowrap px-8 py-3 rounded-full bg-primary text-on-primary font-mono text-xs uppercase tracking-widest hard-shadow-sm hover:rotate-[-4deg] transition-transform">All</button>
+<button class="whitespace-nowrap px-8 py-3 rounded-full bg-secondary-container text-on-secondary-container font-mono text-xs uppercase tracking-widest border-2 border-secondary-fixed-dim hover:bg-secondary-fixed-dim transition-colors">Recent</button>
+<button class="whitespace-nowrap px-8 py-3 rounded-full bg-secondary-container text-on-secondary-container font-mono text-xs uppercase tracking-widest border-2 border-secondary-fixed-dim hover:bg-secondary-fixed-dim transition-colors">Favorites</button>
+<button class="whitespace-nowrap px-8 py-3 rounded-full bg-secondary-container text-on-secondary-container font-mono text-xs uppercase tracking-widest border-2 border-secondary-fixed-dim hover:bg-secondary-fixed-dim transition-colors">My Recipes</button>
+<button class="whitespace-nowrap px-8 py-3 rounded-full bg-secondary-container text-on-secondary-container font-mono text-xs uppercase tracking-widest border-2 border-secondary-fixed-dim hover:bg-secondary-fixed-dim transition-colors">Custom</button>
+</div>
+</section>
+<!-- Bento Results Grid -->
+<section class="space-y-4">
+<div class="flex items-center justify-between mb-4 px-2">
+<h2 class="font-mono text-xs uppercase tracking-widest text-on-surface-variant font-bold">Suggested Results</h2>
+<span class="material-symbols-outlined text-on-surface-variant">sort</span>
+</div>
+<!-- Food Item Row 1 -->
+<div class="group relative bg-white rounded-lg p-6 flex items-center justify-between border-2 border-secondary-fixed-dim hover:border-primary hover:rotate-[-1deg] transition-all cursor-pointer">
+<div class="flex items-center gap-6">
+<div class="w-16 h-16 rounded-full overflow-hidden bg-surface-container-low flex items-center justify-center">
+<img alt="Food" class="w-full h-full object-cover" data-alt="Top down close up of organic greek yogurt in a bowl with fresh berries on a clean white surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNtENXdi4IrkWO-HHGjPlVEl86WuOW8s-L97nLnz_Om6NwRNasPVudqF1sBAh29bUwyjgV_Ia5EfpKKEWTdzYRX4CEv1oesTSqn-4xQpbnsRsQll5xzGIYUeiZL_QloV_1Iv_N6RdQbTaxE4ve7oyPpyNbJFYR6Ksrnv8gkvqvRn-lEm9cRW3eQMCGliNSGsH5Jb4mGdgGx-r1i52GrH2F45U7SesFQCl0sWHXpDL5xDek2pi9adNZz_dPE3i-SLgf-UW71AEdD06e"/>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<h3 class="font-headline font-bold text-xl text-on-background">Greek Yogurt</h3>
+</div>
+<div class="flex gap-4 font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> 59 kcal</span>
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span> 10g protein</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-2xl grayscale group-hover:grayscale-0 transition-all">🥛</span>
+<button class="w-10 h-10 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<!-- Food Item Row 2 (Moroccan Item) -->
+<div class="group relative bg-white rounded-lg p-6 flex items-center justify-between border-2 border-secondary-fixed-dim hover:border-primary hover:rotate-[1deg] transition-all cursor-pointer">
+<div class="flex items-center gap-6">
+<div class="w-16 h-16 rounded-full overflow-hidden bg-surface-container-low flex items-center justify-center">
+<img alt="Food" class="w-full h-full object-cover" data-alt="Traditional Moroccan harira soup in a clay bowl with fresh herbs and spices on an artisanal textile background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7rVmVGN58Hzw-UPCAh8cu-5QfA3V28exCMrD4wP2_z9KM4OwPIbrf2irBrih31CW6Ztzty8lY2NPYXNbqxUMrvApmcqPZ9CAWXzV03MlC3xZR7fmlY_LMkXe7l7CLQfbuG6Aj9VgNFQKi6yXd2AkWWMniwVBNA7Ju1kJ4fEu7Nu8sovVYqdkG1i1eaVVvh1oxunJ74zUQqeFOJMF9avbAMcDxhO8SlzW8UW4TGDsc8Mp-ULCIKg1kLsSsotCP5QkQ7Y2RGWRMMupT"/>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<h3 class="font-headline font-bold text-xl text-on-background">Amlou</h3>
+<span class="text-sm">🇲🇦</span>
+</div>
+<div class="flex gap-4 font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> 598 kcal</span>
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span> 15g protein</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-2xl grayscale group-hover:grayscale-0 transition-all">🍯</span>
+<button class="w-10 h-10 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<!-- Food Item Row 3 -->
+<div class="group relative bg-white rounded-lg p-6 flex items-center justify-between border-2 border-secondary-fixed-dim hover:border-primary hover:rotate-[-0.5deg] transition-all cursor-pointer">
+<div class="flex items-center gap-6">
+<div class="w-16 h-16 rounded-full overflow-hidden bg-surface-container-low flex items-center justify-center">
+<img alt="Food" class="w-full h-full object-cover" data-alt="Bowl of warm creamy oatmeal topped with sliced bananas and a drizzle of honey in soft morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyIqaHft3CZmwnSzkuGScbrlg6Rli0N8NjZ-_rDjfagXZN8hNJuMrnu93zG7c-0iEhSD32kdJZH-DqCFYk6q-zk4tFS7pmOBoNTnCKtUK2361BUVrJjpI-KVig7IpunldrdCkyTfauf3l_B36prloiW_Oo0A9G9hWabPdJZKT0XBu3slDSsl6FY09S_hwuJcdWiLCdnrJhJjXBwwRFuvC-jxTXKUuL0zUll5G6BWm65UhZ9vCs6NuNn_sAN960uAF4VGaGyxvtn_wc"/>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<h3 class="font-headline font-bold text-xl text-on-background">Oatmeal</h3>
+</div>
+<div class="flex gap-4 font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> 68 kcal</span>
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span> 2.4g protein</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-2xl grayscale group-hover:grayscale-0 transition-all">🥣</span>
+<button class="w-10 h-10 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<!-- Food Item Row 4 (Moroccan Item) -->
+<div class="group relative bg-white rounded-lg p-6 flex items-center justify-between border-2 border-secondary-fixed-dim hover:border-primary hover:rotate-[1.5deg] transition-all cursor-pointer">
+<div class="flex items-center gap-6">
+<div class="w-16 h-16 rounded-full overflow-hidden bg-surface-container-low flex items-center justify-center">
+<img alt="Food" class="w-full h-full object-cover" data-alt="Freshly baked Moroccan semolina bread Harcha on a wooden board with olive oil and zaatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoN9wmfeqnKmAImvnVvdPFejcKI4EYNZ_NQfEXfQ0zvccrRCcCnL1uDJE-uEEW6Jt58AAiuPxbVkO8CSiMyJsOErtfJYikMDPkBA509H2FnhvE0SdV97TcHzKFzzaPfa4fXgKwYFvBptA7dcucA8KKDLOjG0R9kx5jH9sMbfvRnwG4uoEYwJ2KrXSKi_cbJmXmL_PR2LXBniYqbHyuN4m0Ijx0FoJ4ydajkR5CMyLK5ZvkDnFD45RX8uRzvOn5r8ma5K1oBN9-wHmM"/>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<h3 class="font-headline font-bold text-xl text-on-background">Harcha</h3>
+<span class="text-sm">🇲🇦</span>
+</div>
+<div class="flex gap-4 font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> 420 kcal</span>
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span> 8g protein</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-2xl grayscale group-hover:grayscale-0 transition-all">🍞</span>
+<button class="w-10 h-10 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Empty State/Custom Callout -->
+<section class="custom-dashed p-10 flex flex-col items-center justify-center text-center space-y-4 rounded-xl">
+<span class="material-symbols-outlined text-secondary text-4xl">inventory_2</span>
+<div>
+<p class="font-headline font-bold text-lg">Can't find your food?</p>
+<p class="text-sm text-on-surface-variant font-mono uppercase tracking-tight">Create a unique entry for your macro tracking.</p>
+</div>
+<button class="px-10 py-4 bg-tertiary text-on-tertiary rounded-full font-bold hard-shadow-sm hover:rotate-[-5deg] hover:-translate-y-1 transition-all active:scale-95">
+                Create Custom Food
+            </button>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 bg-[#faf9f7]/90 dark:bg-stone-900/90 backdrop-blur-md z-50 rounded-t-[3rem] border-t-2 border-[#dad4c8] shadow-[0_-7px_0px_0px_rgba(46,47,46,0.05)]">
+<a class="flex flex-col items-center justify-center text-[#2e2f2e] px-4 py-2 hover:bg-[#dad4c8] hover:rounded-full transition-all" href="#">
+<span class="material-symbols-outlined mb-1">restaurant</span>
+<span class="font-mono uppercase text-[10px] tracking-widest">Journal</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#38671a] text-[#faf9f7] rounded-full px-6 py-2 shadow-[-4px_4px_0px_0px_rgba(46,47,46,1)]" href="#">
+<span class="material-symbols-outlined mb-1">menu_book</span>
+<span class="font-mono uppercase text-[10px] tracking-widest">Recipes</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#2e2f2e] px-4 py-2 hover:bg-[#dad4c8] hover:rounded-full transition-all" href="#">
+<span class="material-symbols-outlined mb-1">query_stats</span>
+<span class="font-mono uppercase text-[10px] tracking-widest">Trends</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#2e2f2e] px-4 py-2 hover:bg-[#dad4c8] hover:rounded-full transition-all" href="#">
+<span class="material-symbols-outlined mb-1">settings</span>
+<span class="font-mono uppercase text-[10px] tracking-widest">Settings</span>
+</a>
+</nav>
+<!-- Activity Sticker Decor -->
+<div class="fixed top-1/2 -right-4 rotate-[12deg] bg-primary-fixed text-on-primary-fixed px-4 py-2 rounded-full font-mono text-[10px] font-bold tracking-widest shadow-[-2px_2px_0px_black] z-10 hidden lg:block">
+        MOROCCAN FLAVORS 🇲🇦
+    </div>
+</body></html>

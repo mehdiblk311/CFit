@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UM6P_FIT | Food Database Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Mono:wght@400;700&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed": "#e8e2d6",
+                    "surface-dim": "#d4d5d2",
+                    "surface-variant": "#dddddb",
+                    "tertiary": "#5d3fd3",
+                    "tertiary-dim": "#5130c6",
+                    "on-secondary-container": "#555148",
+                    "inverse-on-surface": "#9d9d9b",
+                    "secondary-container": "#e8e2d6",
+                    "inverse-primary": "#c5fe9e",
+                    "outline": "#767775",
+                    "on-tertiary-container": "#31009b",
+                    "error-container": "#f95630",
+                    "surface-container-low": "#f1f1ef",
+                    "on-secondary-fixed-variant": "#5f5b52",
+                    "primary-fixed-dim": "#b5ec8f",
+                    "primary-container": "#c3fb9c",
+                    "surface-container-highest": "#dddddb",
+                    "primary": "#38671a",
+                    "surface-bright": "#f7f6f4",
+                    "on-tertiary": "#f6f0ff",
+                    "on-primary": "#d6ffb7",
+                    "error-dim": "#b92902",
+                    "surface-container-lowest": "#ffffff",
+                    "surface": "#f7f6f4",
+                    "on-tertiary-fixed-variant": "#3a03b1",
+                    "on-primary-container": "#336215",
+                    "background": "#f7f6f4",
+                    "on-secondary": "#f9f2e5",
+                    "on-primary-fixed-variant": "#3d6c1f",
+                    "on-error": "#ffefec",
+                    "outline-variant": "#adadab",
+                    "on-primary-fixed": "#214f01",
+                    "secondary": "#5f5b52",
+                    "on-error-container": "#520c00",
+                    "tertiary-fixed": "#b4a5ff",
+                    "on-secondary-fixed": "#423f36",
+                    "tertiary-fixed-dim": "#a694ff",
+                    "on-surface": "#2e2f2e",
+                    "surface-tint": "#38671a",
+                    "on-tertiary-fixed": "#180058",
+                    "surface-container-high": "#e2e3e0",
+                    "secondary-dim": "#534f46",
+                    "on-background": "#2e2f2e",
+                    "inverse-surface": "#0d0e0e",
+                    "surface-container": "#e8e8e6",
+                    "primary-dim": "#2c5a0d",
+                    "on-surface-variant": "#5b5c5a",
+                    "tertiary-container": "#b4a5ff",
+                    "error": "#b02500",
+                    "primary-fixed": "#c3fb9c",
+                    "secondary-fixed-dim": "#dad4c8"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Space Mono"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .signature-shadow {
+            box-shadow: -7px 7px 0px #2e2f2e;
+        }
+        .bounce-hover:hover {
+            transform: rotateZ(-4deg) translateY(-4px);
+            box-shadow: -7px 7px 0px #2e2f2e;
+        }
+        .dashed-border {
+            border-image: linear-gradient(to bottom, #dad4c8 50%, rgba(0,0,0,0) 0%) 1 100%;
+            border-bottom: 2px dashed #dad4c8;
+        }
+        .clay-card {
+            background: #ffffff;
+            border: 2px solid #dad4c8;
+            box-shadow: inset 4px 4px 0px rgba(255,255,255,0.8), -7px 7px 0px #2e2f2e;
+        }
+        .asymmetric-pill {
+            border-radius: 9999px 40px 9999px 40px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- SideNavBar Shell -->
+<nav class="fixed left-0 top-0 h-full z-50 flex flex-col bg-[#faf9f7] h-screen w-20 hover:w-64 transition-all duration-300 border-r-2 border-[#dad4c8] dark:border-stone-800 group overflow-hidden">
+<div class="p-6 mb-8">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-primary flex items-center justify-center rounded-xl shadow-[-4px_4px_0px_#2e2f2e]">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+</div>
+<div class="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+<h1 class="text-2xl font-black text-[#2e2f2e] uppercase tracking-tighter">UM6P_FIT</h1>
+<p class="font-['Plus_Jakarta_Sans'] tracking-tight text-xs font-bold uppercase text-primary">Admin Terminal</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-2 flex-grow">
+<!-- Dashboard -->
+<a class="flex items-center gap-4 text-[#2e2f2e] hover:bg-[#dad4c8]/30 rounded-full px-4 py-3 m-2 transition-transform hover:rotate-[-2deg] hover:-translate-y-1" href="#">
+<span class="material-symbols-outlined shrink-0">dashboard</span>
+<span class="opacity-0 group-hover:opacity-100 font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase whitespace-nowrap">Dashboard</span>
+</a>
+<!-- Users -->
+<a class="flex items-center gap-4 text-[#2e2f2e] hover:bg-[#dad4c8]/30 rounded-full px-4 py-3 m-2 transition-transform hover:rotate-[-2deg] hover:-translate-y-1" href="#">
+<span class="material-symbols-outlined shrink-0">group</span>
+<span class="opacity-0 group-hover:opacity-100 font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase whitespace-nowrap">Users</span>
+</a>
+<!-- Exercises -->
+<a class="flex items-center gap-4 text-[#2e2f2e] hover:bg-[#dad4c8]/30 rounded-full px-4 py-3 m-2 transition-transform hover:rotate-[-2deg] hover:-translate-y-1" href="#">
+<span class="material-symbols-outlined shrink-0">fitness_center</span>
+<span class="opacity-0 group-hover:opacity-100 font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase whitespace-nowrap">Exercises</span>
+</a>
+<!-- Foods (ACTIVE) -->
+<a class="flex items-center gap-4 bg-[#38671a] text-[#faf9f7] rounded-full px-4 py-3 m-2 shadow-[-4px_4px_0px_#2e2f2e] transition-transform hover:rotate-[-2deg] hover:-translate-y-1" href="#">
+<span class="material-symbols-outlined shrink-0" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+<span class="opacity-0 group-hover:opacity-100 font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase whitespace-nowrap">Foods</span>
+</a>
+<!-- Workout Templates -->
+<a class="flex items-center gap-4 text-[#2e2f2e] hover:bg-[#dad4c8]/30 rounded-full px-4 py-3 m-2 transition-transform hover:rotate-[-2deg] hover:-translate-y-1" href="#">
+<span class="material-symbols-outlined shrink-0">description</span>
+<span class="opacity-0 group-hover:opacity-100 font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase whitespace-nowrap">Workout Templates</span>
+</a>
+</div>
+<div class="p-4 border-t-2 border-dashed border-[#dad4c8]">
+<a class="flex items-center gap-4 text-[#2e2f2e] hover:bg-[#dad4c8]/30 rounded-full px-4 py-3 transition-transform" href="#">
+<span class="material-symbols-outlined shrink-0">logout</span>
+<span class="opacity-0 group-hover:opacity-100 font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase whitespace-nowrap">Sign Out</span>
+</a>
+</div>
+</nav>
+<div class="ml-20 min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-8 ml-0 w-full h-16 sticky top-0 z-40 bg-[#faf9f7]/80 backdrop-blur-md border-b-2 border-[#dad4c8]">
+<div class="flex items-center gap-6">
+<span class="text-xl font-black text-[#2e2f2e] font-headline uppercase tracking-tighter">Food Database</span>
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline text-sm">search</span>
+</div>
+<input class="bg-surface-container-low border-2 border-secondary-fixed-dim rounded-full pl-10 pr-4 py-1.5 font-label text-[10px] w-64 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="SEARCH DATABASE..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface">notifications</span>
+</button>
+<div class="h-8 w-px bg-secondary-fixed-dim"></div>
+<div class="flex items-center gap-3 bg-secondary-fixed/50 px-3 py-1.5 rounded-full">
+<span class="font-label text-[10px] text-secondary font-bold">ADMIN_ACCESS</span>
+<img alt="Admin Avatar" class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="professional portrait of a middle-aged male administrator with a short beard wearing a neutral colored polo shirt, clean lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyaivWjf5WF2AASDMjlQ47w5bCgDX8-onCuvhFdJZHXkaqgXQWr8CQTJ4XOe_87JJsCz2RUTe4WWWFYhwUMSViW0xvrydDpKY20-76VgSvs9yiEQeVvqEWdBA0T28uQCpzqqZgVAPJ9X_4n6uZB2wvKkfmq53Qo7PDd7HG7oOYAqvv5IwmhtmaE9lN-RKC3egRRMRWlteXo3h5pQrnCcRx8s1nC0LLvUMH22hSmK0bk-I0xSXf_IFzrQG7erbLB-_jGOH-Tj927JSl"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow p-8 max-w-7xl mx-auto w-full">
+<!-- Hero / Controls Section -->
+<div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
+<div class="max-w-xl">
+<h2 class="text-[5rem] leading-[0.9] font-black tracking-[-3.2px] text-on-surface font-headline uppercase mb-4">
+                        Nourish <br/> <span class="text-primary italic">The Machine</span>
+</h2>
+<p class="font-label text-sm uppercase tracking-wider text-secondary flex items-center gap-2">
+<span class="w-12 h-[2px] bg-primary"></span> 
+                        Managing 1,284 Verified Food Entities
+                    </p>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<label class="relative inline-flex items-center cursor-pointer group">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-14 h-8 bg-surface-container border-2 border-secondary-fixed-dim rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:border-secondary-fixed-dim after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary-container peer-checked:border-primary"></div>
+<span class="ml-3 font-label text-[10px] text-on-surface uppercase tracking-widest font-bold">🇲🇦 Local Cuisine Only</span>
+</label>
+<select class="bg-white border-2 border-secondary-fixed-dim rounded-full px-4 py-2 font-label text-[10px] uppercase focus:border-primary outline-none hover:border-outline transition-colors">
+<option>ALL CATEGORIES</option>
+<option>PROTEIN</option>
+<option>CARBOHYDRATES</option>
+<option>HEALTHY FATS</option>
+<option>DAIRY</option>
+</select>
+</div>
+<button class="bg-primary text-on-primary flex items-center justify-center gap-3 px-8 py-4 rounded-full font-headline font-extrabold uppercase tracking-tight text-sm bounce-hover transition-all signature-shadow">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+                        Add New Food Entry
+                    </button>
+</div>
+</div>
+<!-- Dashboard Bento Summary -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+<div class="clay-card p-6 rounded-xl flex items-center justify-between">
+<div>
+<p class="font-label text-[10px] text-secondary uppercase mb-1">Top Ingredient</p>
+<h3 class="text-3xl font-black font-headline text-primary">Couscous</h3>
+</div>
+<div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">trending_up</span>
+</div>
+</div>
+<div class="clay-card p-6 rounded-xl flex items-center justify-between">
+<div>
+<p class="font-label text-[10px] text-secondary uppercase mb-1">Average Calorie Density</p>
+<h3 class="text-3xl font-black font-headline text-error">245 <span class="text-sm">kcal</span></h3>
+</div>
+<div class="w-12 h-12 rounded-full bg-error-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-error">analytics</span>
+</div>
+</div>
+<div class="clay-card p-6 rounded-xl bg-on-tertiary flex items-center justify-between border-dashed">
+<div>
+<p class="font-label text-[10px] text-tertiary-dim uppercase mb-1">Database Health</p>
+<h3 class="text-3xl font-black font-headline text-tertiary">98.2%</h3>
+</div>
+<div class="w-12 h-12 rounded-full bg-tertiary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary">check_circle</span>
+</div>
+</div>
+</div>
+<!-- Main Data Table Container -->
+<div class="clay-card rounded-xl overflow-hidden bg-white">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low">
+<th class="px-6 py-5 font-label text-xs font-black uppercase tracking-widest text-secondary border-b-2 border-secondary-fixed-dim">Name</th>
+<th class="px-6 py-5 font-label text-xs font-black uppercase tracking-widest text-secondary border-b-2 border-secondary-fixed-dim">Category</th>
+<th class="px-6 py-5 font-label text-xs font-black uppercase tracking-widest text-secondary border-b-2 border-secondary-fixed-dim text-right">Cal/100g</th>
+<th class="px-6 py-5 font-label text-xs font-black uppercase tracking-widest text-secondary border-b-2 border-secondary-fixed-dim text-right">Protein</th>
+<th class="px-6 py-5 font-label text-xs font-black uppercase tracking-widest text-secondary border-b-2 border-secondary-fixed-dim text-right">Carbs</th>
+<th class="px-6 py-5 font-label text-xs font-black uppercase tracking-widest text-secondary border-b-2 border-secondary-fixed-dim text-right">Fats</th>
+<th class="px-6 py-5 font-label text-xs font-black uppercase tracking-widest text-secondary border-b-2 border-secondary-fixed-dim text-center">🇲🇦</th>
+<th class="px-6 py-5 font-label text-xs font-black uppercase tracking-widest text-secondary border-b-2 border-secondary-fixed-dim text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y-2 divide-dashed divide-secondary-fixed-dim">
+<!-- Row 1 -->
+<tr class="hover:bg-on-secondary/30 transition-colors group">
+<td class="px-6 py-6">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden shrink-0 border-2 border-secondary-fixed-dim">
+<img alt="Tajine" class="w-full h-full object-cover" data-alt="Traditional Moroccan tajine with slow-cooked meat and vegetables in a ceramic pot, top view, vibrant colors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDj0bcYsfFiDvl1QZbZRfRE0w9ll9GcoxrUxi_27ohIRr9nsAAls97R0uLuU3lhGhZGXyIpC8JPFyE_DNg88POtq2eHp6iLwBThMoJ5myjCOANPigbtjvaRTYA44ekaHTUyr6VBwVhQl0lNm0ofsw9qqCNWrmn_MnEPic4gNQx6UivJai6RYrKOqAF6HFDr9suKRDrQA5dwJFOSHhp2c6aKWjKrqO2hd0YjdtTb155m2fDfOFy7G61fJh37z2SnsrPARQQNOYoZ-NfE"/>
+</div>
+<span class="font-headline font-extrabold text-on-surface uppercase tracking-tight">Chicken Tajine</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<span class="px-3 py-1 rounded-full bg-secondary-container text-secondary font-label text-[10px] font-bold uppercase">Main Course</span>
+</td>
+<td class="px-6 py-6 text-right font-label font-bold text-on-surface">145</td>
+<td class="px-6 py-6 text-right font-label text-secondary">18g</td>
+<td class="px-6 py-6 text-right font-label text-secondary">12g</td>
+<td class="px-6 py-6 text-right font-label text-secondary">6g</td>
+<td class="px-6 py-6 text-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">verified</span>
+</td>
+<td class="px-6 py-6 text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="w-8 h-8 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+<button class="w-8 h-8 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:border-error hover:text-error transition-colors">
+<span class="material-symbols-outlined text-sm">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-on-secondary/30 transition-colors group">
+<td class="px-6 py-6">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden shrink-0 border-2 border-secondary-fixed-dim">
+<img alt="Argan Oil" class="w-full h-full object-cover" data-alt="Close-up of golden argan oil in a small glass bowl with toasted almonds on a wooden surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnV6rF224KJneXhoC3tq1M3h3fZ1ljvuinEjmrbGYlEdG8fQCG2gybgyU79MdrmXhLCphhlzbnsPvWglGb-ax8ZW_W_k1BT6l-lRQIZx99_UW41dyFywG8zBQydeeVryp5gNe3jbmil5KMunZuyXi-QUzhFAaMsAxrdhfylJnV0lR_gOZGu3oOHQYT54K03y72mOf_rKcAgpsHZ_pUTbSySnMYdgRZButyJDhN9ZUgsQUH0cw-DsZICgixRpe66S-jvp3kKJHqHP4s"/>
+</div>
+<span class="font-headline font-extrabold text-on-surface uppercase tracking-tight">Pure Argan Oil</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<span class="px-3 py-1 rounded-full bg-[#f9f2e5] text-[#38671a] border border-[#38671a]/20 font-label text-[10px] font-bold uppercase">Healthy Fats</span>
+</td>
+<td class="px-6 py-6 text-right font-label font-bold text-on-surface">884</td>
+<td class="px-6 py-6 text-right font-label text-secondary">0g</td>
+<td class="px-6 py-6 text-right font-label text-secondary">0g</td>
+<td class="px-6 py-6 text-right font-label text-secondary">100g</td>
+<td class="px-6 py-6 text-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">verified</span>
+</td>
+<td class="px-6 py-6 text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="w-8 h-8 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+<button class="w-8 h-8 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:border-error hover:text-error transition-colors">
+<span class="material-symbols-outlined text-sm">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-on-secondary/30 transition-colors group">
+<td class="px-6 py-6">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden shrink-0 border-2 border-secondary-fixed-dim">
+<img alt="Greek Yogurt" class="w-full h-full object-cover" data-alt="Creamy white greek yogurt in a ceramic bowl with a wooden spoon, soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAP-WPL752EQ4Ogl78TPcc0JFGjILASUoKM4-Gc6Z5K3iJHqqqqzk9q0MQB0yzpvPoSPwETH1_eR-nRKzpYR-vwXtcuKgkgLcXIqcpTujZzNJvcOV76spvcbWpl3ZpKUu-kOl_URBAs8BsWVniEdE2-o2BwA18uh9OUApDqRKJyUjbxue1NY_9FTgb63_VjabkNxNqK1oB-UeCR-ugZioJEH765G5ExD4CDJYwe1xJOolGa90_6b2AddLoqJB9Mfrx23grVOL19oeNb"/>
+</div>
+<span class="font-headline font-extrabold text-on-surface uppercase tracking-tight">Greek Yogurt 0%</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<span class="px-3 py-1 rounded-full bg-secondary-container text-secondary font-label text-[10px] font-bold uppercase">Dairy</span>
+</td>
+<td class="px-6 py-6 text-right font-label font-bold text-on-surface">59</td>
+<td class="px-6 py-6 text-right font-label text-secondary">10g</td>
+<td class="px-6 py-6 text-right font-label text-secondary">3.6g</td>
+<td class="px-6 py-6 text-right font-label text-secondary">0.4g</td>
+<td class="px-6 py-6 text-center">
+<span class="material-symbols-outlined text-outline" style="font-variation-settings: 'FILL' 0;">close</span>
+</td>
+<td class="px-6 py-6 text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="w-8 h-8 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+<button class="w-8 h-8 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:border-error hover:text-error transition-colors">
+<span class="material-symbols-outlined text-sm">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-on-secondary/30 transition-colors group">
+<td class="px-6 py-6">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden shrink-0 border-2 border-secondary-fixed-dim">
+<img alt="Couscous" class="w-full h-full object-cover" data-alt="Close-up of fluffy cooked couscous grains, warm earth tones, soft side light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxSFZmnvM84YKsJvF-sNuALkmqJ0yusps5HgzOrxX7HzUfhmxPDERiClzttB50WIWzQoCw2n8CjwJkbWKnyhkWAN8bfhH50zLWN7-TXfkfz14wHWds1hlj7Z8lGW--ZXw5nmZTIHbUH3vmw0REPFxSV_NwECDHuE2CW7xtgcoR1ExpatclVHm4UKzmRFgJxRCIy-_N4H6na0aLspKTsQfye-5pE6ugrVp7SwUDCAghVViZLXUBEZU2lo6fq4T6e2ahdfdpRtSPVxES"/>
+</div>
+<span class="font-headline font-extrabold text-on-surface uppercase tracking-tight">Whole Wheat Couscous</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<span class="px-3 py-1 rounded-full bg-secondary-container text-secondary font-label text-[10px] font-bold uppercase">Carbohydrates</span>
+</td>
+<td class="px-6 py-6 text-right font-label font-bold text-on-surface">112</td>
+<td class="px-6 py-6 text-right font-label text-secondary">3.8g</td>
+<td class="px-6 py-6 text-right font-label text-secondary">23g</td>
+<td class="px-6 py-6 text-right font-label text-secondary">0.2g</td>
+<td class="px-6 py-6 text-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">verified</span>
+</td>
+<td class="px-6 py-6 text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="w-8 h-8 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+<button class="w-8 h-8 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:border-error hover:text-error transition-colors">
+<span class="material-symbols-outlined text-sm">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination -->
+<div class="bg-surface-container-low px-8 py-4 flex items-center justify-between">
+<span class="font-label text-[10px] text-secondary uppercase font-bold">Showing 1-25 of 1,284 entries</span>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded-full bg-white border-2 border-secondary-fixed-dim flex items-center justify-center hover:border-primary transition-all">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="px-3 h-8 rounded-full bg-primary text-on-primary font-label text-[10px] font-bold">1</button>
+<button class="px-3 h-8 rounded-full bg-white border-2 border-secondary-fixed-dim font-label text-[10px] font-bold hover:border-primary transition-all">2</button>
+<button class="px-3 h-8 rounded-full bg-white border-2 border-secondary-fixed-dim font-label text-[10px] font-bold hover:border-primary transition-all">3</button>
+<button class="w-8 h-8 rounded-full bg-white border-2 border-secondary-fixed-dim flex items-center justify-center hover:border-primary transition-all">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Accent Callout Section -->
+<div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="bg-error/5 p-8 rounded-xl border-2 border-dashed border-error relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-20 transform -rotate-12 translate-x-4 -translate-y-4 group-hover:rotate-0 group-hover:translate-x-0 transition-transform">
+<span class="material-symbols-outlined text-8xl text-error">priority_high</span>
+</div>
+<h4 class="font-headline font-black text-2xl text-error uppercase mb-4">Pending Verification</h4>
+<p class="font-label text-xs leading-relaxed text-secondary-dim uppercase tracking-wider mb-6">
+                        There are 14 food items recently submitted by users that require nutritional verification against standard laboratory data before being added to the verified 🇲🇦 Moroccan registry.
+                    </p>
+<button class="px-6 py-3 rounded-full bg-error text-white font-label text-[10px] font-bold uppercase tracking-widest hover:scale-105 transition-transform shadow-[-4px_4px_0px_#520c00]">
+                        Review Submissions
+                    </button>
+</div>
+<div class="bg-secondary-container/30 p-8 rounded-xl border-2 border-[#dad4c8] relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-20 transform rotate-12 translate-x-4 -translate-y-4 group-hover:rotate-0 group-hover:translate-x-0 transition-transform">
+<span class="material-symbols-outlined text-8xl text-primary">emoji_objects</span>
+</div>
+<h4 class="font-headline font-black text-2xl text-on-surface uppercase mb-4">Nutrient Density Tip</h4>
+<p class="font-label text-xs leading-relaxed text-secondary-dim uppercase tracking-wider mb-6">
+                        Add entries with high fiber and protein ratios. These are automatically flagged as "Bio-Fit Approved" and promoted in the user application's meal planning engine.
+                    </p>
+<button class="px-6 py-3 rounded-full border-2 border-secondary text-secondary font-label text-[10px] font-bold uppercase tracking-widest hover:bg-white transition-all">
+                        View Best Practices
+                    </button>
+</div>
+</div>
+</main>
+</div>
+<!-- Floating Action Sticker (New Component) -->
+<div class="fixed bottom-8 right-8 z-50">
+<div class="w-32 h-32 bg-[#f9f2e5] rounded-full flex flex-col items-center justify-center text-center p-4 shadow-[-7px_7px_0px_#2e2f2e] border-2 border-primary rotate-12 hover:rotate-0 transition-all cursor-pointer group">
+<span class="material-symbols-outlined text-primary mb-1">download</span>
+<span class="font-label text-[10px] font-black uppercase text-on-surface leading-none">Export Data</span>
+<div class="mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="font-label text-[8px] text-secondary">JSON/CSV</span>
+</div>
+</div>
+</div>
+</body></html>

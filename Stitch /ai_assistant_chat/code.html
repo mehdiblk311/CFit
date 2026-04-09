@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Artisanal Fitness - AI Assistant</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Space+Mono:wght@400;700&amp;family=Space+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#f6f0ff",
+                        "primary-dim": "#2c5a0d",
+                        "background": "#f7f6f4",
+                        "secondary-container": "#e8e2d6",
+                        "secondary-fixed-dim": "#dad4c8",
+                        "inverse-surface": "#0d0e0e",
+                        "primary-fixed": "#c3fb9c",
+                        "on-primary-container": "#336215",
+                        "surface-container": "#e8e8e6",
+                        "on-secondary-fixed-variant": "#5f5b52",
+                        "on-primary-fixed-variant": "#3d6c1f",
+                        "tertiary-fixed": "#b4a5ff",
+                        "on-tertiary-fixed-variant": "#3a03b1",
+                        "on-error-container": "#520c00",
+                        "on-tertiary-container": "#31009b",
+                        "primary": "#38671a",
+                        "secondary-dim": "#534f46",
+                        "on-error": "#ffefec",
+                        "error": "#b02500",
+                        "on-secondary-container": "#555148",
+                        "secondary-fixed": "#e8e2d6",
+                        "on-primary": "#d6ffb7",
+                        "surface-tint": "#38671a",
+                        "inverse-on-surface": "#9d9d9b",
+                        "error-container": "#f95630",
+                        "surface-container-low": "#f1f1ef",
+                        "tertiary-dim": "#5130c6",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#a694ff",
+                        "surface": "#f7f6f4",
+                        "secondary": "#5f5b52",
+                        "on-tertiary-fixed": "#180058",
+                        "on-secondary-fixed": "#423f36",
+                        "surface-dim": "#d4d5d2",
+                        "inverse-primary": "#c5fe9e",
+                        "primary-fixed-dim": "#b5ec8f",
+                        "on-surface": "#2e2f2e",
+                        "primary-container": "#c3fb9c",
+                        "surface-container-highest": "#dddddb",
+                        "tertiary": "#5d3fd3",
+                        "error-dim": "#b92902",
+                        "on-surface-variant": "#5b5c5a",
+                        "tertiary-container": "#b4a5ff",
+                        "outline-variant": "#adadab",
+                        "on-primary-fixed": "#214f01",
+                        "outline": "#767775",
+                        "surface-variant": "#dddddb",
+                        "surface-bright": "#f7f6f4",
+                        "on-background": "#2e2f2e",
+                        "surface-container-high": "#e2e3e0",
+                        "on-secondary": "#f9f2e5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Space Mono"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #faf9f7;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #2e2f2e;
+        }
+        .kinetic-shadow {
+            box-shadow: -7px 7px 0px 0px rgba(46,47,46,1);
+        }
+        .kinetic-shadow-sm {
+            box-shadow: -4px 4px 0px 0px rgba(46,47,46,1);
+        }
+        .kinetic-shadow-hover:hover {
+            box-shadow: -10px 10px 0px 0px rgba(46,47,46,1);
+            transform: translateY(-4px) rotate(-2deg);
+        }
+        .dashed-border {
+            border: 2px dashed #dad4c8;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#faf9f7] text-[#2e2f2e] min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#faf9f7] flex justify-between items-center px-6 h-20 w-full border-b-2 border-dashed border-[#dad4c8] shadow-[-7px_7px_0px_0px_rgba(46,47,46,1)]">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed border-2 border-[#2e2f2e] overflow-hidden">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="portrait of a confident athlete in soft natural lighting, high-end editorial fitness photography style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZDcfUnBnvn14yBq3aiE3W5crSTKPj50JR_wa3Gy1hHKugH0RQqS7ugZx9a3MG9bpPTLPReyEaqFvznSkTLBnVPLCqXAKN5uOmQEcfFGiwPd82xUirYuNqqGjAdRNJTJGqBIo_KmoUPVmeYGYMvbl_SkIfOTE0htSEp-8izf7xUxxXssNHcmkSpgPwAOos1GAEl2LEum3FDU7ckGMtUHHTAfMvmwetNgh9GHA-5KwmVO0viJi6Jr1DWj3BDG9msEBrZFLBt_IEjF_B"/>
+</div>
+<div>
+<h1 class="text-xl font-['Plus_Jakarta_Sans'] font-bold tracking-tighter text-[#38671a]">AI Assistant</h1>
+<p class="text-[10px] font-['Space_Mono'] uppercase tracking-widest text-[#5b5c5a]">UM6P_Fit Coach</p>
+</div>
+</div>
+<button class="w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-[#2e2f2e] kinetic-shadow-sm hover:-rotate-2 transition-transform">
+<span class="material-symbols-outlined text-[#2e2f2e]">history</span>
+</button>
+</header>
+<!-- Main Chat Canvas -->
+<main class="flex-grow pt-24 pb-48 px-6 overflow-y-auto max-w-2xl mx-auto w-full space-y-8">
+<!-- User Message -->
+<div class="flex flex-col items-end w-full">
+<div class="max-w-[85%] bg-primary text-on-primary p-6 rounded-t-xl rounded-bl-xl kinetic-shadow border-2 border-[#2e2f2e]">
+<p class="font-medium text-lg leading-relaxed">How is my protein intake looking for this week?</p>
+</div>
+<span class="text-[10px] font-['Space_Mono'] mt-2 mr-2">10:42 AM</span>
+</div>
+<!-- AI Message 1 -->
+<div class="flex flex-col items-start w-full">
+<div class="max-w-[85%] bg-white p-6 rounded-t-xl rounded-br-xl kinetic-shadow border-2 border-[#dad4c8] relative">
+<div class="absolute -top-4 -left-2 bg-tertiary-fixed text-on-tertiary-fixed px-3 py-1 rounded-full text-[10px] font-['Space_Mono'] uppercase kinetic-shadow-sm rotate-[-3deg]">Coach AI</div>
+<p class="leading-relaxed">Based on your protein intake this week (average 110g), you are slightly below your target. I suggest adding more lean protein to your dinner.</p>
+</div>
+</div>
+<!-- AI Message 2: Workout Suggestion -->
+<div class="flex flex-col items-start w-full">
+<div class="max-w-[95%] w-full bg-white p-6 rounded-t-xl rounded-br-xl kinetic-shadow border-2 border-[#dad4c8]">
+<h3 class="font-['Plus_Jakarta_Sans'] font-extrabold text-xl mb-4 tracking-tight">Today's Hypertrophy Boost</h3>
+<div class="overflow-hidden rounded-lg border-2 border-[#dad4c8] mb-6">
+<table class="w-full text-left font-['Space_Mono'] text-sm">
+<thead class="bg-secondary-container">
+<tr>
+<th class="p-3 border-b-2 border-[#dad4c8]">Exercise</th>
+<th class="p-3 border-b-2 border-[#dad4c8]">Sets</th>
+<th class="p-3 border-b-2 border-[#dad4c8]">Reps</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-b border-[#dad4c8]">
+<td class="p-3 font-bold">Dumbbell Press</td>
+<td class="p-3">4</td>
+<td class="p-3">10-12</td>
+</tr>
+<tr class="border-b border-[#dad4c8]">
+<td class="p-3 font-bold">Incline Flys</td>
+<td class="p-3">3</td>
+<td class="p-3">15</td>
+</tr>
+<tr>
+<td class="p-3 font-bold">Weighted Dips</td>
+<td class="p-3">3</td>
+<td class="p-3">AMRAP</td>
+</tr>
+</tbody>
+</table>
+</div>
+<button class="w-full bg-primary text-on-primary py-4 rounded-full font-bold kinetic-shadow-sm hover:-rotate-2 hover:-translate-y-1 transition-all flex items-center justify-center gap-2 border-2 border-[#2e2f2e]">
+<span class="material-symbols-outlined">save</span>
+                    SAVE TO MY PROGRAMS
+                </button>
+</div>
+<span class="text-[10px] font-['Space_Mono'] mt-2 ml-2">10:43 AM</span>
+</div>
+</main>
+<!-- Fixed Input Area -->
+<section class="fixed bottom-24 left-0 w-full px-4 z-40">
+<div class="max-w-2xl mx-auto">
+<!-- Chips Row -->
+<div class="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
+<button class="whitespace-nowrap px-6 py-2 bg-white border-2 border-[#dad4c8] rounded-full text-[12px] font-['Space_Mono'] hover:bg-secondary-container transition-colors kinetic-shadow-sm">Analyze my week</button>
+<button class="whitespace-nowrap px-6 py-2 bg-white border-2 border-[#dad4c8] rounded-full text-[12px] font-['Space_Mono'] hover:bg-secondary-container transition-colors kinetic-shadow-sm">Suggest a meal</button>
+<button class="whitespace-nowrap px-6 py-2 bg-white border-2 border-[#dad4c8] rounded-full text-[12px] font-['Space_Mono'] hover:bg-secondary-container transition-colors kinetic-shadow-sm">Am I overtraining?</button>
+</div>
+<!-- Text Input Container -->
+<div class="bg-white p-3 rounded-full border-2 border-[#2e2f2e] kinetic-shadow flex items-center gap-3">
+<input class="flex-grow bg-transparent border-none focus:ring-0 px-4 font-medium placeholder:text-stone-400" placeholder="Ask me anything about your fitness..." type="text"/>
+<button class="w-12 h-12 rounded-full bg-primary text-on-primary flex items-center justify-center kinetic-shadow-sm hover:rotate-12 transition-transform">
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</section>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-[#faf9f7] rounded-t-[3rem] border-t-2 border-[#dad4c8] shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.1)]">
+<a class="text-[#2e2f2e] p-3 hover:rotate-6 hover:-translate-y-2 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+</a>
+<a class="text-[#2e2f2e] p-3 hover:rotate-6 hover:-translate-y-2 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+</a>
+<a class="text-[#2e2f2e] p-3 hover:rotate-6 hover:-translate-y-2 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+</a>
+<a class="bg-[#38671a] text-[#faf9f7] rounded-full p-3 shadow-[-4px_4px_0px_0px_rgba(0,0,0,1)] hover:rotate-6 hover:-translate-y-2 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+</a>
+<a class="text-[#2e2f2e] p-3 hover:rotate-6 hover:-translate-y-2 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</a>
+</nav>
+<style>
+        /* Custom scrollbar hiding */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</body></html>

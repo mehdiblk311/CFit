@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Mono:ital,wght@0,400;0,700;1,400&amp;family=Space+Grotesk:wght@300..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-fixed-variant": "#3d6c1f",
+                    "secondary": "#5f5b52",
+                    "on-primary": "#d6ffb7",
+                    "secondary-dim": "#534f46",
+                    "surface-bright": "#f7f6f4",
+                    "surface": "#f7f6f4",
+                    "on-tertiary-fixed": "#180058",
+                    "tertiary-container": "#b4a5ff",
+                    "background": "#f7f6f4",
+                    "surface-dim": "#d4d5d2",
+                    "surface-variant": "#dddddb",
+                    "outline-variant": "#adadab",
+                    "on-primary-container": "#336215",
+                    "error-dim": "#b92902",
+                    "on-tertiary": "#f6f0ff",
+                    "secondary-fixed-dim": "#dad4c8",
+                    "secondary-container": "#e8e2d6",
+                    "surface-container-low": "#f1f1ef",
+                    "on-secondary-fixed": "#423f36",
+                    "tertiary": "#5d3fd3",
+                    "on-surface": "#2e2f2e",
+                    "on-primary-fixed": "#214f01",
+                    "inverse-primary": "#c5fe9e",
+                    "tertiary-fixed-dim": "#a694ff",
+                    "error": "#b02500",
+                    "primary-dim": "#2c5a0d",
+                    "surface-tint": "#38671a",
+                    "on-tertiary-container": "#31009b",
+                    "surface-container": "#e8e8e8",
+                    "primary": "#38671a",
+                    "on-secondary-fixed-variant": "#5f5b52",
+                    "outline": "#767775",
+                    "secondary-fixed": "#e8e2d6",
+                    "tertiary-dim": "#5130c6",
+                    "primary-fixed": "#c3fb9c",
+                    "inverse-surface": "#0d0e0e",
+                    "error-container": "#f95630",
+                    "on-error-container": "#520c00",
+                    "on-error": "#ffefec",
+                    "on-secondary-container": "#555148",
+                    "on-surface-variant": "#5b5c5a",
+                    "surface-container-high": "#e2e3e0",
+                    "primary-fixed-dim": "#b5ec8f",
+                    "surface-container-highest": "#dddddb",
+                    "on-secondary": "#f9f2e5",
+                    "tertiary-fixed": "#b4a5ff",
+                    "on-tertiary-fixed-variant": "#3a03b1",
+                    "surface-container-lowest": "#ffffff",
+                    "on-background": "#2e2f2e",
+                    "inverse-on-surface": "#9d9d9b",
+                    "primary-container": "#c3fb9c"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Space Grotesk"],
+                    "mono": ["Space Mono"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .kinetic-shadow {
+            box-shadow: -7px 7px 0px rgba(46,47,46,1);
+        }
+        .clay-card {
+            box-shadow: -4px 4px 0px 0px rgba(46,47,46,1);
+        }
+        .inner-glow {
+            box-shadow: inset 2px 2px 0px rgba(255,255,255,0.8);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body min-h-screen selection:bg-primary-container selection:text-on-primary-container overflow-x-hidden">
+<!-- Top Navigation (Shell suppressed for transactional screen but keeping brand anchor elements) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-20 bg-surface/80 backdrop-blur-md border-b-2 border-dashed border-secondary-fixed-dim">
+<a class="flex items-center gap-2 group transition-transform active:scale-95 duration-200 ease-out" href="#">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center border-2 border-on-surface group-hover:-rotate-12 transition-transform">
+<span class="material-symbols-outlined text-on-surface" data-icon="arrow_back">arrow_back</span>
+</div>
+</a>
+<div class="font-headline text-2xl font-black text-on-surface tracking-[-1.5px]">
+            UM6P_FIT
+        </div>
+<div class="w-10"></div> <!-- Spacer for balance -->
+</header>
+<main class="pt-32 pb-20 px-6 max-w-xl mx-auto min-h-screen flex flex-col items-center">
+<!-- Hero Illustration Area (Visual Soul) -->
+<div class="relative w-full aspect-square max-w-[320px] mb-12">
+<div class="absolute inset-0 bg-tertiary-container rounded-xl rotate-3 clay-card border-2 border-on-surface overflow-hidden">
+<img alt="Artisanal Fitness Aesthetic" class="w-full h-full object-cover opacity-80 mix-blend-multiply" data-alt="Soft ethereal lighting hitting a textured yoga mat and a ceramic water bottle on a warm wooden floor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0K2_yCXJKoSFfmbjkVPeMWc-wMjr1B8VYfwdwcmDe-vcpyr-tx5qdeJndi9jbfShPbrct-9FJCxcCBU0xVLZyfaQ2W2ABsM1ienaF89QIWmJwKtsaFZ33Ma6sUttOWg9aingPQ7PR0akbOaASmA-MgoGjoMCBLe3wUVlXSgs_nhrOjRe7vFNCIkaWUHYiT_1HwNiD60ZHVNSwReg8ogsQ6q16J7MWH_JKUmhxnFmR3yoswvxz_DOIZvd2wc-AlSGrOqHFruqJaXeM"/>
+</div>
+<div class="absolute inset-0 bg-primary-container rounded-xl -rotate-6 clay-card border-2 border-on-surface flex items-center justify-center">
+<div class="text-center p-8">
+<span class="material-symbols-outlined text-on-primary-container text-8xl mb-4" data-icon="lock_reset">lock_reset</span>
+</div>
+</div>
+<!-- Activity Sticker -->
+<div class="absolute -top-4 -right-4 bg-on-secondary-fixed text-on-secondary px-4 py-2 rounded-full font-mono text-[10px] uppercase tracking-widest rotate-12 kinetic-shadow border-2 border-on-surface z-10">
+                Security_First
+            </div>
+</div>
+<!-- Content Area -->
+<div class="w-full space-y-8">
+<div class="space-y-4">
+<h1 class="font-headline text-5xl font-extrabold tracking-[-3.2px] text-on-surface leading-none">
+                    Reset Password
+                </h1>
+<p class="text-on-surface-variant leading-relaxed text-lg max-w-md">
+                    Enter your email address and we'll send you a link to reset your password.
+                </p>
+</div>
+<!-- Form -->
+<form class="space-y-10" onsubmit="return false;">
+<div class="space-y-3">
+<label class="font-mono text-xs uppercase tracking-[2px] text-on-surface ml-2">Account Email</label>
+<div class="relative group">
+<input class="w-full bg-surface-container-lowest border-2 border-secondary-fixed-dim rounded-lg py-5 px-6 font-body text-on-surface placeholder:text-outline-variant focus:outline-none focus:border-primary transition-all duration-300 kinetic-shadow" placeholder="hello@artisanal.fit" type="email"/>
+<div class="absolute right-6 top-1/2 -translate-y-1/2">
+<span class="material-symbols-outlined text-secondary-fixed-dim group-focus-within:text-primary transition-colors" data-icon="mail">mail</span>
+</div>
+</div>
+</div>
+<!-- Primary CTA -->
+<button class="w-full py-5 bg-primary text-on-primary rounded-full font-headline font-bold text-xl clay-card hover:-rotate-2 hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-3" type="submit">
+                    Send Reset Link
+                    <span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+</form>
+<!-- Success State Preview (Hidden by default, shown conceptually) -->
+<div class="hidden mt-12 p-8 bg-surface-container-low rounded-xl border-2 border-dashed border-secondary-fixed-dim flex flex-col items-center text-center space-y-4">
+<div class="w-16 h-16 bg-on-primary-fixed rounded-full flex items-center justify-center kinetic-shadow border-2 border-on-surface">
+<span class="material-symbols-outlined text-primary-fixed text-3xl" data-icon="check_circle">check_circle</span>
+</div>
+<div>
+<h3 class="font-headline font-bold text-xl">Check your email</h3>
+<p class="font-mono text-[11px] uppercase tracking-wider text-on-surface-variant mt-1">We sent a link to reset your craft.</p>
+</div>
+</div>
+<div class="pt-8 flex justify-center">
+<a class="font-mono text-xs uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors border-b border-transparent hover:border-primary pb-1" href="#">
+                    Back to login
+                </a>
+</div>
+</div>
+</main>
+<!-- Footer Decoration -->
+<footer class="py-12 px-6 opacity-30 pointer-events-none">
+<div class="max-w-xl mx-auto border-t-2 border-dashed border-secondary-fixed-dim pt-6 flex justify-between items-center">
+<div class="font-mono text-[10px] uppercase tracking-[3px]">UM6P_FIT_CORE</div>
+<div class="font-mono text-[10px] uppercase tracking-[3px]">v1.0.3</div>
+</div>
+</footer>
+<!-- Floating Background Elements (Clay System Texture) -->
+<div class="fixed top-40 -left-20 w-64 h-64 bg-secondary-container/20 rounded-full blur-3xl -z-10"></div>
+<div class="fixed bottom-20 -right-20 w-80 h-80 bg-tertiary-container/10 rounded-full blur-3xl -z-10"></div>
+</body></html>

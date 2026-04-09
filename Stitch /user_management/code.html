@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Mono&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "secondary-fixed": "#e8e2d6",
+                  "surface-dim": "#d4d5d2",
+                  "surface-variant": "#dddddb",
+                  "tertiary": "#5d3fd3",
+                  "tertiary-dim": "#5130c6",
+                  "on-secondary-container": "#555148",
+                  "inverse-on-surface": "#9d9d9b",
+                  "secondary-container": "#e8e2d6",
+                  "inverse-primary": "#c5fe9e",
+                  "outline": "#767775",
+                  "on-tertiary-container": "#31009b",
+                  "error-container": "#f95630",
+                  "surface-container-low": "#f1f1ef",
+                  "on-secondary-fixed-variant": "#5f5b52",
+                  "primary-fixed-dim": "#b5ec8f",
+                  "primary-container": "#c3fb9c",
+                  "surface-container-highest": "#dddddb",
+                  "primary": "#38671a",
+                  "surface-bright": "#f7f6f4",
+                  "on-tertiary": "#f6f0ff",
+                  "on-primary": "#d6ffb7",
+                  "error-dim": "#b92902",
+                  "surface-container-lowest": "#ffffff",
+                  "surface": "#f7f6f4",
+                  "on-tertiary-fixed-variant": "#3a03b1",
+                  "on-primary-container": "#336215",
+                  "background": "#f7f6f4",
+                  "on-secondary": "#f9f2e5",
+                  "on-primary-fixed-variant": "#3d6c1f",
+                  "on-error": "#ffefec",
+                  "outline-variant": "#adadab",
+                  "on-primary-fixed": "#214f01",
+                  "secondary": "#5f5b52",
+                  "on-error-container": "#520c00",
+                  "tertiary-fixed": "#b4a5ff",
+                  "on-secondary-fixed": "#423f36",
+                  "tertiary-fixed-dim": "#a694ff",
+                  "on-surface": "#2e2f2e",
+                  "surface-tint": "#38671a",
+                  "on-tertiary-fixed": "#180058",
+                  "surface-container-high": "#e2e3e0",
+                  "secondary-dim": "#534f46",
+                  "on-background": "#2e2f2e",
+                  "inverse-surface": "#0d0e0e",
+                  "surface-container": "#e8e8e6",
+                  "primary-dim": "#2c5a0d",
+                  "on-surface-variant": "#5b5c5a",
+                  "tertiary-container": "#b4a5ff",
+                  "error": "#b02500",
+                  "primary-fixed": "#c3fb9c",
+                  "secondary-fixed-dim": "#dad4c8"
+          },
+          "borderRadius": {
+                  "DEFAULT": "1rem",
+                  "lg": "2rem",
+                  "xl": "3rem",
+                  "full": "9999px"
+          },
+          "fontFamily": {
+                  "headline": ["Plus Jakarta Sans"],
+                  "body": ["Plus Jakarta Sans"],
+                  "label": ["Space Mono"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .custom-shadow {
+      box-shadow: -7px 7px 0px #2e2f2e;
+    }
+    .hover-bounce:hover {
+      transform: rotateZ(-2deg) translateY(-4px);
+      box-shadow: -7px 7px 0px #2e2f2e;
+    }
+    .active-bounce:active {
+      transform: scale(0.95);
+    }
+    .header-anchor {
+      letter-spacing: -0.05em;
+    }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #faf9f7; }
+    ::-webkit-scrollbar-thumb { background: #dad4c8; border-radius: 10px; }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary/30 min-h-screen">
+<!-- Side Navigation Shell -->
+<aside class="fixed left-0 top-0 h-full z-50 flex flex-col bg-[#faf9f7] h-screen w-20 hover:w-64 transition-all duration-300 border-r-2 border-[#dad4c8] group overflow-hidden">
+<div class="p-6 flex items-center gap-4">
+<div class="min-w-[40px] h-10 bg-primary rounded-xl flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined">fitness_center</span>
+</div>
+<span class="whitespace-nowrap text-2xl font-black text-[#2e2f2e] uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">UM6P_FIT</span>
+</div>
+<nav class="flex-1 mt-4">
+<!-- Dashboard -->
+<a class="flex items-center gap-4 text-[#2e2f2e] hover:bg-[#dad4c8]/30 rounded-full px-4 py-3 m-2 hover:rotate-[-2deg] hover:-translate-y-1 transition-transform" href="#">
+<span class="material-symbols-outlined min-w-[24px]">dashboard</span>
+<span class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Dashboard</span>
+</a>
+<!-- Users (Active) -->
+<a class="flex items-center gap-4 bg-[#38671a] text-[#faf9f7] rounded-full px-4 py-3 m-2 hover:rotate-[-2deg] hover:-translate-y-1 transition-transform shadow-[-4px_4px_0px_#2e2f2e]" href="#">
+<span class="material-symbols-outlined min-w-[24px]" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Users</span>
+</a>
+<!-- Exercises -->
+<a class="flex items-center gap-4 text-[#2e2f2e] hover:bg-[#dad4c8]/30 rounded-full px-4 py-3 m-2 hover:rotate-[-2deg] hover:-translate-y-1 transition-transform" href="#">
+<span class="material-symbols-outlined min-w-[24px]">fitness_center</span>
+<span class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Exercises</span>
+</a>
+<!-- Foods -->
+<a class="flex items-center gap-4 text-[#2e2f2e] hover:bg-[#dad4c8]/30 rounded-full px-4 py-3 m-2 hover:rotate-[-2deg] hover:-translate-y-1 transition-transform" href="#">
+<span class="material-symbols-outlined min-w-[24px]">restaurant</span>
+<span class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Foods</span>
+</a>
+<!-- Workout Templates -->
+<a class="flex items-center gap-4 text-[#2e2f2e] hover:bg-[#dad4c8]/30 rounded-full px-4 py-3 m-2 hover:rotate-[-2deg] hover:-translate-y-1 transition-transform" href="#">
+<span class="material-symbols-outlined min-w-[24px]">description</span>
+<span class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Workout Templates</span>
+</a>
+</nav>
+<div class="p-4 border-t border-dashed border-[#dad4c8]">
+<div class="flex items-center gap-3 px-2">
+<img class="w-10 h-10 rounded-full object-cover border-2 border-primary shadow-sm" data-alt="Portrait of a professional administrator in a minimalist office setting, soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSTMhYvMYQYRbUQT8-dC6syGLnMxVFie-7HGhSRXJB2RbuwmraV0lgtsdHz8AnH5LryF1wJb51vc8hlr8BsOe9J151Tk0f4U7I8DGN8Y5CzSspf9ZChkTfyn7ogjrJFcThqcSnTz87lmw1i26irVh3LKILPdCEONktEzvvcWCwRqDcdfBqk5ofz4-1-_lyWf8XYLV-ZLb92KRb9CGi1shcLTXyfHJy6mX_QzKNGLcSHA2A1K2YN2SyVRwtFb6geWOgipwH46NWEI5P"/>
+<div class="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+<p class="font-['Space_Mono'] text-[10px] uppercase font-bold text-primary">Admin Terminal</p>
+<p class="font-bold text-xs">A. Mansour</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Top App Bar -->
+<header class="flex justify-between items-center px-8 ml-20 w-[calc(100%-5rem)] h-16 sticky top-0 z-40 bg-[#faf9f7]/80 backdrop-blur-md border-b-2 border-[#dad4c8]">
+<div class="flex items-center gap-6">
+<h1 class="text-xl font-black text-[#2e2f2e] header-anchor">UM6P_FIT Admin</h1>
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-surface-container-low border-none rounded-full font-label text-[10px] w-64 focus:ring-2 focus:ring-primary" placeholder="GLOBAL SEARCH..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-primary/10 text-on-surface transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-8 w-[1px] bg-[#dad4c8] mx-2"></div>
+<span class="font-['Space_Mono'] uppercase tracking-[1px] text-[10px] text-[#38671a] font-bold">Session: Active</span>
+</div>
+</header>
+<main class="ml-20 p-8">
+<!-- Header Section -->
+<div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="space-y-2">
+<div class="inline-flex items-center px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed rounded-full rotate-[-2deg] mb-2">
+<span class="font-label text-[10px] font-bold">DIRECTORY_V.2.0</span>
+</div>
+<h2 class="text-6xl font-black tracking-[-3.2px] text-[#2e2f2e] leading-none uppercase">User<br/>Management</h2>
+</div>
+<div class="flex flex-wrap gap-4 items-center">
+<!-- Search -->
+<div class="relative">
+<input class="bg-surface-container-low border-2 border-secondary-fixed-dim rounded-full pl-12 pr-6 py-3 font-label text-xs w-72 focus:border-primary focus:ring-0 transition-colors" placeholder="SEARCH BY NAME OR EMAIL" type="text"/>
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary">search</span>
+</div>
+<!-- Filter Dropdowns -->
+<div class="flex gap-2">
+<select class="bg-surface-container-low border-2 border-dashed border-secondary-fixed-dim rounded-full px-6 py-3 font-label text-xs appearance-none focus:border-primary focus:ring-0 cursor-pointer">
+<option>ROLE: ALL</option>
+<option>ADMIN</option>
+<option>COACH</option>
+<option>USER</option>
+</select>
+<select class="bg-surface-container-low border-2 border-dashed border-secondary-fixed-dim rounded-full px-6 py-3 font-label text-xs appearance-none focus:border-primary focus:ring-0 cursor-pointer">
+<option>STATUS: ACTIVE</option>
+<option>INACTIVE</option>
+<option>SUSPENDED</option>
+</select>
+</div>
+<button class="bg-primary text-on-primary font-label text-xs font-bold px-8 py-4 rounded-full flex items-center gap-2 hover-bounce active-bounce transition-all">
+<span class="material-symbols-outlined text-sm">person_add</span>
+          ADD NEW USER
+        </button>
+</div>
+</div>
+<!-- Table Container -->
+<div class="bg-white rounded-xl overflow-hidden border-2 border-secondary-fixed-dim custom-shadow mb-12">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b-2 border-secondary-fixed-dim">
+<th class="px-6 py-5 font-label text-[11px] font-bold tracking-widest text-secondary uppercase">
+<div class="flex items-center gap-2">
+                User <span class="material-symbols-outlined text-[14px]">arrow_downward</span>
+</div>
+</th>
+<th class="px-6 py-5 font-label text-[11px] font-bold tracking-widest text-secondary uppercase">Email</th>
+<th class="px-6 py-5 font-label text-[11px] font-bold tracking-widest text-secondary uppercase">Role</th>
+<th class="px-6 py-5 font-label text-[11px] font-bold tracking-widest text-secondary uppercase">Joined</th>
+<th class="px-6 py-5 font-label text-[11px] font-bold tracking-widest text-secondary uppercase">Last Active</th>
+<th class="px-6 py-5 font-label text-[11px] font-bold tracking-widest text-secondary uppercase text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y-2 divide-secondary-fixed-dim/30">
+<!-- User Row 1 -->
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-4">
+<div class="relative">
+<img class="w-12 h-12 rounded-2xl object-cover border-2 border-secondary-fixed shadow-sm" data-alt="Portrait of a young Moroccan man with a sharp beard and professional look, warm natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxJPNiQ4YZTPdZc_yyPw6Y_QfxtBkaZifYTD_KmGG2DAiUGkK6t_SXXvCc_uPMRkNy-wUK6OEtX2ZYuMBwbCo2FjoTTkfwMnLmf5L7zcReLALt8EXuYdOWY_agjJj0Q9UVW-JunVGaA4WcjYv_rYR7RPb5YXRbhALagRXxhzrM5gcm4zqBg3WGKd6pYJ8IJNGG2aYj426KxnxiYM_LXMLWXzXVvGGChjcdtWEpsn2vrQzztwljrK67NbBx77_bNTyCp77ELqnBuuIs"/>
+<div class="absolute -bottom-1 -right-1 w-4 h-4 bg-primary border-2 border-white rounded-full"></div>
+</div>
+<div>
+<p class="font-bold text-[#2e2f2e] text-sm group-hover:text-primary transition-colors">Mehdi Alami</p>
+<p class="font-label text-[10px] text-outline">@mehdi_alami</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="font-label text-xs text-secondary">m.alami@um6p.ma</p>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-3 py-1 bg-primary-container text-on-primary-container rounded-full text-[10px] font-bold font-label">ADMIN</span>
+</td>
+<td class="px-6 py-4">
+<p class="font-label text-xs text-secondary">OCT 12, 2023</p>
+</td>
+<td class="px-6 py-4">
+<p class="font-label text-xs text-secondary">2 MINS AGO</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex justify-end gap-2">
+<button class="p-2 hover:bg-tertiary-fixed rounded-xl transition-colors text-on-surface">
+<span class="material-symbols-outlined text-[20px]">edit_note</span>
+</button>
+<button class="p-2 hover:bg-error-container/20 rounded-xl transition-colors text-error">
+<span class="material-symbols-outlined text-[20px]">delete_sweep</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- User Row 2 -->
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-4">
+<img class="w-12 h-12 rounded-2xl object-cover border-2 border-secondary-fixed shadow-sm" data-alt="Portrait of a modern woman with a confident smile, editorial style photography, soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuApTP8kC4KBbx1WZlg9Hgw_6pjxxRGf4X8MjVPcW-2a5VrAHUIR8JCm67sK5NScbjHVZ2BPvxuZ0AGuSiaVu_R6gr__oHtxiJenSHqm4c6ZXpP79L0yq-UMY8geokJEPrEHepCXnbG1n94RwKGHBaVtCl1SVQ7QWLKJ97nz2nUFWx64KQNqdJY4mHH2AymtauEE-CT1i8FcjSjaYSpHB35b55htM8aG-ha-m09sdLa6Cplb9d0MEJvQ7ffbMVivrU0txws9D7V2cS-V"/>
+<div>
+<p class="font-bold text-[#2e2f2e] text-sm group-hover:text-primary transition-colors">Sarah Bennani</p>
+<p class="font-label text-[10px] text-outline">@sarah_fit</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="font-label text-xs text-secondary">s.bennani@um6p.ma</p>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-[10px] font-bold font-label">USER</span>
+</td>
+<td class="px-6 py-4">
+<p class="font-label text-xs text-secondary">JAN 05, 2024</p>
+</td>
+<td class="px-6 py-4">
+<p class="font-label text-xs text-secondary">4 HOURS AGO</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex justify-end gap-2">
+<button class="p-2 hover:bg-tertiary-fixed rounded-xl transition-colors text-on-surface">
+<span class="material-symbols-outlined text-[20px]">edit_note</span>
+</button>
+<button class="p-2 hover:bg-error-container/20 rounded-xl transition-colors text-error">
+<span class="material-symbols-outlined text-[20px]">delete_sweep</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- User Row 3 -->
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-4">
+<img class="w-12 h-12 rounded-2xl object-cover border-2 border-secondary-fixed shadow-sm" data-alt="Portrait of a young professional man wearing glasses, minimalist background, bright and clear aesthetics" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANzV01AWEqJqsLov8xl--XFZPlq_JEM75vs4Z1FEgcTTKc-FGIkEetUrKoS8Rs8KI8LaYD-MqvtvY6wAN5SDZyrYaFhAlxCSV3xBRfGVXLl2qgOIFxvl8lGaf9WBEkEv7g99o-C6ETjEr2-Sjv8s9eYm6oofcrDT2mhxKPQRk4RYPiSOo0znjwsca2LpjH0298M08WvWxt7rLwn6oMEFaK8t6ZgveNWbYF6XxUJad5Yl6qUSo37iRbEqlCFp59WT1gXPknqlYKP6jg"/>
+<div>
+<p class="font-bold text-[#2e2f2e] text-sm group-hover:text-primary transition-colors">Yassine Amrani</p>
+<p class="font-label text-[10px] text-outline">@yassine_coach</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="font-label text-xs text-secondary">y.amrani@um6p.ma</p>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed rounded-full text-[10px] font-bold font-label">COACH</span>
+</td>
+<td class="px-6 py-4">
+<p class="font-label text-xs text-secondary">NOV 22, 2023</p>
+</td>
+<td class="px-6 py-4">
+<p class="font-label text-xs text-secondary">YESTERDAY</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex justify-end gap-2">
+<button class="p-2 hover:bg-tertiary-fixed rounded-xl transition-colors text-on-surface">
+<span class="material-symbols-outlined text-[20px]">edit_note</span>
+</button>
+<button class="p-2 hover:bg-error-container/20 rounded-xl transition-colors text-error">
+<span class="material-symbols-outlined text-[20px]">delete_sweep</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- User Row 4 -->
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-4">
+<div class="relative">
+<img class="w-12 h-12 rounded-2xl object-cover border-2 border-secondary-fixed shadow-sm" data-alt="Close-up portrait of a woman with natural light, clean skin, artistic fitness lifestyle feel" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSSKLzZuBDN4k5MGaOa7dKP6mRFk_TZ3oJeczYW0nSBNfAMbmP1OhRvtmVCBvAqd9SaqwweOBeNIxiyOoMgckF7ME4hIXsDfZSmr9B2gfValuHgX6bnsXCsmDwidP21oJ54Bb8xw90RkbZgWHfBFiLyrE_TGShZYGcExrahn5aDJXws-5vkGxO6EdEhhYOAoxwYAU7AYZeq3KbVndfh9STDrfLCNBalm4PBFysBgPFq_d8mCejB-1w9QmIF138LvCoYdIkZMahXahb"/>
+<div class="absolute -bottom-1 -right-1 w-4 h-4 bg-outline-variant border-2 border-white rounded-full"></div>
+</div>
+<div>
+<p class="font-bold text-[#2e2f2e] text-sm group-hover:text-primary transition-colors">Inès Kadiri</p>
+<p class="font-label text-[10px] text-outline">@ines_k</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="font-label text-xs text-secondary">i.kadiri@um6p.ma</p>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-[10px] font-bold font-label">USER</span>
+</td>
+<td class="px-6 py-4">
+<p class="font-label text-xs text-secondary">FEB 14, 2024</p>
+</td>
+<td class="px-6 py-4">
+<p class="font-label text-xs text-secondary">3 DAYS AGO</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex justify-end gap-2">
+<button class="p-2 hover:bg-tertiary-fixed rounded-xl transition-colors text-on-surface">
+<span class="material-symbols-outlined text-[20px]">edit_note</span>
+</button>
+<button class="p-2 hover:bg-error-container/20 rounded-xl transition-colors text-error">
+<span class="material-symbols-outlined text-[20px]">delete_sweep</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination / Load More -->
+<div class="flex flex-col items-center gap-6">
+<div class="flex items-center gap-4 p-4 border-2 border-dashed border-secondary-fixed-dim rounded-xl w-full max-w-md justify-center">
+<p class="font-label text-[10px] uppercase font-bold text-secondary">Showing 4 of 1,284 verified members</p>
+</div>
+<button class="group flex items-center gap-4 bg-secondary-container text-on-secondary-container font-label text-xs font-black px-12 py-5 rounded-full hover-bounce active-bounce transition-all border-2 border-secondary-fixed-dim">
+<span class="material-symbols-outlined group-hover:rotate-180 transition-transform duration-500">sync</span>
+        LOAD MORE RESULTS
+      </button>
+</div>
+<!-- Decorative Bottom Sticker -->
+<div class="fixed bottom-8 right-8 rotate-[5deg] z-10 pointer-events-none hidden xl:block">
+<div class="bg-lemon px-4 py-2 border-2 border-primary rounded-lg shadow-[-4px_4px_0px_#38671a] flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-label text-[10px] font-bold text-primary uppercase">Active Session Confirmed</span>
+</div>
+</div>
+</main>
+<!-- Mobile Floating Action Button (Only on Mobile) -->
+<div class="md:hidden fixed bottom-8 right-8 z-50">
+<button class="w-16 h-16 bg-primary text-on-primary rounded-full shadow-[-7px_7px_0px_#2e2f2e] flex items-center justify-center hover:scale-110 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</div>
+</body></html>

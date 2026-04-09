@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Space+Grotesk:wght@400;500;700&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#b4a5ff",
+                    "on-background": "#2e2f2e",
+                    "inverse-primary": "#c5fe9e",
+                    "on-primary-container": "#336215",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary": "#d6ffb7",
+                    "surface-dim": "#d4d5d2",
+                    "on-surface": "#2e2f2e",
+                    "background": "#f7f6f4",
+                    "secondary-dim": "#534f46",
+                    "surface-container-low": "#f1f1ef",
+                    "on-secondary-container": "#555148",
+                    "on-primary-fixed": "#214f01",
+                    "secondary-fixed": "#e8e2d6",
+                    "primary-fixed": "#c3fb9c",
+                    "error-dim": "#b92902",
+                    "secondary-container": "#e8e2d6",
+                    "tertiary-container": "#b4a5ff",
+                    "inverse-on-surface": "#9d9d9b",
+                    "outline": "#767775",
+                    "primary-fixed-dim": "#b5ec8f",
+                    "on-tertiary": "#f6f0ff",
+                    "on-secondary": "#f9f2e5",
+                    "primary-dim": "#2c5a0d",
+                    "on-tertiary-container": "#31009b",
+                    "on-secondary-fixed": "#423f36",
+                    "surface-container": "#e8e8e6",
+                    "outline-variant": "#adadab",
+                    "secondary-fixed-dim": "#dad4c8",
+                    "inverse-surface": "#0d0e0e",
+                    "primary": "#38671a",
+                    "tertiary-fixed-dim": "#a694ff",
+                    "surface-tint": "#38671a",
+                    "primary-container": "#c3fb9c",
+                    "tertiary": "#5d3fd3",
+                    "error-container": "#f95630",
+                    "on-secondary-fixed-variant": "#5f5b52",
+                    "error": "#b02500",
+                    "on-error": "#ffefec",
+                    "on-primary-fixed-variant": "#3d6c1f",
+                    "surface-container-high": "#e2e3e0",
+                    "on-error-container": "#520c00",
+                    "on-surface-variant": "#5b5c5a",
+                    "surface-variant": "#dddddb",
+                    "secondary": "#5f5b52",
+                    "tertiary-dim": "#5130c6",
+                    "on-tertiary-fixed-variant": "#3a03b1",
+                    "on-tertiary-fixed": "#180058",
+                    "surface": "#f7f6f4",
+                    "surface-container-highest": "#dddddb",
+                    "surface-bright": "#f7f6f4"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Space Grotesk"],
+                    "mono": ["Space Mono"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        @font-face {
+            font-family: 'Roobert';
+            src: local('Plus Jakarta Sans'); /* Fallback for local dev environment */
+        }
+        .roobert-tight {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: -3.2px;
+            font-weight: 800;
+        }
+        .signature-shadow {
+            box-shadow: -7px 7px 0px 0px rgba(46, 47, 46, 1);
+        }
+        .inner-highlight {
+            box-shadow: inset 4px 4px 0px 0px rgba(255, 255, 255, 0.4);
+        }
+        .clay-card {
+            border: 2px solid #dad4c8;
+            background-color: #f1f1ef;
+        }
+        .sticker-rotate {
+            transform: rotate(-3deg);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body min-h-screen pb-32">
+<!-- Top AppBar (JSON Derived Styles) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-[#faf9f7] dark:bg-stone-900 border-b-2 border-dashed border-[#dad4c8] shadow-[-7px_7px_0px_0px_rgba(46,47,46,1)]">
+<div class="flex items-center gap-4">
+<button class="hover:rotate-[-2deg] hover:-translate-y-1 transition-transform">
+<span class="material-symbols-outlined text-[#38671a] font-bold">arrow_back</span>
+</button>
+<h1 class="roobert-tight text-2xl uppercase text-[#2e2f2e] dark:text-stone-100">Pull Day</h1>
+</div>
+<button class="hover:rotate-[5deg] hover:-translate-y-1 transition-transform">
+<span class="material-symbols-outlined text-[#38671a]">edit</span>
+</button>
+</header>
+<main class="pt-24 px-6 max-w-2xl mx-auto">
+<!-- Hero Section / Context -->
+<div class="mb-10 flex flex-col gap-2">
+<p class="font-mono text-[10px] tracking-widest uppercase opacity-60">Estimated Duration</p>
+<h2 class="roobert-tight text-5xl text-tertiary">45 MINS</h2>
+<div class="flex gap-2 mt-4">
+<span class="bg-primary-container text-on-primary-fixed-variant px-4 py-1 rounded-full font-mono text-[10px] border-2 border-secondary-fixed-dim sticker-rotate shadow-sm">6 EXERCISES</span>
+<span class="bg-secondary-container text-on-secondary-fixed-variant px-4 py-1 rounded-full font-mono text-[10px] border-2 border-secondary-fixed-dim shadow-sm">HYPERTROPHY</span>
+</div>
+</div>
+<!-- Exercise List -->
+<div class="flex flex-col gap-8">
+<!-- Exercise Card: Barbell Row -->
+<div class="clay-card rounded-lg p-6 signature-shadow inner-highlight flex flex-col gap-4 relative overflow-hidden">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="font-mono text-[10px] tracking-widest uppercase text-primary mb-1">Back &amp; Rear Delts</span>
+<h3 class="roobert-tight text-3xl leading-none">Barbell Row</h3>
+</div>
+<!-- Activity Sticker -->
+<div class="bg-tertiary text-on-tertiary-container font-mono text-[10px] px-3 py-1 rounded-full sticker-rotate border-2 border-black/10 shadow-md">
+                        PR: 85KG X 8
+                    </div>
+</div>
+<!-- Bento Info Grid -->
+<div class="grid grid-cols-2 gap-3 mt-2">
+<div class="bg-surface-container-lowest p-4 rounded-md border-2 border-dashed border-secondary-fixed-dim">
+<p class="font-mono text-[9px] uppercase opacity-50 mb-1">Target Sets</p>
+<p class="text-xl font-bold">4 Sets</p>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-md border-2 border-dashed border-secondary-fixed-dim">
+<p class="font-mono text-[9px] uppercase opacity-50 mb-1">Rep Range</p>
+<p class="text-xl font-bold">8-12</p>
+</div>
+</div>
+<!-- Sparkline Mockup -->
+<div class="flex items-end justify-between gap-4 mt-2">
+<div class="flex flex-col">
+<p class="font-mono text-[9px] uppercase opacity-50">Volume Trend</p>
+<div class="flex items-center gap-1 mt-2">
+<div class="w-1.5 h-3 bg-primary/20 rounded-full"></div>
+<div class="w-1.5 h-5 bg-primary/40 rounded-full"></div>
+<div class="w-1.5 h-4 bg-primary/60 rounded-full"></div>
+<div class="w-1.5 h-6 bg-primary/80 rounded-full"></div>
+<div class="w-1.5 h-8 bg-primary rounded-full"></div>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary opacity-30 text-4xl">fitness_center</span>
+</div>
+</div>
+<!-- Exercise Card: Pull-up -->
+<div class="clay-card rounded-lg p-6 signature-shadow inner-highlight flex flex-col gap-4 relative overflow-hidden">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="font-mono text-[10px] tracking-widest uppercase text-primary mb-1">Lats &amp; Biceps</span>
+<h3 class="roobert-tight text-3xl leading-none">Pull-up</h3>
+</div>
+<div class="bg-error-container text-on-error-container font-mono text-[10px] px-3 py-1 rounded-full -rotate-2 border-2 border-black/10 shadow-md">
+                        PR: BW + 15KG
+                    </div>
+</div>
+<div class="grid grid-cols-2 gap-3 mt-2">
+<div class="bg-surface-container-lowest p-4 rounded-md border-2 border-dashed border-secondary-fixed-dim">
+<p class="font-mono text-[9px] uppercase opacity-50 mb-1">Target Sets</p>
+<p class="text-xl font-bold">3 Sets</p>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-md border-2 border-dashed border-secondary-fixed-dim">
+<p class="font-mono text-[9px] uppercase opacity-50 mb-1">Rep Range</p>
+<p class="text-xl font-bold">To Failure</p>
+</div>
+</div>
+<div class="flex items-end justify-between gap-4 mt-2">
+<div class="flex flex-col">
+<p class="font-mono text-[9px] uppercase opacity-50">Consistency</p>
+<div class="flex items-center gap-1 mt-2">
+<div class="w-1.5 h-6 bg-tertiary/20 rounded-full"></div>
+<div class="w-1.5 h-4 bg-tertiary/40 rounded-full"></div>
+<div class="w-1.5 h-8 bg-tertiary/60 rounded-full"></div>
+<div class="w-1.5 h-5 bg-tertiary/80 rounded-full"></div>
+<div class="w-1.5 h-7 bg-tertiary rounded-full"></div>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary opacity-30 text-4xl">accessibility_new</span>
+</div>
+</div>
+<!-- More indicator -->
+<div class="flex flex-col items-center gap-2 py-8 opacity-40">
+<span class="material-symbols-outlined">expand_more</span>
+<p class="font-mono text-[10px] uppercase">4 More Exercises</p>
+</div>
+</div>
+</main>
+<!-- Bottom Action Area -->
+<div class="fixed bottom-0 w-full px-6 pb-10 pt-6 bg-gradient-to-t from-background via-background to-transparent pointer-events-none">
+<div class="max-w-2xl mx-auto pointer-events-auto">
+<button class="w-full bg-primary text-on-primary-container h-16 rounded-full flex items-center justify-center gap-3 transition-all hover:rotate-[-2deg] hover:-translate-y-2 signature-shadow group">
+<span class="font-mono font-bold uppercase tracking-widest">Start Workout</span>
+<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">play_circle</span>
+</button>
+</div>
+</div>
+<!-- Navigation Shell (JSON Logic: Manual BottomNavBar) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-[#faf9f7] rounded-t-[3rem] border-t-2 border-[#dad4c8] shadow-[-7px_-7px_0px_0px_rgba(46,47,46,0.05)] md:hidden">
+<div class="flex flex-col items-center justify-center text-[#2e2f2e] opacity-70 hover:rotate-[2deg] hover:-translate-y-2 transition-all">
+<span class="material-symbols-outlined">fitness_center</span>
+<span class="font-mono uppercase tracking-wider text-[10px] mt-1">Programs</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#2e2f2e] opacity-70 hover:rotate-[2deg] hover:-translate-y-2 transition-all">
+<span class="material-symbols-outlined">search</span>
+<span class="font-mono uppercase tracking-wider text-[10px] mt-1">Library</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#38671a] text-[#faf9f7] rounded-full px-6 py-2 rotate-[-3deg] shadow-[-4px_4px_0px_0px_rgba(0,0,0,1)] active:scale-90 duration-150">
+<span class="material-symbols-outlined">play_circle</span>
+<span class="font-mono uppercase tracking-wider text-[10px] mt-1">Workout</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#2e2f2e] opacity-70 hover:rotate-[2deg] hover:-translate-y-2 transition-all">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-mono uppercase tracking-wider text-[10px] mt-1">History</span>
+</div>
+</nav>
+</body></html>

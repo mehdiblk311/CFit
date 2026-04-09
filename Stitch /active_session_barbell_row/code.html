@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Space+Grotesk:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .font-roobert { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-space-mono { font-family: 'Space Mono', monospace; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .aggressive-crop {
+            letter-spacing: -3.2px;
+        }
+        .clay-shadow {
+            box-shadow: -7px 7px 0px 0px rgba(46, 47, 46, 1);
+        }
+        .clay-inset {
+            box-shadow: inset 4px 4px 0px rgba(255, 255, 255, 0.4);
+        }
+        .sticker-rotate {
+            transform: rotate(-3deg);
+        }
+        .hover-bounce:hover {
+            transform: rotateZ(-8deg) translateY(-4px);
+            box-shadow: -7px 7px 0px rgb(0,0,0);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-fixed": "#b4a5ff",
+                        "on-background": "#2e2f2e",
+                        "inverse-primary": "#c5fe9e",
+                        "on-primary-container": "#336215",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary": "#d6ffb7",
+                        "surface-dim": "#d4d5d2",
+                        "on-surface": "#2e2f2e",
+                        "background": "#f7f6f4",
+                        "secondary-dim": "#534f46",
+                        "surface-container-low": "#f1f1ef",
+                        "on-secondary-container": "#555148",
+                        "on-primary-fixed": "#214f01",
+                        "secondary-fixed": "#e8e2d6",
+                        "primary-fixed": "#c3fb9c",
+                        "error-dim": "#b92902",
+                        "secondary-container": "#e8e2d6",
+                        "tertiary-container": "#b4a5ff",
+                        "inverse-on-surface": "#9d9d9b",
+                        "outline": "#767775",
+                        "primary-fixed-dim": "#b5ec8f",
+                        "on-tertiary": "#f6f0ff",
+                        "on-secondary": "#f9f2e5",
+                        "primary-dim": "#2c5a0d",
+                        "on-tertiary-container": "#31009b",
+                        "on-secondary-fixed": "#423f36",
+                        "surface-container": "#e8e8e6",
+                        "outline-variant": "#adadab",
+                        "secondary-fixed-dim": "#dad4c8",
+                        "inverse-surface": "#0d0e0e",
+                        "primary": "#38671a",
+                        "tertiary-fixed-dim": "#a694ff",
+                        "surface-tint": "#38671a",
+                        "primary-container": "#c3fb9c",
+                        "tertiary": "#5d3fd3",
+                        "error-container": "#f95630",
+                        "on-secondary-fixed-variant": "#5f5b52",
+                        "error": "#b02500",
+                        "on-error": "#ffefec",
+                        "on-primary-fixed-variant": "#3d6c1f",
+                        "surface-container-high": "#e2e3e0",
+                        "on-error-container": "#520c00",
+                        "on-surface-variant": "#5b5c5a",
+                        "surface-variant": "#dddddb",
+                        "secondary": "#5f5b52",
+                        "tertiary-dim": "#5130c6",
+                        "on-tertiary-fixed-variant": "#3a03b1",
+                        "on-tertiary-fixed": "#180058",
+                        "surface": "#f7f6f4",
+                        "surface-container-highest": "#dddddb",
+                        "surface-bright": "#f7f6f4"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Space Grotesk"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-container">
+<!-- Active Session Header (Derived from TopAppBar Logic) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-20 bg-background border-b-2 border-dashed border-secondary-fixed-dim">
+<div class="flex flex-col">
+<span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Exercise 3/6</span>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="timer">timer</span>
+<span class="font-label font-bold text-lg">0:12:45</span>
+</div>
+</div>
+<button class="bg-primary text-on-primary font-label px-6 py-2 rounded-full uppercase tracking-wider text-xs font-bold hover-bounce clay-shadow transition-all">
+            Finish
+        </button>
+</header>
+<main class="pt-24 pb-48 px-6 max-w-2xl mx-auto">
+<!-- Exercise Hero Section -->
+<section class="mb-10 relative">
+<div class="flex items-start justify-between mb-4">
+<div>
+<h1 class="text-5xl font-bold font-roobert aggressive-crop text-on-surface uppercase mb-2 leading-[0.9]">
+                        Barbell Row
+                    </h1>
+<span class="inline-flex items-center bg-tertiary-container text-on-tertiary-fixed font-label text-[10px] uppercase tracking-widest px-3 py-1 rounded-full sticker-rotate clay-inset">
+                        Back &amp; Biceps
+                    </span>
+</div>
+<!-- Performance Sparkline Simulation -->
+<div class="w-32 h-16 bg-surface-container-low rounded-lg border border-secondary-fixed-dim p-2 flex items-end gap-1">
+<div class="w-2 bg-primary/20 h-1/2 rounded-t-sm"></div>
+<div class="w-2 bg-primary/40 h-2/3 rounded-t-sm"></div>
+<div class="w-2 bg-primary/60 h-3/4 rounded-t-sm"></div>
+<div class="w-2 bg-primary h-full rounded-t-sm"></div>
+<div class="w-2 bg-primary/30 h-1/2 rounded-t-sm"></div>
+</div>
+</div>
+<!-- PR Flash Sticker (Floating) -->
+<div class="absolute -right-4 top-20 bg-[#f9f2e5] text-primary border-2 border-primary border-dashed font-label font-bold text-xs p-3 rounded-full rotate-[12deg] clay-shadow z-10">
+                NEW PR! +5kg
+            </div>
+</section>
+<!-- Set Logging Table -->
+<section class="bg-surface-container-low rounded-xl p-6 border-2 border-secondary-fixed-dim clay-shadow mb-8">
+<div class="grid grid-cols-4 gap-4 mb-4 text-center font-label text-[10px] uppercase tracking-widest text-on-surface-variant">
+<span>Set #</span>
+<span>Weight (kg)</span>
+<span>Reps</span>
+<span>Done</span>
+</div>
+<div class="space-y-4">
+<!-- Completed Set -->
+<div class="grid grid-cols-4 gap-4 items-center bg-surface-bright p-3 rounded-xl border border-secondary-fixed-dim">
+<span class="text-center font-label font-bold text-secondary">1</span>
+<input class="bg-transparent border-none text-center font-label font-bold focus:ring-0 text-on-surface/50" disabled="" type="number" value="60"/>
+<input class="bg-transparent border-none text-center font-label font-bold focus:ring-0 text-on-surface/50" disabled="" type="number" value="12"/>
+<div class="flex justify-center">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-sm" data-icon="check" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+</div>
+<!-- Active Set -->
+<div class="grid grid-cols-4 gap-4 items-center bg-surface-container-lowest p-3 rounded-xl border-2 border-primary clay-shadow scale-105 transform transition-transform">
+<span class="text-center font-label font-bold text-primary">2</span>
+<input class="bg-surface-container-low rounded-full py-2 border-none text-center font-label font-bold focus:ring-2 focus:ring-primary" placeholder="60" type="number"/>
+<input class="bg-surface-container-low rounded-full py-2 border-none text-center font-label font-bold focus:ring-2 focus:ring-primary" placeholder="12" type="number"/>
+<div class="flex justify-center">
+<button class="w-8 h-8 rounded-full border-2 border-secondary-fixed-dim flex items-center justify-center hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-sm text-secondary-dim" data-icon="circle">circle</span>
+</button>
+</div>
+</div>
+<!-- Future Set -->
+<div class="grid grid-cols-4 gap-4 items-center bg-surface-bright/50 p-3 rounded-xl border border-dashed border-secondary-fixed-dim opacity-60">
+<span class="text-center font-label font-bold text-secondary">3</span>
+<div class="h-8 bg-surface-container-low rounded-full"></div>
+<div class="h-8 bg-surface-container-low rounded-full"></div>
+<div class="flex justify-center">
+<div class="w-8 h-8 rounded-full border border-secondary-fixed-dim"></div>
+</div>
+</div>
+</div>
+<button class="w-full mt-6 py-4 rounded-full border-2 border-dashed border-secondary-fixed-dim font-label uppercase tracking-widest text-xs font-bold text-secondary-dim hover:bg-surface-container transition-colors">
+                + Add Set
+            </button>
+</section>
+<!-- Notes Section -->
+<section class="mb-10">
+<h3 class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 px-2">Session Notes</h3>
+<div class="bg-white rounded-xl p-4 border border-secondary-fixed-dim clay-inset h-24 italic text-on-surface-variant text-sm font-body">
+                Feeling strong on the pull today. Focus on squeeze at the top...
+            </div>
+</section>
+</main>
+<!-- Rest Timer Bottom Sheet (Simulated as persistent bottom UI for this view) -->
+<div class="fixed bottom-0 left-0 w-full z-50 bg-background border-t-2 border-secondary-fixed-dim rounded-t-xl px-6 pt-6 pb-10 shadow-[0_-20px_50px_rgba(0,0,0,0.05)]">
+<div class="w-12 h-1.5 bg-surface-container mx-auto rounded-full mb-8"></div>
+<div class="flex flex-col items-center">
+<div class="relative w-48 h-48 mb-6 flex items-center justify-center">
+<!-- Circular Ring Background -->
+<svg class="absolute inset-0 w-full h-full -rotate-90">
+<circle class="text-surface-container" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-dasharray="552.92" stroke-dashoffset="150" stroke-width="8"></circle>
+</svg>
+<div class="text-center">
+<span class="font-roobert aggressive-crop text-6xl font-bold block">1:30</span>
+<span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Resting</span>
+</div>
+</div>
+<div class="flex items-center gap-6 w-full max-w-xs">
+<button class="flex-1 bg-surface-container-low text-on-surface font-label text-xs font-bold py-3 rounded-full border border-secondary-fixed-dim hover-bounce">
+                    -15s
+                </button>
+<button class="flex-1 bg-primary text-on-primary font-label text-xs font-bold py-3 rounded-full clay-shadow hover-bounce uppercase tracking-widest">
+                    Skip
+                </button>
+<button class="flex-1 bg-surface-container-low text-on-surface font-label text-xs font-bold py-3 rounded-full border border-secondary-fixed-dim hover-bounce">
+                    +15s
+                </button>
+</div>
+</div>
+</div>
+</body></html>

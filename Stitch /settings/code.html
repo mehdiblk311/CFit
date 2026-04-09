@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Mono:wght@400;700&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-fixed": "#180058",
+                    "on-primary-fixed-variant": "#3d6c1f",
+                    "inverse-surface": "#0d0e0e",
+                    "secondary-fixed-dim": "#dad4c8",
+                    "on-surface-variant": "#5b5c5a",
+                    "error-container": "#f95630",
+                    "tertiary-dim": "#5130c6",
+                    "secondary-dim": "#534f46",
+                    "primary": "#38671a",
+                    "secondary-fixed": "#e8e2d6",
+                    "on-secondary": "#f9f2e5",
+                    "surface-tint": "#38671a",
+                    "on-error-container": "#520c00",
+                    "secondary": "#5f5b52",
+                    "primary-fixed": "#c3fb9c",
+                    "on-surface": "#2e2f2e",
+                    "on-tertiary-container": "#31009b",
+                    "on-tertiary": "#f6f0ff",
+                    "outline": "#767775",
+                    "surface-container": "#e8e8e6",
+                    "tertiary-fixed": "#b4a5ff",
+                    "surface-container-low": "#f1f1ef",
+                    "surface-variant": "#dddddb",
+                    "tertiary": "#5d3fd3",
+                    "primary-container": "#c3fb9c",
+                    "on-primary": "#d6ffb7",
+                    "background": "#f7f6f4",
+                    "surface-container-high": "#e2e3e0",
+                    "inverse-primary": "#c5fe9e",
+                    "primary-dim": "#2c5a0d",
+                    "surface-dim": "#d4d5d2",
+                    "primary-fixed-dim": "#b5ec8f",
+                    "on-tertiary-fixed-variant": "#3a03b1",
+                    "surface": "#f7f6f4",
+                    "on-primary-fixed": "#214f01",
+                    "on-primary-container": "#336215",
+                    "on-secondary-fixed-variant": "#5f5b52",
+                    "inverse-on-surface": "#9d9d9b",
+                    "tertiary-container": "#b4a5ff",
+                    "error": "#b02500",
+                    "on-secondary-container": "#555148",
+                    "surface-bright": "#f7f6f4",
+                    "surface-container-highest": "#dddddb",
+                    "outline-variant": "#adadab",
+                    "on-background": "#2e2f2e",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-container": "#e8e2d6",
+                    "tertiary-fixed-dim": "#a694ff",
+                    "error-dim": "#b92902",
+                    "on-secondary-fixed": "#423f36",
+                    "on-error": "#ffefec"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Space Mono"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .clay-shadow {
+            box-shadow: -7px 7px 0px 0px rgba(46,47,46,1);
+        }
+        .inner-glow {
+            box-shadow: inset 4px 4px 0px rgba(255, 255, 255, 0.5);
+        }
+        .aggressive-crop {
+            letter-spacing: -0.05em;
+            line-height: 0.9;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="bg-[#faf9f7] dark:bg-[#1a1a19] border-b-2 border-[#dad4c8] border-dashed docked full-width top-0 sticky z-50 flex justify-between items-center px-6 h-16 w-full">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-[#38671a] dark:text-[#7db15b] hover:rotate-[-2deg] transition-transform Active: scale-95 transition-all">arrow_back</button>
+<h1 class="font-['Plus_Jakarta_Sans'] uppercase tracking-[1px] text-[12px] font-bold text-[#38671a] dark:text-[#7db15b]">SETTINGS</h1>
+</div>
+<span class="text-xl font-black text-[#2e2f2e] dark:text-[#faf9f7] tracking-tighter">UM6P_FIT</span>
+</header>
+<main class="max-w-2xl mx-auto px-6 pt-12 pb-32 space-y-12">
+<!-- Profile Section -->
+<section class="relative" id="profile">
+<div class="flex flex-col md:flex-row items-center gap-8 bg-surface-container-low p-8 rounded-xl border-2 border-secondary-fixed-dim clay-shadow inner-glow">
+<div class="relative">
+<img alt="User Profile" class="w-20 h-20 rounded-full border-4 border-white shadow-sm" data-alt="close-up portrait of a fit man with a friendly expression in a modern minimalist setting with soft natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7yuraIYLjFl4hw6_txwauSuLjufGUDANaq4RzCdk3PXklZjsvCm5r4yqzIMqTALoj5QyXKcNmCPI9eRb7aAH99Bom8DnJVe9G1T-TnkWh_rmpKe3xDAoCHJq65LdgMV9gBD5KvqfIbv3sRV9iHK6JqmiobHKuNQaNoeNwbFrbuoKu0gUETr08P0MgxuL2m0jrzuUfQ7nh37IU0UKJS9tsrrdI_1CsBmbTZ8SCdWOI6uFTRH-sNJUs_hmTQUKuqkR32w4a5uBf_nUp"/>
+<div class="absolute -bottom-1 -right-1 bg-primary p-1.5 rounded-full text-on-primary text-xs material-symbols-outlined">edit</div>
+</div>
+<div class="flex-1 w-full space-y-4">
+<div>
+<label class="font-label text-[10px] uppercase tracking-wider text-on-surface-variant block mb-1">Full Name</label>
+<input class="w-full bg-white border-2 border-secondary-fixed-dim rounded-full px-6 py-2 focus:ring-0 focus:border-primary outline-none font-bold" type="text" value="Anas Alami"/>
+</div>
+<div>
+<label class="font-label text-[10px] uppercase tracking-wider text-on-surface-variant block mb-1">Email Address</label>
+<div class="px-6 py-2 bg-surface-variant/30 rounded-full text-on-surface-variant font-medium">anas.alami@um6p.ma</div>
+</div>
+<button class="flex items-center gap-2 text-primary font-bold text-sm hover:rotate-[-2deg] transition-all">
+<span class="material-symbols-outlined text-sm">lock_reset</span>
+                        Change Password
+                    </button>
+</div>
+</div>
+</section>
+<!-- Body Metrics -->
+<section class="space-y-6" id="metrics">
+<h2 class="font-headline font-extrabold text-3xl aggressive-crop uppercase">Body Metrics</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="bg-surface-container p-6 rounded-lg border-2 border-dashed border-secondary-fixed-dim">
+<label class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Height (cm)</label>
+<input class="w-full bg-transparent border-none p-0 text-2xl font-bold focus:ring-0" type="number" value="182"/>
+</div>
+<div class="bg-surface-container p-6 rounded-lg border-2 border-dashed border-secondary-fixed-dim relative">
+<label class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Weight (kg)</label>
+<div class="text-2xl font-bold text-on-surface-variant">78.5</div>
+<span class="absolute bottom-4 right-6 font-label text-[8px] text-tertiary">Last logged: Apr 4</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="bg-surface-container p-6 rounded-lg border-2 border-dashed border-secondary-fixed-dim">
+<label class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Age</label>
+<input class="w-full bg-transparent border-none p-0 text-2xl font-bold focus:ring-0" type="number" value="24"/>
+</div>
+<div class="space-y-2">
+<label class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant ml-2">Gender</label>
+<div class="flex p-1 bg-secondary-fixed rounded-full">
+<button class="flex-1 py-2 rounded-full bg-white text-on-surface font-bold text-xs shadow-sm">Male</button>
+<button class="flex-1 py-2 rounded-full text-on-surface-variant font-bold text-xs">Female</button>
+</div>
+</div>
+</div>
+<button class="w-full py-4 bg-secondary-container text-on-secondary-container font-bold rounded-full border-2 border-secondary-fixed-dim hover:rotate-[-2deg] transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">calculate</span>
+                Recalculate TDEE
+            </button>
+</section>
+<!-- Fitness Goals -->
+<section class="bg-surface-container-lowest p-8 rounded-xl border-2 border-secondary-fixed-dim clay-shadow inner-glow space-y-8" id="goals">
+<h2 class="font-headline font-extrabold text-3xl aggressive-crop uppercase">Fitness Goals</h2>
+<div class="space-y-4">
+<label class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Primary Objective</label>
+<div class="grid grid-cols-3 gap-2">
+<button class="py-3 rounded-full border-2 border-secondary-fixed-dim text-xs font-bold hover:bg-primary-container hover:border-primary transition-colors">Lose</button>
+<button class="py-3 rounded-full border-2 border-primary bg-primary-container text-xs font-bold">Maintain</button>
+<button class="py-3 rounded-full border-2 border-secondary-fixed-dim text-xs font-bold hover:bg-primary-container hover:border-primary transition-colors">Gain</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Target Weight (kg)</label>
+<input class="w-full bg-surface-container-low border-2 border-secondary-fixed-dim rounded-full px-6 py-3 focus:border-primary outline-none font-bold" type="number" value="75"/>
+</div>
+<div class="space-y-2">
+<label class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Activity Level</label>
+<select class="w-full bg-surface-container-low border-2 border-secondary-fixed-dim rounded-full px-6 py-3 focus:border-primary outline-none font-bold appearance-none">
+<option>Moderate (3-5 days/week)</option>
+<option>Sedentary</option>
+<option>Very Active</option>
+</select>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<label class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Workout Frequency</label>
+<span class="font-bold text-primary">5 days</span>
+</div>
+<input class="w-full h-2 bg-secondary-fixed rounded-lg appearance-none cursor-pointer accent-primary" max="7" min="1" type="range" value="5"/>
+</div>
+</section>
+<!-- TDEE & Macro Targets -->
+<section class="bg-primary text-on-primary p-8 rounded-xl border-2 border-on-primary-container clay-shadow inner-glow space-y-6" id="macros">
+<div class="flex justify-between items-end">
+<div>
+<h2 class="font-label text-[10px] uppercase tracking-[2px] opacity-80">Daily TDEE Target</h2>
+<div class="text-6xl font-headline font-black aggressive-crop">2,300 <span class="text-xl font-medium tracking-normal">kcal</span></div>
+</div>
+<button class="font-label text-[10px] underline underline-offset-4 decoration-2 decoration-on-primary-fixed-variant hover:text-white transition-colors">Reset to Calculated</button>
+</div>
+<div class="grid grid-cols-3 gap-4 pt-4">
+<div class="bg-on-primary/10 p-4 rounded-lg border border-on-primary/20">
+<label class="font-label text-[8px] uppercase tracking-widest opacity-70 block mb-1">Protein</label>
+<input class="w-full bg-transparent border-none p-0 font-bold text-lg focus:ring-0 placeholder:text-on-primary/50" type="text" value="180g"/>
+</div>
+<div class="bg-on-primary/10 p-4 rounded-lg border border-on-primary/20">
+<label class="font-label text-[8px] uppercase tracking-widest opacity-70 block mb-1">Carbs</label>
+<input class="w-full bg-transparent border-none p-0 font-bold text-lg focus:ring-0 placeholder:text-on-primary/50" type="text" value="250g"/>
+</div>
+<div class="bg-on-primary/10 p-4 rounded-lg border border-on-primary/20">
+<label class="font-label text-[8px] uppercase tracking-widest opacity-70 block mb-1">Fats</label>
+<input class="w-full bg-transparent border-none p-0 font-bold text-lg focus:ring-0 placeholder:text-on-primary/50" type="text" value="65g"/>
+</div>
+</div>
+</section>
+<!-- Appearance & Language -->
+<section class="space-y-4" id="preferences">
+<div class="flex items-center justify-between p-6 bg-surface-container-low rounded-lg border-2 border-dashed border-secondary-fixed-dim">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary">dark_mode</span>
+<span class="font-bold">Dark Mode</span>
+</div>
+<button class="w-12 h-6 bg-secondary-fixed rounded-full relative transition-colors">
+<div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform"></div>
+</button>
+</div>
+<div class="flex items-center justify-between p-6 bg-surface-container-low rounded-lg border-2 border-dashed border-secondary-fixed-dim">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary">language</span>
+<span class="font-bold">Language</span>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1 rounded-full bg-primary text-white text-xs font-bold">EN</button>
+<button class="px-3 py-1 rounded-full bg-white border border-secondary-fixed-dim text-xs font-bold">FR</button>
+<button class="px-3 py-1 rounded-full bg-white border border-secondary-fixed-dim text-xs font-bold">AR</button>
+</div>
+</div>
+</section>
+<!-- Legal & Account -->
+<section class="space-y-2" id="legal">
+<div class="p-6 bg-white rounded-lg flex items-center justify-between hover:bg-surface-container transition-colors cursor-pointer group">
+<span class="font-medium text-on-surface-variant group-hover:text-on-surface">Privacy Policy</span>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+<div class="p-6 bg-white rounded-lg flex items-center justify-between hover:bg-surface-container transition-colors cursor-pointer group">
+<span class="font-medium text-on-surface-variant group-hover:text-on-surface">Terms of Service</span>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+<div class="p-6 bg-white rounded-lg flex items-center justify-between hover:bg-surface-container transition-colors cursor-pointer group">
+<span class="font-medium text-on-surface-variant group-hover:text-on-surface">Export My Data</span>
+<span class="material-symbols-outlined text-on-surface-variant">download</span>
+</div>
+<div class="p-6 bg-white rounded-lg flex items-center justify-between hover:bg-error-container/10 transition-colors cursor-pointer group">
+<span class="font-bold text-error">Delete Account</span>
+<span class="material-symbols-outlined text-error">delete_forever</span>
+</div>
+</section>
+<!-- Logout -->
+<footer class="pt-8">
+<button class="w-full py-6 bg-error text-white font-headline font-black text-xl rounded-xl clay-shadow inner-glow hover:translate-y-[-4px] hover:rotate-[-2deg] transition-all flex items-center justify-center gap-4 active:scale-95">
+<span class="material-symbols-outlined">logout</span>
+                LOGOUT
+            </button>
+<p class="text-center mt-12 font-label text-[10px] text-on-surface-variant opacity-40 uppercase tracking-widest italic">UM6P_FIT Version 2.4.1 - Kinetic Craft Build</p>
+</footer>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-6 pb-8 pt-4 bg-[#faf9f7] rounded-t-[3rem] border-t-2 border-[#dad4c8] shadow-[-7px_7px_0px_0px_rgba(46,47,46,1)] tonal shift using bg-[#dad4c8]">
+<div class="flex flex-col items-center justify-center text-[#2e2f2e] opacity-70 hover:translate-y-[-4px] hover:rotate-[-8deg] transition-all">
+<span class="material-symbols-outlined">edit_note</span>
+<span class="font-['Space_Mono'] uppercase tracking-[1px] text-[10px]">JOURNAL</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#2e2f2e] opacity-70 hover:translate-y-[-4px] hover:rotate-[-8deg] transition-all">
+<span class="material-symbols-outlined">fitness_center</span>
+<span class="font-['Space_Mono'] uppercase tracking-[1px] text-[10px]">WORKOUT</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#2e2f2e] opacity-70 hover:translate-y-[-4px] hover:rotate-[-8deg] transition-all">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-['Space_Mono'] uppercase tracking-[1px] text-[10px]">METRICS</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#38671a] text-[#faf9f7] rounded-full px-5 py-2 scale-90 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-['Space_Mono'] uppercase tracking-[1px] text-[10px]">SETTINGS</span>
+</div>
+</nav>
+</body></html>

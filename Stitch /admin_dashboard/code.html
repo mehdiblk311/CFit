@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UM6P_FIT Admin Terminal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Space+Mono:wght@400;700&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#e8e2d6",
+                        "surface-dim": "#d4d5d2",
+                        "surface-variant": "#dddddb",
+                        "tertiary": "#5d3fd3",
+                        "tertiary-dim": "#5130c6",
+                        "on-secondary-container": "#555148",
+                        "inverse-on-surface": "#9d9d9b",
+                        "secondary-container": "#e8e2d6",
+                        "inverse-primary": "#c5fe9e",
+                        "outline": "#767775",
+                        "on-tertiary-container": "#31009b",
+                        "error-container": "#f95630",
+                        "surface-container-low": "#f1f1ef",
+                        "on-secondary-fixed-variant": "#5f5b52",
+                        "primary-fixed-dim": "#b5ec8f",
+                        "primary-container": "#c3fb9c",
+                        "surface-container-highest": "#dddddb",
+                        "primary": "#38671a",
+                        "surface-bright": "#f7f6f4",
+                        "on-tertiary": "#f6f0ff",
+                        "on-primary": "#d6ffb7",
+                        "error-dim": "#b92902",
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#f7f6f4",
+                        "on-tertiary-fixed-variant": "#3a03b1",
+                        "on-primary-container": "#336215",
+                        "background": "#f7f6f4",
+                        "on-background": "#2e2f2e",
+                        "inverse-surface": "#0d0e0e",
+                        "surface-container": "#e8e8e6",
+                        "primary-dim": "#2c5a0d",
+                        "on-surface-variant": "#5b5c5a",
+                        "tertiary-container": "#b4a5ff",
+                        "error": "#b02500",
+                        "primary-fixed": "#c3fb9c",
+                        "secondary-fixed-dim": "#dad4c8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Space Mono"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hard-shadow {
+            box-shadow: -7px 7px 0px #2e2f2e;
+        }
+        .signature-card {
+            border: 2px solid #dad4c8;
+            box-shadow: -7px 7px 0px #2e2f2e;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .signature-card:hover {
+            transform: rotate(-2deg) translateY(-4px);
+        }
+        .technical-mono {
+            font-family: 'Space Mono', monospace;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body class="bg-[#faf9f7] text-[#2e2f2e] font-body selection:bg-primary-container">
+<!-- SideNavBar Shell -->
+<nav class="fixed left-0 top-0 h-full z-50 flex flex-col bg-[#faf9f7] h-screen w-20 hover:w-64 transition-all duration-300 border-r-2 border-[#dad4c8]">
+<div class="p-6 mb-8">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+</div>
+<div class="overflow-hidden whitespace-nowrap">
+<h1 class="text-2xl font-black text-[#2e2f2e] uppercase tracking-tighter">UM6P_FIT</h1>
+<p class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase text-[#38671a]">Admin Terminal</p>
+</div>
+</div>
+</div>
+<div class="flex-1 px-2">
+<!-- Active: Dashboard -->
+<a class="flex items-center gap-4 bg-[#38671a] text-[#faf9f7] rounded-full px-4 py-3 m-2 transition-transform active:scale-95 duration-100 hover:rotate-[-2deg] hover:-translate-y-1" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase overflow-hidden whitespace-nowrap">Dashboard</span>
+</a>
+<a class="flex items-center gap-4 text-[#2e2f2e] hover:bg-[#dad4c8]/30 rounded-full px-4 py-3 m-2 transition-transform active:scale-95 duration-100 hover:rotate-[-2deg] hover:-translate-y-1" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase overflow-hidden whitespace-nowrap">Users</span>
+</a>
+<a class="flex items-center gap-4 text-[#2e2f2e] hover:bg-[#dad4c8]/30 rounded-full px-4 py-3 m-2 transition-transform active:scale-95 duration-100 hover:rotate-[-2deg] hover:-translate-y-1" href="#">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+<span class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase overflow-hidden whitespace-nowrap">Exercises</span>
+</a>
+<a class="flex items-center gap-4 text-[#2e2f2e] hover:bg-[#dad4c8]/30 rounded-full px-4 py-3 m-2 transition-transform active:scale-95 duration-100 hover:rotate-[-2deg] hover:-translate-y-1" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+<span class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase overflow-hidden whitespace-nowrap">Foods</span>
+</a>
+<a class="flex items-center gap-4 text-[#2e2f2e] hover:bg-[#dad4c8]/30 rounded-full px-4 py-3 m-2 transition-transform active:scale-95 duration-100 hover:rotate-[-2deg] hover:-translate-y-1" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm font-bold uppercase overflow-hidden whitespace-nowrap">Workout Templates</span>
+</a>
+</div>
+<div class="p-4 border-t-2 border-dashed border-[#dad4c8]">
+<div class="flex items-center gap-4 px-2">
+<div class="w-10 h-10 rounded-full bg-secondary-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="professional portrait of a fitness administrator with a confident look and soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaPUNk_TZpHXtG18HiPQzfUvXyJtdXPQ0f3yA9bna4Peh-ueOUjNiexknJlzvebB8GeEQFk0xGh-ftlSHXZViI3SVRBreC6fmNJM-pL3_xZEtFeBSDv5HBrxWOoe8E0W4h3I5J06kLS_643VVpv1_Qxm52xdDIYgF19mlyaCSxaiyQtRkDBNpd-btqq1AgYaedMj3auefTA79-zchBE-05T9xUUD1hbmnTvge7UPZQY-0BDB8uOZjH17JEOXWkqO77nhUPIKH4UtVl"/>
+</div>
+<div class="overflow-hidden whitespace-nowrap">
+<p class="technical-mono text-[10px] font-bold">Root Admin</p>
+</div>
+</div>
+</div>
+</nav>
+<!-- TopAppBar Shell -->
+<header class="flex justify-between items-center px-8 ml-20 w-full h-16 sticky top-0 z-40 bg-[#faf9f7]/80 backdrop-blur-md border-b-2 border-[#dad4c8]">
+<div class="flex items-center gap-6">
+<span class="text-xl font-black text-[#2e2f2e]">UM6P_FIT Admin</span>
+<div class="relative hidden lg:block">
+<input class="bg-surface-container-low border-2 border-secondary-fixed-dim rounded-full py-1 px-8 technical-mono text-[10px] focus:ring-primary focus:border-primary w-64 transition-all" placeholder="SEARCH COMMANDS..." type="text"/>
+<span class="material-symbols-outlined absolute left-2 top-1.5 text-xs text-outline" data-icon="search">search</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary-container transition-colors active:opacity-80">
+<span class="material-symbols-outlined text-primary" data-icon="notifications">notifications</span>
+</button>
+<div class="h-8 w-[2px] bg-secondary-fixed-dim"></div>
+<div class="flex items-center gap-3">
+<p class="technical-mono text-[10px] font-bold text-primary">System Online</p>
+<div class="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+</div>
+</div>
+</header>
+<main class="ml-20 p-8 lg:p-12 max-w-[1600px] mx-auto">
+<!-- Dashboard Header -->
+<div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<p class="technical-mono text-primary font-bold mb-2">// OVERVIEW_TERMINAL_V1</p>
+<h2 class="text-6xl md:text-8xl font-black tracking-[-3.2px] leading-tight font-headline">The Kinetic <br/> Dashboard</h2>
+</div>
+<div class="flex flex-col items-end">
+<div class="bg-primary-container px-6 py-4 rounded-xl border-2 border-[#dad4c8] hard-shadow mb-4 rotate-[2deg]">
+<p class="technical-mono text-xs text-on-primary-container font-bold italic">Last Sync: Oct 24, 09:42 AM</p>
+</div>
+</div>
+</div>
+<!-- Row 1: Key Metric Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+<div class="signature-card bg-surface-container-lowest p-8 rounded-lg relative overflow-hidden group">
+<div class="absolute top-4 right-4 bg-primary text-on-primary text-[10px] technical-mono px-2 py-1 rounded-full">+12%</div>
+<p class="technical-mono text-xs text-outline font-bold mb-4">Total Users</p>
+<h3 class="text-5xl font-black font-headline tracking-tighter">1,247</h3>
+<div class="mt-6 h-1 w-full bg-secondary-fixed-dim rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[75%]"></div>
+</div>
+</div>
+<div class="signature-card bg-primary-container p-8 rounded-lg relative">
+<p class="technical-mono text-xs text-on-primary-container font-bold mb-4">Active Today</p>
+<h3 class="text-5xl font-black font-headline tracking-tighter text-on-primary-container">482</h3>
+<span class="material-symbols-outlined absolute bottom-4 right-4 text-4xl opacity-20" data-icon="bolt">bolt</span>
+</div>
+<div class="signature-card bg-tertiary-container p-8 rounded-lg relative">
+<p class="technical-mono text-xs text-on-tertiary-fixed-variant font-bold mb-4">New Signups</p>
+<h3 class="text-5xl font-black font-headline tracking-tighter text-on-tertiary-fixed-variant">89</h3>
+<p class="technical-mono text-[10px] mt-4 font-bold opacity-70">Weekly Goal: 100</p>
+</div>
+<div class="signature-card bg-surface-container-lowest p-8 rounded-lg relative">
+<p class="technical-mono text-xs text-outline font-bold mb-4">Total Workouts</p>
+<h3 class="text-5xl font-black font-headline tracking-tighter">15,402</h3>
+<span class="material-symbols-outlined absolute bottom-4 right-4 text-4xl text-primary opacity-10" data-icon="exercise">exercise</span>
+</div>
+</div>
+<!-- Row 2: Charts (Line Charts) -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-12">
+<div class="signature-card bg-surface-container-lowest p-10 rounded-xl">
+<div class="flex justify-between items-center mb-10">
+<h4 class="technical-mono text-sm font-bold text-primary">User Growth Trend</h4>
+<span class="material-symbols-outlined text-outline" data-icon="show_chart">show_chart</span>
+</div>
+<div class="h-64 flex items-end gap-3 px-4 border-l-2 border-b-2 border-dashed border-[#dad4c8]">
+<!-- Simulated Line Chart Points -->
+<div class="flex-1 bg-primary/10 relative h-1/4 rounded-t-lg group">
+<div class="absolute -top-1 w-full border-t-4 border-primary"></div>
+</div>
+<div class="flex-1 bg-primary/10 relative h-1/3 rounded-t-lg">
+<div class="absolute -top-1 w-full border-t-4 border-primary"></div>
+</div>
+<div class="flex-1 bg-primary/10 relative h-2/3 rounded-t-lg">
+<div class="absolute -top-1 w-full border-t-4 border-primary"></div>
+</div>
+<div class="flex-1 bg-primary/10 relative h-1/2 rounded-t-lg">
+<div class="absolute -top-1 w-full border-t-4 border-primary"></div>
+</div>
+<div class="flex-1 bg-primary/10 relative h-[80%] rounded-t-lg">
+<div class="absolute -top-1 w-full border-t-4 border-primary"></div>
+</div>
+<div class="flex-1 bg-primary/10 relative h-full rounded-t-lg">
+<div class="absolute -top-1 w-full border-t-4 border-primary"></div>
+</div>
+</div>
+<div class="flex justify-between mt-4 technical-mono text-[10px] text-outline font-bold">
+<span>JAN</span><span>FEB</span><span>MAR</span><span>APR</span><span>MAY</span><span>JUN</span>
+</div>
+</div>
+<div class="signature-card bg-surface-container-lowest p-10 rounded-xl">
+<div class="flex justify-between items-center mb-10">
+<h4 class="technical-mono text-sm font-bold text-tertiary">Active Users Log</h4>
+<span class="material-symbols-outlined text-outline" data-icon="monitoring">monitoring</span>
+</div>
+<div class="h-64 flex items-end gap-1 px-4 border-l-2 border-b-2 border-dashed border-[#dad4c8]">
+<!-- Simulated Frequency Histogram -->
+<div class="w-4 bg-tertiary h-[10%] rounded-t-sm"></div>
+<div class="w-4 bg-tertiary h-[15%] rounded-t-sm"></div>
+<div class="w-4 bg-tertiary h-[40%] rounded-t-sm"></div>
+<div class="w-4 bg-tertiary h-[35%] rounded-t-sm"></div>
+<div class="w-4 bg-tertiary h-[60%] rounded-t-sm"></div>
+<div class="w-4 bg-tertiary h-[85%] rounded-t-sm"></div>
+<div class="w-4 bg-tertiary h-[70%] rounded-t-sm"></div>
+<div class="w-4 bg-tertiary h-[90%] rounded-t-sm"></div>
+<div class="w-4 bg-tertiary h-[65%] rounded-t-sm"></div>
+<div class="w-4 bg-tertiary h-[55%] rounded-t-sm"></div>
+<div class="w-4 bg-tertiary h-[45%] rounded-t-sm"></div>
+<div class="w-4 bg-tertiary h-[30%] rounded-t-sm"></div>
+</div>
+<div class="flex justify-between mt-4 technical-mono text-[10px] text-outline font-bold">
+<span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:59</span>
+</div>
+</div>
+</div>
+<!-- Row 3: Horizontal Bars -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-12">
+<div class="p-10 rounded-xl border-2 border-dashed border-[#dad4c8] bg-surface-bright">
+<h4 class="technical-mono text-sm font-bold text-primary mb-8 underline decoration-wavy underline-offset-8">Popular Exercises</h4>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between technical-mono text-[10px] font-bold mb-2">
+<span>Deadlift</span><span>892 Logs</span>
+</div>
+<div class="h-4 w-full bg-secondary-fixed-dim rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[95%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between technical-mono text-[10px] font-bold mb-2">
+<span>Bench Press</span><span>745 Logs</span>
+</div>
+<div class="h-4 w-full bg-secondary-fixed-dim rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[80%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between technical-mono text-[10px] font-bold mb-2">
+<span>Squat</span><span>612 Logs</span>
+</div>
+<div class="h-4 w-full bg-secondary-fixed-dim rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[65%]"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="p-10 rounded-xl border-2 border-dashed border-[#dad4c8] bg-surface-bright">
+<h4 class="technical-mono text-sm font-bold text-tertiary mb-8 underline decoration-wavy underline-offset-8">Most Logged Foods</h4>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between technical-mono text-[10px] font-bold mb-2">
+<span>Oatmeal</span><span>1,120 Logs</span>
+</div>
+<div class="h-4 w-full bg-secondary-fixed-dim rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[90%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between technical-mono text-[10px] font-bold mb-2">
+<span>Chicken Breast</span><span>945 Logs</span>
+</div>
+<div class="h-4 w-full bg-secondary-fixed-dim rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[75%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between technical-mono text-[10px] font-bold mb-2">
+<span>Avocado</span><span>732 Logs</span>
+</div>
+<div class="h-4 w-full bg-secondary-fixed-dim rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[60%]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Row 4: Quick Stats & Activity Stickers -->
+<div class="flex flex-wrap gap-8">
+<div class="flex-1 min-w-[300px] signature-card bg-primary-fixed p-10 rounded-xl relative overflow-hidden">
+<p class="technical-mono text-xs text-on-primary-fixed-variant font-bold mb-2">Avg Workouts</p>
+<h4 class="text-6xl font-black font-headline tracking-tighter">3.4<span class="text-2xl">/week</span></h4>
+<div class="mt-4 flex gap-1">
+<div class="w-6 h-6 rounded-full bg-on-primary"></div>
+<div class="w-6 h-6 rounded-full bg-on-primary"></div>
+<div class="w-6 h-6 rounded-full bg-on-primary"></div>
+<div class="w-6 h-6 rounded-full bg-on-primary/40"></div>
+</div>
+<div class="absolute -right-4 -bottom-4 w-32 h-32 bg-on-primary/10 rounded-full blur-3xl"></div>
+</div>
+<div class="flex-1 min-w-[300px] signature-card bg-surface-container-lowest p-10 rounded-xl relative">
+<p class="technical-mono text-xs text-outline font-bold mb-2">Avg Calories</p>
+<h4 class="text-6xl font-black font-headline tracking-tighter">2,150<span class="text-2xl"> kcal</span></h4>
+<p class="technical-mono text-[10px] mt-4 font-bold text-primary">Surplus Trend: +150</p>
+<div class="absolute top-4 right-4 w-12 h-12 bg-[#f9f2e5] border-2 border-dashed border-primary rounded-full rotate-12 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="restaurant_menu">restaurant_menu</span>
+</div>
+</div>
+<div class="w-full lg:w-72 flex flex-col gap-4">
+<div class="bg-tertiary text-on-tertiary px-6 py-4 rounded-full border-2 border-[#2e2f2e] hard-shadow rotate-[-4deg] flex items-center justify-between">
+<span class="technical-mono text-[10px] font-bold">Community Rank</span>
+<span class="material-symbols-outlined" data-icon="star">star</span>
+</div>
+<div class="bg-primary text-on-primary px-6 py-4 rounded-full border-2 border-[#2e2f2e] hard-shadow rotate-[3deg] flex items-center justify-between">
+<span class="technical-mono text-[10px] font-bold">Live Classes</span>
+<span class="text-xs font-bold">12 NOW</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Contextual FAB (Hidden on Dash by Instruction, but styled here for System compliance) -->
+<!-- Suppressed based on "Contextual FAB Suppression" rule as this is an Admin Dashboard -->
+</body></html>

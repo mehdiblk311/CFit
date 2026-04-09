@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add Ingredients | The Kinetic Craft</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Space+Grotesk:wght@300..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+        
+        /* Simulating Roobert with Plus Jakarta Sans + Stylistic Sets */
+        .font-roobert {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-feature-settings: "ss01", "ss03", "ss10";
+        }
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .kinetic-shadow {
+            box-shadow: -7px 7px 0px 0px rgba(46, 47, 46, 1);
+        }
+
+        .sticker-rotate-left { transform: rotate(-3deg); }
+        .sticker-rotate-right { transform: rotate(4deg); }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "error": "#b02500",
+                        "on-surface-variant": "#5b5c5a",
+                        "surface-container-high": "#e2e3e0",
+                        "on-primary-fixed": "#214f01",
+                        "error-dim": "#b92902",
+                        "surface-dim": "#d4d5d2",
+                        "on-tertiary": "#f6f0ff",
+                        "secondary": "#5f5b52",
+                        "primary-fixed": "#c3fb9c",
+                        "surface-container-low": "#f1f1ef",
+                        "on-secondary-fixed-variant": "#5f5b52",
+                        "on-secondary-fixed": "#423f36",
+                        "secondary-container": "#e8e2d6",
+                        "tertiary-fixed-dim": "#a694ff",
+                        "outline": "#767775",
+                        "on-tertiary-fixed-variant": "#3a03b1",
+                        "tertiary": "#5d3fd3",
+                        "on-tertiary-fixed": "#180058",
+                        "on-background": "#2e2f2e",
+                        "primary-dim": "#2c5a0d",
+                        "surface-container": "#e8e8e8",
+                        "on-tertiary-container": "#31009b",
+                        "on-surface": "#2e2f2e",
+                        "on-error": "#ffefec",
+                        "tertiary-fixed": "#b4a5ff",
+                        "on-error-container": "#520c00",
+                        "on-primary-container": "#336215",
+                        "tertiary-dim": "#5130c6",
+                        "surface": "#faf9f7",
+                        "primary": "#38671a",
+                        "error-container": "#f95630",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#dddddb",
+                        "on-primary": "#d6ffb7",
+                        "surface-variant": "#dddddb",
+                        "background": "#faf9f7",
+                        "secondary-fixed-dim": "#dad4c8",
+                        "inverse-primary": "#c5fe9e",
+                        "inverse-on-surface": "#9d9d9b",
+                        "primary-container": "#c3fb9c",
+                        "secondary-fixed": "#e8e2d6",
+                        "tertiary-container": "#b4a5ff",
+                        "secondary-dim": "#534f46",
+                        "primary-fixed-dim": "#b5ec8f",
+                        "surface-bright": "#faf9f7",
+                        "on-secondary": "#f9f2e5",
+                        "on-secondary-container": "#555148",
+                        "on-primary-fixed-variant": "#3d6c1f",
+                        "outline-variant": "#adadab",
+                        "inverse-surface": "#0d0e0e",
+                        "surface-tint": "#38671a"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans", "sans-serif"],
+                        "body": ["Plus Jakarta Sans", "sans-serif"],
+                        "label": ["Space Mono", "monospace"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#faf9f7] dark:bg-stone-950 border-b-2 border-dashed border-[#dad4c8] dark:border-stone-800 shadow-[-7px_7px_0px_0px_rgba(46,47,46,1)] px-6 py-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full border-2 border-primary overflow-hidden shadow-sm">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Close-up portrait of a fitness-focused young woman with glowing skin and tied back hair in soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCn7gj7baXG9TSylesiX_DkTEiS8bhdeIK_-zBiwyefgeE0-whdSXPGnHvyYc_4iTkPz8s-k8zrp3nU9gtsXlYPQPZ67qSPgs6tpDQ9q_PwExGfQpq61A44Gmawgtn14Tc-8hkFTO_dsNhXG0GK0vGJqSmdZFD24XyJ0JiSlfsVIeJT5dhca4Drpb5rl7SH5v5-aLV8TmbRsYyG-mvX-e16M8OBcilz7ExMFcu9ZXTZggx0ES-PCvU3VFvTvt2iGZm8j2syrmefMKGy"/>
+</div>
+<h1 class="font-roobert tracking-[-2px] font-bold text-2xl text-primary">The Kinetic Craft</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-primary hover:rotate-[-2deg] hover:-translate-y-1 transition-transform">calendar_today</button>
+<div class="font-label text-[10px] uppercase tracking-widest bg-secondary-container px-3 py-1 rounded-full border border-secondary-fixed-dim">UM6P_FIT</div>
+</div>
+</header>
+<main class="pt-28 px-6 max-w-2xl mx-auto">
+<!-- Dashboard / Running Total Sticker Stack -->
+<section class="mb-12 relative">
+<div class="bg-surface-container-low rounded-xl border-2 border-secondary-fixed-dim p-8 kinetic-shadow relative overflow-hidden">
+<div class="flex flex-col gap-1">
+<span class="font-label text-[12px] uppercase tracking-widest text-on-surface-variant">Step 02 / Add Ingredients</span>
+<h2 class="font-roobert text-4xl font-extrabold tracking-[-2.5px] leading-tight text-on-surface">New Recipe: Protein Pancakes</h2>
+</div>
+<!-- Macro Stickers (Asymmetric Layout) -->
+<div class="mt-8 flex flex-wrap gap-3">
+<div class="sticker-rotate-left bg-primary text-on-primary font-label text-xs py-2 px-4 rounded-full border border-primary shadow-sm">
+                        Total: 420 kcal
+                    </div>
+<div class="sticker-rotate-right bg-tertiary text-on-tertiary font-label text-xs py-2 px-4 rounded-full border border-tertiary shadow-sm">
+                        45g P
+                    </div>
+<div class="bg-secondary-fixed text-on-secondary-container font-label text-xs py-2 px-4 rounded-full border border-secondary-fixed-dim shadow-sm">
+                        30g C
+                    </div>
+<div class="sticker-rotate-left bg-error-container text-on-error-container font-label text-xs py-2 px-4 rounded-full border border-error shadow-sm">
+                        12g F
+                    </div>
+</div>
+<!-- Decorative element -->
+<div class="absolute top-4 right-4 opacity-10">
+<span class="material-symbols-outlined text-8xl" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+</div>
+</div>
+</section>
+<!-- Ingredient List -->
+<section class="space-y-6">
+<h3 class="font-label text-[10px] uppercase tracking-[3px] text-on-surface-variant pl-2">Current Composition</h3>
+<div class="space-y-4">
+<!-- Item 1 -->
+<div class="bg-surface-container-lowest border-2 border-secondary-fixed-dim rounded-lg p-5 flex items-center justify-between hover:rotate-[-1deg] transition-all duration-300">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-primary-container rounded-full flex items-center justify-center border-2 border-primary text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">grain</span>
+</div>
+<div>
+<p class="font-roobert font-bold text-lg text-on-surface">Protein Powder</p>
+<p class="font-label text-[10px] text-on-surface-variant">Whey Isolate / Vanilla</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label font-bold text-primary">(30g)</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="bg-surface-container-low border-2 border-secondary-fixed-dim rounded-lg p-5 flex items-center justify-between hover:rotate-[1deg] transition-all duration-300">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-tertiary-container rounded-full flex items-center justify-center border-2 border-tertiary text-tertiary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">nutrition</span>
+</div>
+<div>
+<p class="font-roobert font-bold text-lg text-on-surface">Oat Flour</p>
+<p class="font-label text-[10px] text-on-surface-variant">Finely Ground / Gluten Free</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label font-bold text-primary">(50g)</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="bg-surface-container-lowest border-2 border-secondary-fixed-dim rounded-lg p-5 flex items-center justify-between hover:rotate-[-0.5deg] transition-all duration-300">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-error-container/20 rounded-full flex items-center justify-center border-2 border-error text-error">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">egg</span>
+</div>
+<div>
+<p class="font-roobert font-bold text-lg text-on-surface">Egg</p>
+<p class="font-label text-[10px] text-on-surface-variant">Large / Grade A</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label font-bold text-primary">(1 unit)</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Actions -->
+<section class="mt-12 flex flex-col gap-4">
+<button class="w-full bg-surface-container-high border-2 border-dashed border-secondary-fixed-dim text-on-surface font-label uppercase py-6 rounded-full flex items-center justify-center gap-2 hover:bg-secondary-container transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined">add_circle</span>
+                Add Ingredient
+            </button>
+<button class="w-full bg-primary text-on-primary font-roobert font-black tracking-widest text-lg uppercase py-6 rounded-full kinetic-shadow hover:rotate-[-2deg] hover:-translate-y-2 transition-all active:scale-95 duration-150 flex items-center justify-center gap-3">
+                Review &amp; Save
+                <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</section>
+<!-- Visual Context Card (Editorial) -->
+<section class="mt-16 bg-secondary-container rounded-xl overflow-hidden border-2 border-secondary-fixed-dim kinetic-shadow">
+<div class="relative h-48 w-full">
+<img alt="Protein Pancakes" class="w-full h-full object-cover" data-alt="Overhead shot of fluffy golden pancakes topped with berries and honey on a textured beige ceramic plate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLOHckBm8UgtU3w88wEYyFaMGZ0TpZJkrvMhNtwwaYUfnsHKPpvpg72ZWwedHiLLB08lmJFxZBeNR1E8WdRKFMzFfvMqYL3cezlwujwXQNPxWL_lBpc4x14xPanIFV-nkAi0zvMKR30kwo8NL3LixzP82HkMhWbD4SXU1ZF4A9n4qItRG8htcUL3xOUoEq4qHy4SY98fbr62Cm7J2k7Oh7XoJC6_hWnPuJa3l82PzwBgI3qdqa37RvbqXJAZlEC-eheNgIFXNx8MRd"/>
+<div class="absolute inset-0 bg-gradient-to-t from-secondary-container via-transparent to-transparent"></div>
+<div class="absolute bottom-4 left-6">
+<div class="sticker-rotate-right bg-[#faf9f7] text-on-background font-label text-[10px] px-3 py-1 rounded-full border border-secondary-fixed-dim">
+                        EST. 15 MINS
+                    </div>
+</div>
+</div>
+<div class="p-6">
+<p class="font-roobert text-on-secondary-container italic text-sm">"Balance the texture by sifting the oat flour before adding the protein powder for maximum airiness."</p>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 bg-[#faf9f7]/90 dark:bg-stone-900/90 backdrop-blur-md rounded-t-[3rem] border-t-2 border-[#dad4c8] z-50">
+<a class="flex flex-col items-center justify-center text-[#2e2f2e] px-4 py-2 hover:bg-[#dad4c8] hover:rounded-full transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined">restaurant</span>
+<span class="font-label uppercase text-[10px] tracking-widest mt-1">Journal</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#38671a] text-[#faf9f7] rounded-full px-6 py-2 shadow-[-4px_4px_0px_0px_rgba(46,47,46,1)] active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<span class="font-label uppercase text-[10px] tracking-widest mt-1">Recipes</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#2e2f2e] px-4 py-2 hover:bg-[#dad4c8] hover:rounded-full transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-label uppercase text-[10px] tracking-widest mt-1">Trends</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#2e2f2e] px-4 py-2 hover:bg-[#dad4c8] hover:rounded-full transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label uppercase text-[10px] tracking-widest mt-1">Settings</span>
+</a>
+</nav>
+</body></html>

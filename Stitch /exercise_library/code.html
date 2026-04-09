@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&amp;family=Space+Grotesk:wght@400;500;700&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#b4a5ff",
+                    "on-background": "#2e2f2e",
+                    "inverse-primary": "#c5fe9e",
+                    "on-primary-container": "#336215",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary": "#d6ffb7",
+                    "surface-dim": "#d4d5d2",
+                    "on-surface": "#2e2f2e",
+                    "background": "#f7f6f4",
+                    "secondary-dim": "#534f46",
+                    "surface-container-low": "#f1f1ef",
+                    "on-secondary-container": "#555148",
+                    "on-primary-fixed": "#214f01",
+                    "secondary-fixed": "#e8e2d6",
+                    "primary-fixed": "#c3fb9c",
+                    "error-dim": "#b92902",
+                    "secondary-container": "#e8e2d6",
+                    "tertiary-container": "#b4a5ff",
+                    "inverse-on-surface": "#9d9d9b",
+                    "outline": "#767775",
+                    "primary-fixed-dim": "#b5ec8f",
+                    "on-tertiary": "#f6f0ff",
+                    "on-secondary": "#f9f2e5",
+                    "primary-dim": "#2c5a0d",
+                    "on-tertiary-container": "#31009b",
+                    "on-secondary-fixed": "#423f36",
+                    "surface-container": "#e8e8e6",
+                    "outline-variant": "#adadab",
+                    "secondary-fixed-dim": "#dad4c8",
+                    "inverse-surface": "#0d0e0e",
+                    "primary": "#38671a",
+                    "tertiary-fixed-dim": "#a694ff",
+                    "surface-tint": "#38671a",
+                    "primary-container": "#c3fb9c",
+                    "tertiary": "#5d3fd3",
+                    "error-container": "#f95630",
+                    "on-secondary-fixed-variant": "#5f5b52",
+                    "error": "#b02500",
+                    "on-error": "#ffefec",
+                    "on-primary-fixed-variant": "#3d6c1f",
+                    "surface-container-high": "#e2e3e0",
+                    "on-error-container": "#520c00",
+                    "on-surface-variant": "#5b5c5a",
+                    "surface-variant": "#dddddb",
+                    "secondary": "#5f5b52",
+                    "tertiary-dim": "#5130c6",
+                    "on-tertiary-fixed-variant": "#3a03b1",
+                    "on-tertiary-fixed": "#180058",
+                    "surface": "#f7f6f4",
+                    "surface-container-highest": "#dddddb",
+                    "surface-bright": "#f7f6f4"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Space Grotesk"],
+                    "mono": ["Space Mono"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .signature-shadow {
+            box-shadow: -7px 7px 0px 0px rgba(46,47,46,1);
+        }
+        .signature-shadow-subtle {
+            box-shadow: -4px 4px 0px 0px rgba(46,47,46,0.1);
+        }
+        .bounce-hover:hover {
+            transform: rotateZ(-4deg) translateY(-4px);
+            box-shadow: -7px 7px 0px 0px rgba(46,47,46,1);
+        }
+        .aggressive-crop {
+            letter-spacing: -1.6px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-container">
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-[#faf9f7] border-b-2 border-dashed border-[#dad4c8] shadow-[-7px_7px_0px_0px_rgba(46,47,46,1)]">
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full border-2 border-secondary-fixed-dim bg-white hover:rotate-[-2deg] transition-transform">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="text-xl font-extrabold font-headline uppercase tracking-[-1.2px] text-on-surface">Add Exercise</h1>
+</div>
+<div class="w-10 h-10 rounded-full border-2 border-primary bg-primary-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Close up portrait of a smiling woman with athletic headband in soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDJpo166UQF_WzMUqfk6CHU7-qx9X-RqpNrynd2MTzGVU-sOA7mIdF4mEjhn6wGuufhiX-JRDlvbLWcDyBS8ijxE7W-ARIDn0xcbl9gqrGWwVMMwnRDs9K1s41It6VRDz7D59MaQKs5L5wu95t8q2Yu4RT22TkSRkL-EOAiAk6ZXgbAsTTNtxDuXN2CeH_9q45VHoJ7UoMCwkmjZaC7pfAHYRD7GsZdx_KY8WIpmsNqMxHksmVnFRqaAULC6W6KIj0d8zDi5ODzL0D"/>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-2xl mx-auto min-h-screen space-y-8">
+<section class="space-y-4">
+<div class="relative group">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline">search</span>
+</div>
+<input class="w-full py-4 pl-12 pr-6 bg-surface-container-low border-2 border-secondary-fixed-dim rounded-full font-mono text-sm uppercase tracking-wider focus:outline-none focus:border-primary transition-colors signature-shadow-subtle" placeholder="Search exercises..." type="text"/>
+</div>
+<div class="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+<button class="px-6 py-2 rounded-full bg-primary text-on-primary font-mono text-[10px] uppercase tracking-widest rotate-[-2deg] shadow-[-4px_4px_0px_0px_rgba(0,0,0,1)] flex-shrink-0">All</button>
+<button class="px-6 py-2 rounded-full border-2 border-secondary-fixed-dim bg-white text-secondary font-mono text-[10px] uppercase tracking-widest flex-shrink-0 hover:rotate-[2deg] transition-transform">Chest</button>
+<button class="px-6 py-2 rounded-full border-2 border-secondary-fixed-dim bg-white text-secondary font-mono text-[10px] uppercase tracking-widest flex-shrink-0 hover:rotate-[-1deg] transition-transform">Back</button>
+<button class="px-6 py-2 rounded-full border-2 border-secondary-fixed-dim bg-white text-secondary font-mono text-[10px] uppercase tracking-widest flex-shrink-0 hover:rotate-[3deg] transition-transform">Legs</button>
+<button class="px-6 py-2 rounded-full border-2 border-secondary-fixed-dim bg-white text-secondary font-mono text-[10px] uppercase tracking-widest flex-shrink-0 hover:rotate-[-2deg] transition-transform">Arms</button>
+</div>
+</section>
+<section class="space-y-6">
+<div class="flex items-baseline justify-between border-b-2 border-dashed border-secondary-fixed-dim pb-2">
+<h2 class="font-headline font-extrabold text-2xl aggressive-crop uppercase">Results</h2>
+<span class="font-mono text-[10px] text-outline">24 ITEMS FOUND</span>
+</div>
+<div class="grid gap-6">
+<div class="group relative bg-white border-2 border-secondary-fixed-dim p-4 rounded-lg flex items-center gap-5 signature-shadow-subtle hover:rotate-[-1deg] transition-all">
+<div class="w-20 h-20 rounded-md overflow-hidden bg-surface-container flex-shrink-0 border border-secondary-fixed-dim">
+<img class="w-full h-full object-cover" data-alt="Athletic man performing barbell deadlift in a minimalist warehouse gym with concrete walls" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBWcuqK32Ks239XXHLC0uzVZ_7E8bSWuiTziWQ49mkGpU2WH3-CjUm7tIP2hQMqTeFZLMpwVsgc07C7S62kLRBgnYZerSgXa17yRVYvT9pbaG9wgbQo-LUxSTtgYP5fRtMheDVcgspdcVH5XnTwO3mk2-lls3W2cbYDKjLj0Y118vGniEA3Z9KtYNBdbqRrlZWUq0Ke5FNpBAKyLml4AqT0O7-mYyYjIAlEsEPHik8_j5VoAuJ6AqMPc87UHhda-OPXCbVeb2NiziB"/>
+</div>
+<div class="flex-1">
+<h3 class="font-headline font-bold text-lg leading-tight mb-2">Barbell Deadlift</h3>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-surface-container-low border border-secondary-fixed-dim rounded-full font-mono text-[9px] uppercase tracking-tighter">Back</span>
+<span class="px-3 py-1 bg-surface-container-low border border-secondary-fixed-dim rounded-full font-mono text-[9px] uppercase tracking-tighter">Barbell</span>
+</div>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-primary-container border-2 border-primary text-primary hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 700">add</span>
+</button>
+</div>
+<div class="group relative bg-white border-2 border-secondary-fixed-dim p-4 rounded-lg flex items-center gap-5 signature-shadow-subtle hover:rotate-[1deg] transition-all">
+<div class="w-20 h-20 rounded-md overflow-hidden bg-surface-container flex-shrink-0 border border-secondary-fixed-dim">
+<img class="w-full h-full object-cover" data-alt="Muscular person performing pull-ups on a metal bar with dramatic back lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDD8nUwq3asbgT7kjuUfaArLCP6bMtqtlaAqWI62KOXVF-trwNiqFPvZMq2wWrKBWj3pWbltJAsXOyTGmAjdHtS95RiJYsGyPZ9tHoTvbbSgWNrdYj3Al1XDmYUDPIzU4QWHRG9dSjyofLYQ0zsS_QmLOpIAWmhyDSQUe5N_T6AqaFQbwZ4JjmUwqKJFdnO8n4T2y5Muh6SDM5Nl_wPM86rmezV4Iubx2JOg3jN0C0HPYG5mO_-ViQt0UEMzdQdrENhkVIfP5C0hGqi"/>
+</div>
+<div class="flex-1">
+<h3 class="font-headline font-bold text-lg leading-tight mb-2">Wide-Grip Pull Ups</h3>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-surface-container-low border border-secondary-fixed-dim rounded-full font-mono text-[9px] uppercase tracking-tighter">Back</span>
+<span class="px-3 py-1 bg-surface-container-low border border-secondary-fixed-dim rounded-full font-mono text-[9px] uppercase tracking-tighter">Bodyweight</span>
+</div>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-primary-container border-2 border-primary text-primary hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 700">add</span>
+</button>
+<div class="absolute -top-3 -right-2 bg-tertiary-container border-2 border-tertiary text-on-tertiary-container px-3 py-1 rounded-full font-mono text-[8px] uppercase tracking-widest rotate-6 shadow-sm">
+                        Popular
+                    </div>
+</div>
+<div class="group relative bg-white border-2 border-secondary-fixed-dim p-4 rounded-lg flex items-center gap-5 signature-shadow-subtle hover:rotate-[-0.5deg] transition-all">
+<div class="w-20 h-20 rounded-md overflow-hidden bg-surface-container flex-shrink-0 border border-secondary-fixed-dim">
+<img class="w-full h-full object-cover" data-alt="Close up of heavy adjustable dumbbells on a dark gym floor with soft natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDR92gz58AMvDpZVp5xaytL8PtOSHUdbJBXXOT5rGDTwCsL17xrEbpi9rLoSrt9C-qnYoTnSxPPV2qhEWD5pRgdrq8X7ODvIJbMAnNHoChL9PwgVvNl4_vBfT5fORKizwc9tRKNNTtwKpRnTCagUupGaZjlGNEHS1X3mDqPORaqgzN2hjhXAzaSQRAeYL8nllO159BrNg_942SJOObuMyB3Js7cL2AS8tb07CoUMqiNINOlIZKeubd-hQ1z-iRn1WRvkvm1WAqe0NgO"/>
+</div>
+<div class="flex-1">
+<h3 class="font-headline font-bold text-lg leading-tight mb-2">Dumbbell Row</h3>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-surface-container-low border border-secondary-fixed-dim rounded-full font-mono text-[9px] uppercase tracking-tighter">Back</span>
+<span class="px-3 py-1 bg-surface-container-low border border-secondary-fixed-dim rounded-full font-mono text-[9px] uppercase tracking-tighter">Dumbbell</span>
+</div>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-primary-container border-2 border-primary text-primary hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 700">add</span>
+</button>
+</div>
+<div class="group relative bg-white border-2 border-secondary-fixed-dim p-4 rounded-lg flex items-center gap-5 signature-shadow-subtle hover:rotate-[2deg] transition-all">
+<div class="w-20 h-20 rounded-md overflow-hidden bg-surface-container flex-shrink-0 border border-secondary-fixed-dim">
+<img class="w-full h-full object-cover" data-alt="Gym cable machine pulley system close-up with stainless steel finish and blurred background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzPsSMx-0_0zAOB6a2KpUElLst7cBdGE200qM56kKnAyl1-UCMSqRUeXFs-wrF0x1lFt7iFo-fhx7le_uElGS_cwZXRa9DHo5axuYmUJI9qqgsDeJ7uUE53NuZoXT4xTE8bLoJ8urhbPWkX9o3NehQTzy40Xbgyb0b_kg0q2ABHjUR5rhWZgywy1ZzyLiTImo_ckeAD2P-TpuUMTmMPvXX7FGv3929tIDAEDqhcNUsoc5R-AboacXce3b7lvgPklTfg4VbtbUqFALq"/>
+</div>
+<div class="flex-1">
+<h3 class="font-headline font-bold text-lg leading-tight mb-2">Lat Pulldown</h3>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-surface-container-low border border-secondary-fixed-dim rounded-full font-mono text-[9px] uppercase tracking-tighter">Back</span>
+<span class="px-3 py-1 bg-surface-container-low border border-secondary-fixed-dim rounded-full font-mono text-[9px] uppercase tracking-tighter">Machine</span>
+</div>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-primary-container border-2 border-primary text-primary hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 700">add</span>
+</button>
+</div>
+</div>
+</section>
+<div class="flex justify-center pt-8">
+<button class="group flex items-center gap-3 px-10 py-5 bg-primary text-on-primary rounded-full signature-shadow bounce-hover transition-all duration-300">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 700">edit_note</span>
+<span class="font-mono text-xs uppercase tracking-[0.2em] font-bold">Create Custom Exercise</span>
+</button>
+</div>
+</main>
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-[#faf9f7] rounded-t-[3rem] border-t-2 border-[#dad4c8] shadow-[-7px_-7px_0px_0px_rgba(46,47,46,0.05)]">
+<button class="flex flex-col items-center justify-center text-[#2e2f2e] opacity-70 hover:rotate-[2deg] hover:-translate-y-2 transition-all">
+<span class="material-symbols-outlined mb-1">fitness_center</span>
+<span class="font-mono uppercase tracking-wider text-[10px]">Programs</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-[#38671a] text-[#faf9f7] rounded-full px-6 py-2 rotate-[-3deg] shadow-[-4px_4px_0px_0px_rgba(0,0,0,1)] active:scale-90 transition-all">
+<span class="material-symbols-outlined mb-1">search</span>
+<span class="font-mono uppercase tracking-wider text-[10px]">Library</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#2e2f2e] opacity-70 hover:rotate-[2deg] hover:-translate-y-2 transition-all">
+<span class="material-symbols-outlined mb-1">play_circle</span>
+<span class="font-mono uppercase tracking-wider text-[10px]">Workout</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#2e2f2e] opacity-70 hover:rotate-[2deg] hover:-translate-y-2 transition-all">
+<span class="material-symbols-outlined mb-1">calendar_month</span>
+<span class="font-mono uppercase tracking-wider text-[10px]">History</span>
+</button>
+</nav>
+</body></html>

@@ -1,0 +1,287 @@
+/* ── OTP Verification — Mobile-First, no scroll ─────────────────── */
+
+.otp-root {
+  background: #faf9f7;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  position: relative;
+}
+
+.otp-blob-purple {
+  position: absolute;
+  width: 320px; height: 320px;
+  border-radius: 9999px;
+  background: #b4a5ff;
+  filter: blur(60px);
+  top: -60px; right: -80px;
+  opacity: 0.2;
+  pointer-events: none;
+}
+.otp-blob-green {
+  position: absolute;
+  width: 260px; height: 260px;
+  border-radius: 9999px;
+  background: #c3fb9c;
+  filter: blur(50px);
+  bottom: -40px; left: -60px;
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+.otp-header {
+  width: 100%;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: #faf9f7;
+  border-bottom: 2px dashed #dad4c8;
+  box-shadow: -4px 4px 0 #2e2f2e;
+  flex-shrink: 0;
+  z-index: 10;
+  position: relative;
+}
+
+.otp-back-btn {
+  width: 40px; height: 40px;
+  border-radius: 9999px;
+  background: #e8e2d6;
+  border: 2px solid #2e2f2e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: -3px 3px 0 #2e2f2e;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.otp-back-btn:hover  { transform: translate(1px, -1px); box-shadow: -4px 4px 0 #2e2f2e; }
+.otp-back-btn:active { transform: translate(-1px, 1px); box-shadow: -2px 2px 0 #2e2f2e; }
+.otp-back-btn svg { width: 16px; height: 16px; }
+
+.otp-logo {
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -1.5px;
+  color: #2e2f2e;
+  user-select: none;
+}
+
+/* ── Main ───────────────────────────────────────────────────────── */
+.otp-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  width: 100%;
+  max-width: 420px;
+  padding: 20px 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Icon badge ─────────────────────────────────────────────────── */
+.otp-icon-badge {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  flex-shrink: 0;
+}
+
+.otp-badge-back {
+  position: absolute;
+  inset: 0;
+  background: #b4a5ff;
+  border: 2px solid #2e2f2e;
+  border-radius: 36px;
+  box-shadow: -4px 4px 0 #2e2f2e;
+  transform: rotate(5deg);
+}
+
+.otp-badge-front {
+  position: absolute;
+  inset: 0;
+  background: #faf9f7;
+  border: 2px solid #2e2f2e;
+  border-radius: 28px;
+  box-shadow: -4px 4px 0 #2e2f2e;
+  transform: rotate(-4deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 52px;
+  line-height: 1;
+}
+
+.otp-sticker {
+  position: absolute;
+  top: -14px; right: -36px;
+  background: #38671a;
+  border: 2px solid #2e2f2e;
+  border-radius: 9999px;
+  padding: 5px 12px;
+  transform: rotate(-10deg);
+  box-shadow: -3px 3px 0 #2e2f2e;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #d6ffb7;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+/* ── Copy ───────────────────────────────────────────────────────── */
+.otp-copy { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+
+.otp-heading {
+  font-weight: 400;
+  font-size: clamp(32px, 9vw, 40px);
+  letter-spacing: -2px;
+  color: #2e2f2e;
+  line-height: 1;
+}
+
+.otp-subtext {
+  font-size: 14px;
+  color: #5b5c5a;
+  line-height: 1.6;
+}
+
+.otp-email {
+  color: #38671a;
+  font-weight: 700;
+  background: #eeffd8;
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+
+/* ── OTP Boxes ──────────────────────────────────────────────────── */
+.otp-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.otp-boxes {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.otp-box {
+  width: 52px;
+  height: 64px;
+  border: 2px solid #dad4c8;
+  border-radius: 16px;
+  background: #fff;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #2e2f2e;
+  text-align: center;
+  outline: none;
+  box-shadow: rgba(0,0,0,0.06) 0 1px 2px;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+  caret-color: #38671a;
+}
+.otp-box:focus {
+  border-color: #38671a;
+  box-shadow: -3px 3px 0 #2e2f2e;
+  transform: translateY(-2px);
+}
+.otp-box--filled {
+  background: #faf9f7;
+  border-color: #b4a5ff;
+  box-shadow: -3px 3px 0 #5d3fd3;
+}
+.otp-box--error {
+  border-color: #b02500 !important;
+  box-shadow: -3px 3px 0 #b02500 !important;
+}
+
+.otp-error {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #b02500;
+  text-align: center;
+  margin-top: -8px;
+}
+
+/* ── Button ─────────────────────────────────────────────────────── */
+.otp-btn {
+  width: 100%;
+  background: #5d3fd3;
+  border: none;
+  border-radius: 9999px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: -4px 4px 0 #2e2f2e;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: #f6f0ff;
+}
+.otp-btn:hover:not(:disabled) {
+  transform: translate(1px, -1px);
+  box-shadow: -5px 5px 0 #2e2f2e;
+  background: #4a32a8;
+}
+.otp-btn:active:not(:disabled) {
+  transform: translate(-2px, 2px);
+  box-shadow: -2px 2px 0 #2e2f2e;
+}
+.otp-btn:disabled { background: #d4d5d2; color: rgba(91,92,90,0.5); box-shadow: none; cursor: not-allowed; }
+
+.otp-spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(246, 240, 255, 0.3);
+  border-top-color: #f6f0ff;
+  border-radius: 50%;
+  animation: otp-spin 0.7s linear infinite;
+}
+@keyframes otp-spin { to { transform: rotate(360deg); } }
+
+/* Resend */
+.otp-resend-row {
+  font-size: 13px;
+  color: #5b5c5a;
+  text-align: center;
+}
+.otp-resend-btn {
+  background: none;
+  border: none;
+  color: #5d3fd3;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: opacity 0.15s;
+}
+.otp-resend-btn:hover { opacity: 0.7; }
+
+/* Very small phones */
+@media (max-height: 680px) {
+  .otp-icon-badge { width: 100px; height: 100px; }
+  .otp-badge-front { font-size: 36px; }
+  .otp-heading { font-size: 28px; }
+  .otp-main { gap: 18px; }
+  .otp-box { width: 44px; height: 54px; font-size: 22px; }
+}

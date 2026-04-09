@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UM6P_FIT - Onboarding Goal Setting</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&amp;family=Space+Mono:wght@400;700&amp;family=Space+Grotesk:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed-variant": "#3d6c1f",
+                      "secondary": "#5f5b52",
+                      "on-primary": "#d6ffb7",
+                      "secondary-dim": "#534f46",
+                      "surface-bright": "#f7f6f4",
+                      "surface": "#f7f6f4",
+                      "on-tertiary-fixed": "#180058",
+                      "tertiary-container": "#b4a5ff",
+                      "background": "#f7f6f4",
+                      "surface-dim": "#d4d5d2",
+                      "surface-variant": "#dddddb",
+                      "outline-variant": "#adadab",
+                      "on-primary-container": "#336215",
+                      "error-dim": "#b92902",
+                      "on-tertiary": "#f6f0ff",
+                      "secondary-fixed-dim": "#dad4c8",
+                      "secondary-container": "#e8e2d6",
+                      "surface-container-low": "#f1f1ef",
+                      "on-secondary-fixed": "#423f36",
+                      "tertiary": "#5d3fd3",
+                      "on-surface": "#2e2f2e",
+                      "on-primary-fixed": "#214f01",
+                      "inverse-primary": "#c5fe9e",
+                      "tertiary-fixed-dim": "#a694ff",
+                      "error": "#b02500",
+                      "primary-dim": "#2c5a0d",
+                      "surface-tint": "#38671a",
+                      "on-tertiary-container": "#31009b",
+                      "surface-container": "#e8e8e6",
+                      "primary": "#38671a",
+                      "on-secondary-fixed-variant": "#5f5b52",
+                      "outline": "#767775",
+                      "secondary-fixed": "#e8e2d6",
+                      "tertiary-dim": "#5130c6",
+                      "primary-fixed": "#c3fb9c",
+                      "inverse-surface": "#0d0e0e",
+                      "error-container": "#f95630",
+                      "on-error-container": "#520c00",
+                      "on-error": "#ffefec",
+                      "on-secondary-container": "#555148",
+                      "on-surface-variant": "#5b5c5a",
+                      "surface-container-high": "#e2e3e0",
+                      "primary-fixed-dim": "#b5ec8f",
+                      "surface-container-highest": "#dddddb",
+                      "on-secondary": "#f9f2e5",
+                      "tertiary-fixed": "#b4a5ff",
+                      "on-tertiary-fixed-variant": "#3a03b1",
+                      "surface-container-lowest": "#ffffff",
+                      "on-background": "#2e2f2e",
+                      "inverse-on-surface": "#9d9d9b",
+                      "primary-container": "#c3fb9c"
+              },
+              "borderRadius": {
+                      "DEFAULT": "1rem",
+                      "lg": "2rem",
+                      "xl": "3rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Plus Jakarta Sans"],
+                      "body": ["Plus Jakarta Sans"],
+                      "label": ["Space Grotesk"],
+                      "mono": ["Space Mono"]
+              }
+            },
+          }
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .kinetic-shadow {
+            box-shadow: -7px 7px 0px rgba(46, 47, 46, 1);
+        }
+        .inner-glow {
+            box-shadow: inset 4px 4px 0px rgba(255, 255, 255, 0.4);
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 12px;
+            cursor: pointer;
+            background: #dad4c8;
+            border-radius: 9999px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            height: 28px;
+            width: 28px;
+            border-radius: 9999px;
+            background: #38671a;
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -8px;
+            border: 2px solid #2e2f2e;
+            box-shadow: -3px 3px 0px #2e2f2e;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-primary">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-20 bg-[#faf9f7] dark:bg-stone-900 border-b-2 border-dashed border-[#dad4c8] dark:border-stone-700 shadow-[-4px_4px_0px_0px_rgba(46,47,46,1)]">
+<button class="flex items-center justify-center w-12 h-12 rounded-full border-2 border-secondary-fixed-dim hover:-rotate-2 hover:-translate-y-1 transition-transform active:scale-95 duration-200 ease-out">
+<span class="material-symbols-outlined text-[#38671a]" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex items-center gap-2">
+<div class="w-2.5 h-2.5 rounded-full bg-secondary-fixed-dim"></div>
+<div class="w-6 h-2.5 rounded-full bg-primary kinetic-shadow border border-on-surface"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-secondary-fixed-dim"></div>
+</div>
+<div class="text-2xl font-black text-[#2e2f2e] dark:text-[#faf9f7] tracking-[-1.5px] font-headline">
+            UM6P_FIT
+        </div>
+</header>
+<main class="pt-32 pb-24 px-6 max-w-2xl mx-auto">
+<!-- Hero Header -->
+<div class="mb-12">
+<p class="font-mono uppercase tracking-widest text-xs text-primary mb-4">Step 02 / Goals</p>
+<h1 class="text-5xl md:text-6xl font-headline font-black tracking-[-3.2px] leading-[0.9] text-on-surface">
+                What's your <span class="text-primary italic">goal?</span>
+</h1>
+</div>
+<!-- Fitness Goal Cards -->
+<div class="space-y-6 mb-12">
+<!-- Lose Weight -->
+<label class="group relative block cursor-pointer">
+<input checked="" class="peer sr-only" name="fitness_goal" type="radio"/>
+<div class="p-6 bg-surface-container-lowest border-2 border-secondary-fixed-dim rounded-lg transition-all duration-300 peer-checked:border-primary peer-checked:bg-primary-fixed-dim peer-checked:kinetic-shadow peer-checked:-translate-y-1">
+<div class="flex items-start gap-4">
+<div class="w-14 h-14 flex items-center justify-center rounded-2xl bg-secondary-container border-2 border-on-surface group-hover:rotate-6 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="monitor_weight">monitor_weight</span>
+</div>
+<div class="flex-1">
+<h3 class="text-xl font-bold font-headline mb-1">Lose Weight</h3>
+<p class="text-sm font-label text-on-surface-variant">Burn fat and improve metabolic health through cardio and caloric deficit.</p>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-on-surface peer-checked:bg-primary flex items-center justify-center">
+<div class="w-2 h-2 rounded-full bg-surface hidden peer-checked:block"></div>
+</div>
+</div>
+</div>
+</label>
+<!-- Maintain -->
+<label class="group relative block cursor-pointer">
+<input class="peer sr-only" name="fitness_goal" type="radio"/>
+<div class="p-6 bg-surface-container-lowest border-2 border-secondary-fixed-dim rounded-lg transition-all duration-300 peer-checked:border-primary peer-checked:bg-primary-fixed-dim peer-checked:kinetic-shadow peer-checked:-translate-y-1">
+<div class="flex items-start gap-4">
+<div class="w-14 h-14 flex items-center justify-center rounded-2xl bg-secondary-container border-2 border-on-surface group-hover:rotate-6 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="balance">balance</span>
+</div>
+<div class="flex-1">
+<h3 class="text-xl font-bold font-headline mb-1">Maintain</h3>
+<p class="text-sm font-label text-on-surface-variant">Keep your current physique while focusing on endurance and flexibility.</p>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-on-surface flex items-center justify-center"></div>
+</div>
+</div>
+</label>
+<!-- Gain Muscle -->
+<label class="group relative block cursor-pointer">
+<input class="peer sr-only" name="fitness_goal" type="radio"/>
+<div class="p-6 bg-surface-container-lowest border-2 border-secondary-fixed-dim rounded-lg transition-all duration-300 peer-checked:border-primary peer-checked:bg-primary-fixed-dim peer-checked:kinetic-shadow peer-checked:-translate-y-1">
+<div class="flex items-start gap-4">
+<div class="w-14 h-14 flex items-center justify-center rounded-2xl bg-secondary-container border-2 border-on-surface group-hover:rotate-6 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="fitness_center">fitness_center</span>
+</div>
+<div class="flex-1">
+<h3 class="text-xl font-bold font-headline mb-1">Gain Muscle</h3>
+<p class="text-sm font-label text-on-surface-variant">Build strength and increase lean muscle mass through hypertrophy training.</p>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-on-surface flex items-center justify-center"></div>
+</div>
+</div>
+</label>
+</div>
+<!-- Activity Level & Frequency Section -->
+<div class="bg-surface-container border-2 border-dashed border-secondary-fixed-dim rounded-xl p-8 space-y-10">
+<!-- Activity Level Dropdown -->
+<div class="space-y-4">
+<label class="font-mono uppercase tracking-widest text-xs text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="bolt">bolt</span>
+                    Daily Activity Level
+                </label>
+<div class="relative group">
+<select class="w-full h-16 px-6 bg-surface-container-lowest border-2 border-secondary-fixed-dim rounded-full font-headline font-bold text-on-surface appearance-none focus:outline-none focus:border-primary cursor-pointer">
+<option>Sedentary (Office job, little movement)</option>
+<option selected="">Lightly Active (Walking 3-5k steps)</option>
+<option>Moderately Active (Active job/daily movement)</option>
+<option>Very Active (Heavy manual labor/athlete)</option>
+</select>
+<div class="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface">
+<span class="material-symbols-outlined" data-icon="unfold_more">unfold_more</span>
+</div>
+</div>
+</div>
+<!-- Workout Frequency Slider -->
+<div class="space-y-6">
+<div class="flex justify-between items-end">
+<label class="font-mono uppercase tracking-widest text-xs text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="calendar_today">calendar_today</span>
+                        Workout Frequency
+                    </label>
+<span class="text-4xl font-headline font-black text-primary tracking-tighter">4 <span class="text-base font-mono uppercase tracking-normal">days / week</span></span>
+</div>
+<div class="relative pt-2">
+<input class="relative z-10" max="7" min="1" type="range" value="4"/>
+<div class="flex justify-between mt-4 px-1">
+<span class="font-mono text-[10px] text-on-surface-variant">1</span>
+<span class="font-mono text-[10px] text-on-surface-variant">2</span>
+<span class="font-mono text-[10px] text-on-surface-variant">3</span>
+<span class="font-mono text-[10px] text-on-surface-variant">4</span>
+<span class="font-mono text-[10px] text-on-surface-variant">5</span>
+<span class="font-mono text-[10px] text-on-surface-variant">6</span>
+<span class="font-mono text-[10px] text-on-surface-variant">7</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer CTA -->
+<div class="mt-12 flex items-center gap-6">
+<div class="flex-1">
+<button class="w-full py-5 bg-primary text-on-primary font-headline font-black text-xl rounded-full kinetic-shadow border-2 border-on-surface hover:rotate-2 hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-3">
+                    Next
+                    <span class="material-symbols-outlined font-bold" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Side Decoration (Sticker) -->
+<div class="hidden lg:block fixed bottom-12 right-12 rotate-12 pointer-events-none">
+<div class="bg-tertiary text-on-tertiary px-6 py-3 rounded-full font-mono text-xs kinetic-shadow border-2 border-on-surface">
+            FUEL YOUR CRAFT
+        </div>
+</div>
+<div class="hidden lg:block fixed top-32 left-8 -rotate-12 pointer-events-none">
+<div class="w-40 h-40 rounded-xl overflow-hidden kinetic-shadow border-2 border-on-surface">
+<img class="w-full h-full object-cover" data-alt="Close-up of chalked hands gripping a heavy barbell in a sunlit industrial gym with warm editorial lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5SO1afjj7r0EnBQL-bXbLiHkvDO5GS-MMEQpxhV0ADsFyRTO8I0PmtjBuQ62Go06A8XFCOypzLo8-4M6Hh9V03HilKKS1OkeRmUvk2ZhLbCns9cnq5sIk3zMj-E0gwzkMdvAQAmjlcsxMpwgQaZlkjczmokwLRQO8Yb-g3Xxx53L0upffQLtFkaoNgmxTwJCsKAHt5dZDe_rii2qqvh8Ex1YLdGN4gMPX0G3RM5r96OnP_oz4V8VzwKLkwLg4Zf2Fshr21JLoF6J_"/>
+</div>
+</div>
+</body></html>
