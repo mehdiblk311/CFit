@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import './Dashboard.css';
 
@@ -28,8 +29,9 @@ function MacroRing({ value, total, color, label }) {
   );
 }
 
-export default function Dashboard({ onTabChange }) {
+export default function Dashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const name = user?.name ?? 'Athlete';
   const firstName = name.charAt(0).toUpperCase() + name.slice(1);
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -98,11 +100,11 @@ export default function Dashboard({ onTabChange }) {
 
         {/* Card 3: Quick Actions */}
         <div className="dash-actions">
-          <button className="dash-action-btn dash-action-btn--primary" onClick={() => onTabChange?.('nutrition')}>
+          <button className="dash-action-btn dash-action-btn--primary" onClick={() => navigate('/nutrition')}>
             <span className="material-symbols-outlined">nutrition</span>
             <span>Log Meal</span>
           </button>
-          <button className="dash-action-btn dash-action-btn--secondary" onClick={() => onTabChange?.('workouts')}>
+          <button className="dash-action-btn dash-action-btn--secondary" onClick={() => navigate('/workouts')}>
             <span className="material-symbols-outlined">fitness_center</span>
             <span>Start Workout</span>
           </button>

@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import './Signup.css';
 
@@ -19,8 +20,9 @@ function getStrength(pw) {
   return                        { score, label: 'STRONG', cls: 'strong' };
 }
 
-export default function Signup({ onBack, onLogin }) {
+export default function Signup() {
   const { signup } = useAuth();
+  const navigate = useNavigate();
   const [name,    setName]    = useState('');
   const [email,   setEmail]   = useState('');
   const [pw,      setPw]      = useState('');
@@ -80,7 +82,7 @@ export default function Signup({ onBack, onLogin }) {
 
       {/* Header */}
       <header className="su-header">
-        <button className="su-back-btn" onClick={onBack} aria-label="Go back">
+        <button className="su-back-btn" onClick={() => navigate('/login')} aria-label="Go back">
           <svg viewBox="0 0 16 16" fill="none">
             <path d="M10 3L5 8L10 13" stroke="#2e2f2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -235,7 +237,7 @@ export default function Signup({ onBack, onLogin }) {
         {/* Login link */}
         <div className="su-footer-link">
           <span>Already have an account?</span>
-          <button type="button" onClick={onLogin}>Sign in</button>
+          <button type="button" onClick={() => navigate('/login')}>Sign in</button>
         </div>
       </main>
     </div>
