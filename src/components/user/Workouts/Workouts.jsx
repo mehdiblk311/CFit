@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Workouts.css';
 
 // ── Data ─────────────────────────────────────────────────────────────
@@ -1334,7 +1335,9 @@ function HistoryView() {
 
 // ── Main Workouts ─────────────────────────────────────────────────────
 
-export default function Workouts({ onClose }) {
+export default function Workouts() {
+  const navigate = useNavigate();
+  const onClose = () => navigate('/dashboard');
   const [navVisible,       setNavVisible]       = useState(false);
   const [wkTab,            setWkTab]            = useState('programs');
   const [programs,         setPrograms]         = useState(PROGRAMS);
