@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import AdminLayout           from './AdminLayout';
 import AdminDashboard        from './AdminDashboard';
 import AdminUserManagement   from './AdminUserManagement';
@@ -6,11 +8,18 @@ import AdminExerciseLibrary  from './AdminExerciseLibrary';
 import AdminUserPrograms     from './AdminUserPrograms';
 import AdminNutritionCS      from './AdminNutritionCS';
 
-export default function Admin({ onExit }) {
+export default function Admin() {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [tab, setTab] = useState('dashboard');
 
+  function handleLogout() {
+    logout();
+    navigate('/login');
+  }
+
   function handleTabChange(id) {
-    if (id === 'logout') { onExit?.(); return; }
+    if (id === 'logout') { handleLogout(); return; }
     setTab(id);
   }
 
@@ -26,7 +35,7 @@ export default function Admin({ onExit }) {
     <AdminLayout
       activeTab={tab}
       onTabChange={handleTabChange}
-      onLogout={onExit}
+      onLogout={handleLogout}
     >
       {content[tab] ?? <AdminDashboard />}
     </AdminLayout>
