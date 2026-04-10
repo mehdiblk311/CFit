@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import './Login.css';
 
@@ -6,8 +7,9 @@ const IMG_GOOGLE = 'https://www.figma.com/api/mcp/asset/782a9f22-34dc-433c-8213-
 
 function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim()); }
 
-export default function Login({ onForgotPassword, onSignup }) {
+export default function Login() {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
   const [showPw,   setShowPw]   = useState(false);
@@ -136,7 +138,7 @@ export default function Login({ onForgotPassword, onSignup }) {
 
             {/* Forgot */}
             <div className="login-forgot-row">
-              <button type="button" className="login-forgot" onClick={onForgotPassword}>
+              <button type="button" className="login-forgot" onClick={() => navigate('/forgot-password')}>
                 Forgot password?
               </button>
             </div>
@@ -164,7 +166,7 @@ export default function Login({ onForgotPassword, onSignup }) {
         {/* Footer */}
         <div className="login-footer-link">
           <span>Don't have an account?</span>
-          <button type="button" onClick={onSignup}>Sign up</button>
+          <button type="button" onClick={() => navigate('/signup')}>Sign up</button>
         </div>
       </div>
     </div>
