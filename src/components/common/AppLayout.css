@@ -16,6 +16,11 @@
   padding-bottom: 96px;
 }
 
+/* When nutrition inner nav is active, the layout has no global nav */
+.app-content--no-pad {
+  padding-bottom: 0;
+}
+
 /* ── Bottom Navigation ─────────────────────────────────────────────── */
 .app-nav {
   position: fixed;

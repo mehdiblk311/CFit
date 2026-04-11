@@ -13,33 +13,38 @@ export default function AppLayout({ children }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
+  // Nutrition routes have their own inner nav — hide the global nav there
+  const hideNav = pathname.startsWith('/nutrition');
+
   return (
     <div className="app-layout">
-      <div className="app-content">
+      <div className={`app-content${hideNav ? ' app-content--no-pad' : ''}`}>
         {children}
       </div>
 
-      <nav className="app-nav">
-        {NAV_ITEMS.map(item => {
-          const isActive = pathname === item.path;
-          return (
-            <button
-              key={item.id}
-              className={`app-nav-item${isActive ? ' app-nav-item--active' : ''}`}
-              onClick={() => navigate(item.path)}
-              aria-label={item.label}
-            >
-              <span
-                className="material-symbols-outlined app-nav-icon"
-                style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}
+      {!hideNav && (
+        <nav className="app-nav">
+          {NAV_ITEMS.map(item => {
+            const isActive = pathname === item.path || pathname.startsWith(item.path + '/');
+            return (
+              <button
+                key={item.id}
+                className={`app-nav-item${isActive ? ' app-nav-item--active' : ''}`}
+                onClick={() => navigate(item.path)}
+                aria-label={item.label}
               >
-                {item.icon}
-              </span>
-              <span className="app-nav-label">{item.label}</span>
-            </button>
-          );
-        })}
-      </nav>
+                <span
+                  className="material-symbols-outlined app-nav-icon"
+                  style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                >
+                  {item.icon}
+                </span>
+                <span className="app-nav-label">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      )}
     </div>
   );
 }

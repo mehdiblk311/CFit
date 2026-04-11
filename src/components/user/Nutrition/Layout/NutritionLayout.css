@@ -1,0 +1,91 @@
+/* ── Nutrition Inner Layout ──────────────────────────────────────────── */
+
+.nut-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: #faf9f7;
+  position: relative;
+}
+
+.nut-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 100px; /* space for inner nav */
+}
+
+/* When inner nav is hidden (sub-pages with their own sticky CTAs) */
+.nut-content--full {
+  padding-bottom: 0;
+}
+
+/* ── Nutrition Bottom Nav ─────────────────────────────────────────────── */
+.nut-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 12px 16px 28px;
+  background: rgba(250, 249, 247, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 2px solid #dad4c8;
+  border-radius: 32px 32px 0 0;
+  box-shadow: 0 -4px 0 rgba(46, 47, 46, 0.05);
+}
+
+.nut-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 9999px;
+  transition: transform 0.2s, background 0.2s, color 0.2s;
+  color: #2e2f2e;
+  min-width: 56px;
+}
+
+.nut-nav-item:hover:not(.nut-nav-item--active) {
+  background: #dad4c8;
+  transform: translateY(-2px);
+}
+
+.nut-nav-item--active {
+  background: #38671a;
+  color: #d6ffb7;
+  box-shadow: -4px 4px 0 rgba(46, 47, 46, 1);
+  transform: translateY(-2px);
+}
+
+/* Home / dashboard button — distinct, not primary green */
+.nut-nav-item--home {
+  color: #5b5c5a;
+}
+.nut-nav-item--home:hover {
+  background: #dad4c8;
+  transform: translateY(-2px);
+}
+
+.nut-nav-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.nut-nav-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 700;
+  line-height: 1;
+}
