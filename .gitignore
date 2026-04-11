@@ -26,3 +26,5 @@ dist-ssr
 #claude 
 .claude
 AgentSkills.worktrees
+
+Temp.txt
