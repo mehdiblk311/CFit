@@ -1,0 +1,331 @@
+/* ══════════════════════════════════════════════════════
+   Create Recipe  (cr-*)
+   ══════════════════════════════════════════════════════ */
+
+.cr-root {
+  min-height: 100dvh;
+  background: #faf9f7;
+  color: #2e2f2e;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  padding-bottom: 24px;
+}
+
+/* ── Header ─────────────────────────────────────────── */
+.cr-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  background: #faf9f7;
+  border-bottom: 2px dashed #dad4c8;
+  box-shadow: -7px 7px 0 rgba(46,47,46,1);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cr-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cr-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 2px solid #38671a;
+  background: #b4a5ff;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+
+.cr-header-brand {
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -1.5px;
+  color: #38671a;
+}
+
+.cr-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cr-cal-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  transition: transform 0.2s;
+}
+.cr-cal-btn:hover { transform: rotate(-8deg) translateY(-2px); }
+
+.cr-tag-badge {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: #e8e2d6;
+  border: 1px solid #dad4c8;
+  border-radius: 9999px;
+  padding: 4px 12px;
+}
+
+/* ── Main ───────────────────────────────────────────── */
+.cr-main {
+  padding: 100px 20px 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ── Running Total ──────────────────────────────────── */
+.cr-total-card {
+  background: #f1f1ef;
+  border: 2px solid #dad4c8;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: -7px 7px 0 rgba(46,47,46,1);
+  position: relative;
+  overflow: hidden;
+}
+
+.cr-step-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #5b5c5a;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.cr-recipe-name {
+  font-weight: 800;
+  font-size: 30px;
+  letter-spacing: -2px;
+  line-height: 1.1;
+  color: #2e2f2e;
+}
+
+.cr-sticker-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.cr-sticker {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  border: 1px solid;
+}
+
+.cr-sticker--green  { background: #38671a; color: #d6ffb7; border-color: #38671a; }
+.cr-sticker--purple { background: #5d3fd3; color: #f6f0ff; border-color: #5d3fd3; }
+.cr-sticker--sand   { background: #e8e2d6; color: #555148; border-color: #dad4c8; }
+.cr-sticker--red    { background: #f95630; color: #ffefec; border-color: #b02500; }
+
+.cr-sticker--left  { transform: rotate(-3deg); }
+.cr-sticker--right { transform: rotate(4deg); }
+
+.cr-deco-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  pointer-events: none;
+}
+
+/* ── Ingredient List ────────────────────────────────── */
+.cr-section-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: #5b5c5a;
+  margin-bottom: 14px;
+  padding-left: 4px;
+}
+
+.cr-ingredient-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cr-item {
+  background: #fff;
+  border: 2px solid #dad4c8;
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: transform 0.25s ease;
+}
+
+.cr-item--left:hover     { transform: rotate(-1deg); }
+.cr-item--right:hover    { transform: rotate(1deg); }
+.cr-item--left-sm:hover  { transform: rotate(-0.5deg); }
+
+.cr-item-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cr-item-icon {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cr-item-name {
+  font-weight: 700;
+  font-size: 16px;
+  color: #2e2f2e;
+}
+
+.cr-item-desc {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: #5b5c5a;
+  margin-top: 2px;
+}
+
+.cr-item-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cr-item-qty {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: #38671a;
+}
+
+.cr-remove-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1px solid #dad4c8;
+  background: transparent;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: #5b5c5a;
+  transition: background 0.15s, color 0.15s;
+}
+.cr-remove-btn:hover { background: #f95630; color: #fff; border-color: #f95630; }
+
+/* ── Actions ────────────────────────────────────────── */
+.cr-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cr-add-ingredient-btn {
+  width: 100%;
+  background: #e2e3e0;
+  border: 2px dashed #dad4c8;
+  border-radius: 9999px;
+  padding: 20px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #2e2f2e;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+.cr-add-ingredient-btn:hover { background: #e8e2d6; }
+
+.cr-save-btn {
+  width: 100%;
+  background: #38671a;
+  color: #d6ffb7;
+  border: none;
+  border-radius: 9999px;
+  padding: 22px;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: -7px 7px 0 rgba(46,47,46,1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: transform 0.2s;
+}
+.cr-save-btn:hover { transform: rotate(-2deg) translateY(-3px); }
+
+/* ── Editorial Image Card ───────────────────────────── */
+.cr-image-card {
+  border: 2px solid #dad4c8;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: -7px 7px 0 rgba(46,47,46,1);
+  background: #e8e2d6;
+}
+
+.cr-image-area {
+  position: relative;
+  height: 160px;
+  background: linear-gradient(135deg, #e8e2d6 0%, #dad4c8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cr-image-area > span {
+  font-size: 72px;
+}
+
+.cr-image-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, #e8e2d6, transparent);
+}
+
+.cr-time-badge {
+  position: absolute;
+  bottom: 14px;
+  left: 16px;
+  background: #faf9f7;
+  border: 1px solid #dad4c8;
+  border-radius: 9999px;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 4px 12px;
+  transform: rotate(4deg);
+}
+
+.cr-image-caption {
+  padding: 16px 20px;
+}
+
+.cr-image-quote {
+  font-style: italic;
+  font-size: 13px;
+  color: #555148;
+  line-height: 1.5;
+}

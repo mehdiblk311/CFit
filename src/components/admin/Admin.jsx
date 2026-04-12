@@ -6,7 +6,7 @@ import AdminDashboard        from './AdminDashboard';
 import AdminUserManagement   from './AdminUserManagement';
 import AdminExerciseLibrary  from './AdminExerciseLibrary';
 import AdminUserPrograms     from './AdminUserPrograms';
-import AdminNutritionCS      from './AdminNutritionCS';
+import AdminNutrition        from './Nutrition/AdminNutrition';
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -28,7 +28,7 @@ export default function Admin() {
     users:     <AdminUserManagement />,
     exercises: <AdminExerciseLibrary />,
     programs:  <AdminUserPrograms />,
-    nutrition: <AdminNutritionCS />,
+    nutrition: <AdminNutrition />,
   };
 
   return (

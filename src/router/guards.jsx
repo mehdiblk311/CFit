@@ -4,24 +4,30 @@ import AppLayout from '../components/common/AppLayout';
 
 /**
  * PublicRoute — for /login, /signup, /forgot-password
- * If already authenticated + onboarded → /dashboard
- * If authenticated but not onboarded → /onboarding
+ * If already authenticated + admin → /admin
+ * If already authenticated + onboarded user → /dashboard
+ * If authenticated but not onboarded user → /onboarding
  */
 export function PublicRoute() {
-  const { isAuthenticated, isOnboarded } = useAuth();
-  if (isAuthenticated && isOnboarded)  return <Navigate to="/dashboard" replace />;
-  if (isAuthenticated && !isOnboarded) return <Navigate to="/onboarding" replace />;
+  const { isAuthenticated, isOnboarded, isAdmin } = useAuth();
+  if (isAuthenticated) {
+    if (isAdmin) return <Navigate to="/admin" replace />;
+    if (isOnboarded) return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/onboarding" replace />;
+  }
   return <Outlet />;
 }
 
 /**
  * OnboardingRoute — for /onboarding
  * If not authenticated → /login
- * If already onboarded → /dashboard
+ * If admin → /admin
+ * If already onboarded user → /dashboard
  */
 export function OnboardingRoute() {
-  const { isAuthenticated, isOnboarded } = useAuth();
+  const { isAuthenticated, isOnboarded, isAdmin } = useAuth();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (isAdmin)          return <Navigate to="/admin" replace />;
   if (isOnboarded)      return <Navigate to="/dashboard" replace />;
   return <Outlet />;
 }
@@ -29,12 +35,13 @@ export function OnboardingRoute() {
 /**
  * ProtectedRoute — for /dashboard, /workouts, /nutrition, /ai, /settings
  * If not authenticated → /login
- * If authenticated but not onboarded → /onboarding
- * Wraps content in AppLayout with nav driven by react-router location.
+ * If admin → /admin (admins are separate from normal app flow)
+ * If authenticated user but not onboarded → /onboarding
  */
 export function ProtectedRoute() {
-  const { isAuthenticated, isOnboarded } = useAuth();
+  const { isAuthenticated, isOnboarded, isAdmin } = useAuth();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (isAdmin)          return <Navigate to="/admin" replace />;
   if (!isOnboarded)     return <Navigate to="/onboarding" replace />;
   return <AppLayout><Outlet /></AppLayout>;
 }
