@@ -1,7 +1,4 @@
 # UM6P_FIT — Master Context Prompt
-_Give this to any AI before starting a large task on this codebase._
-
----
 
 ## What This Project Is
 
