@@ -1,0 +1,1470 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "vite.config.js",
+      "file_type": "code",
+      "source_file": "vite.config.js",
+      "source_location": "L1",
+      "id": "vite_config_js",
+      "community": 25
+    },
+    {
+      "label": "eslint.config.js",
+      "file_type": "code",
+      "source_file": "eslint.config.js",
+      "source_location": "L1",
+      "id": "eslint_config_js",
+      "community": 26
+    },
+    {
+      "label": "main.jsx",
+      "file_type": "code",
+      "source_file": "src/main.jsx",
+      "source_location": "L1",
+      "id": "src_main_jsx",
+      "community": 27
+    },
+    {
+      "label": "AuthContext.jsx",
+      "file_type": "code",
+      "source_file": "src/context/AuthContext.jsx",
+      "source_location": "L1",
+      "id": "src_context_authcontext_jsx",
+      "community": 4
+    },
+    {
+      "label": "loadFromStorage()",
+      "file_type": "code",
+      "source_file": "src/context/AuthContext.jsx",
+      "source_location": "L7",
+      "id": "authcontext_loadfromstorage",
+      "community": 4
+    },
+    {
+      "label": "saveToStorage()",
+      "file_type": "code",
+      "source_file": "src/context/AuthContext.jsx",
+      "source_location": "L16",
+      "id": "authcontext_savetostorage",
+      "community": 4
+    },
+    {
+      "label": "AuthProvider()",
+      "file_type": "code",
+      "source_file": "src/context/AuthContext.jsx",
+      "source_location": "L21",
+      "id": "authcontext_authprovider",
+      "community": 4
+    },
+    {
+      "label": "Signup.jsx",
+      "file_type": "code",
+      "source_file": "src/components/auth/Signup.jsx",
+      "source_location": "L1",
+      "id": "src_components_auth_signup_jsx",
+      "community": 5
+    },
+    {
+      "label": "isValidEmail()",
+      "file_type": "code",
+      "source_file": "src/components/auth/Signup.jsx",
+      "source_location": "L8",
+      "id": "signup_isvalidemail",
+      "community": 5
+    },
+    {
+      "label": "getStrength()",
+      "file_type": "code",
+      "source_file": "src/components/auth/Signup.jsx",
+      "source_location": "L10",
+      "id": "signup_getstrength",
+      "community": 5
+    },
+    {
+      "label": "Signup()",
+      "file_type": "code",
+      "source_file": "src/components/auth/Signup.jsx",
+      "source_location": "L23",
+      "id": "signup_signup",
+      "community": 5
+    },
+    {
+      "label": "OnboardingFlow.jsx",
+      "file_type": "code",
+      "source_file": "src/components/auth/OnboardingFlow.jsx",
+      "source_location": "L1",
+      "id": "src_components_auth_onboardingflow_jsx",
+      "community": 13
+    },
+    {
+      "label": "OnboardingFlow()",
+      "file_type": "code",
+      "source_file": "src/components/auth/OnboardingFlow.jsx",
+      "source_location": "L8",
+      "id": "onboardingflow_onboardingflow",
+      "community": 13
+    },
+    {
+      "label": "Login.jsx",
+      "file_type": "code",
+      "source_file": "src/components/auth/Login.jsx",
+      "source_location": "L1",
+      "id": "src_components_auth_login_jsx",
+      "community": 8
+    },
+    {
+      "label": "isValidEmail()",
+      "file_type": "code",
+      "source_file": "src/components/auth/Login.jsx",
+      "source_location": "L8",
+      "id": "login_isvalidemail",
+      "community": 8
+    },
+    {
+      "label": "Login()",
+      "file_type": "code",
+      "source_file": "src/components/auth/Login.jsx",
+      "source_location": "L10",
+      "id": "login_login",
+      "community": 8
+    },
+    {
+      "label": "OnboardingYourPlan.jsx",
+      "file_type": "code",
+      "source_file": "src/components/auth/OnboardingYourPlan.jsx",
+      "source_location": "L1",
+      "id": "src_components_auth_onboardingyourplan_jsx",
+      "community": 9
+    },
+    {
+      "label": "MacroBar()",
+      "file_type": "code",
+      "source_file": "src/components/auth/OnboardingYourPlan.jsx",
+      "source_location": "L10",
+      "id": "onboardingyourplan_macrobar",
+      "community": 9
+    },
+    {
+      "label": "OnboardingYourPlan()",
+      "file_type": "code",
+      "source_file": "src/components/auth/OnboardingYourPlan.jsx",
+      "source_location": "L24",
+      "id": "onboardingyourplan_onboardingyourplan",
+      "community": 9
+    },
+    {
+      "label": "OTPVerification.jsx",
+      "file_type": "code",
+      "source_file": "src/components/auth/OTPVerification.jsx",
+      "source_location": "L1",
+      "id": "src_components_auth_otpverification_jsx",
+      "community": 14
+    },
+    {
+      "label": "OTPVerification()",
+      "file_type": "code",
+      "source_file": "src/components/auth/OTPVerification.jsx",
+      "source_location": "L6",
+      "id": "otpverification_otpverification",
+      "community": 14
+    },
+    {
+      "label": "OnboardingBasicInfo.jsx",
+      "file_type": "code",
+      "source_file": "src/components/auth/OnboardingBasicInfo.jsx",
+      "source_location": "L1",
+      "id": "src_components_auth_onboardingbasicinfo_jsx",
+      "community": 15
+    },
+    {
+      "label": "OnboardingBasicInfo()",
+      "file_type": "code",
+      "source_file": "src/components/auth/OnboardingBasicInfo.jsx",
+      "source_location": "L5",
+      "id": "onboardingbasicinfo_onboardingbasicinfo",
+      "community": 15
+    },
+    {
+      "label": "OnboardingGoalsActivity.jsx",
+      "file_type": "code",
+      "source_file": "src/components/auth/OnboardingGoalsActivity.jsx",
+      "source_location": "L1",
+      "id": "src_components_auth_onboardinggoalsactivity_jsx",
+      "community": 16
+    },
+    {
+      "label": "OnboardingGoalsActivity()",
+      "file_type": "code",
+      "source_file": "src/components/auth/OnboardingGoalsActivity.jsx",
+      "source_location": "L33",
+      "id": "onboardinggoalsactivity_onboardinggoalsactivity",
+      "community": 16
+    },
+    {
+      "label": "AdminLayout.jsx",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminLayout.jsx",
+      "source_location": "L1",
+      "id": "src_components_admin_adminlayout_jsx",
+      "community": 17
+    },
+    {
+      "label": "AdminLayout()",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminLayout.jsx",
+      "source_location": "L12",
+      "id": "adminlayout_adminlayout",
+      "community": 17
+    },
+    {
+      "label": "AdminDashboard.jsx",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminDashboard.jsx",
+      "source_location": "L1",
+      "id": "src_components_admin_admindashboard_jsx",
+      "community": 18
+    },
+    {
+      "label": "AdminDashboard()",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminDashboard.jsx",
+      "source_location": "L31",
+      "id": "admindashboard_admindashboard",
+      "community": 18
+    },
+    {
+      "label": "Admin.jsx",
+      "file_type": "code",
+      "source_file": "src/components/admin/Admin.jsx",
+      "source_location": "L1",
+      "id": "src_components_admin_admin_jsx",
+      "community": 19
+    },
+    {
+      "label": "Admin()",
+      "file_type": "code",
+      "source_file": "src/components/admin/Admin.jsx",
+      "source_location": "L11",
+      "id": "admin_admin",
+      "community": 19
+    },
+    {
+      "label": "AdminNutritionCS.jsx",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminNutritionCS.jsx",
+      "source_location": "L1",
+      "id": "src_components_admin_adminnutritioncs_jsx",
+      "community": 20
+    },
+    {
+      "label": "AdminNutritionCS()",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminNutritionCS.jsx",
+      "source_location": "L1",
+      "id": "adminnutritioncs_adminnutritioncs",
+      "community": 20
+    },
+    {
+      "label": "AdminExerciseLibrary.jsx",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminExerciseLibrary.jsx",
+      "source_location": "L1",
+      "id": "src_components_admin_adminexerciselibrary_jsx",
+      "community": 1
+    },
+    {
+      "label": "PillSelect()",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminExerciseLibrary.jsx",
+      "source_location": "L63",
+      "id": "adminexerciselibrary_pillselect",
+      "community": 1
+    },
+    {
+      "label": "FormSelect()",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminExerciseLibrary.jsx",
+      "source_location": "L112",
+      "id": "adminexerciselibrary_formselect",
+      "community": 1
+    },
+    {
+      "label": "DiffBars()",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminExerciseLibrary.jsx",
+      "source_location": "L159",
+      "id": "adminexerciselibrary_diffbars",
+      "community": 1
+    },
+    {
+      "label": "ExerciseModal()",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminExerciseLibrary.jsx",
+      "source_location": "L178",
+      "id": "adminexerciselibrary_exercisemodal",
+      "community": 1
+    },
+    {
+      "label": "AdminExerciseLibrary()",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminExerciseLibrary.jsx",
+      "source_location": "L267",
+      "id": "adminexerciselibrary_adminexerciselibrary",
+      "community": 1
+    },
+    {
+      "label": "AdminUserManagement.jsx",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminUserManagement.jsx",
+      "source_location": "L1",
+      "id": "src_components_admin_adminusermanagement_jsx",
+      "community": 6
+    },
+    {
+      "label": "UserModal()",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminUserManagement.jsx",
+      "source_location": "L25",
+      "id": "adminusermanagement_usermodal",
+      "community": 6
+    },
+    {
+      "label": "DeleteConfirm()",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminUserManagement.jsx",
+      "source_location": "L93",
+      "id": "adminusermanagement_deleteconfirm",
+      "community": 6
+    },
+    {
+      "label": "AdminUserManagement()",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminUserManagement.jsx",
+      "source_location": "L114",
+      "id": "adminusermanagement_adminusermanagement",
+      "community": 6
+    },
+    {
+      "label": "AdminUserPrograms.jsx",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminUserPrograms.jsx",
+      "source_location": "L1",
+      "id": "src_components_admin_adminuserprograms_jsx",
+      "community": 7
+    },
+    {
+      "label": "getStyleChip()",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminUserPrograms.jsx",
+      "source_location": "L97",
+      "id": "adminuserprograms_getstylechip",
+      "community": 7
+    },
+    {
+      "label": "ProgramModal()",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminUserPrograms.jsx",
+      "source_location": "L121",
+      "id": "adminuserprograms_programmodal",
+      "community": 7
+    },
+    {
+      "label": "AdminUserPrograms()",
+      "file_type": "code",
+      "source_file": "src/components/admin/AdminUserPrograms.jsx",
+      "source_location": "L217",
+      "id": "adminuserprograms_adminuserprograms",
+      "community": 7
+    },
+    {
+      "label": "Settings.jsx",
+      "file_type": "code",
+      "source_file": "src/components/user/Settings/Settings.jsx",
+      "source_location": "L1",
+      "id": "src_components_user_settings_settings_jsx",
+      "community": 10
+    },
+    {
+      "label": "Toggle()",
+      "file_type": "code",
+      "source_file": "src/components/user/Settings/Settings.jsx",
+      "source_location": "L5",
+      "id": "settings_toggle",
+      "community": 10
+    },
+    {
+      "label": "Settings()",
+      "file_type": "code",
+      "source_file": "src/components/user/Settings/Settings.jsx",
+      "source_location": "L18",
+      "id": "settings_settings",
+      "community": 10
+    },
+    {
+      "label": "Workouts.jsx",
+      "file_type": "code",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L1",
+      "id": "src_components_user_workouts_workouts_jsx",
+      "community": 0
+    },
+    {
+      "label": "WorkoutContextNav()",
+      "file_type": "code",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L153",
+      "id": "workouts_workoutcontextnav",
+      "community": 0
+    },
+    {
+      "label": "ProgramsView()",
+      "file_type": "code",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L177",
+      "id": "workouts_programsview",
+      "community": 0
+    },
+    {
+      "label": "AddExerciseModal()",
+      "file_type": "code",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L264",
+      "id": "workouts_addexercisemodal",
+      "community": 0
+    },
+    {
+      "label": "ProgramPreview()",
+      "file_type": "code",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L362",
+      "id": "workouts_programpreview",
+      "community": 0
+    },
+    {
+      "label": "CreateProgramModal()",
+      "file_type": "code",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L501",
+      "id": "workouts_createprogrammodal",
+      "community": 0
+    },
+    {
+      "label": "LibraryView()",
+      "file_type": "code",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L609",
+      "id": "workouts_libraryview",
+      "community": 0
+    },
+    {
+      "label": "useTimer()",
+      "file_type": "code",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L743",
+      "id": "workouts_usetimer",
+      "community": 0
+    },
+    {
+      "label": "RestTimer()",
+      "file_type": "code",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L762",
+      "id": "workouts_resttimer",
+      "community": 0
+    },
+    {
+      "label": "ActiveSession()",
+      "file_type": "code",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L810",
+      "id": "workouts_activesession",
+      "community": 0
+    },
+    {
+      "label": "DiscardModal()",
+      "file_type": "code",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L986",
+      "id": "workouts_discardmodal",
+      "community": 0
+    },
+    {
+      "label": "WorkoutSummary()",
+      "file_type": "code",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L1016",
+      "id": "workouts_workoutsummary",
+      "community": 0
+    },
+    {
+      "label": "HistoryView()",
+      "file_type": "code",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L1140",
+      "id": "workouts_historyview",
+      "community": 0
+    },
+    {
+      "label": "Workouts()",
+      "file_type": "code",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L1338",
+      "id": "workouts_workouts",
+      "community": 0
+    },
+    {
+      "label": "Dashboard.jsx",
+      "file_type": "code",
+      "source_file": "src/components/user/Dashboard/Dashboard.jsx",
+      "source_location": "L1",
+      "id": "src_components_user_dashboard_dashboard_jsx",
+      "community": 11
+    },
+    {
+      "label": "MacroRing()",
+      "file_type": "code",
+      "source_file": "src/components/user/Dashboard/Dashboard.jsx",
+      "source_location": "L8",
+      "id": "dashboard_macroring",
+      "community": 11
+    },
+    {
+      "label": "Dashboard()",
+      "file_type": "code",
+      "source_file": "src/components/user/Dashboard/Dashboard.jsx",
+      "source_location": "L32",
+      "id": "dashboard_dashboard",
+      "community": 11
+    },
+    {
+      "label": "AIAssistant.jsx",
+      "file_type": "code",
+      "source_file": "src/components/user/AIAssistant/AIAssistant.jsx",
+      "source_location": "L1",
+      "id": "src_components_user_aiassistant_aiassistant_jsx",
+      "community": 2
+    },
+    {
+      "label": "UserBubble()",
+      "file_type": "code",
+      "source_file": "src/components/user/AIAssistant/AIAssistant.jsx",
+      "source_location": "L75",
+      "id": "aiassistant_userbubble",
+      "community": 2
+    },
+    {
+      "label": "AIBubble()",
+      "file_type": "code",
+      "source_file": "src/components/user/AIAssistant/AIAssistant.jsx",
+      "source_location": "L86",
+      "id": "aiassistant_aibubble",
+      "community": 2
+    },
+    {
+      "label": "HistoryPanel()",
+      "file_type": "code",
+      "source_file": "src/components/user/AIAssistant/AIAssistant.jsx",
+      "source_location": "L125",
+      "id": "aiassistant_historypanel",
+      "community": 2
+    },
+    {
+      "label": "AIAssistant()",
+      "file_type": "code",
+      "source_file": "src/components/user/AIAssistant/AIAssistant.jsx",
+      "source_location": "L218",
+      "id": "aiassistant_aiassistant",
+      "community": 2
+    },
+    {
+      "label": "Nutrition.jsx",
+      "file_type": "code",
+      "source_file": "src/components/user/Nutrition/Nutrition.jsx",
+      "source_location": "L1",
+      "id": "src_components_user_nutrition_nutrition_jsx",
+      "community": 21
+    },
+    {
+      "label": "Nutrition()",
+      "file_type": "code",
+      "source_file": "src/components/user/Nutrition/Nutrition.jsx",
+      "source_location": "L3",
+      "id": "nutrition_nutrition",
+      "community": 21
+    },
+    {
+      "label": "AppLayout.jsx",
+      "file_type": "code",
+      "source_file": "src/components/common/AppLayout.jsx",
+      "source_location": "L1",
+      "id": "src_components_common_applayout_jsx",
+      "community": 22
+    },
+    {
+      "label": "AppLayout()",
+      "file_type": "code",
+      "source_file": "src/components/common/AppLayout.jsx",
+      "source_location": "L12",
+      "id": "applayout_applayout",
+      "community": 22
+    },
+    {
+      "label": "useAuth.js",
+      "file_type": "code",
+      "source_file": "src/hooks/useAuth.js",
+      "source_location": "L1",
+      "id": "src_hooks_useauth_js",
+      "community": 23
+    },
+    {
+      "label": "useAuth()",
+      "file_type": "code",
+      "source_file": "src/hooks/useAuth.js",
+      "source_location": "L4",
+      "id": "useauth_useauth",
+      "community": 23
+    },
+    {
+      "label": "AppRouter.jsx",
+      "file_type": "code",
+      "source_file": "src/router/AppRouter.jsx",
+      "source_location": "L1",
+      "id": "src_router_approuter_jsx",
+      "community": 24
+    },
+    {
+      "label": "AppRouter()",
+      "file_type": "code",
+      "source_file": "src/router/AppRouter.jsx",
+      "source_location": "L59",
+      "id": "approuter_approuter",
+      "community": 24
+    },
+    {
+      "label": "guards.jsx",
+      "file_type": "code",
+      "source_file": "src/router/guards.jsx",
+      "source_location": "L1",
+      "id": "src_router_guards_jsx",
+      "community": 3
+    },
+    {
+      "label": "PublicRoute()",
+      "file_type": "code",
+      "source_file": "src/router/guards.jsx",
+      "source_location": "L10",
+      "id": "guards_publicroute",
+      "community": 3
+    },
+    {
+      "label": "OnboardingRoute()",
+      "file_type": "code",
+      "source_file": "src/router/guards.jsx",
+      "source_location": "L22",
+      "id": "guards_onboardingroute",
+      "community": 3
+    },
+    {
+      "label": "ProtectedRoute()",
+      "file_type": "code",
+      "source_file": "src/router/guards.jsx",
+      "source_location": "L35",
+      "id": "guards_protectedroute",
+      "community": 3
+    },
+    {
+      "label": "AdminRoute()",
+      "file_type": "code",
+      "source_file": "src/router/guards.jsx",
+      "source_location": "L47",
+      "id": "guards_adminroute",
+      "community": 3
+    },
+    {
+      "label": "CFit Fitness Application",
+      "file_type": "document",
+      "source_file": "agents/platform_context.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "cfit_fitness_app",
+      "community": 12
+    },
+    {
+      "label": "Workout Management System",
+      "file_type": "document",
+      "source_file": "agents/platform_context.md",
+      "source_location": "15-52",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "workout_management",
+      "community": 12
+    },
+    {
+      "label": "Nutrition Tracking System",
+      "file_type": "document",
+      "source_file": "agents/platform_context.md",
+      "source_location": "54-81",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "nutrition_tracking",
+      "community": 12
+    },
+    {
+      "label": "React Router DOM",
+      "file_type": "code",
+      "source_file": "src",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "react_router",
+      "community": 28
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/context/AuthContext.jsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "src_context_authcontext_jsx",
+      "_tgt": "authcontext_loadfromstorage",
+      "source": "src_context_authcontext_jsx",
+      "target": "authcontext_loadfromstorage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/context/AuthContext.jsx",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_src": "src_context_authcontext_jsx",
+      "_tgt": "authcontext_savetostorage",
+      "source": "src_context_authcontext_jsx",
+      "target": "authcontext_savetostorage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/context/AuthContext.jsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_src": "src_context_authcontext_jsx",
+      "_tgt": "authcontext_authprovider",
+      "source": "src_context_authcontext_jsx",
+      "target": "authcontext_authprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/auth/Signup.jsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_src": "src_components_auth_signup_jsx",
+      "_tgt": "signup_isvalidemail",
+      "source": "src_components_auth_signup_jsx",
+      "target": "signup_isvalidemail",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/auth/Signup.jsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_src": "src_components_auth_signup_jsx",
+      "_tgt": "signup_getstrength",
+      "source": "src_components_auth_signup_jsx",
+      "target": "signup_getstrength",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/auth/Signup.jsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_src": "src_components_auth_signup_jsx",
+      "_tgt": "signup_signup",
+      "source": "src_components_auth_signup_jsx",
+      "target": "signup_signup",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/auth/OnboardingFlow.jsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_src": "src_components_auth_onboardingflow_jsx",
+      "_tgt": "onboardingflow_onboardingflow",
+      "source": "src_components_auth_onboardingflow_jsx",
+      "target": "onboardingflow_onboardingflow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/auth/Login.jsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_src": "src_components_auth_login_jsx",
+      "_tgt": "login_isvalidemail",
+      "source": "src_components_auth_login_jsx",
+      "target": "login_isvalidemail",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/auth/Login.jsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_src": "src_components_auth_login_jsx",
+      "_tgt": "login_login",
+      "source": "src_components_auth_login_jsx",
+      "target": "login_login",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/auth/OnboardingYourPlan.jsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_src": "src_components_auth_onboardingyourplan_jsx",
+      "_tgt": "onboardingyourplan_macrobar",
+      "source": "src_components_auth_onboardingyourplan_jsx",
+      "target": "onboardingyourplan_macrobar",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/auth/OnboardingYourPlan.jsx",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_src": "src_components_auth_onboardingyourplan_jsx",
+      "_tgt": "onboardingyourplan_onboardingyourplan",
+      "source": "src_components_auth_onboardingyourplan_jsx",
+      "target": "onboardingyourplan_onboardingyourplan",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/auth/OTPVerification.jsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "src_components_auth_otpverification_jsx",
+      "_tgt": "otpverification_otpverification",
+      "source": "src_components_auth_otpverification_jsx",
+      "target": "otpverification_otpverification",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/auth/OnboardingBasicInfo.jsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_src": "src_components_auth_onboardingbasicinfo_jsx",
+      "_tgt": "onboardingbasicinfo_onboardingbasicinfo",
+      "source": "src_components_auth_onboardingbasicinfo_jsx",
+      "target": "onboardingbasicinfo_onboardingbasicinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/auth/OnboardingGoalsActivity.jsx",
+      "source_location": "L33",
+      "weight": 1.0,
+      "_src": "src_components_auth_onboardinggoalsactivity_jsx",
+      "_tgt": "onboardinggoalsactivity_onboardinggoalsactivity",
+      "source": "src_components_auth_onboardinggoalsactivity_jsx",
+      "target": "onboardinggoalsactivity_onboardinggoalsactivity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/AdminLayout.jsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_src": "src_components_admin_adminlayout_jsx",
+      "_tgt": "adminlayout_adminlayout",
+      "source": "src_components_admin_adminlayout_jsx",
+      "target": "adminlayout_adminlayout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/AdminDashboard.jsx",
+      "source_location": "L31",
+      "weight": 1.0,
+      "_src": "src_components_admin_admindashboard_jsx",
+      "_tgt": "admindashboard_admindashboard",
+      "source": "src_components_admin_admindashboard_jsx",
+      "target": "admindashboard_admindashboard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/Admin.jsx",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_src": "src_components_admin_admin_jsx",
+      "_tgt": "admin_admin",
+      "source": "src_components_admin_admin_jsx",
+      "target": "admin_admin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/AdminNutritionCS.jsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "src_components_admin_adminnutritioncs_jsx",
+      "_tgt": "adminnutritioncs_adminnutritioncs",
+      "source": "src_components_admin_adminnutritioncs_jsx",
+      "target": "adminnutritioncs_adminnutritioncs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/AdminExerciseLibrary.jsx",
+      "source_location": "L63",
+      "weight": 1.0,
+      "_src": "src_components_admin_adminexerciselibrary_jsx",
+      "_tgt": "adminexerciselibrary_pillselect",
+      "source": "src_components_admin_adminexerciselibrary_jsx",
+      "target": "adminexerciselibrary_pillselect",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/AdminExerciseLibrary.jsx",
+      "source_location": "L112",
+      "weight": 1.0,
+      "_src": "src_components_admin_adminexerciselibrary_jsx",
+      "_tgt": "adminexerciselibrary_formselect",
+      "source": "src_components_admin_adminexerciselibrary_jsx",
+      "target": "adminexerciselibrary_formselect",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/AdminExerciseLibrary.jsx",
+      "source_location": "L159",
+      "weight": 1.0,
+      "_src": "src_components_admin_adminexerciselibrary_jsx",
+      "_tgt": "adminexerciselibrary_diffbars",
+      "source": "src_components_admin_adminexerciselibrary_jsx",
+      "target": "adminexerciselibrary_diffbars",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/AdminExerciseLibrary.jsx",
+      "source_location": "L178",
+      "weight": 1.0,
+      "_src": "src_components_admin_adminexerciselibrary_jsx",
+      "_tgt": "adminexerciselibrary_exercisemodal",
+      "source": "src_components_admin_adminexerciselibrary_jsx",
+      "target": "adminexerciselibrary_exercisemodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/AdminExerciseLibrary.jsx",
+      "source_location": "L267",
+      "weight": 1.0,
+      "_src": "src_components_admin_adminexerciselibrary_jsx",
+      "_tgt": "adminexerciselibrary_adminexerciselibrary",
+      "source": "src_components_admin_adminexerciselibrary_jsx",
+      "target": "adminexerciselibrary_adminexerciselibrary",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/AdminUserManagement.jsx",
+      "source_location": "L25",
+      "weight": 1.0,
+      "_src": "src_components_admin_adminusermanagement_jsx",
+      "_tgt": "adminusermanagement_usermodal",
+      "source": "src_components_admin_adminusermanagement_jsx",
+      "target": "adminusermanagement_usermodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/AdminUserManagement.jsx",
+      "source_location": "L93",
+      "weight": 1.0,
+      "_src": "src_components_admin_adminusermanagement_jsx",
+      "_tgt": "adminusermanagement_deleteconfirm",
+      "source": "src_components_admin_adminusermanagement_jsx",
+      "target": "adminusermanagement_deleteconfirm",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/AdminUserManagement.jsx",
+      "source_location": "L114",
+      "weight": 1.0,
+      "_src": "src_components_admin_adminusermanagement_jsx",
+      "_tgt": "adminusermanagement_adminusermanagement",
+      "source": "src_components_admin_adminusermanagement_jsx",
+      "target": "adminusermanagement_adminusermanagement",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/AdminUserPrograms.jsx",
+      "source_location": "L97",
+      "weight": 1.0,
+      "_src": "src_components_admin_adminuserprograms_jsx",
+      "_tgt": "adminuserprograms_getstylechip",
+      "source": "src_components_admin_adminuserprograms_jsx",
+      "target": "adminuserprograms_getstylechip",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/AdminUserPrograms.jsx",
+      "source_location": "L121",
+      "weight": 1.0,
+      "_src": "src_components_admin_adminuserprograms_jsx",
+      "_tgt": "adminuserprograms_programmodal",
+      "source": "src_components_admin_adminuserprograms_jsx",
+      "target": "adminuserprograms_programmodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/AdminUserPrograms.jsx",
+      "source_location": "L217",
+      "weight": 1.0,
+      "_src": "src_components_admin_adminuserprograms_jsx",
+      "_tgt": "adminuserprograms_adminuserprograms",
+      "source": "src_components_admin_adminuserprograms_jsx",
+      "target": "adminuserprograms_adminuserprograms",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Settings/Settings.jsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_src": "src_components_user_settings_settings_jsx",
+      "_tgt": "settings_toggle",
+      "source": "src_components_user_settings_settings_jsx",
+      "target": "settings_toggle",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Settings/Settings.jsx",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_src": "src_components_user_settings_settings_jsx",
+      "_tgt": "settings_settings",
+      "source": "src_components_user_settings_settings_jsx",
+      "target": "settings_settings",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L153",
+      "weight": 1.0,
+      "_src": "src_components_user_workouts_workouts_jsx",
+      "_tgt": "workouts_workoutcontextnav",
+      "source": "src_components_user_workouts_workouts_jsx",
+      "target": "workouts_workoutcontextnav",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L177",
+      "weight": 1.0,
+      "_src": "src_components_user_workouts_workouts_jsx",
+      "_tgt": "workouts_programsview",
+      "source": "src_components_user_workouts_workouts_jsx",
+      "target": "workouts_programsview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L264",
+      "weight": 1.0,
+      "_src": "src_components_user_workouts_workouts_jsx",
+      "_tgt": "workouts_addexercisemodal",
+      "source": "src_components_user_workouts_workouts_jsx",
+      "target": "workouts_addexercisemodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L362",
+      "weight": 1.0,
+      "_src": "src_components_user_workouts_workouts_jsx",
+      "_tgt": "workouts_programpreview",
+      "source": "src_components_user_workouts_workouts_jsx",
+      "target": "workouts_programpreview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L501",
+      "weight": 1.0,
+      "_src": "src_components_user_workouts_workouts_jsx",
+      "_tgt": "workouts_createprogrammodal",
+      "source": "src_components_user_workouts_workouts_jsx",
+      "target": "workouts_createprogrammodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L609",
+      "weight": 1.0,
+      "_src": "src_components_user_workouts_workouts_jsx",
+      "_tgt": "workouts_libraryview",
+      "source": "src_components_user_workouts_workouts_jsx",
+      "target": "workouts_libraryview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L743",
+      "weight": 1.0,
+      "_src": "src_components_user_workouts_workouts_jsx",
+      "_tgt": "workouts_usetimer",
+      "source": "src_components_user_workouts_workouts_jsx",
+      "target": "workouts_usetimer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L762",
+      "weight": 1.0,
+      "_src": "src_components_user_workouts_workouts_jsx",
+      "_tgt": "workouts_resttimer",
+      "source": "src_components_user_workouts_workouts_jsx",
+      "target": "workouts_resttimer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L810",
+      "weight": 1.0,
+      "_src": "src_components_user_workouts_workouts_jsx",
+      "_tgt": "workouts_activesession",
+      "source": "src_components_user_workouts_workouts_jsx",
+      "target": "workouts_activesession",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L986",
+      "weight": 1.0,
+      "_src": "src_components_user_workouts_workouts_jsx",
+      "_tgt": "workouts_discardmodal",
+      "source": "src_components_user_workouts_workouts_jsx",
+      "target": "workouts_discardmodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L1016",
+      "weight": 1.0,
+      "_src": "src_components_user_workouts_workouts_jsx",
+      "_tgt": "workouts_workoutsummary",
+      "source": "src_components_user_workouts_workouts_jsx",
+      "target": "workouts_workoutsummary",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L1140",
+      "weight": 1.0,
+      "_src": "src_components_user_workouts_workouts_jsx",
+      "_tgt": "workouts_historyview",
+      "source": "src_components_user_workouts_workouts_jsx",
+      "target": "workouts_historyview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L1338",
+      "weight": 1.0,
+      "_src": "src_components_user_workouts_workouts_jsx",
+      "_tgt": "workouts_workouts",
+      "source": "src_components_user_workouts_workouts_jsx",
+      "target": "workouts_workouts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Workouts/Workouts.jsx",
+      "source_location": "L811",
+      "weight": 1.0,
+      "_src": "workouts_activesession",
+      "_tgt": "workouts_usetimer",
+      "source": "workouts_usetimer",
+      "target": "workouts_activesession",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Dashboard/Dashboard.jsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_src": "src_components_user_dashboard_dashboard_jsx",
+      "_tgt": "dashboard_macroring",
+      "source": "src_components_user_dashboard_dashboard_jsx",
+      "target": "dashboard_macroring",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Dashboard/Dashboard.jsx",
+      "source_location": "L32",
+      "weight": 1.0,
+      "_src": "src_components_user_dashboard_dashboard_jsx",
+      "_tgt": "dashboard_dashboard",
+      "source": "src_components_user_dashboard_dashboard_jsx",
+      "target": "dashboard_dashboard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/AIAssistant/AIAssistant.jsx",
+      "source_location": "L75",
+      "weight": 1.0,
+      "_src": "src_components_user_aiassistant_aiassistant_jsx",
+      "_tgt": "aiassistant_userbubble",
+      "source": "src_components_user_aiassistant_aiassistant_jsx",
+      "target": "aiassistant_userbubble",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/AIAssistant/AIAssistant.jsx",
+      "source_location": "L86",
+      "weight": 1.0,
+      "_src": "src_components_user_aiassistant_aiassistant_jsx",
+      "_tgt": "aiassistant_aibubble",
+      "source": "src_components_user_aiassistant_aiassistant_jsx",
+      "target": "aiassistant_aibubble",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/AIAssistant/AIAssistant.jsx",
+      "source_location": "L125",
+      "weight": 1.0,
+      "_src": "src_components_user_aiassistant_aiassistant_jsx",
+      "_tgt": "aiassistant_historypanel",
+      "source": "src_components_user_aiassistant_aiassistant_jsx",
+      "target": "aiassistant_historypanel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/AIAssistant/AIAssistant.jsx",
+      "source_location": "L218",
+      "weight": 1.0,
+      "_src": "src_components_user_aiassistant_aiassistant_jsx",
+      "_tgt": "aiassistant_aiassistant",
+      "source": "src_components_user_aiassistant_aiassistant_jsx",
+      "target": "aiassistant_aiassistant",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/user/Nutrition/Nutrition.jsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_src": "src_components_user_nutrition_nutrition_jsx",
+      "_tgt": "nutrition_nutrition",
+      "source": "src_components_user_nutrition_nutrition_jsx",
+      "target": "nutrition_nutrition",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/common/AppLayout.jsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_src": "src_components_common_applayout_jsx",
+      "_tgt": "applayout_applayout",
+      "source": "src_components_common_applayout_jsx",
+      "target": "applayout_applayout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/hooks/useAuth.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_src": "src_hooks_useauth_js",
+      "_tgt": "useauth_useauth",
+      "source": "src_hooks_useauth_js",
+      "target": "useauth_useauth",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/router/AppRouter.jsx",
+      "source_location": "L59",
+      "weight": 1.0,
+      "_src": "src_router_approuter_jsx",
+      "_tgt": "approuter_approuter",
+      "source": "src_router_approuter_jsx",
+      "target": "approuter_approuter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/router/guards.jsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_src": "src_router_guards_jsx",
+      "_tgt": "guards_publicroute",
+      "source": "src_router_guards_jsx",
+      "target": "guards_publicroute",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/router/guards.jsx",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_src": "src_router_guards_jsx",
+      "_tgt": "guards_onboardingroute",
+      "source": "src_router_guards_jsx",
+      "target": "guards_onboardingroute",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/router/guards.jsx",
+      "source_location": "L35",
+      "weight": 1.0,
+      "_src": "src_router_guards_jsx",
+      "_tgt": "guards_protectedroute",
+      "source": "src_router_guards_jsx",
+      "target": "guards_protectedroute",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/router/guards.jsx",
+      "source_location": "L47",
+      "weight": 1.0,
+      "_src": "src_router_guards_jsx",
+      "_tgt": "guards_adminroute",
+      "source": "src_router_guards_jsx",
+      "target": "guards_adminroute",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "agents/platform_context.md",
+      "source_location": "2-52",
+      "weight": 1.0,
+      "_src": "cfit_fitness_app",
+      "_tgt": "workout_management",
+      "source": "cfit_fitness_app",
+      "target": "workout_management"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "agents/platform_context.md",
+      "source_location": "2-81",
+      "weight": 1.0,
+      "_src": "cfit_fitness_app",
+      "_tgt": "nutrition_tracking",
+      "source": "cfit_fitness_app",
+      "target": "nutrition_tracking"
+    }
+  ],
+  "hyperedges": []
+}
