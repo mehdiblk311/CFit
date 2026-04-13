@@ -1,4 +1,9 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { authStore } from '../../stores/authStore';
+import { uiStore } from '../../stores/uiStore';
+import { usersAPI } from '../../api/users';
 import './OnboardingYourPlan.css';
 
 const MACRO_COLORS = {
@@ -22,7 +27,44 @@ function MacroBar({ label, grams, pct, color }) {
 }
 
 export default function OnboardingYourPlan({ step = 3, totalSteps = 3, onBack }) {
-  const { completeOnboarding } = useAuth();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [targets, setTargets] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [completing, setCompleting] = useState(false);
+
+  useEffect(() => {
+    // Fetch nutrition targets
+    async function fetchTargets() {
+      try {
+        const data = await usersAPI.getNutritionTargets(user.id);
+        setTargets(data);
+      } catch (error) {
+        console.error('Failed to fetch nutrition targets:', error);
+        uiStore.getState().addToast('Failed to load targets', 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (user?.id) {
+      fetchTargets();
+    }
+  }, [user?.id]);
+
+  const handleComplete = async () => {
+    setCompleting(true);
+    try {
+      // Mark as onboarded by updating profile (just a flag in auth state)
+      authStore.getState().updateProfile({ onboarded: true });
+      // Navigate to dashboard (auth guard will allow it now)
+      navigate('/dashboard');
+    } catch (error) {
+      uiStore.getState().addToast('Failed to complete onboarding', 'error');
+    } finally {
+      setCompleting(false);
+    }
+  };
 
   return (
     <div className="yp-root">
@@ -58,27 +100,55 @@ export default function OnboardingYourPlan({ step = 3, totalSteps = 3, onBack })
           <h1 className="yp-title">Your Daily Target</h1>
         </div>
 
-        {/* TDEE Bento Card */}
-        <div className="yp-tdee-card">
-          <div className="yp-tdee-bg-orb" />
-          <span className="yp-tdee-sub">Estimated Maintenance</span>
-          <div className="yp-tdee-row">
-            <span className="yp-tdee-cal">2,300</span>
-            <span className="yp-tdee-unit">kcal</span>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+            <div className="yp-spinner" />
+            <p style={{ marginTop: '16px', color: '#7d7d7b' }}>Loading your targets...</p>
           </div>
-          <div className="yp-tdee-badges">
-            <span className="yp-badge yp-badge--green">Weight Loss Plan</span>
-            <span className="yp-badge yp-badge--neutral">Active Mode</span>
-          </div>
-        </div>
+        ) : targets ? (
+          <>
+            {/* TDEE Bento Card */}
+            <div className="yp-tdee-card">
+              <div className="yp-tdee-bg-orb" />
+              <span className="yp-tdee-sub">Estimated Daily Calories</span>
+              <div className="yp-tdee-row">
+                <span className="yp-tdee-cal">{Math.round(targets.tdee || targets.daily_calories || 2300)}</span>
+                <span className="yp-tdee-unit">kcal</span>
+              </div>
+              <div className="yp-tdee-badges">
+                <span className="yp-badge yp-badge--green">{user.goal || 'Custom'} Plan</span>
+                <span className="yp-badge yp-badge--neutral">{user.activity_level || 'Active'} Mode</span>
+              </div>
+            </div>
 
-        {/* Macros */}
-        <div className="yp-macros">
-          <span className="yp-macros-title">Nutritional Split</span>
-          <MacroBar label="Protein" grams={150} pct={75} color={MACRO_COLORS.protein} />
-          <MacroBar label="Carbs"   grams={250} pct={62} color={MACRO_COLORS.carbs}   />
-          <MacroBar label="Fats"    grams={75}  pct={45} color={MACRO_COLORS.fats}    />
-        </div>
+            {/* Macros */}
+            <div className="yp-macros">
+              <span className="yp-macros-title">Nutritional Split</span>
+              <MacroBar
+                label="Protein"
+                grams={Math.round(targets.protein_target || 0)}
+                pct={targets.protein_target ? Math.min(100, (targets.protein_target / (targets.tdee || 2300) * 4) * 100) : 25}
+                color={MACRO_COLORS.protein}
+              />
+              <MacroBar
+                label="Carbs"
+                grams={Math.round(targets.carbs_target || 0)}
+                pct={targets.carbs_target ? Math.min(100, (targets.carbs_target / (targets.tdee || 2300) * 4) * 100) : 45}
+                color={MACRO_COLORS.carbs}
+              />
+              <MacroBar
+                label="Fats"
+                grams={Math.round(targets.fats_target || 0)}
+                pct={targets.fats_target ? Math.min(100, (targets.fats_target / (targets.tdee || 2300) * 9) * 100) : 30}
+                color={MACRO_COLORS.fats}
+              />
+            </div>
+          </>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '40px 20px', color: '#fc7981' }}>
+            <p>Unable to load nutrition targets. Please try again.</p>
+          </div>
+        )}
 
         {/* Info note */}
         <div className="yp-info">
@@ -92,9 +162,15 @@ export default function OnboardingYourPlan({ step = 3, totalSteps = 3, onBack })
 
       {/* ── Fixed CTA ── */}
       <footer className="yp-footer">
-        <button className="yp-cta-btn" onClick={() => completeOnboarding()}>
-          Let's Go
-          <span className="material-symbols-outlined">rocket_launch</span>
+        <button className="yp-cta-btn" onClick={handleComplete} disabled={loading || completing}>
+          {completing ? (
+            <div className="yp-spinner" />
+          ) : (
+            <>
+              Let's Go
+              <span className="material-symbols-outlined">rocket_launch</span>
+            </>
+          )}
         </button>
       </footer>
     </div>

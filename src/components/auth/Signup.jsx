@@ -58,8 +58,13 @@ export default function Signup() {
     if (Object.keys(e).length) { setErrors(e); return; }
     setLoading(true);
     try {
-      await signup(name, email, pw);
-      // auth state update drives routing in App.jsx — goes to onboarding
+      const response = await signup(name, email, pw);
+      // Check if 2FA is required
+      if (response.two_factor_required) {
+        navigate('/2fa-challenge');
+        return;
+      }
+      // Otherwise auth state update drives routing in App.jsx — goes to onboarding
     } catch {
       setErrors({ email: 'Could not create account. Try again.' });
     } finally {

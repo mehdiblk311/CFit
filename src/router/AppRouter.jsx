@@ -1,10 +1,10 @@
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { PublicRoute, ProtectedRoute, OnboardingRoute, AdminRoute } from './guards';
 
-import Login               from '../components/auth/Login';
-import Signup              from '../components/auth/Signup';
-import ForgotPasswordFlow  from '../components/auth/ForgotPasswordFlow';
-import OnboardingFlow      from '../components/auth/OnboardingFlow';
+import Login                 from '../components/auth/Login';
+import Signup                from '../components/auth/Signup';
+import TwoFactorChallenge    from '../components/auth/TwoFactorChallenge';
+import OnboardingFlow        from '../components/auth/OnboardingFlow';
 import Dashboard           from '../components/user/Dashboard/Dashboard';
 import Workouts            from '../components/user/Workouts/Workouts';
 import NutritionLayout     from '../components/user/Nutrition/Layout/NutritionLayout';
@@ -28,7 +28,7 @@ const router = createBrowserRouter([
     children: [
       { path: '/login',           element: <Login /> },
       { path: '/signup',          element: <Signup /> },
-      { path: '/forgot-password', element: <ForgotPasswordFlow /> },
+      { path: '/2fa-challenge',   element: <TwoFactorChallenge /> },
     ],
   },
 

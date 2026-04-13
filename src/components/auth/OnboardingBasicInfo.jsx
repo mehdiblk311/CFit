@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { authStore } from '../../stores/authStore';
+import { uiStore } from '../../stores/uiStore';
 import './OnboardingBasicInfo.css';
 
 export default function OnboardingBasicInfo({ onNext, onBack, step = 1, totalSteps = 3 }) {
-  const { updateOnboardingStep } = useAuth();
+  const { updateProfile, user } = useAuth();
 
   const [gender, setGender] = useState('male');
   const [age,    setAge]    = useState('');
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   function validate() {
     const e = {};
@@ -25,11 +28,23 @@ export default function OnboardingBasicInfo({ onNext, onBack, step = 1, totalSte
     return e;
   }
 
-  function handleNext() {
+  async function handleNext() {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
-    updateOnboardingStep({ gender, age: parseInt(age), height: parseInt(height), weight: parseFloat(weight) });
-    onNext?.();
+
+    setLoading(true);
+    try {
+      await updateProfile(user.id, {
+        age: parseInt(age),
+        height: parseInt(height),
+        weight: parseFloat(weight)
+      });
+      onNext?.();
+    } catch (error) {
+      uiStore.getState().addToast('Failed to save profile', 'error');
+    } finally {
+      setLoading(false);
+    }
   }
 
   function clearErr(field) { setErrors(p => ({ ...p, [field]: undefined })); }
@@ -171,11 +186,17 @@ export default function OnboardingBasicInfo({ onNext, onBack, step = 1, totalSte
 
       {/* ── Fixed Bottom Action Bar ──────────────────────────────────── */}
       <footer className="ob1-footer">
-        <button className="ob1-next-btn" type="button" onClick={handleNext}>
-          <span>Next</span>
-          <svg width="20" height="16" viewBox="0 0 20 16" fill="none">
-            <path d="M1 8H19M12 1L19 8L12 15" stroke="#faf9f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+        <button className="ob1-next-btn" type="button" onClick={handleNext} disabled={loading}>
+          {loading ? (
+            <div className="ob1-spinner" />
+          ) : (
+            <>
+              <span>Next</span>
+              <svg width="20" height="16" viewBox="0 0 20 16" fill="none">
+                <path d="M1 8H19M12 1L19 8L12 15" stroke="#faf9f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </>
+          )}
         </button>
       </footer>
     </div>

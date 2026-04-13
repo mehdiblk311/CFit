@@ -32,8 +32,13 @@ export default function Login() {
     if (Object.keys(e).length) { setErrors(e); return; }
     setLoading(true);
     try {
-      await login(email, password);
-      // auth state update drives routing in App.jsx automatically
+      const response = await login(email, password);
+      // Check if 2FA is required
+      if (response.two_factor_required) {
+        navigate('/2fa-challenge');
+        return;
+      }
+      // Otherwise auth state update drives routing in App.jsx automatically
     } catch {
       setErrors({ email: 'Invalid email or password.' });
     } finally {
@@ -134,13 +139,6 @@ export default function Login() {
                 )}
               </button>
               {errors.password && <p className="login-error-msg">{errors.password}</p>}
-            </div>
-
-            {/* Forgot */}
-            <div className="login-forgot-row">
-              <button type="button" className="login-forgot" onClick={() => navigate('/forgot-password')}>
-                Forgot password?
-              </button>
             </div>
 
             {/* Sign In */}

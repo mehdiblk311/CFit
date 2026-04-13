@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { authStore } from '../../stores/authStore';
+import { uiStore } from '../../stores/uiStore';
 import './OnboardingGoalsActivity.css';
 
 const GOALS = [
@@ -31,14 +33,26 @@ const ACTIVITY_LEVELS = [
 ];
 
 export default function OnboardingGoalsActivity({ step = 2, totalSteps = 3, onNext, onBack }) {
-  const { updateOnboardingStep } = useAuth();
+  const { updateProfile, user } = useAuth();
   const [goal,      setGoal]      = useState('lose');
   const [activity,  setActivity]  = useState('light');
   const [frequency, setFrequency] = useState(4);
+  const [loading, setLoading] = useState(false);
 
-  function handleNext() {
-    updateOnboardingStep({ goal, activityLevel: activity, workoutFrequency: frequency });
-    onNext?.();
+  async function handleNext() {
+    setLoading(true);
+    try {
+      await updateProfile(user.id, {
+        goal,
+        activity_level: activity
+        // Note: workoutFrequency not stored in backend (UI-only)
+      });
+      onNext?.();
+    } catch (error) {
+      uiStore.getState().addToast('Failed to save goals', 'error');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -152,9 +166,8 @@ export default function OnboardingGoalsActivity({ step = 2, totalSteps = 3, onNe
 
       {/* ── Fixed CTA ── */}
       <footer className="og-footer">
-        <button className="og-next-btn" onClick={handleNext}>
-          Next
-          <span className="material-symbols-outlined">arrow_forward</span>
+        <button className="og-next-btn" onClick={handleNext} disabled={loading}>
+          {loading ? <div className="og-spinner" /> : <>Next<span className="material-symbols-outlined">arrow_forward</span></>}
         </button>
       </footer>
     </div>
