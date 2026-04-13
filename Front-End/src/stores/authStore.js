@@ -45,12 +45,12 @@ export const authStore = create(
 
       isOnboarded: () => {
         const state = get();
-        return !!(
-          state.user &&
-          state.user.weight &&
-          state.user.height &&
-          state.user.goal
-        );
+        if (!state.user) return false;
+        // Only trust the explicit flag set at the end of onboarding step 3.
+        // Any backend-data fallback risks firing mid-flow (steps 1/2 update the
+        // user object via API, which can merge a pre-existing tdee/goal/weight
+        // back into the store and trigger a premature redirect to /dashboard).
+        return !!state.user.onboarded;
       },
 
       isAdmin: () => {

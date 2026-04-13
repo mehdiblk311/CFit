@@ -89,6 +89,17 @@ export default function Login() {
               </div>
             ))}
           </div>
+          {/* Desktop signup CTA — visible only on md+ */}
+          <div className="login-desktop-signup">
+            <span className="login-desktop-signup-label">New to UM6P_FIT?</span>
+            <button
+              type="button"
+              className="login-desktop-signup-btn"
+              onClick={() => navigate('/signup')}
+            >
+              Create free account →
+            </button>
+          </div>
         </div>
 
         <div className="login-card">

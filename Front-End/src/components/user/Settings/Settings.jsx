@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
+import { authStore } from '../../../stores/authStore';
+import TwoFactorSetup from '../../auth/TwoFactorSetup';
 import './Settings.css';
 
 function Toggle({ checked, onChange }) {
@@ -21,6 +23,8 @@ export default function Settings() {
   const [frequency,  setFrequency]  = useState(5);
   const [darkMode,   setDarkMode]   = useState(false);
   const [language,   setLanguage]   = useState('EN');
+  const [show2FA,    setShow2FA]    = useState(false);
+  const twoFactorEnabled = user?.two_factor_enabled ?? false;
 
   const name  = user?.name  ?? 'Athlete';
   const email = user?.email ?? 'athlete@um6p.ma';
@@ -156,6 +160,28 @@ export default function Settings() {
           </div>
         </section>
 
+        {/* ── Security / 2FA ── */}
+        <section className="st-card st-card--shadow" id="security">
+          <h2 className="st-section-title">Security</h2>
+          <div className="st-2fa-row">
+            <div className="st-2fa-left">
+              <div className="st-2fa-icon" aria-hidden="true">{twoFactorEnabled ? '🔐' : '🛡️'}</div>
+              <div className="st-2fa-info">
+                <span className="st-2fa-label">Two-Factor Authentication</span>
+                <span className={`st-2fa-status ${twoFactorEnabled ? 'st-2fa-status--on' : 'st-2fa-status--off'}`}>
+                  {twoFactorEnabled ? 'Enabled' : 'Disabled'}
+                </span>
+              </div>
+            </div>
+            <button
+              className={`st-2fa-btn ${twoFactorEnabled ? 'st-2fa-btn--manage' : 'st-2fa-btn--enable'}`}
+              onClick={() => setShow2FA(true)}
+            >
+              {twoFactorEnabled ? 'Manage' : 'Enable'}
+            </button>
+          </div>
+        </section>
+
         {/* ── Preferences ── */}
         <section className="st-section" id="preferences">
           <div className="st-pref-row">
@@ -212,6 +238,17 @@ export default function Settings() {
         </footer>
 
       </main>
+      {show2FA && (
+        <TwoFactorSetup
+          isEnabled={twoFactorEnabled}
+          onClose={() => setShow2FA(false)}
+          onSuccess={({ enabled }) => {
+            // Update user in store so badge reflects new state
+            authStore.getState().updateProfile({ two_factor_enabled: enabled });
+            if (!enabled) setShow2FA(false);
+          }}
+        />
+      )}
     </div>
   );
 }

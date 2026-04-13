@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { authStore } from '../../stores/authStore';
@@ -26,38 +26,49 @@ function MacroBar({ label, grams, pct, color }) {
   );
 }
 
-export default function OnboardingYourPlan({ step = 3, totalSteps = 3, onBack }) {
-  const { user } = useAuth();
+export default function OnboardingYourPlan({ step = 3, totalSteps = 3, onBack, tdeeData, basicData, goalsData }) {
+  const { user, updateProfile } = useAuth();
   const navigate = useNavigate();
   const [targets, setTargets] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const submitted = useRef(false);
+  // Tracks the in-flight TDEE save promise so handleComplete can await it
+  const tdeePromise = useRef(null);
 
   useEffect(() => {
-    // Fetch nutrition targets
-    async function fetchTargets() {
-      try {
-        const data = await usersAPI.getNutritionTargets(user.id);
-        setTargets(data);
-      } catch (error) {
-        console.error('Failed to fetch nutrition targets:', error);
-        uiStore.getState().addToast('Failed to load targets', 'error');
-      } finally {
-        setLoading(false);
-      }
+    if (!tdeeData) {
+      // Fallback: fetch from API if tdeeData not passed (e.g. direct navigation)
+      setLoading(true);
+      usersAPI.getNutritionTargets(user?.id)
+        .then(data => setTargets(data))
+        .catch(() => uiStore.getState().addToast('Failed to load targets', 'error'))
+        .finally(() => setLoading(false));
+      return;
     }
 
-    if (user?.id) {
-      fetchTargets();
+    // Use frontend-computed TDEE immediately (instant display)
+    setTargets(tdeeData);
+
+    // Submit TDEE to backend once (persists computed value for returning-user fallback)
+    if (!submitted.current && user?.id) {
+      submitted.current = true;
+      tdeePromise.current = updateProfile(user.id, { tdee: tdeeData.calories })
+        .catch(() => {
+          console.warn('Failed to persist TDEE to backend');
+        });
     }
-  }, [user?.id]);
+  }, [tdeeData, user?.id]);
 
   const handleComplete = async () => {
     setCompleting(true);
     try {
-      // Mark as onboarded by updating profile (just a flag in auth state)
+      // Wait for TDEE to be persisted so the returning-user fallback works
+      if (tdeePromise.current) {
+        await tdeePromise.current;
+      }
+      // Mark as onboarded — persisted in localStorage via Zustand
       authStore.getState().updateProfile({ onboarded: true });
-      // Navigate to dashboard (auth guard will allow it now)
       navigate('/dashboard');
     } catch (error) {
       uiStore.getState().addToast('Failed to complete onboarding', 'error');
@@ -110,14 +121,17 @@ export default function OnboardingYourPlan({ step = 3, totalSteps = 3, onBack })
             {/* TDEE Bento Card */}
             <div className="yp-tdee-card">
               <div className="yp-tdee-bg-orb" />
-              <span className="yp-tdee-sub">Estimated Daily Calories</span>
+              <div className="yp-tdee-header-row">
+                <span className="yp-tdee-sub">Estimated Daily Calories</span>
+                {tdeeData && <span className="yp-tdee-calc-badge">Calculated</span>}
+              </div>
               <div className="yp-tdee-row">
                 <span className="yp-tdee-cal">{Math.round(targets.calories || 2300)}</span>
                 <span className="yp-tdee-unit">kcal</span>
               </div>
               <div className="yp-tdee-badges">
-                <span className="yp-badge yp-badge--green">{targets.goal || user.goal || 'Custom'} Plan</span>
-                <span className="yp-badge yp-badge--neutral">{targets.activity_level || user.activity_level || 'Active'} Mode</span>
+                <span className="yp-badge yp-badge--green">{goalsData?.goal || targets.goal || user?.goal || 'Custom'} Plan</span>
+                <span className="yp-badge yp-badge--neutral">{goalsData?.activityLevel || targets.activity_level || user?.activity_level || 'Active'} Mode</span>
               </div>
             </div>
 

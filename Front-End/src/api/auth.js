@@ -62,15 +62,15 @@ export const authAPI = {
     return response.data;
   },
 
-  // Confirm 2FA setup with verification code
+  // Verify 2FA setup with TOTP code → enables 2FA, returns recovery codes
   confirm2FA: async (code) => {
-    const response = await client.post('/v1/auth/2fa/confirm', { code });
+    const response = await client.post('/v1/auth/2fa/verify', { code });
     return response.data;
   },
 
-  // Disable 2FA
-  disable2FA: async () => {
-    const response = await client.post('/v1/auth/2fa/disable');
+  // Disable 2FA (requires current TOTP code)
+  disable2FA: async (code) => {
+    const response = await client.post('/v1/auth/2fa/disable', { code });
     return response.data;
   },
 

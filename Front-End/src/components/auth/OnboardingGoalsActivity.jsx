@@ -47,7 +47,8 @@ export default function OnboardingGoalsActivity({ step = 2, totalSteps = 3, onNe
         activity_level: activity
         // Note: workoutFrequency not stored in backend (UI-only)
       });
-      onNext?.();
+      // Pass data up so OnboardingFlow can compute TDEE
+      onNext?.({ goal, activityLevel: activity });
     } catch (error) {
       uiStore.getState().addToast('Failed to save goals', 'error');
     } finally {

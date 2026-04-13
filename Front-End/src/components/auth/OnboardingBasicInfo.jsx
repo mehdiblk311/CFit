@@ -39,7 +39,13 @@ export default function OnboardingBasicInfo({ onNext, onBack, step = 1, totalSte
         height: parseInt(height),
         weight: parseFloat(weight)
       });
-      onNext?.();
+      // Pass data up so OnboardingFlow can compute TDEE
+      onNext?.({
+        age:    parseInt(age),
+        height: parseInt(height),
+        weight: parseFloat(weight),
+        gender,
+      });
     } catch (error) {
       uiStore.getState().addToast('Failed to save profile', 'error');
     } finally {

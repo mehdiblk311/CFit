@@ -297,6 +297,7 @@
 /* ── Desktop hero — hidden on mobile ───────────────────────────── */
 .login-desktop-hero      { display: none; }
 .login-desktop-sticker   { display: none; }
+.login-desktop-signup    { display: none; }
 
 /* ── Desktop Layout ─────────────────────────────────────────────── */
 @media (min-width: 768px) {
@@ -417,6 +418,55 @@
     color: #2e2f2e;
     line-height: 1.5;
   }
+
+  /* Desktop signup CTA */
+  .login-desktop-signup {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 8px;
+  }
+
+  .login-desktop-signup-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #5b5c5a;
+    white-space: nowrap;
+  }
+
+  .login-desktop-signup-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #2e2f2e;
+    color: #d6ffb7;
+    border: none;
+    border-radius: 9999px;
+    padding: 10px 22px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: -4px 4px 0 #38671a;
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+    white-space: nowrap;
+  }
+
+  .login-desktop-signup-btn:hover {
+    transform: translate(1px, -1px);
+    box-shadow: -5px 5px 0 #38671a;
+    background: #1a1b1a;
+  }
+
+  .login-desktop-signup-btn:active {
+    transform: translate(-1px, 1px);
+    box-shadow: -2px 2px 0 #38671a;
+  }
+
+  /* Hide mobile footer link on desktop */
+  .login-footer-link { display: none; }
 }
 
 /* ── Tablet ──────────────────────────────────────────────────────── */
