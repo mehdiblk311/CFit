@@ -35,8 +35,12 @@ export const authAPI = {
   },
 
   // Logout (revoke current session)
-  logout: async () => {
-    const response = await client.post('/v1/auth/logout');
+  logout: async (allSessions = false) => {
+    const state = (await import('../stores/authStore')).authStore.getState();
+    const body = allSessions
+      ? { all_sessions: true }
+      : { refresh_token: state.refresh_token };
+    const response = await client.post('/v1/auth/logout', body);
     return response.data;
   },
 
