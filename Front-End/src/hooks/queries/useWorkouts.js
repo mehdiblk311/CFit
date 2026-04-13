@@ -83,6 +83,37 @@ export function useUpdateWorkout(workout_id) {
   });
 }
 
+export function useExercises(params = {}) {
+  return useQuery({
+    queryKey: ['exercises', params],
+    queryFn: () => workoutsAPI.searchExercises(params),
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+export function useAddExercise() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ workout_id, exercise_id, notes }) =>
+      workoutsAPI.addExercise(workout_id, exercise_id, notes),
+    onSuccess: (_, { workout_id }) => {
+      queryClient.invalidateQueries({ queryKey: ['workouts', workout_id] });
+    },
+  });
+}
+
+export function useFinishWorkout() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ workout_id, data }) => workoutsAPI.updateWorkout(workout_id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workouts'] });
+    },
+  });
+}
+
 export function useAddSet() {
   const queryClient = useQueryClient();
 

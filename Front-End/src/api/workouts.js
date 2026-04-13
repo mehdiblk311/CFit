@@ -67,6 +67,12 @@ export const workoutsAPI = {
     return response.data;
   },
 
+  // Search exercise library
+  searchExercises: async (params = {}) => {
+    const response = await client.get('/v1/exercises', { params });
+    return response.data;
+  },
+
   // Get exercise history
   getExerciseHistory: async (exercise_id, params = {}) => {
     const response = await client.get(`/v1/exercises/${exercise_id}/history`, { params });
