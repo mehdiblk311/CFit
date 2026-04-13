@@ -1,0 +1,10 @@
+ 7/7] COPY --link --chown=appuser:appuser FoodData_Central_foundation_food_json_2025-12-18.json  0.0s
+------
+ > [app stage-1 7/7] COPY --link --chown=appuser:appuser FoodData_Central_foundation_food_json_2025-12-18.json /app/FoodData_Central_foundation_food_json_2025-12-18.json:
+------
+target app: failed to solve: invalid user index: -1
+
+
+
+View build details: docker-desktop://dashboard/build/default/default/dzk3f2l744sqs9h7xkzf8r1aq
+
