@@ -65,8 +65,15 @@ export default function Signup() {
         return;
       }
       // Otherwise auth state update drives routing in App.jsx — goes to onboarding
-    } catch {
-      setErrors({ email: 'Could not create account. Try again.' });
+    } catch (err) {
+      const detail = err?.detail ?? err?.message ?? '';
+      if (detail.toLowerCase().includes('duplicate') || detail.toLowerCase().includes('unique') || detail.toLowerCase().includes('already')) {
+        setErrors({ email: 'An account with this email already exists.' });
+      } else if (err?.status === 400) {
+        setErrors({ email: detail || 'Invalid data. Please check your inputs.' });
+      } else {
+        setErrors({ email: 'Could not create account. Please try again.' });
+      }
     } finally {
       setLoading(false);
     }

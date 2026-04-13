@@ -29,8 +29,11 @@ export function useAuth() {
       authStore.getState().login(response.user, response.access_token, response.refresh_token);
       return response;
     } catch (error) {
-      uiStore.getState().addToast('Login failed', 'error');
-      throw error;
+      const detail = error?.response?.data?.detail ?? error?.response?.data?.error ?? null;
+      const enriched = new Error(detail || 'Login failed');
+      enriched.status = error?.response?.status;
+      enriched.detail = detail;
+      throw enriched;
     }
   };
 
@@ -47,8 +50,12 @@ export function useAuth() {
       authStore.getState().login(response.user, response.access_token, response.refresh_token);
       return response;
     } catch (error) {
-      uiStore.getState().addToast('Signup failed', 'error');
-      throw error;
+      // Extract backend detail message and attach it to the error
+      const detail = error?.response?.data?.detail ?? error?.response?.data?.error ?? null;
+      const enriched = new Error(detail || 'Signup failed');
+      enriched.status = error?.response?.status;
+      enriched.detail = detail;
+      throw enriched;
     }
   };
 

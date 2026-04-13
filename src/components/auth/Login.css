@@ -105,7 +105,7 @@
 /* ── Form ───────────────────────────────────────────────────────── */
 .login-form { display: flex; flex-direction: column; gap: 12px; }
 
-.login-field { position: relative; }
+.login-field { position: relative; display: flex; flex-direction: column; }
 
 .login-field-label {
   position: absolute;
@@ -177,7 +177,8 @@
   letter-spacing: 1px;
   color: #e05c3a;
   padding-left: 16px;
-  margin-top: -8px;
+  margin-top: 4px;
+  margin-bottom: 0;
 }
 
 /* ── Sign In button ─────────────────────────────────────────────── */

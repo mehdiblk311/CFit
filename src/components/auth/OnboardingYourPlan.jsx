@@ -112,12 +112,12 @@ export default function OnboardingYourPlan({ step = 3, totalSteps = 3, onBack })
               <div className="yp-tdee-bg-orb" />
               <span className="yp-tdee-sub">Estimated Daily Calories</span>
               <div className="yp-tdee-row">
-                <span className="yp-tdee-cal">{Math.round(targets.tdee || targets.daily_calories || 2300)}</span>
+                <span className="yp-tdee-cal">{Math.round(targets.calories || 2300)}</span>
                 <span className="yp-tdee-unit">kcal</span>
               </div>
               <div className="yp-tdee-badges">
-                <span className="yp-badge yp-badge--green">{user.goal || 'Custom'} Plan</span>
-                <span className="yp-badge yp-badge--neutral">{user.activity_level || 'Active'} Mode</span>
+                <span className="yp-badge yp-badge--green">{targets.goal || user.goal || 'Custom'} Plan</span>
+                <span className="yp-badge yp-badge--neutral">{targets.activity_level || user.activity_level || 'Active'} Mode</span>
               </div>
             </div>
 
@@ -126,20 +126,20 @@ export default function OnboardingYourPlan({ step = 3, totalSteps = 3, onBack })
               <span className="yp-macros-title">Nutritional Split</span>
               <MacroBar
                 label="Protein"
-                grams={Math.round(targets.protein_target || 0)}
-                pct={targets.protein_target ? Math.min(100, (targets.protein_target / (targets.tdee || 2300) * 4) * 100) : 25}
+                grams={Math.round(targets.protein || 0)}
+                pct={targets.protein ? Math.min(100, (targets.protein / (targets.calories || 2300) * 4) * 100) : 25}
                 color={MACRO_COLORS.protein}
               />
               <MacroBar
                 label="Carbs"
-                grams={Math.round(targets.carbs_target || 0)}
-                pct={targets.carbs_target ? Math.min(100, (targets.carbs_target / (targets.tdee || 2300) * 4) * 100) : 45}
+                grams={Math.round(targets.carbs || 0)}
+                pct={targets.carbs ? Math.min(100, (targets.carbs / (targets.calories || 2300) * 4) * 100) : 45}
                 color={MACRO_COLORS.carbs}
               />
               <MacroBar
                 label="Fats"
-                grams={Math.round(targets.fats_target || 0)}
-                pct={targets.fats_target ? Math.min(100, (targets.fats_target / (targets.tdee || 2300) * 9) * 100) : 30}
+                grams={Math.round(targets.fat || 0)}
+                pct={targets.fat ? Math.min(100, (targets.fat / (targets.calories || 2300) * 9) * 100) : 30}
                 color={MACRO_COLORS.fats}
               />
             </div>

@@ -39,8 +39,17 @@ export default function Login() {
         return;
       }
       // Otherwise auth state update drives routing in App.jsx automatically
-    } catch {
-      setErrors({ email: 'Invalid email or password.' });
+    } catch (err) {
+      const detail = err?.detail ?? err?.message ?? '';
+      if (err?.status === 401 || detail.toLowerCase().includes('invalid') || detail.toLowerCase().includes('credentials')) {
+        setErrors({ email: 'Invalid email or password.' });
+      } else if (err?.status === 403) {
+        setErrors({ email: 'Account is disabled. Contact support.' });
+      } else if (detail) {
+        setErrors({ email: detail });
+      } else {
+        setErrors({ email: 'Login failed. Please try again.' });
+      }
     } finally {
       setLoading(false);
     }
