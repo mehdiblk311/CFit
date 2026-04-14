@@ -48,7 +48,7 @@ export const nutritionAPI = {
 
   // Search foods
   searchFoods: async (query, params = {}) => {
-    const response = await client.get('/v1/foods', { params: { q: query, ...params } });
+    const response = await client.get('/v1/foods', { params: { name: query, ...params } });
     return response.data;
   },
 
@@ -79,6 +79,18 @@ export const nutritionAPI = {
   // Create recipe
   createRecipe: async (data) => {
     const response = await client.post('/v1/recipes', data);
+    return response.data;
+  },
+
+  // Delete recipe
+  deleteRecipe: async (recipe_id) => {
+    const response = await client.delete(`/v1/recipes/${recipe_id}`);
+    return response.data;
+  },
+
+  // Log recipe to meal
+  logRecipeToMeal: async (recipe_id, data) => {
+    const response = await client.post(`/v1/recipes/${recipe_id}/log-to-meal`, data);
     return response.data;
   },
 

@@ -6,7 +6,7 @@
   min-height: 100dvh;
   background: #faf9f7;
   color: #2e2f2e;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Roobert', Arial, sans-serif;
   padding-bottom: 100px;
 }
 
@@ -42,7 +42,10 @@
 }
 
 .aq-back-btn:hover {
-  transform: rotate(-8deg);
+  transform: rotate(-8deg) translateY(-4px);
+  box-shadow: -4px 4px 0 rgba(46, 47, 46, 1);
+  background: #e8e2d6;
+  border-radius: 50%;
 }
 
 .aq-header-title {
@@ -230,7 +233,7 @@
   color: #2e2f2e;
   padding: 0;
   line-height: 1;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Roobert', Arial, sans-serif;
   -moz-appearance: textfield;
 }
 

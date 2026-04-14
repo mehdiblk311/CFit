@@ -17,9 +17,9 @@ export const workoutStore = create(
         set({
           activeWorkout: {
             ...workoutData,
-            exercises: [],
-            startedAt: new Date().toISOString(),
-            notes: '',
+            exercises: Array.isArray(workoutData?.exercises) ? workoutData.exercises : [],
+            startedAt: workoutData?.startedAt || new Date().toISOString(),
+            notes: workoutData?.notes || '',
           },
         });
       },
@@ -32,7 +32,7 @@ export const workoutStore = create(
               ...state.activeWorkout,
               exercises: [
                 ...state.activeWorkout.exercises,
-                { ...exerciseData, sets: [] },
+                { ...exerciseData, sets: Array.isArray(exerciseData?.sets) ? exerciseData.sets : [] },
               ],
             },
           };

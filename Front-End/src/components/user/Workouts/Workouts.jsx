@@ -36,6 +36,10 @@ function getAccentForType(type) {
   return map[type?.toLowerCase()] || '#38671a';
 }
 
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
 // ── useTimer ──────────────────────────────────────────────────────────
 
 function useTimer(running = true) {
@@ -97,11 +101,11 @@ function ExerciseSearchModal({ onClose, onSelect }) {
   }, [search]);
 
   const params = {};
-  if (debouncedSearch) params.q = debouncedSearch;
-  if (cat) params.muscle_group = cat;
+  if (debouncedSearch) params.name = debouncedSearch;
+  if (cat) params.muscle = cat;
 
   const { data: exercisesData, isLoading } = useExercises(params);
-  const exercises = exercisesData?.exercises || exercisesData || [];
+  const exercises = asArray(exercisesData?.exercises || exercisesData?.data || exercisesData);
 
   const CATS = ['All', 'Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Core', 'Cardio'];
 
@@ -169,7 +173,7 @@ function ExerciseSearchModal({ onClose, onSelect }) {
 
 function ProgramsView({ onProgramPreview, onProgramStart }) {
   const { data: templatesData, isLoading } = useTemplateList();
-  const templates = templatesData?.templates || templatesData || [];
+  const templates = asArray(templatesData?.templates || templatesData?.data || templatesData);
 
   return (
     <div className="wk-view">
@@ -312,11 +316,11 @@ function TemplatePreview({ template, onBack, onStart }) {
                     <h4 className="wk-ex-name">{ex.name}</h4>
                   </div>
                 </div>
-                {(ex.sets || ex.sets_count) && (
+                {(ex.sets_count || ex.sets?.length) && (
                   <div className="wk-ex-grid" style={{ marginTop: 0 }}>
                     <div className="wk-ex-stat">
                       <p className="wk-ex-stat-label">Sets</p>
-                      <p className="wk-ex-stat-val">{ex.sets || ex.sets_count}</p>
+                      <p className="wk-ex-stat-val">{ex.sets_count || ex.sets?.length}</p>
                     </div>
                     {ex.reps && (
                       <div className="wk-ex-stat">
@@ -357,11 +361,11 @@ function LibraryView() {
   }, [search]);
 
   const params = {};
-  if (debouncedSearch) params.q = debouncedSearch;
-  if (cat) params.muscle_group = cat;
+  if (debouncedSearch) params.name = debouncedSearch;
+  if (cat) params.muscle = cat;
 
   const { data: exercisesData, isLoading } = useExercises(params);
-  const exercises = exercisesData?.exercises || exercisesData || [];
+  const exercises = asArray(exercisesData?.exercises || exercisesData?.data || exercisesData);
 
   const CATS = ['All', 'Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Core', 'Cardio'];
 
@@ -450,7 +454,7 @@ function HistoryView() {
   const { data: workoutsData, isLoading } = useWorkoutList({ limit: 20, page: currentPage });
   const { data: calendarData } = useActivityCalendar();
 
-  const workouts = workoutsData?.workouts || workoutsData || [];
+  const workouts = asArray(workoutsData?.workouts || workoutsData?.data || workoutsData);
   const calendarDots = calendarData?.dates || {};
 
   const now = new Date();
@@ -468,7 +472,11 @@ function HistoryView() {
     return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
   }
 
-  function fmtDuration(start, end) {
+  function fmtDuration(start, end, durationMinutes) {
+    const minsFromDuration = Number(durationMinutes);
+    if (Number.isFinite(minsFromDuration) && minsFromDuration > 0) {
+      return `${minsFromDuration}m`;
+    }
     if (!start || !end) return '—';
     const mins = Math.round((new Date(end) - new Date(start)) / 60000);
     return mins > 0 ? `${mins}m` : '—';
@@ -541,7 +549,7 @@ function HistoryView() {
                     <p className="wk-hist-ex-meta">
                       {fmtDate(wo.started_at || wo.created_at)}
                       {' · '}
-                      {fmtDuration(wo.started_at, wo.completed_at)}
+                      {fmtDuration(wo.started_at, wo.completed_at, wo.duration)}
                       {vol > 0 ? ` · ${vol.toLocaleString()}kg` : ''}
                     </p>
                   </div>
@@ -911,7 +919,13 @@ function WorkoutSummary({ workoutId, sessionData, durationSeconds, programName, 
     setSaving(true);
     if (workoutId) {
       finishWorkoutMutation.mutate(
-        { workout_id: workoutId, data: { completed_at: new Date().toISOString(), notes } },
+        {
+          workout_id: workoutId,
+          data: {
+            duration: Math.max(1, Math.round(durationSeconds / 60)),
+            notes,
+          },
+        },
         { onSettled: () => { setSaving(false); onSave(); } }
       );
     } else {
@@ -1066,13 +1080,32 @@ export default function Workouts() {
 
   async function handleProgramStart(template) {
     const workoutName = template?.name || 'Workout';
-    const initialExercises = template?.exercises || [];
+    const templateExercises = asArray(template?.exercises);
 
-    // Create workout in backend
     let workoutId = null;
+    let initialExercises = templateExercises;
+
     try {
-      const data = await createWorkoutMutation.mutateAsync({ name: workoutName });
-      workoutId = data?.id || data?.workout?.id;
+      const createPayload = {
+        name: workoutName,
+        exercises: templateExercises
+          .filter((ex) => ex.exercise_id || ex.id)
+          .map((ex, index) => ({
+            exercise_id: ex.exercise_id || ex.id,
+            order: index + 1,
+            sets: ex.sets_count || ex.sets?.length || 0,
+            reps: ex.reps || 0,
+            weight: ex.weight_kg || 0,
+            rest_time: ex.rest_time || 0,
+            notes: ex.notes || '',
+          })),
+      };
+
+      const data = await createWorkoutMutation.mutateAsync(createPayload);
+      workoutId = data?.id || data?.workout?.id || null;
+      if (Array.isArray(data?.exercises)) {
+        initialExercises = data.exercises;
+      }
     } catch {
       // Offline — continue locally
     }

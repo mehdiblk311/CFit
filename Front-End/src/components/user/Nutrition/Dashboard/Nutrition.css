@@ -25,7 +25,8 @@
   min-height: 100dvh;
   background: var(--nd-surface);
   color: var(--nd-on-bg);
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Roobert', Arial, sans-serif;
+  font-feature-settings: "ss01", "ss03", "ss10", "ss11", "ss12";
 }
 
 /* ── Header ────────────────────────────────────────────── */
@@ -63,7 +64,8 @@
 }
 
 .nd-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Roobert', Arial, sans-serif;
+  font-feature-settings: "ss01", "ss03", "ss10", "ss11", "ss12";
   font-weight: 800;
   font-size: 28px;
   letter-spacing: -3px;
@@ -261,8 +263,8 @@
   cursor: default;
 }
 
-.nd-card--tilt-left:hover  { transform: rotate(-1.5deg) translateY(-2px); }
-.nd-card--tilt-right:hover { transform: rotate(1.5deg)  translateY(-2px); }
+.nd-card--tilt-left:hover  { transform: rotate(-3deg) translateY(-4px); box-shadow: -7px 7px 0 rgba(46,47,46,1); }
+.nd-card--tilt-right:hover { transform: rotate(3deg) translateY(-4px); box-shadow: -7px 7px 0 rgba(46,47,46,1); }
 
 /* Empty meal card */
 .nd-card--empty {
