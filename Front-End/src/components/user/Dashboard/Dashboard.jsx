@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
+import { useUnreadCount } from '../../../hooks/queries/useDashboard';
 import './Dashboard.css';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -32,9 +33,11 @@ function MacroRing({ value, total, color, label }) {
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { data: unreadCountData } = useUnreadCount();
   const name = user?.name ?? 'Athlete';
   const firstName = name.charAt(0).toUpperCase() + name.slice(1);
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const unreadCount = unreadCountData?.unread_count ?? 0;
 
   return (
     <div className="dash-root">
@@ -45,9 +48,11 @@ export default function Dashboard() {
           <p className="dash-tagline">The Kinetic Craft is a journey.</p>
         </div>
         <div className="dash-header-right">
-          <button className="dash-notif-btn" aria-label="Notifications">
+          <button className="dash-notif-btn" aria-label="Notifications" onClick={() => navigate('/notifications')}>
             <span className="material-symbols-outlined">notifications</span>
-            <span className="dash-notif-badge">3</span>
+            {unreadCount > 0 && (
+              <span className="dash-notif-badge">{unreadCount}</span>
+            )}
           </button>
           <div className="dash-avatar">
             <span>{firstName.charAt(0).toUpperCase()}</span>
@@ -107,6 +112,10 @@ export default function Dashboard() {
           <button className="dash-action-btn dash-action-btn--secondary" onClick={() => navigate('/workouts')}>
             <span className="material-symbols-outlined">fitness_center</span>
             <span>Start Workout</span>
+          </button>
+          <button className="dash-action-btn dash-action-btn--secondary" style={{ borderColor: '#078a52' }} onClick={() => navigate('/weight')}>
+            <span className="material-symbols-outlined" style={{ color: '#078a52' }}>monitor_weight</span>
+            <span>Log Weight</span>
           </button>
         </div>
 

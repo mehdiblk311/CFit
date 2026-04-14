@@ -1,16 +1,54 @@
 import client from './client';
 
+const NOTIFICATIONS_PAGE_SIZE = 100;
+
+function normalizeNotification(notification) {
+  if (!notification || typeof notification !== 'object') return notification;
+
+  return {
+    ...notification,
+    read_at: notification.read_at || null,
+    created_at: notification.created_at || null,
+  };
+}
+
 export const notificationsAPI = {
   // Get all notifications
   getNotifications: async (params = {}) => {
     const response = await client.get('/v1/notifications', { params });
-    return response.data;
+    return Array.isArray(response.data)
+      ? response.data.map(normalizeNotification)
+      : [];
+  },
+
+  // Get all notifications across paginated results
+  getAllNotifications: async (params = {}) => {
+    const notifications = [];
+    const limit = params.limit ?? NOTIFICATIONS_PAGE_SIZE;
+    let offset = params.offset ?? 0;
+    let hasMore = true;
+
+    while (hasMore) {
+      const batch = await notificationsAPI.getNotifications({
+        ...params,
+        limit,
+        offset,
+      });
+
+      notifications.push(...batch);
+      hasMore = batch.length === limit;
+      offset += limit;
+    }
+
+    return notifications;
   },
 
   // Get unread notification count
   getUnreadCount: async () => {
     const response = await client.get('/v1/notifications/unread-count');
-    return response.data;
+    return {
+      unread_count: Number(response.data?.unread_count) || 0,
+    };
   },
 
   // Mark notification as read
@@ -21,7 +59,7 @@ export const notificationsAPI = {
 
   // Mark all notifications as read
   markAllAsRead: async () => {
-    const response = await client.post('/v1/notifications/mark-all-read');
+    const response = await client.patch('/v1/notifications/read-all');
     return response.data;
   },
 

@@ -24,6 +24,8 @@ import CreateRecipe from './components/user/Nutrition/CreateRecipe/CreateRecipe'
 import CustomFood from './components/user/Nutrition/CustomFood/CustomFood';
 import AIAssistant from './components/user/AIAssistant/AIAssistant';
 import Settings from './components/user/Settings/Settings';
+import WeightTracker from './components/user/WeightTracker/WeightTracker';
+import NotificationsCenter from './components/user/Notifications/NotificationsCenter';
 import Admin from './components/admin/Admin';
 
 function RouteErrorBoundary() {
@@ -93,6 +95,8 @@ const router = createBrowserRouter([
         children: [
           { path: '/dashboard', element: <Dashboard /> },
           { path: '/workouts', element: <Workouts /> },
+          { path: '/weight', element: <WeightTracker /> },
+          { path: '/notifications', element: <NotificationsCenter /> },
           {
             path: '/nutrition',
             element: <NutritionLayout />,
