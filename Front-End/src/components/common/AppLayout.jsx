@@ -5,8 +5,8 @@ const NAV_ITEMS = [
   { id: 'dashboard', path: '/dashboard', icon: 'dashboard',      label: 'Home'      },
   { id: 'workouts',  path: '/workouts',  icon: 'fitness_center',  label: 'Workout'   },
   { id: 'nutrition', path: '/nutrition', icon: 'restaurant',      label: 'Nutrition' },
+  { id: 'progress',  path: '/progress',  icon: 'trending_up',     label: 'Progress'  },
   { id: 'ai',        path: '/ai',        icon: 'smart_toy',        label: 'Coach'     },
-  { id: 'settings',  path: '/settings',  icon: 'settings',         label: 'Settings'  },
 ];
 
 export default function AppLayout({ children }) {

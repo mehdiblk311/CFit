@@ -25,6 +25,7 @@ import CustomFood from './components/user/Nutrition/CustomFood/CustomFood';
 import AIAssistant from './components/user/AIAssistant/AIAssistant';
 import Settings from './components/user/Settings/Settings';
 import WeightTracker from './components/user/WeightTracker/WeightTracker';
+import Progress from './components/user/Progress/Progress';
 import NotificationsCenter from './components/user/Notifications/NotificationsCenter';
 import Admin from './components/admin/Admin';
 
@@ -96,6 +97,7 @@ const router = createBrowserRouter([
           { path: '/dashboard', element: <Dashboard /> },
           { path: '/workouts', element: <Workouts /> },
           { path: '/weight', element: <WeightTracker /> },
+          { path: '/progress', element: <Progress /> },
           { path: '/notifications', element: <NotificationsCenter /> },
           {
             path: '/nutrition',
