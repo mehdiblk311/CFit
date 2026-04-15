@@ -3,6 +3,41 @@ import { authAPI } from '../api/auth';
 import { usersAPI } from '../api/users';
 import { uiStore } from '../stores/uiStore';
 
+// ── Auth initialisation ──────────────────────────────────────
+// If we have a refresh_token but no access_token (e.g. after a page
+// refresh, because access_token is intentionally *not* persisted to
+// localStorage), we try to obtain a fresh access token before the
+// app renders.  This prevents the route guards from redirecting to
+// /login on every refresh.
+let _initPromise = null;
+
+export function initAuth() {
+  if (_initPromise) return _initPromise;
+
+  _initPromise = (async () => {
+    const { refresh_token, access_token, user } = authStore.getState();
+
+    // Already authenticated – nothing to do
+    if (access_token && user) return true;
+
+    // No refresh token either – truly logged out
+    if (!refresh_token) return false;
+
+    // We have a refresh token but no access token → try to refresh
+    try {
+      const response = await authAPI.refresh(refresh_token);
+      authStore.getState().setTokens(response.access_token, response.refresh_token);
+      return true;
+    } catch {
+      // Refresh failed (token revoked / expired) → clean state
+      authStore.getState().logout();
+      return false;
+    }
+  })();
+
+  return _initPromise;
+}
+
 export function useAuth() {
   const user = authStore((state) => state.user);
   const access_token = authStore((state) => state.access_token);

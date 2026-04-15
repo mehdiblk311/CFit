@@ -119,6 +119,28 @@ export function useCreateRecipe() {
   });
 }
 
+export function useDeleteRecipe() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (recipe_id) => nutritionAPI.deleteRecipe(recipe_id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['recipes'] });
+    },
+  });
+}
+
+export function useLogRecipeToMeal() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ recipe_id, data }) => nutritionAPI.logRecipeToMeal(recipe_id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['meals'] });
+    },
+  });
+}
+
 export function useAddFavorite() {
   const queryClient = useQueryClient();
 

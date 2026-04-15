@@ -1,41 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createPortal } from 'react-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { workoutStore } from '../../../stores/workoutStore';
-import { uiStore } from '../../../stores/uiStore';
-import { authStore } from '../../../stores/authStore';
-import { workoutsAPI } from '../../../api/workouts';
-import ExerciseImagePreview from '../../shared/ExerciseImagePreview';
 import {
   useWorkoutList,
-  useWorkout,
   useTemplateList,
-  useTemplate,
-  useCreateTemplate,
-  useApplyTemplate,
-  useProgramAssignments,
-  useUpdateProgramAssignmentStatus,
-  useApplyProgramSession,
   useExercises,
   useCreateWorkout,
   useAddSet,
-  useUpdateSet,
-  useDeleteSet,
   useAddExercise,
-  useUpdateWorkoutExercise,
-  useDeleteWorkoutExercise,
   useFinishWorkout,
-  useAddCardio,
-  useDeleteWorkout,
-  useSemanticSearch,
-  useExerciseMeta,
-  useExerciseHistory,
 } from '../../../hooks/queries/useWorkouts';
 import {
   useActivityCalendar,
 } from '../../../hooks/queries/useAnalytics';
-import { mapApiError } from '../../../utils/apiErrors';
-import { resolveExerciseImageUrl } from '../../../utils/exerciseImages';
 import './Workouts.css';
 
 // ── Helpers ────────────────────────────────────────────────────────────
@@ -49,8 +26,8 @@ function fmtSeconds(s) {
 function calcVolume(exercises) {
   if (!exercises) return 0;
   return exercises.reduce((total, ex) => {
-    const sets = ex.workout_sets || ex.sets || [];
-    return total + sets.reduce((s, set) => s + (Number(set.weight ?? set.weight_kg) || 0) * (Number(set.reps) || 0), 0);
+    const sets = ex.sets || [];
+    return total + sets.reduce((s, set) => s + (Number(set.weight_kg) || 0) * (Number(set.reps) || 0), 0);
   }, 0);
 }
 
@@ -59,248 +36,8 @@ function getAccentForType(type) {
   return map[type?.toLowerCase()] || '#38671a';
 }
 
-function extractWorkoutExercises(workout) {
-  return workout?.workout_exercises || workout?.exercises || [];
-}
-
-function extractExerciseSets(exercise) {
-  return exercise?.workout_sets || exercise?.sets || [];
-}
-
-function setWeightValue(set) {
-  return Number(set?.weight ?? set?.weight_kg) || 0;
-}
-
-function splitExerciseField(value) {
-  if (Array.isArray(value)) {
-    return value.map((item) => String(item).trim()).filter(Boolean);
-  }
-  if (typeof value !== 'string') return [];
-  return value
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
-function getExercisePrimaryMuscle(exercise) {
-  return (
-    exercise?.muscle_group
-    || exercise?.primary_muscle
-    || splitExerciseField(exercise?.primary_muscles)[0]
-    || splitExerciseField(exercise?.exercise?.primary_muscles)[0]
-    || ''
-  );
-}
-
-function getExerciseSecondaryMuscles(exercise) {
-  return (
-    exercise?.secondary_muscles
-      ? splitExerciseField(exercise.secondary_muscles)
-      : splitExerciseField(exercise?.exercise?.secondary_muscles)
-  );
-}
-
-function getExerciseInstructions(exercise) {
-  if (Array.isArray(exercise?.instructions)) {
-    return exercise.instructions.filter(Boolean).join(' ');
-  }
-  if (typeof exercise?.instructions === 'string' && exercise.instructions.trim()) {
-    return exercise.instructions.trim();
-  }
-  if (typeof exercise?.description === 'string' && exercise.description.trim()) {
-    return exercise.description.trim();
-  }
-  return '';
-}
-
-function getExerciseDifficulty(exercise) {
-  return exercise?.difficulty || exercise?.level || '';
-}
-
-function normalizeExerciseParam(value) {
-  return String(value || '').trim().toLowerCase();
-}
-
-function formatExerciseOption(value) {
-  return String(value || '')
-    .split(/[\s_-]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-}
-
-function normalizeUniqueOptions(options = [], fallbacks = []) {
-  const normalized = [...options, ...fallbacks]
-    .map((item) => normalizeExerciseParam(item))
-    .filter(Boolean);
-  return [...new Set(normalized)];
-}
-
-function extractTemplateExercises(template) {
-  return template?.workout_template_exercises || template?.exercises || [];
-}
-
-function normalizeCollection(payload, key = '') {
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.data)) return payload.data;
-  if (key && Array.isArray(payload?.[key])) return payload[key];
-  return [];
-}
-
-function ModalPortal({ children }) {
-  if (typeof document === 'undefined') return children;
-  return createPortal(children, document.body);
-}
-
-function extractProgramWeeks(program) {
-  const weeks = program?.weeks || [];
-  return [...weeks].sort((a, b) => (a.week_number || 0) - (b.week_number || 0));
-}
-
-function flattenProgramSessions(program) {
-  const weeks = extractProgramWeeks(program);
-  return weeks.flatMap((week) => {
-    const sessions = [...(week.sessions || [])].sort((a, b) => (a.day_number || 0) - (b.day_number || 0));
-    return sessions.map((session) => ({
-      ...session,
-      week_number: week.week_number,
-      week_name: week.name,
-    }));
-  });
-}
-
-function getStatusLabel(status) {
-  const map = {
-    assigned: 'Assigned',
-    in_progress: 'In Progress',
-    completed: 'Completed',
-    cancelled: 'Cancelled',
-  };
-  return map[status] || 'Assigned';
-}
-
-function getStatusColor(status) {
-  const map = {
-    assigned: '#38671a',
-    in_progress: '#5d3fd3',
-    completed: '#2f7d32',
-    cancelled: '#b02500',
-  };
-  return map[status] || '#38671a';
-}
-
-function getNextProgramSession(assignment) {
-  if (!assignment || assignment.status === 'completed' || assignment.status === 'cancelled') {
-    return null;
-  }
-  const sessions = flattenProgramSessions(assignment?.program);
-  return sessions[0] || null;
-}
-
-const PROGRAM_PROGRESS_STORAGE_KEY = 'um6p_fit_program_progress_v1';
-
-function readProgramProgress() {
-  if (typeof window === 'undefined') return {};
-  try {
-    const raw = window.localStorage.getItem(PROGRAM_PROGRESS_STORAGE_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === 'object' ? parsed : {};
-  } catch {
-    return {};
-  }
-}
-
-function writeProgramProgress(progress) {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.setItem(PROGRAM_PROGRESS_STORAGE_KEY, JSON.stringify(progress));
-  } catch {
-    // Ignore localStorage write failures.
-  }
-}
-
-function getCompletedSessionIds(progressByAssignment, assignmentId) {
-  if (!assignmentId) return [];
-  const entries = progressByAssignment?.[assignmentId];
-  return Array.isArray(entries) ? entries : [];
-}
-
-function getNextProgramSessionByProgress(assignment, completedSessionIds = []) {
-  if (!assignment || assignment.status === 'completed' || assignment.status === 'cancelled') {
-    return null;
-  }
-  const sessions = flattenProgramSessions(assignment?.program);
-  if (sessions.length === 0) return null;
-  const completedSet = new Set(completedSessionIds);
-  return sessions.find((session) => session?.id && !completedSet.has(session.id)) || null;
-}
-
-function mapAppliedWorkoutToSessionExercises(workout) {
-  const workoutExercises = extractWorkoutExercises(workout);
-  return workoutExercises.map((exercise, index) => {
-    const backendSets = extractExerciseSets(exercise);
-    const plannedCount = Math.max(backendSets.length, Number(exercise?.sets) || 0, 1);
-    const prefilledSets = backendSets.length > 0
-      ? backendSets.map((set, setIndex) => ({
-          backendSetId: set.id,
-          setNumber: set.set_number || setIndex + 1,
-          weight: String(setWeightValue(set) || ''),
-          reps: String(set.reps ?? ''),
-          done: false,
-        }))
-      : Array.from({ length: plannedCount }, (_, setIndex) => ({
-          setNumber: setIndex + 1,
-          weight: String(Number(exercise?.weight) || ''),
-          reps: String(Number(exercise?.reps) || ''),
-          done: false,
-        }));
-
-    return {
-      id: exercise.exercise?.id || exercise.exercise_id || `program-ex-${index + 1}`,
-      name: exercise.exercise?.name || `Exercise ${index + 1}`,
-      muscle_group: getExercisePrimaryMuscle(exercise.exercise),
-      primary_muscle: getExercisePrimaryMuscle(exercise.exercise),
-      primary_muscles: exercise.exercise?.primary_muscles || '',
-      equipment: exercise.exercise?.equipment,
-      type: workout?.type,
-      note: exercise.notes || '',
-      rest_time: Number(exercise?.rest_time) || 60,
-      workoutExerciseId: exercise.id,
-      sets: prefilledSets,
-    };
-  });
-}
-
-function buildTemplatePayload(userId, form) {
-  return {
-    owner_id: userId,
-    name: form.name.trim(),
-    type: (form.type || 'custom').trim().toLowerCase(),
-    notes: form.notes?.trim() || '',
-    exercises: form.exercises.map((exercise, index) => {
-      const totalSets = Math.max(1, Number(exercise.sets) || 1);
-      const reps = Math.max(0, Number(exercise.reps) || 0);
-      const weight = Math.max(0, Number(exercise.weight) || 0);
-      const restTime = Math.max(0, Number(exercise.rest_time) || 0);
-
-      return {
-        exercise_id: exercise.id,
-        order: index + 1,
-        sets: totalSets,
-        reps,
-        weight,
-        rest_time: restTime,
-        notes: exercise.notes?.trim() || '',
-        set_entries: Array.from({ length: totalSets }, (_, setIndex) => ({
-          set_number: setIndex + 1,
-          reps,
-          weight,
-          rest_seconds: restTime,
-        })),
-      };
-    }),
-  };
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
 }
 
 // ── useTimer ──────────────────────────────────────────────────────────
@@ -355,11 +92,7 @@ function ExerciseSearchModal({ onClose, onSelect }) {
   const [search, setSearch] = useState('');
   const [cat, setCat] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [page, setPage] = useState(1);
   const timerRef = useRef(null);
-  const { data: metaData } = useExerciseMeta();
-  const meta = metaData?.meta || metaData;
-  const pageSize = 20;
 
   useEffect(() => {
     clearTimeout(timerRef.current);
@@ -367,25 +100,14 @@ function ExerciseSearchModal({ onClose, onSelect }) {
     return () => clearTimeout(timerRef.current);
   }, [search]);
 
-  const params = { page, limit: pageSize };
-  if (debouncedSearch) params.q = debouncedSearch;
-  if (cat) params.muscle = normalizeExerciseParam(cat);
+  const params = {};
+  if (debouncedSearch) params.name = debouncedSearch;
+  if (cat) params.muscle = cat;
 
-  const { data: exercisesData, isLoading } = useExercises(params, { keepPreviousData: true });
-  const exercises = exercisesData?.exercises || exercisesData || [];
-  const metadata = exercisesData?.metadata || {};
-  const totalPages = Math.max(1, Number(metadata.total_pages) || 1);
-  const totalCount = Number(metadata.total_count) || exercises.length;
-  const canPrevPage = page > 1;
-  const canNextPage = Boolean(metadata.has_next) || page < totalPages;
-  const showingFrom = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
-  const showingTo = totalCount === 0 ? 0 : Math.min((page - 1) * pageSize + exercises.length, totalCount);
+  const { data: exercisesData, isLoading } = useExercises(params);
+  const exercises = asArray(exercisesData?.exercises || exercisesData?.data || exercisesData);
 
-  const muscleOptions = normalizeUniqueOptions(
-    meta?.muscles || [],
-    ['chest', 'back', 'shoulders', 'arms', 'legs', 'core', 'cardio']
-  );
-  const chips = [{ label: 'All', value: '' }, ...muscleOptions.slice(0, 8).map((value) => ({ label: formatExerciseOption(value), value }))];
+  const CATS = ['All', 'Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Core', 'Cardio'];
 
   return (
     <div className="wk-modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
@@ -403,24 +125,18 @@ function ExerciseSearchModal({ onClose, onSelect }) {
               className="wk-search"
               placeholder="Search exercises..."
               value={search}
-              onChange={e => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
+              onChange={e => setSearch(e.target.value)}
               autoFocus
             />
           </div>
           <div className="wk-cat-chips" style={{ marginBottom: 12 }}>
-            {chips.map(chip => (
+            {CATS.map(c => (
               <button
-                key={chip.label}
-                className={`wk-cat-chip${(chip.value ? normalizeExerciseParam(cat) === chip.value : !cat) ? ' wk-cat-chip--active' : ''}`}
-                onClick={() => {
-                  setCat(chip.value);
-                  setPage(1);
-                }}
+                key={c}
+                className={`wk-cat-chip${(c === 'All' ? !cat : cat === c) ? ' wk-cat-chip--active' : ''}`}
+                onClick={() => setCat(c === 'All' ? '' : c)}
               >
-                {chip.label}
+                {c}
               </button>
             ))}
           </div>
@@ -440,283 +156,24 @@ function ExerciseSearchModal({ onClose, onSelect }) {
                   <div className="wk-modal-ex-dot" style={{ background: getAccentForType(ex.type) }} />
                   <div className="wk-modal-ex-info">
                     <span className="wk-lib-name">{ex.name}</span>
-                    <span className="wk-lib-muscle">{getExercisePrimaryMuscle(ex) || 'Full body'} · {ex.equipment || 'Bodyweight'}</span>
+                    <span className="wk-lib-muscle">{ex.muscle_group || ex.primary_muscle} · {ex.equipment || 'Bodyweight'}</span>
                   </div>
                   <span className="material-symbols-outlined" style={{ fontSize: 20, color: '#38671a' }}>add_circle</span>
                 </button>
               ))
             )}
           </div>
-          {!isLoading && (
-            <div className="wk-lib-pagination">
-              <span className="wk-lib-pagination-label">
-                Showing {showingFrom}-{showingTo} of {totalCount}
-              </span>
-              <div className="wk-lib-pagination-actions">
-                <button
-                  className="wk-lib-pagination-btn"
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
-                  disabled={!canPrevPage}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>chevron_left</span>
-                </button>
-                <span className="wk-lib-pagination-page">{page}/{totalPages}</span>
-                <button
-                  className="wk-lib-pagination-btn"
-                  onClick={() => setPage((current) => current + 1)}
-                  disabled={!canNextPage}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>chevron_right</span>
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
   );
 }
 
-function CustomProgramBuilderModal({ onClose, onSave, isSaving = false }) {
-  const [showExercisePicker, setShowExercisePicker] = useState(false);
-  const [form, setForm] = useState({
-    name: '',
-    type: 'custom',
-    notes: '',
-    exercises: [],
-  });
-
-  function setField(key, value) {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  }
-
-  function handleAddExercise(exercise) {
-    setForm((prev) => ({
-      ...prev,
-      exercises: [
-        ...prev.exercises,
-        {
-          id: exercise.id,
-          name: exercise.name,
-          muscle_group: exercise.muscle_group || exercise.primary_muscle || '',
-          equipment: exercise.equipment || '',
-          sets: 3,
-          reps: 10,
-          weight: '',
-          rest_time: 90,
-          notes: '',
-        },
-      ],
-    }));
-    setShowExercisePicker(false);
-  }
-
-  function updateExercise(index, key, value) {
-    setForm((prev) => ({
-      ...prev,
-      exercises: prev.exercises.map((exercise, exerciseIndex) => (
-        exerciseIndex === index ? { ...exercise, [key]: value } : exercise
-      )),
-    }));
-  }
-
-  function removeExercise(index) {
-    setForm((prev) => ({
-      ...prev,
-      exercises: prev.exercises.filter((_, exerciseIndex) => exerciseIndex !== index),
-    }));
-  }
-
-  function handleSave() {
-    if (!form.name.trim() || form.exercises.length === 0 || isSaving) return;
-    onSave(form);
-  }
-
-  return (
-    <>
-      <div className="wk-modal-overlay" onClick={(event) => event.target === event.currentTarget && onClose()}>
-        <div className="wk-modal">
-          <div className="wk-modal-header">
-            <h3 className="wk-modal-title">Create Your Program</h3>
-            <button className="wk-modal-close" onClick={onClose}>
-              <span className="material-symbols-outlined" style={{ fontSize: 20 }}>close</span>
-            </button>
-          </div>
-
-          <div className="wk-modal-body">
-            <div className="wk-form-field">
-              <label className="wk-form-label">Program Name</label>
-              <input
-                className="wk-form-input"
-                placeholder="Push Pull Legs"
-                value={form.name}
-                onChange={(event) => setField('name', event.target.value)}
-                autoFocus
-              />
-            </div>
-
-            <div className="wk-form-field">
-              <label className="wk-form-label">Training Style</label>
-              <div className="wk-cat-chips">
-                {['custom', 'strength', 'hypertrophy', 'cardio', 'endurance'].map((type) => (
-                  <button
-                    key={type}
-                    className={`wk-cat-chip${form.type === type ? ' wk-cat-chip--active' : ''}`}
-                    onClick={() => setField('type', type)}
-                  >
-                    {type.replace('_', ' ')}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="wk-form-field">
-              <label className="wk-form-label">Notes</label>
-              <textarea
-                className="wk-builder-textarea"
-                placeholder="What is this plan for?"
-                value={form.notes}
-                onChange={(event) => setField('notes', event.target.value)}
-              />
-            </div>
-
-            <div className="wk-builder-section">
-              <div className="wk-builder-section-top">
-                <div>
-                  <span className="wk-eyebrow">Exercise Plan</span>
-                  <h4 className="wk-builder-section-title">{form.exercises.length} exercise{form.exercises.length !== 1 ? 's' : ''}</h4>
-                </div>
-                <button className="wk-btn-ghost" onClick={() => setShowExercisePicker(true)}>
-                  Add Exercise
-                </button>
-              </div>
-
-              {form.exercises.length === 0 ? (
-                <div className="wk-empty-section" style={{ paddingBlock: 20 }}>
-                  <span className="material-symbols-outlined wk-empty-icon" style={{ fontSize: 34, color: '#dad4c8' }}>playlist_add</span>
-                  <p className="wk-empty-text">Add a few exercises to turn this into your own reusable program.</p>
-                </div>
-              ) : (
-                <div className="wk-builder-list">
-                  {form.exercises.map((exercise, index) => (
-                    <div key={`${exercise.id}-${index}`} className="wk-builder-card">
-                      <div className="wk-builder-card-top">
-                        <div>
-                          <span className="wk-eyebrow">{exercise.muscle_group || 'Exercise'}</span>
-                          <h4 className="wk-ex-name" style={{ marginTop: 4 }}>{exercise.name}</h4>
-                        </div>
-                        <button
-                          className="wk-discard-btn-sm"
-                          onClick={() => removeExercise(index)}
-                          title="Remove exercise"
-                          style={{ color: '#b02500' }}
-                        >
-                          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>delete</span>
-                        </button>
-                      </div>
-
-                      <div className="wk-form-row">
-                        <div className="wk-form-field">
-                          <label className="wk-form-label">Sets</label>
-                          <input
-                            className="wk-form-input"
-                            type="number"
-                            min="1"
-                            value={exercise.sets}
-                            onChange={(event) => updateExercise(index, 'sets', event.target.value)}
-                          />
-                        </div>
-                        <div className="wk-form-field">
-                          <label className="wk-form-label">Reps</label>
-                          <input
-                            className="wk-form-input"
-                            type="number"
-                            min="0"
-                            value={exercise.reps}
-                            onChange={(event) => updateExercise(index, 'reps', event.target.value)}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="wk-form-row">
-                        <div className="wk-form-field">
-                          <label className="wk-form-label">Weight</label>
-                          <input
-                            className="wk-form-input"
-                            type="number"
-                            min="0"
-                            step="0.5"
-                            value={exercise.weight}
-                            onChange={(event) => updateExercise(index, 'weight', event.target.value)}
-                          />
-                        </div>
-                        <div className="wk-form-field">
-                          <label className="wk-form-label">Rest Seconds</label>
-                          <input
-                            className="wk-form-input"
-                            type="number"
-                            min="0"
-                            step="5"
-                            value={exercise.rest_time}
-                            onChange={(event) => updateExercise(index, 'rest_time', event.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="wk-builder-actions">
-              <button className="wk-btn-ghost" onClick={onClose}>Cancel</button>
-              <button className="wk-create-btn" onClick={handleSave} disabled={isSaving || !form.name.trim() || form.exercises.length === 0}>
-                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
-                  {isSaving ? 'hourglass_top' : 'save'}
-                </span>
-                {isSaving ? 'Saving...' : 'Save My Program'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {showExercisePicker && (
-        <ExerciseSearchModal
-          onClose={() => setShowExercisePicker(false)}
-          onSelect={handleAddExercise}
-        />
-      )}
-    </>
-  );
-}
-
 // ── Programs View ─────────────────────────────────────────────────────
 
-function ProgramsView({
-  onProgramPreview,
-  onProgramStart,
-  onTemplatePreview,
-  onTemplateCreate,
-  onQuickStart,
-  progressByAssignment = {},
-  isStartingTemplate = false,
-  isStartingProgram = false,
-}) {
-  const {
-    data: templatesData,
-    isLoading: templatesLoading,
-  } = useTemplateList({ limit: 50 });
-  const {
-    data: assignmentsData,
-    isLoading,
-    isError,
-    errorMeta,
-  } = useProgramAssignments({ limit: 50 });
-  const templates = normalizeCollection(templatesData, 'templates');
-  const liveAssignments = normalizeCollection(assignmentsData);
-  const assignments = liveAssignments;
-  const totalPrograms = templates.length + assignments.length;
+function ProgramsView({ onProgramPreview, onProgramStart }) {
+  const { data: templatesData, isLoading } = useTemplateList();
+  const templates = asArray(templatesData?.templates || templatesData?.data || templatesData);
 
   return (
     <div className="wk-view">
@@ -725,875 +182,67 @@ function ProgramsView({
           <span className="wk-eyebrow">Your Regimen</span>
           <h2 className="wk-heading">My Programs</h2>
         </div>
-        {!isLoading && !templatesLoading && (
-          <div className="wk-header-badge">{totalPrograms} total</div>
+        {!isLoading && (
+          <div className="wk-header-badge">{templates.length} programs</div>
         )}
-      </div>
-
-      <div className="wk-programs-split">
-        <div className="wk-programs-panel">
-          <div className="wk-programs-panel-top">
-            <div>
-              <span className="wk-eyebrow">Built By You</span>
-              <h3 className="wk-programs-panel-title">Custom Programs</h3>
-            </div>
-            <button className="wk-btn-ghost" onClick={onTemplateCreate}>Create</button>
-          </div>
-
-          {templatesLoading ? (
-            <div className="wk-cards-list">
-              <div className="wk-card wk-skeleton-card" />
-            </div>
-          ) : templates.length === 0 ? (
-            <div className="wk-empty-section wk-empty-section--compact">
-              <span className="material-symbols-outlined wk-empty-icon" style={{ fontSize: 34, color: '#dad4c8' }}>library_add</span>
-              <p className="wk-empty-text">Build your own program once, then launch it whenever you train.</p>
-            </div>
-          ) : (
-            <div className="wk-cards-list">
-              {templates.map((template, index) => {
-                const accent = getAccentForType(template.type);
-                return (
-                  <div key={template.id} className={`wk-card wk-card--${index % 2 === 0 ? 'a' : 'b'}`}>
-                    <div className="wk-card-accent" style={{ background: accent }} />
-                    <div className="wk-card-body" onClick={() => onTemplatePreview(template)} style={{ cursor: 'pointer' }}>
-                      <div className="wk-card-top">
-                        <h3 className="wk-card-name">{template.name || 'Custom Program'}</h3>
-                        <span className="wk-card-tag" style={{ background: '#e8e2d6', color: '#423f36' }}>
-                          {String(template.type || 'custom').toUpperCase()}
-                        </span>
-                      </div>
-                      <div className="wk-card-meta">
-                        <div className="wk-card-meta-item">
-                          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>person</span>
-                          <span>Made by you</span>
-                        </div>
-                        {template.created_at && (
-                          <div className="wk-card-meta-item">
-                            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>schedule</span>
-                            <span>{new Date(template.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
-                          </div>
-                        )}
-                      </div>
-                      {template.notes && (
-                        <p className="wk-card-last" style={{ color: '#767775', fontSize: 13 }}>
-                          {template.notes}
-                        </p>
-                      )}
-                    </div>
-                    <button
-                      className="wk-card-play"
-                      style={{ background: accent, borderColor: accent, opacity: isStartingTemplate ? 0.65 : 1 }}
-                      onClick={() => onTemplatePreview(template)}
-                      disabled={isStartingTemplate}
-                      aria-label={`Open ${template.name || 'custom program'}`}
-                    >
-                      <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
-                        {isStartingTemplate ? 'hourglass_top' : 'play_arrow'}
-                      </span>
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        <div className="wk-programs-panel">
-          <div className="wk-programs-panel-top">
-            <div>
-              <span className="wk-eyebrow">From Taha</span>
-              <h3 className="wk-programs-panel-title">Coach Programs</h3>
-            </div>
-            {!isLoading && (
-              <div className="wk-programs-count">{assignments.length} assigned</div>
-            )}
-          </div>
-
-          {isError && errorMeta?.shouldFallback && (
-            <div className="wk-semantic-active" style={{ marginBottom: 10 }}>
-              <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#b02500' }}>warning</span>
-              <span>Coach programs could not sync right now.</span>
-            </div>
-          )}
-
-          {isLoading ? (
-            <div className="wk-cards-list">
-              {[1, 2].map((item) => <div key={item} className="wk-card wk-skeleton-card" />)}
-            </div>
-          ) : assignments.length === 0 ? (
-            <div className="wk-empty-section wk-empty-section--compact">
-              <span className="material-symbols-outlined wk-empty-icon" style={{ fontSize: 34, color: '#dad4c8' }}>fitness_center</span>
-              <p className="wk-empty-text">No program assigned by Taha yet. You can still train using your own custom programs.</p>
-            </div>
-          ) : (
-            <div className="wk-cards-list">
-              {assignments.map((assignment, i) => {
-                const program = assignment.program;
-                const sessions = flattenProgramSessions(program);
-                const accent = getStatusColor(assignment.status);
-                const completedSessionIds = getCompletedSessionIds(progressByAssignment, assignment.id);
-                const nextSession = getNextProgramSessionByProgress(assignment, completedSessionIds) || getNextProgramSession(assignment);
-                const completedCount = sessions.filter((session) => session?.id && completedSessionIds.includes(session.id)).length;
-                const isStartDisabled = !nextSession || isStartingProgram;
-                return (
-                  <div key={assignment.id} className={`wk-card wk-card--${i % 2 === 0 ? 'a' : 'b'}`}>
-                    <div className="wk-card-accent" style={{ background: accent }} />
-                    <div className="wk-card-body" onClick={() => onProgramPreview(assignment)} style={{ cursor: 'pointer' }}>
-                      <div className="wk-card-top">
-                        <h3 className="wk-card-name">{program?.name || 'Workout Program'}</h3>
-                        {assignment.status && (
-                          <span className="wk-card-tag" style={{
-                            background: i % 2 === 0 ? '#c3fb9c' : '#b4a5ff',
-                            color: i % 2 === 0 ? '#214f01' : '#180058',
-                            transform: `rotate(${i % 2 === 0 ? 3 : -2}deg)`,
-                          }}>
-                            {getStatusLabel(assignment.status).toUpperCase()}
-                          </span>
-                        )}
-                      </div>
-                      <div className="wk-card-meta">
-                        <div className="wk-card-meta-item">
-                          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>calendar_month</span>
-                          <span>{extractProgramWeeks(program).length} week{extractProgramWeeks(program).length !== 1 ? 's' : ''}</span>
-                        </div>
-                        <div className="wk-card-meta-item">
-                          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>format_list_bulleted</span>
-                          <span>{sessions.length} session{sessions.length !== 1 ? 's' : ''}</span>
-                        </div>
-                      </div>
-                      {program?.description && (
-                        <p className="wk-card-last" style={{ color: '#767775', fontSize: 13 }}>
-                          {program.description}
-                        </p>
-                      )}
-                      {nextSession && (
-                        <p className="wk-card-last" style={{ marginTop: 6, fontSize: 12, color: accent }}>
-                          Next: Week {nextSession.week_number}, Day {nextSession.day_number}
-                        </p>
-                      )}
-                      {sessions.length > 0 && (
-                        <p className="wk-card-last" style={{ marginTop: 6, fontSize: 12 }}>
-                          {completedCount}/{sessions.length} sessions tracked
-                        </p>
-                      )}
-                    </div>
-                    <button
-                      className="wk-card-play"
-                      style={{ background: accent, borderColor: accent, opacity: isStartDisabled ? 0.55 : 1 }}
-                      onClick={() => onProgramStart(assignment, nextSession)}
-                      disabled={isStartDisabled}
-                      aria-label={`Start ${program?.name || 'program'}`}
-                    >
-                      <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
-                        {isStartingProgram ? 'hourglass_top' : isStartDisabled ? 'lock' : 'play_arrow'}
-                      </span>
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Quick start blank workout */}
-      <div className="wk-create-banner">
-        <h4 className="wk-create-title">Ready for a new craft?</h4>
-        <p className="wk-create-desc">Build your own program or start a blank workout right away</p>
-        <div className="wk-create-actions">
-          <button className="wk-btn-ghost wk-btn-ghost--wide" onClick={onTemplateCreate}>
-            Create My Program
-          </button>
-          <button className="wk-create-btn" onClick={onQuickStart}>
-            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span>
-            Quick Start
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Program Preview ────────────────────────────────────────────────────
-
-function ProgramPreview({
-  assignment,
-  onBack,
-  onStartSession,
-  onStatusChange,
-  progressByAssignment = {},
-  isStartingProgram = false,
-  startingSessionId = null,
-  isStatusUpdating = false,
-}) {
-  const program = assignment?.program;
-  const sessions = flattenProgramSessions(program);
-  const accent = getStatusColor(assignment?.status);
-  const completedSessionIds = getCompletedSessionIds(progressByAssignment, assignment?.id);
-  const completedSet = new Set(completedSessionIds);
-  const nextSession = getNextProgramSessionByProgress(assignment, completedSessionIds) || getNextProgramSession(assignment);
-  const canCancel = assignment?.status === 'assigned' || assignment?.status === 'in_progress';
-  const canReactivate = assignment?.status === 'cancelled' || assignment?.status === 'completed';
-  const canMarkCompleted = assignment?.status !== 'completed' && assignment?.status !== 'cancelled';
-
-  return (
-    <div className="wk-view">
-      <div className="wk-preview-header">
-        <button className="wk-back-btn" onClick={onBack}>
-          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>arrow_back</span>
-          <span>Programs</span>
-        </button>
-      </div>
-
-      <div className="wk-detail-hero">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-          <div className="wk-preview-color-dot" style={{ background: accent }} />
-          {assignment?.status && (
-            <span className="wk-card-tag" style={{ background: '#c3fb9c', color: '#214f01' }}>
-              {getStatusLabel(assignment.status).toUpperCase()}
-            </span>
-          )}
-        </div>
-        <h2 className="wk-preview-title">{program?.name || 'Workout Program'}</h2>
-        {program?.description && (
-          <p style={{ fontSize: 14, color: '#767775', marginTop: 8 }}>{program.description}</p>
-        )}
-        <div className="wk-detail-pills">
-          <span className="wk-detail-pill wk-detail-pill--green">{extractProgramWeeks(program).length} WEEKS</span>
-          <span className="wk-detail-pill">{sessions.length} SESSIONS</span>
-        </div>
-      </div>
-
-      {sessions.length > 0 && (
-        <div className="wk-ex-list">
-          {sessions.map((session, i) => (
-            <div key={session.id || i} className="wk-ex-card">
-              <div className="wk-ex-card-top">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div className="wk-ex-emoji-dot" style={{ background: accent }} />
-                  <div className="wk-ex-card-left">
-                    <span className="wk-ex-muscle">
-                      Week {session.week_number}
-                      {session.week_name ? ` · ${session.week_name}` : ''}
-                    </span>
-                    <h4 className="wk-ex-name">{session.template?.name || `Session Day ${session.day_number}`}</h4>
-                    {completedSet.has(session.id) && (
-                      <span className="wk-eyebrow" style={{ color: '#38671a', marginTop: 4 }}>COMPLETED (TRACKED)</span>
-                    )}
-                  </div>
-                </div>
-                <button
-                  className="wk-start-btn"
-                  style={{ minWidth: 110, paddingInline: 12, background: accent, opacity: isStartingProgram ? 0.7 : 1 }}
-                  onClick={() => onStartSession(session)}
-                  disabled={isStartingProgram}
-                >
-                  <span>{isStartingProgram && startingSessionId === session.id ? 'Starting...' : completedSet.has(session.id) ? 'Repeat' : 'Start'}</span>
-                </button>
-              </div>
-              {session.notes && (
-                <p style={{ marginTop: 8, fontSize: 12, color: '#767775' }}>{session.notes}</p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="wk-detail-cta">
-        <button
-          className="wk-start-btn"
-          style={{ background: accent, opacity: nextSession && !isStartingProgram ? 1 : 0.55 }}
-          onClick={() => nextSession && onStartSession(nextSession)}
-          disabled={!nextSession || isStartingProgram}
-        >
-          <span>
-            {isStartingProgram
-              ? 'Starting...'
-              : nextSession
-                ? `Start Week ${nextSession.week_number} Day ${nextSession.day_number}`
-                : 'No Upcoming Session'}
-          </span>
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_circle</span>
-        </button>
-      </div>
-
-      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-        {canMarkCompleted && (
-          <button
-            className="wk-discard-cancel"
-            style={{ flex: 1 }}
-            onClick={() => onStatusChange('completed')}
-            disabled={isStatusUpdating}
-          >
-            {isStatusUpdating ? 'Updating...' : 'Mark Complete'}
-          </button>
-        )}
-        {canCancel && (
-          <button
-            className="wk-discard-confirm"
-            style={{ flex: 1 }}
-            onClick={() => onStatusChange('cancelled')}
-            disabled={isStatusUpdating}
-          >
-            {isStatusUpdating ? 'Updating...' : 'Cancel Program'}
-          </button>
-        )}
-        {canReactivate && (
-          <button
-            className="wk-create-btn"
-            style={{ flex: 1 }}
-            onClick={() => onStatusChange('assigned')}
-            disabled={isStatusUpdating}
-          >
-            {isStatusUpdating ? 'Updating...' : 'Reactivate'}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function TemplatePreview({ template, onBack, onStart, isStarting = false }) {
-  const { data: templateData, isLoading } = useTemplate(template?.id);
-  const resolvedTemplate = templateData?.item || templateData?.data || template;
-  const exercises = extractTemplateExercises(resolvedTemplate);
-  const accent = getAccentForType(resolvedTemplate?.type);
-
-  return (
-    <div className="wk-view">
-      <div className="wk-preview-header">
-        <button className="wk-back-btn" onClick={onBack}>
-          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>arrow_back</span>
-          <span>Programs</span>
-        </button>
-      </div>
-
-      <div className="wk-detail-hero">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-          <div className="wk-preview-color-dot" style={{ background: accent }} />
-          <span className="wk-card-tag" style={{ background: '#e8e2d6', color: '#423f36' }}>
-            {String(resolvedTemplate?.type || 'custom').toUpperCase()}
-          </span>
-        </div>
-        <h2 className="wk-preview-title">{resolvedTemplate?.name || 'Custom Program'}</h2>
-        {resolvedTemplate?.notes && (
-          <p style={{ fontSize: 14, color: '#767775', marginTop: 8 }}>{resolvedTemplate.notes}</p>
-        )}
-        <div className="wk-detail-pills">
-          <span className="wk-detail-pill wk-detail-pill--green">BUILT BY YOU</span>
-          <span className="wk-detail-pill">{exercises.length} EXERCISES</span>
-        </div>
       </div>
 
       {isLoading ? (
         <div className="wk-cards-list">
-          {[1, 2].map((item) => <div key={item} className="wk-card wk-skeleton-card" />)}
+          {[1, 2].map(i => <div key={i} className="wk-card wk-skeleton-card" />)}
         </div>
-      ) : exercises.length === 0 ? (
+      ) : templates.length === 0 ? (
         <div className="wk-empty-section">
-          <span className="material-symbols-outlined wk-empty-icon" style={{ fontSize: 42, color: '#dad4c8' }}>playlist_add_check</span>
-          <p className="wk-empty-text">This program does not have exercises yet.</p>
+          <span className="material-symbols-outlined wk-empty-icon" style={{ fontSize: 48, color: '#dad4c8' }}>fitness_center</span>
+          <p className="wk-empty-text">No programs yet. Start a quick workout or browse the library.</p>
         </div>
       ) : (
-        <div className="wk-ex-list">
-          {exercises.map((exercise, index) => (
-            <div key={exercise.id || `${exercise.exercise_id}-${index}`} className="wk-ex-card">
-              <div className="wk-ex-card-top">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div className="wk-ex-emoji-dot" style={{ background: accent }} />
-                  <div className="wk-ex-card-left">
-                    <span className="wk-ex-muscle">{exercise.exercise?.muscle_group || exercise.exercise?.primary_muscle || exercise.notes || 'Program exercise'}</span>
-                    <h4 className="wk-ex-name">{exercise.exercise?.name || `Exercise ${index + 1}`}</h4>
-                  </div>
-                </div>
-                <span className="wk-detail-pill wk-detail-pill--neutral">
-                  {Math.max(1, Number(exercise.sets) || 0)} x {Math.max(0, Number(exercise.reps) || 0)}
-                </span>
-              </div>
-              <p style={{ marginTop: 8, fontSize: 12, color: '#767775' }}>
-                {Number(exercise.weight) > 0 ? `${exercise.weight} kg` : 'Bodyweight'}
-                {' · '}
-                {Math.max(0, Number(exercise.rest_time) || 0)}s rest
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="wk-detail-cta">
-        <button
-          className="wk-start-btn"
-          style={{ background: accent, opacity: isStarting ? 0.7 : 1 }}
-          onClick={() => onStart(resolvedTemplate)}
-          disabled={isStarting}
-        >
-          <span>{isStarting ? 'Starting...' : 'Start This Program'}</span>
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_circle</span>
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ── Exercise Detail Modal ─────────────────────────────────────────────
-
-function ExerciseDetailModal({ exercise, onClose, onAddToWorkout, sessionActive }) {
-  const { data: historyData, isLoading: histLoading } = useExerciseHistory(exercise?.id);
-  const history = normalizeCollection(historyData, 'history');
-
-  if (!exercise) return null;
-  const accent = getAccentForType(exercise.type);
-
-  const difficultyColor = {
-    beginner: '#38671a',
-    intermediate: '#fbbd41',
-    advanced: '#b02500',
-  }[getExerciseDifficulty(exercise)?.toLowerCase()] || '#5d3fd3';
-
-  const difficulty = getExerciseDifficulty(exercise);
-
-  return (
-    <ModalPortal>
-      <div className="wk-modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-        <div className="wk-modal wk-modal--detail">
-
-          {/* ── Hero: image + gradient + overlaid title ─────────── */}
-          <div className="wk-detail-hero">
-            <ExerciseImagePreview
-              key={`${exercise.id || exercise.name}-detail-${exercise.image_url || ''}-${exercise.alt_image_url || ''}`}
-              exercise={exercise}
-              className="wk-detail-hero-frame"
-              imgClassName="wk-detail-hero-img"
-              alt={exercise.name}
-              animate
-              fallback={<ExerciseImageFallback exercise={exercise} className="wk-detail-hero-img" />}
-            />
-            <div className="wk-detail-hero-gradient" />
-            <button className="wk-detail-hero-close" onClick={onClose} aria-label="Close">
-              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
-            </button>
-            <div className="wk-detail-hero-info">
-              {(exercise.muscle_group || exercise.primary_muscle) && (
-                <span className="wk-detail-hero-muscle">{exercise.muscle_group || exercise.primary_muscle}</span>
-              )}
-              <h3 className="wk-detail-hero-title">{exercise.name}</h3>
-            </div>
-          </div>
-
-          {/* ── Scrollable body ──────────────────────────────────── */}
-          <div className="wk-modal-body">
-
-            {/* Meta pills */}
-            <div className="wk-detail-pills">
-              {exercise.equipment && (
-                <span className="wk-detail-pill wk-detail-pill--neutral">
-                  <span className="material-symbols-outlined" style={{ fontSize: 12 }}>fitness_center</span>
-                  {exercise.equipment}
-                </span>
-              )}
-              {difficulty && (
-                <span className="wk-detail-pill" style={{ background: difficultyColor + '20', color: difficultyColor, border: `1.5px solid ${difficultyColor}50` }}>
-                  {difficulty}
-                </span>
-              )}
-              {(exercise.type || exercise.category) && (
-                <span className="wk-detail-pill" style={{ background: accent + '18', color: accent, border: `1.5px solid ${accent}40` }}>
-                  {exercise.type || exercise.category}
-                </span>
-              )}
-            </div>
-
-            {/* Secondary muscles */}
-            {getExerciseSecondaryMuscles(exercise).length > 0 && (
-              <div>
-                <span className="wk-eyebrow" style={{ display: 'block', marginBottom: 8 }}>SECONDARY MUSCLES</span>
-                <div className="wk-detail-pills">
-                  {getExerciseSecondaryMuscles(exercise).map(m => (
-                    <span key={m} className="wk-detail-pill wk-detail-pill--neutral">{m}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* How to perform */}
-            {getExerciseInstructions(exercise) && (
-              <div className="wk-ex-detail-desc">
-                <span className="wk-eyebrow" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: 14, color: accent }}>info</span>
-                  HOW TO PERFORM
-                </span>
-                <p className="wk-ex-detail-desc-text">{getExerciseInstructions(exercise)}</p>
-              </div>
-            )}
-
-            {/* Progression history */}
-            <div className="wk-ex-detail-history">
-              <span className="wk-eyebrow" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-                <span className="material-symbols-outlined" style={{ fontSize: 14, color: accent }}>show_chart</span>
-                PROGRESSION HISTORY
-              </span>
-              {histLoading ? (
-                <div className="wk-loading-rows">
-                  {[1, 2].map(i => <div key={i} className="wk-skeleton-row" />)}
-                </div>
-              ) : history.length === 0 ? (
-                <div className="wk-ex-history-empty">
-                  <span className="material-symbols-outlined" style={{ fontSize: 32, color: '#dad4c8' }}>show_chart</span>
-                  <p style={{ fontSize: 13, color: '#9f9b93', marginTop: 6, textAlign: 'center', lineHeight: 1.5 }}>No history yet.<br />Log this exercise to track progress.</p>
-                </div>
-              ) : (
-                <div className="wk-ex-history-list">
-                  {history.slice(0, 5).map((entry, i) => {
-                    const peak = (entry.sets || []).reduce((m, s) => Math.max(m, setWeightValue(s)), 0);
-                    const vol = (entry.sets || []).reduce((a, s) => a + setWeightValue(s) * (Number(s.reps) || 0), 0);
-                    return (
-                      <div key={i} className="wk-ex-history-row">
-                        <span className="wk-ex-history-date">{new Date(entry.date || entry.started_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
-                        <span className="wk-ex-history-sets">{(entry.sets || []).length} sets</span>
-                        {peak > 0 && <span className="wk-ex-history-peak" style={{ color: accent }}>{peak}kg peak</span>}
-                        {vol > 0 && <span className="wk-ex-history-vol">{vol.toLocaleString()}kg vol</span>}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* ── Footer CTA ───────────────────────────────────────── */}
-          <div className="wk-modal-footer">
-            <button
-              className="wk-start-btn"
-              style={{ background: accent, width: '100%' }}
-              onClick={() => { onAddToWorkout(exercise); onClose(); }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>add_circle</span>
-              {sessionActive ? 'Add to Active Workout' : 'Start Workout With This Exercise'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </ModalPortal>
-  );
-}
-
-// ── Exercise image helper ─────────────────────────────────────────────
-
-const MUSCLE_IMAGE_MAP = {
-  chest: resolveExerciseImageUrl('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200&h=160&fit=crop&auto=format&q=80'),
-  back: resolveExerciseImageUrl('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=160&fit=crop&auto=format&q=80'),
-  legs: resolveExerciseImageUrl('https://images.unsplash.com/photo-1434608519344-49d77a699e1d?w=200&h=160&fit=crop&auto=format&q=80'),
-  shoulders: resolveExerciseImageUrl('https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=200&h=160&fit=crop&auto=format&q=80'),
-  arms: resolveExerciseImageUrl('https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=200&h=160&fit=crop&auto=format&q=80'),
-  core: resolveExerciseImageUrl('https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=160&fit=crop&auto=format&q=80'),
-  cardio: resolveExerciseImageUrl('https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=200&h=160&fit=crop&auto=format&q=80'),
-  default: resolveExerciseImageUrl('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200&h=160&fit=crop&auto=format&q=80'),
-};
-
-function ExerciseImageFallback({ exercise, className = '', fallbackLabel = '' }) {
-  const primaryMuscle = getExercisePrimaryMuscle(exercise);
-  const label = fallbackLabel || exercise?.name || 'Exercise';
-  const muscle = normalizeExerciseParam(primaryMuscle);
-  const fallbackImage = MUSCLE_IMAGE_MAP[muscle] || MUSCLE_IMAGE_MAP.default;
-
-  return (
-    <div className={`wk-ex-img-fallback ${className}`.trim()}>
-      <img src={fallbackImage} alt={label} className="wk-ex-img-fallback-photo" />
-      <div className="wk-ex-img-fallback-overlay">
-        <span className="material-symbols-outlined">fitness_center</span>
-        <span>{primaryMuscle || label.slice(0, 1)}</span>
-      </div>
-    </div>
-  );
-}
-
-const MUSCLE_CHIP_COLOR = {
-  chest:     { bg: '#c3fb9c', color: '#214f01' },
-  back:      { bg: '#c3fb9c', color: '#214f01' },
-  legs:      { bg: '#b4a5ff', color: '#180058' },
-  shoulders: { bg: '#f8cc65', color: '#9d6a09' },
-  arms:      { bg: '#3bd3fd', color: '#0089ad' },
-  core:      { bg: '#f8cc65', color: '#9d6a09' },
-  cardio:    { bg: '#fce4d9', color: '#520c00' },
-};
-
-// ── Library Filter Sheet ──────────────────────────────────────────────
-
-function LibraryFilterSheet({ filters, onChange, onClose, meta }) {
-  const [local, setLocal] = useState({ ...filters });
-
-  const levels = normalizeUniqueOptions(meta?.levels || [], ['beginner', 'intermediate', 'advanced']);
-  const equipment = normalizeUniqueOptions(meta?.equipment || [], ['barbell', 'dumbbell', 'body weight', 'machine', 'cable', 'bands', 'kettlebell']);
-  const muscles = normalizeUniqueOptions(meta?.muscles || [], ['chest', 'back', 'shoulders', 'arms', 'legs', 'core', 'glutes', 'calves']);
-  const categories = normalizeUniqueOptions(meta?.categories || [], ['strength', 'cardio', 'stretching', 'plyometrics', 'powerlifting']);
-
-  function toggle(key, val) {
-    setLocal(prev => ({ ...prev, [key]: prev[key] === val ? '' : val }));
-  }
-
-  function applyAndClose() {
-    onChange(local);
-    onClose();
-  }
-
-  function clearAll() {
-    const cleared = { level: '', equipment: '', muscle: '', category: '' };
-    setLocal(cleared);
-    onChange(cleared);
-    onClose();
-  }
-
-  const activeCount = Object.values(local).filter(Boolean).length;
-
-  return (
-    <ModalPortal>
-      <div className="wk-modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-        <div className="wk-filter-sheet">
-          <div className="wk-filter-sheet-handle" />
-          <div className="wk-modal-header" style={{ paddingBottom: 12 }}>
-            <h3 className="wk-modal-title">Filter Exercises</h3>
-            <button className="wk-modal-close" onClick={onClose}>
-              <span className="material-symbols-outlined" style={{ fontSize: 20 }}>close</span>
-            </button>
-          </div>
-
-          <div className="wk-filter-body">
-            {[
-              { label: 'DIFFICULTY', key: 'level', options: levels },
-              { label: 'EQUIPMENT', key: 'equipment', options: equipment },
-              { label: 'MUSCLE GROUP', key: 'muscle', options: muscles },
-              { label: 'CATEGORY', key: 'category', options: categories },
-            ].map(({ label, key, options }) => (
-              <div key={key} className="wk-filter-section">
-                <span className="wk-eyebrow" style={{ display: 'block', marginBottom: 8 }}>{label}</span>
-                <div className="wk-cat-chips">
-                  {options.map(opt => (
-                    <button
-                      key={opt}
-                      className={`wk-cat-chip${local[key] === opt ? ' wk-cat-chip--active' : ''}`}
-                      onClick={() => toggle(key, opt)}
-                    >
-                      {formatExerciseOption(opt)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="wk-filter-footer">
-            <button className="wk-discard-cancel" onClick={clearAll} style={{ flex: 1 }}>Clear All</button>
-            <button
-              className="wk-start-btn"
-              style={{ flex: 2, background: '#38671a' }}
-              onClick={applyAndClose}
-            >
-              Apply {activeCount > 0 ? `(${activeCount})` : ''}
-            </button>
-          </div>
-        </div>
-      </div>
-    </ModalPortal>
-  );
-}
-
-// ── Library View ──────────────────────────────────────────────────────
-
-function LibraryView({ sessionActive, onAddToWorkout }) {
-  const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [filters, setFilters] = useState({ level: '', equipment: '', muscle: '', category: '' });
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedExercise, setSelectedExercise] = useState(null);
-  const [semanticMode, setSemanticMode] = useState(false);
-  const [page, setPage] = useState(1);
-  const timerRef = useRef(null);
-  const pageSize = 20;
-
-  const semanticSearch = useSemanticSearch();
-  const { data: metaData } = useExerciseMeta();
-  const meta = metaData?.meta || metaData;
-
-  useEffect(() => {
-    clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setDebouncedSearch(search), 350);
-    return () => clearTimeout(timerRef.current);
-  }, [search]);
-
-  const params = { page, limit: pageSize };
-  if (debouncedSearch && !semanticMode) params.q = debouncedSearch;
-  if (filters.muscle) params.muscle = normalizeExerciseParam(filters.muscle);
-  if (filters.level) params.level = normalizeExerciseParam(filters.level);
-  if (filters.equipment) params.equipment = filters.equipment;
-  if (filters.category) params.category = normalizeExerciseParam(filters.category);
-
-  const {
-    data: exercisesData,
-    isLoading: normalLoading,
-    isError: normalError,
-    errorMeta: normalErrorMeta,
-  } = useExercises(params, { keepPreviousData: true });
-  const normalExercises = exercisesData?.exercises || exercisesData?.data || exercisesData || [];
-  const metadata = exercisesData?.metadata || {};
-  const normalTotalPages = Math.max(1, Number(metadata.total_pages) || 1);
-  const normalTotalCount = Number(metadata.total_count) || normalExercises.length;
-
-  // Semantic search results override normal
-  const semanticResults = semanticSearch.data?.results || semanticSearch.data?.exercises || semanticSearch.data || [];
-  const semanticTotalPages = Math.max(1, Math.ceil(semanticResults.length / pageSize));
-  const semanticStart = (page - 1) * pageSize;
-  const semanticPagedResults = semanticResults.slice(semanticStart, semanticStart + pageSize);
-  const exercises = semanticMode && semanticSearch.data ? semanticPagedResults : normalExercises;
-  const isLoading = semanticMode ? semanticSearch.isPending : normalLoading;
-  const totalPages = semanticMode ? semanticTotalPages : normalTotalPages;
-  const totalCount = semanticMode ? semanticResults.length : normalTotalCount;
-  const canPrevPage = page > 1;
-  const canNextPage = semanticMode
-    ? page < semanticTotalPages
-    : (Boolean(metadata.has_next) || page < normalTotalPages);
-  const showingFrom = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
-  const showingTo = totalCount === 0 ? 0 : Math.min((page - 1) * pageSize + exercises.length, totalCount);
-
-  function handleSemanticSearch() {
-    if (!debouncedSearch.trim()) return;
-    setPage(1);
-    setSemanticMode(true);
-    semanticSearch.mutate({
-      query: debouncedSearch,
-      top_k: 20,
-      ...(filters.level ? { level: normalizeExerciseParam(filters.level) } : {}),
-      ...(filters.equipment ? { equipment: filters.equipment } : {}),
-      ...(filters.category ? { category: normalizeExerciseParam(filters.category) } : {}),
-      ...(filters.muscle ? { muscle: normalizeExerciseParam(filters.muscle) } : {}),
-    });
-  }
-
-  function handleSearchChange(val) {
-    setSearch(val);
-    setPage(1);
-    if (!val) setSemanticMode(false);
-  }
-
-  const activeFilterCount = Object.values(filters).filter(Boolean).length;
-
-  return (
-    <div className="wk-view">
-      <div className="wk-section-header">
-        <div>
-          <span className="wk-eyebrow">Browse & Discover</span>
-          <h2 className="wk-heading">Exercise Library</h2>
-        </div>
-        <button
-          className={`wk-filter-btn${activeFilterCount > 0 ? ' wk-filter-btn--active' : ''}`}
-          onClick={() => setShowFilters(true)}
-        >
-          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>tune</span>
-          {activeFilterCount > 0 ? `Filters (${activeFilterCount})` : 'Filters'}
-        </button>
-      </div>
-
-      {/* Search bar with semantic toggle */}
-      <div className="wk-search-wrap" style={{ marginBottom: 8 }}>
-        <span className="material-symbols-outlined wk-search-icon">search</span>
-        <input
-          className="wk-search"
-          type="text"
-          placeholder={semanticMode ? 'AI search active...' : 'Search exercises...'}
-          value={search}
-          onChange={e => handleSearchChange(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSemanticSearch()}
-        />
-        {search && (
-          <button className="wk-search-clear" onClick={() => { handleSearchChange(''); }}>
-            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
-          </button>
-        )}
-      </div>
-
-      {/* Semantic search hint */}
-      {search && !semanticMode && (
-        <button
-          className="wk-semantic-hint"
-          onClick={handleSemanticSearch}
-        >
-          <span className="material-symbols-outlined" style={{ fontSize: 14 }}>auto_awesome</span>
-          Try AI search: "{search}"
-        </button>
-      )}
-      {semanticMode && (
-        <div className="wk-semantic-active">
-          <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#5d3fd3' }}>auto_awesome</span>
-          <span>AI search results for "{search}"</span>
-          <button onClick={() => { setSemanticMode(false); setPage(1); }} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#9f9b93' }}>
-            Clear
-          </button>
-        </div>
-      )}
-
-      {!semanticMode && normalError && normalErrorMeta?.shouldFallback && (
-        <div className="wk-semantic-active" style={{ marginBottom: 8 }}>
-          <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#b02500' }}>warning</span>
-          <span>Exercise service issue. Showing last known results.</span>
-        </div>
-      )}
-
-      {isLoading ? (
         <div className="wk-cards-list">
-          {[1, 2, 3, 4].map(i => <div key={i} className="wk-skeleton-row-large" />)}
-        </div>
-      ) : exercises.length === 0 ? (
-        <div className="wk-empty-section">
-          <span className="material-symbols-outlined wk-empty-icon" style={{ fontSize: 48, color: '#dad4c8' }}>search_off</span>
-          <p className="wk-empty-text">No exercises match your search.</p>
-        </div>
-      ) : (
-        <div className="wk-lib-cards">
-          {exercises.map(ex => {
-            const muscle = normalizeExerciseParam(getExercisePrimaryMuscle(ex));
-            const chipStyle = MUSCLE_CHIP_COLOR[muscle] || { bg: '#f1f1ef', color: '#5b5c5a' };
+          {templates.map((tmpl, i) => {
+            const accent = getAccentForType(tmpl.type);
             return (
-              <div key={ex.id} className="wk-lib-card" onClick={() => setSelectedExercise(ex)}>
-                <div className="wk-lib-card-img-wrap">
-                  <ExerciseImagePreview
-                    key={`${ex.id || ex.name}-card-${ex.image_url || ''}-${ex.alt_image_url || ''}`}
-                    exercise={ex}
-                    className="wk-lib-card-media"
-                    imgClassName="wk-lib-card-img"
-                    alt={ex.name}
-                    animate={false}
-                    fallback={<ExerciseImageFallback exercise={ex} className="wk-lib-card-img" />}
-                  />
-                </div>
-                <div className="wk-lib-card-body">
-                  <span className="wk-lib-card-name">{ex.name}</span>
-                  <div className="wk-lib-card-chips">
-                    {getExercisePrimaryMuscle(ex) && (
-                      <span
-                        className="wk-lib-card-chip"
-                        style={{ background: chipStyle.bg, color: chipStyle.color }}
-                      >
-                        {getExercisePrimaryMuscle(ex)}
-                      </span>
-                    )}
-                    {ex.equipment && (
-                      <span className="wk-lib-card-chip wk-lib-card-chip--equip">
-                        {ex.equipment}
-                      </span>
-                    )}
-                    {getExerciseDifficulty(ex) && (
-                      <span className="wk-lib-card-chip wk-lib-card-chip--diff">
-                        {getExerciseDifficulty(ex)}
+              <div key={tmpl.id} className={`wk-card wk-card--${i % 2 === 0 ? 'a' : 'b'}`}>
+                <div className="wk-card-accent" style={{ background: accent }} />
+                <div className="wk-card-body" onClick={() => onProgramPreview(tmpl)} style={{ cursor: 'pointer' }}>
+                  <div className="wk-card-top">
+                    <h3 className="wk-card-name">{tmpl.name}</h3>
+                    {tmpl.type && (
+                      <span className="wk-card-tag" style={{
+                        background: i % 2 === 0 ? '#c3fb9c' : '#b4a5ff',
+                        color: i % 2 === 0 ? '#214f01' : '#180058',
+                        transform: `rotate(${i % 2 === 0 ? 3 : -2}deg)`,
+                      }}>
+                        {tmpl.type.toUpperCase()}
                       </span>
                     )}
                   </div>
+                  <div className="wk-card-meta">
+                    {tmpl.exercises?.length > 0 && (
+                      <div className="wk-card-meta-item">
+                        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>fitness_center</span>
+                        <span>{tmpl.exercises.length} exercises</span>
+                      </div>
+                    )}
+                    {tmpl.estimated_duration_minutes && (
+                      <div className="wk-card-meta-item">
+                        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>schedule</span>
+                        <span>{tmpl.estimated_duration_minutes} mins</span>
+                      </div>
+                    )}
+                  </div>
+                  {tmpl.description && (
+                    <p className="wk-card-last" style={{ color: '#767775', fontSize: 13 }}>
+                      {tmpl.description}
+                    </p>
+                  )}
                 </div>
                 <button
-                  className="wk-lib-add-btn"
-                  onClick={e => { e.stopPropagation(); onAddToWorkout(ex); }}
-                  aria-label={`Add ${ex.name} to workout`}
+                  className="wk-card-play"
+                  style={{ background: accent, borderColor: accent }}
+                  onClick={() => onProgramStart(tmpl)}
+                  aria-label={`Start ${tmpl.name}`}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: 20 }}>add</span>
+                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
                 </button>
               </div>
             );
@@ -1601,50 +250,195 @@ function LibraryView({ sessionActive, onAddToWorkout }) {
         </div>
       )}
 
-      {!isLoading && exercises.length > 0 && (
-        <div className="wk-lib-pagination">
-          <span className="wk-lib-pagination-label">
-            Showing {showingFrom}-{showingTo} of {totalCount}
-          </span>
-          <div className="wk-lib-pagination-actions">
-            <button
-              className="wk-lib-pagination-btn"
-              onClick={() => setPage((current) => Math.max(1, current - 1))}
-              disabled={!canPrevPage}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>chevron_left</span>
-            </button>
-            <span className="wk-lib-pagination-page">{page}/{totalPages}</span>
-            <button
-              className="wk-lib-pagination-btn"
-              onClick={() => setPage((current) => current + 1)}
-              disabled={!canNextPage}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>chevron_right</span>
-            </button>
-          </div>
+      {/* Quick start blank workout */}
+      <div className="wk-create-banner">
+        <h4 className="wk-create-title">Ready for a quick session?</h4>
+        <p className="wk-create-desc">Start a blank workout and build as you go</p>
+        <button className="wk-create-btn" onClick={() => onProgramStart(null)}>
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span>
+          Quick Start
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Template Preview ───────────────────────────────────────────────────
+
+function TemplatePreview({ template, onBack, onStart }) {
+  const accent = getAccentForType(template?.type);
+  const exercises = template?.exercises || [];
+
+  return (
+    <div className="wk-view">
+      <div className="wk-preview-header">
+        <button className="wk-back-btn" onClick={onBack}>
+          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>arrow_back</span>
+          <span>Programs</span>
+        </button>
+      </div>
+
+      <div className="wk-detail-hero">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+          <div className="wk-preview-color-dot" style={{ background: accent }} />
+          {template?.type && (
+            <span className="wk-card-tag" style={{ background: '#c3fb9c', color: '#214f01' }}>
+              {template.type.toUpperCase()}
+            </span>
+          )}
+        </div>
+        <h2 className="wk-preview-title">{template?.name}</h2>
+        {template?.estimated_duration_minutes && (
+          <>
+            <p className="wk-eyebrow" style={{ marginBottom: 8 }}>Estimated Duration</p>
+            <h3 className="wk-detail-duration" style={{ color: accent }}>
+              {template.estimated_duration_minutes} MINS
+            </h3>
+          </>
+        )}
+        {template?.description && (
+          <p style={{ fontSize: 14, color: '#767775', marginTop: 8 }}>{template.description}</p>
+        )}
+        <div className="wk-detail-pills">
+          <span className="wk-detail-pill wk-detail-pill--green">{exercises.length} EXERCISES</span>
+        </div>
+      </div>
+
+      {exercises.length > 0 && (
+        <div className="wk-ex-list">
+          {exercises.map((ex, i) => (
+            <div key={ex.id || i} className="wk-ex-card">
+              <div className="wk-ex-card-top">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div className="wk-ex-emoji-dot" style={{ background: accent }} />
+                  <div className="wk-ex-card-left">
+                    <span className="wk-ex-muscle">{ex.muscle_group || ex.primary_muscle}</span>
+                    <h4 className="wk-ex-name">{ex.name}</h4>
+                  </div>
+                </div>
+                {(ex.sets_count || ex.sets?.length) && (
+                  <div className="wk-ex-grid" style={{ marginTop: 0 }}>
+                    <div className="wk-ex-stat">
+                      <p className="wk-ex-stat-label">Sets</p>
+                      <p className="wk-ex-stat-val">{ex.sets_count || ex.sets?.length}</p>
+                    </div>
+                    {ex.reps && (
+                      <div className="wk-ex-stat">
+                        <p className="wk-ex-stat-label">Reps</p>
+                        <p className="wk-ex-stat-val">{ex.reps}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
-      {showFilters && (
-        <LibraryFilterSheet
-          filters={filters}
-          onChange={(nextFilters) => {
-            setFilters(nextFilters);
-            setPage(1);
-          }}
-          onClose={() => setShowFilters(false)}
-          meta={meta}
-        />
-      )}
+      <div className="wk-detail-cta">
+        <button className="wk-start-btn" style={{ background: accent }} onClick={() => onStart(template)}>
+          <span>Start Program</span>
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_circle</span>
+        </button>
+      </div>
+    </div>
+  );
+}
 
-      {selectedExercise && (
-        <ExerciseDetailModal
-          exercise={selectedExercise}
-          onClose={() => setSelectedExercise(null)}
-          onAddToWorkout={onAddToWorkout}
-          sessionActive={sessionActive}
+// ── Library View ──────────────────────────────────────────────────────
+
+function LibraryView() {
+  const [search, setSearch] = useState('');
+  const [cat, setCat] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setDebouncedSearch(search), 350);
+    return () => clearTimeout(timerRef.current);
+  }, [search]);
+
+  const params = {};
+  if (debouncedSearch) params.name = debouncedSearch;
+  if (cat) params.muscle = cat;
+
+  const { data: exercisesData, isLoading } = useExercises(params);
+  const exercises = asArray(exercisesData?.exercises || exercisesData?.data || exercisesData);
+
+  const CATS = ['All', 'Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Core', 'Cardio'];
+
+  return (
+    <div className="wk-view">
+      <div className="wk-section-header">
+        <div>
+          <span className="wk-eyebrow">Browse & Discover</span>
+          <h2 className="wk-heading">Library</h2>
+        </div>
+      </div>
+
+      <div className="wk-search-wrap" style={{ marginBottom: 16 }}>
+        <span className="material-symbols-outlined wk-search-icon">search</span>
+        <input
+          className="wk-search"
+          type="text"
+          placeholder="Search exercises..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
         />
+        {search && (
+          <button className="wk-search-clear" onClick={() => setSearch('')}>
+            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
+          </button>
+        )}
+      </div>
+
+      <div className="wk-cat-chips" style={{ marginBottom: 16 }}>
+        {CATS.map(c => (
+          <button
+            key={c}
+            className={`wk-cat-chip${(c === 'All' ? !cat : cat === c) ? ' wk-cat-chip--active' : ''}`}
+            onClick={() => setCat(c === 'All' ? '' : c)}
+          >
+            {c}
+          </button>
+        ))}
+      </div>
+
+      {isLoading ? (
+        <div className="wk-cards-list">
+          {[1, 2, 3].map(i => <div key={i} className="wk-skeleton-row-large" />)}
+        </div>
+      ) : exercises.length === 0 ? (
+        <div className="wk-empty-section">
+          <span className="material-symbols-outlined wk-empty-icon" style={{ fontSize: 48, color: '#dad4c8' }}>search_off</span>
+          <p className="wk-empty-text">No exercises match your search.</p>
+        </div>
+      ) : (
+        <div className="wk-lib-list">
+          {exercises.map(ex => {
+            const accent = getAccentForType(ex.type);
+            return (
+              <div key={ex.id} className="wk-lib-row">
+                <div className="wk-lib-dot" style={{ background: accent }} />
+                <div className="wk-lib-info">
+                  <span className="wk-lib-name">{ex.name}</span>
+                  <span className="wk-lib-muscle">
+                    {ex.muscle_group || ex.primary_muscle}
+                    {ex.equipment ? ` · ${ex.equipment}` : ''}
+                    {ex.difficulty ? ` · ${ex.difficulty}` : ''}
+                  </span>
+                </div>
+                {ex.type && (
+                  <span className="wk-lib-type-badge" style={{ background: accent + '22', color: accent }}>
+                    {ex.type}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );
@@ -1652,771 +446,165 @@ function LibraryView({ sessionActive, onAddToWorkout }) {
 
 // ── History View ──────────────────────────────────────────────────────
 
-const WORKOUT_TYPES = ['All', 'Strength', 'Hypertrophy', 'Cardio', 'Endurance', 'Custom'];
-const HISTORY_WEEK_DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-
-function getWorkoutTimestamp(workout) {
-  return workout?.date || workout?.started_at || workout?.created_at || null;
-}
-
-function getWorkoutDate(workout) {
-  const timestamp = getWorkoutTimestamp(workout);
-  return timestamp ? new Date(timestamp) : null;
-}
-
-function getDateKey(date) {
-  if (!date) return '';
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
-
-function getWorkoutDisplayName(workout) {
-  const name = workout?.name?.trim();
-  return name || 'Workout Session';
-}
-
-function getWorkoutTypeLabel(workout) {
-  return workout?.workout_type || workout?.type || 'Session';
-}
-
-function getWorkoutSetCount(exercises) {
-  return exercises.reduce((total, exercise) => total + extractExerciseSets(exercise).length, 0);
-}
-
-function buildHistoryTrend(workouts) {
-  const recentWorkouts = [...workouts]
-    .filter(Boolean)
-    .sort((a, b) => {
-      const aTime = getWorkoutDate(a)?.getTime() || 0;
-      const bTime = getWorkoutDate(b)?.getTime() || 0;
-      return aTime - bTime;
-    })
-    .slice(-6);
-
-  const rawValues = recentWorkouts.map((workout) => {
-    const duration = Number(workout?.duration) || 0;
-    if (duration > 0) return duration;
-    const exercises = extractWorkoutExercises(workout);
-    const setCount = getWorkoutSetCount(exercises);
-    return setCount > 0 ? setCount * 5 : 12;
-  });
-
-  const peak = rawValues.reduce((max, value) => Math.max(max, value), 1);
-
-  return recentWorkouts.map((workout, index) => ({
-    id: workout?.id || index,
-    label: getWorkoutDate(workout)?.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) || '—',
-    value: rawValues[index],
-    ratio: Math.max(18, Math.round((rawValues[index] / peak) * 100)),
-    type: getWorkoutTypeLabel(workout),
-  }));
-}
-
-function buildHistorySplit(exercises) {
-  const tally = exercises.reduce((acc, exercise) => {
-    const muscle = getExercisePrimaryMuscle(exercise.exercise || exercise) || 'Other';
-    acc[muscle] = (acc[muscle] || 0) + 1;
-    return acc;
-  }, {});
-
-  const entries = Object.entries(tally)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 4);
-
-  const total = entries.reduce((sum, [, count]) => sum + count, 0);
-
-  return entries.map(([label, count], index) => ({
-    label,
-    count,
-    percent: total > 0 ? Math.round((count / total) * 100) : 0,
-    tone: ['#38671a', '#7b61ff', '#ef8f5a', '#5f5b52'][index] || '#38671a',
-  }));
-}
-
-function HistoryView({ onStartWorkout }) {
-  const [selectedWorkoutId, setSelectedWorkoutId] = useState(null);
+function HistoryView() {
+  const [selectedWorkout, setSelectedWorkout] = useState(null);
   const [expandedEx, setExpandedEx] = useState(null);
-  const [deleteTarget, setDeleteTarget] = useState(null);
-  const [filterType, setFilterType] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedCalendarDate, setSelectedCalendarDate] = useState('');
-  const [calendarCursor, setCalendarCursor] = useState(() => {
-    const today = new Date();
-    return new Date(today.getFullYear(), today.getMonth(), 1);
-  });
+  const [currentPage] = useState(1);
 
-  const deleteWorkoutMutation = useDeleteWorkout();
-
-  const params = { limit: 100 };
-  if (filterType && filterType !== 'All') params.type = filterType.toLowerCase();
-
-  const {
-    data: workoutsData,
-    isLoading,
-    isError,
-    errorMeta,
-  } = useWorkoutList(params);
+  const { data: workoutsData, isLoading } = useWorkoutList({ limit: 20, page: currentPage });
   const { data: calendarData } = useActivityCalendar();
 
-  const liveWorkouts = workoutsData?.workouts || workoutsData?.data || workoutsData || [];
-  const workouts = [...liveWorkouts].sort((a, b) => {
-    const aTime = getWorkoutDate(a)?.getTime() || 0;
-    const bTime = getWorkoutDate(b)?.getTime() || 0;
-    return bTime - aTime;
-  });
+  const workouts = asArray(workoutsData?.workouts || workoutsData?.data || workoutsData);
   const calendarDots = calendarData?.dates || {};
 
-  const baseFilteredWorkouts = workouts.filter((workout) => {
-    const workoutDate = getWorkoutDate(workout);
-    if (!workoutDate) return false;
-    if (dateFrom) {
-      const fromDate = new Date(`${dateFrom}T00:00:00`);
-      if (workoutDate < fromDate) return false;
-    }
-    if (dateTo) {
-      const toDate = new Date(`${dateTo}T23:59:59`);
-      if (workoutDate > toDate) return false;
-    }
-    return true;
-  });
-
-  const visibleWorkouts = selectedCalendarDate
-    ? baseFilteredWorkouts.filter((workout) => {
-      const workoutDate = getWorkoutDate(workout);
-      if (!workoutDate) return false;
-      const dateStr = getDateKey(workoutDate);
-      return dateStr === selectedCalendarDate;
-    })
-    : baseFilteredWorkouts;
-
-  const activeWorkoutId = visibleWorkouts.some((workout) => workout.id === selectedWorkoutId)
-    ? selectedWorkoutId
-    : (visibleWorkouts[0]?.id || null);
-  const {
-    data: selectedWorkoutDetailData,
-    isLoading: selectedWorkoutDetailLoading,
-    isError: selectedWorkoutDetailError,
-    errorMeta: selectedWorkoutDetailErrorMeta,
-  } = useWorkout(activeWorkoutId);
-  const selectedWorkoutSummary = visibleWorkouts.find((workout) => workout.id === activeWorkoutId) || null;
-  const selectedWorkoutDetail = selectedWorkoutSummary
-    ? (selectedWorkoutDetailData?.workout || selectedWorkoutDetailData?.data || selectedWorkoutSummary)
-    : null;
-  const selectedExercises = extractWorkoutExercises(selectedWorkoutDetail);
-  const selectedVolume = calcVolume(selectedExercises);
-  const selectedSetCount = getWorkoutSetCount(selectedExercises);
-  const trendData = buildHistoryTrend(baseFilteredWorkouts);
-  const splitData = buildHistorySplit(selectedExercises);
-
-  const activeFilterCount = [
-    filterType && filterType !== 'All',
-    dateFrom,
-    dateTo,
-    selectedCalendarDate,
-  ].filter(Boolean).length;
-
-  const today = new Date();
-  const year = calendarCursor.getFullYear();
-  const month = calendarCursor.getMonth();
-  const monthName = calendarCursor.toLocaleString('default', { month: 'long' });
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const monthName = now.toLocaleString('default', { month: 'long' });
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDayOfWeek = new Date(year, month, 1).getDay();
-  const offset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
-  const selectedWorkoutDate = getWorkoutDate(selectedWorkoutDetail);
-  const totalSessions = baseFilteredWorkouts.length;
-  const totalVolume = baseFilteredWorkouts.reduce(
-    (sum, workout) => sum + calcVolume(extractWorkoutExercises(workout)),
-    0,
-  );
+  const firstDayOfWeek = new Date(year, month, 1).getDay(); // 0=Sun
+  const offset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1; // Mon-first offset
+  const CALENDAR_DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
   function fmtDate(iso) {
     if (!iso) return '';
-    const date = new Date(iso);
-    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
   }
 
-  function fmtDuration(start, end, explicitDuration) {
-    if (explicitDuration) return `${explicitDuration}m`;
-    if (!start || !end) return '—';
-    const minutes = Math.round((new Date(end) - new Date(start)) / 60000);
-    return minutes > 0 ? `${minutes}m` : '—';
-  }
-
-  function clearFilters() {
-    setFilterType('');
-    setDateFrom('');
-    setDateTo('');
-    setSelectedCalendarDate('');
-    setShowFilters(false);
-  }
-
-  function selectWorkout(workout) {
-    setSelectedWorkoutId(workout?.id || null);
-    setExpandedEx(null);
-    const workoutDate = getWorkoutDate(workout);
-    if (workoutDate) {
-      setCalendarCursor(new Date(workoutDate.getFullYear(), workoutDate.getMonth(), 1));
-      setSelectedCalendarDate(getDateKey(workoutDate));
+  function fmtDuration(start, end, durationMinutes) {
+    const minsFromDuration = Number(durationMinutes);
+    if (Number.isFinite(minsFromDuration) && minsFromDuration > 0) {
+      return `${minsFromDuration}m`;
     }
-  }
-
-  function shiftCalendar(monthOffset) {
-    setCalendarCursor((current) => new Date(current.getFullYear(), current.getMonth() + monthOffset, 1));
+    if (!start || !end) return '—';
+    const mins = Math.round((new Date(end) - new Date(start)) / 60000);
+    return mins > 0 ? `${mins}m` : '—';
   }
 
   return (
-    <div className="wk-view wk-history-view">
-      <section className="wk-history-hero">
-        <div className="wk-history-hero-copy">
-          <span className="wk-eyebrow">The Routine</span>
-          <h2 className="wk-heading wk-history-title">Workout History</h2>
-          <p className="wk-history-subtitle">
-            Your completed sessions, current training rhythm, and the details worth repeating.
-          </p>
+    <div className="wk-view">
+      <div className="wk-section-header">
+        <div>
+          <span className="wk-eyebrow">Your Archive</span>
+          <h2 className="wk-heading">History</h2>
         </div>
-        <div className="wk-history-hero-actions">
-          <button
-            className={`wk-filter-btn${activeFilterCount > 0 ? ' wk-filter-btn--active' : ''}`}
-            onClick={() => setShowFilters((state) => !state)}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>tune</span>
-            {activeFilterCount > 0 ? `Filters (${activeFilterCount})` : 'Filters'}
-          </button>
-          <button className="wk-start-btn" onClick={onStartWorkout}>
-            <span className="material-symbols-outlined" style={{ fontSize: 16, fontVariationSettings: "'FILL' 1" }}>play_circle</span>
-            Log Workout
-          </button>
-        </div>
-      </section>
-
-      {showFilters && (
-        <div className="wk-hist-filter-panel">
-          <div className="wk-hist-filter-section">
-            <span className="wk-eyebrow" style={{ display: 'block', marginBottom: 6 }}>WORKOUT TYPE</span>
-            <div className="wk-cat-chips">
-              {WORKOUT_TYPES.map((type) => (
-                <button
-                  key={type}
-                  className={`wk-cat-chip${(type === 'All' ? !filterType || filterType === 'All' : filterType === type) ? ' wk-cat-chip--active' : ''}`}
-                  onClick={() => setFilterType(type === 'All' ? '' : type)}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="wk-hist-filter-section">
-            <span className="wk-eyebrow" style={{ display: 'block', marginBottom: 6 }}>DATE RANGE</span>
-            <div className="wk-hist-date-range">
-              <div className="wk-hist-date-field">
-                <label className="wk-eyebrow" style={{ fontSize: 9 }}>FROM</label>
-                <input
-                  type="date"
-                  className="wk-date-input"
-                  value={dateFrom}
-                  onChange={(event) => setDateFrom(event.target.value)}
-                />
-              </div>
-              <span style={{ color: '#9f9b93', alignSelf: 'flex-end', paddingBottom: 6 }}>—</span>
-              <div className="wk-hist-date-field">
-                <label className="wk-eyebrow" style={{ fontSize: 9 }}>TO</label>
-                <input
-                  type="date"
-                  className="wk-date-input"
-                  value={dateTo}
-                  onChange={(event) => setDateTo(event.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-          {activeFilterCount > 0 && (
-            <button
-              className="wk-discard-cancel"
-              style={{ width: '100%', marginTop: 4 }}
-              onClick={clearFilters}
-            >
-              Clear Filters
-            </button>
-          )}
-        </div>
-      )}
-
-      {activeFilterCount > 0 && (
-        <div className="wk-history-active-filters">
-          {filterType && (
-            <span className="wk-history-filter-pill">Type: {filterType}</span>
-          )}
-          {dateFrom && (
-            <span className="wk-history-filter-pill">From: {fmtDate(dateFrom)}</span>
-          )}
-          {dateTo && (
-            <span className="wk-history-filter-pill">To: {fmtDate(dateTo)}</span>
-          )}
-          {selectedCalendarDate && (
-            <span className="wk-history-filter-pill">Day: {fmtDate(selectedCalendarDate)}</span>
-          )}
-        </div>
-      )}
-
-      {isError && errorMeta?.shouldFallback && (
-        <div className="wk-semantic-active" style={{ marginBottom: 10 }}>
-          <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#b02500' }}>warning</span>
-          <span>Workout list sync issue. Showing last known history.</span>
-        </div>
-      )}
-
-      <div className="wk-history-layout">
-        <section className="wk-cal-card wk-history-calendar">
-          <div className="wk-cal-header">
-            <div>
-              <span className="wk-eyebrow">{year}</span>
-              <h3 className="wk-cal-title">{monthName}</h3>
-            </div>
-            <div className="wk-cal-nav">
-              <button className="wk-cal-nav-btn" onClick={() => shiftCalendar(-1)} aria-label="Previous month">
-                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>west</span>
-              </button>
-              <button className="wk-cal-nav-btn" onClick={() => shiftCalendar(1)} aria-label="Next month">
-                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>east</span>
-              </button>
-            </div>
-          </div>
-          <div className="wk-cal-grid">
-            {HISTORY_WEEK_DAYS.map((day) => (
-              <div key={day} className="wk-cal-day-hdr">{day}</div>
-            ))}
-            {Array.from({ length: offset }).map((_, index) => (
-              <div key={`pad-${index}`} className="wk-cal-day wk-cal-day--prev" />
-            ))}
-            {Array.from({ length: daysInMonth }).map((_, index) => {
-              const day = index + 1;
-              const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-              const matchingWorkouts = baseFilteredWorkouts.filter((workout) => {
-                const workoutDate = getWorkoutDate(workout);
-                return workoutDate ? getDateKey(workoutDate) === dateStr : false;
-              });
-              const hasActivity = calendarDots[dateStr] || matchingWorkouts.length > 0;
-              const isToday = (
-                day === today.getDate()
-                && month === today.getMonth()
-                && year === today.getFullYear()
-              );
-              const isSelected = selectedCalendarDate === dateStr;
-
-              return (
-                <button
-                  key={day}
-                  type="button"
-                  className={`wk-cal-day${isToday ? ' wk-cal-day--active' : ''}${hasActivity ? ' wk-cal-day--has-dot' : ''}${isSelected ? ' wk-cal-day--selected' : ''}`}
-                  onClick={() => {
-                    if (selectedCalendarDate === dateStr) {
-                      setSelectedCalendarDate('');
-                      return;
-                    }
-                    setSelectedCalendarDate(dateStr);
-                    if (matchingWorkouts[0]) {
-                      setSelectedWorkoutId(matchingWorkouts[0].id);
-                      setExpandedEx(null);
-                    }
-                  }}
-                >
-                  {day}
-                  {hasActivity && !isToday && (
-                    <span className="wk-cal-dot" style={{ background: '#38671a' }} />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-          <div className="wk-cal-legend">
-            <div className="wk-cal-legend-item">
-              <span className="wk-cal-legend-dot" style={{ background: '#38671a' }} />
-              Logged session
-            </div>
-            <div className="wk-cal-legend-item">
-              <span className="wk-cal-legend-dot" style={{ background: '#c3fb9c' }} />
-              Selected day
-            </div>
-          </div>
-        </section>
-
-        <section className="wk-hist-focus wk-history-feature">
-          {selectedWorkoutDetail ? (
-            <>
-              <div className="wk-hist-focus-head">
-                <div>
-                  <span className="wk-eyebrow">
-                    {fmtDate(getWorkoutTimestamp(selectedWorkoutDetail))}
-                  </span>
-                  <h3 className="wk-hist-focus-title">{getWorkoutDisplayName(selectedWorkoutDetail)}</h3>
-                </div>
-                <span
-                  className="wk-hist-type-badge"
-                  style={{
-                    background: `${getAccentForType(getWorkoutTypeLabel(selectedWorkoutDetail))}22`,
-                    color: getAccentForType(getWorkoutTypeLabel(selectedWorkoutDetail)),
-                  }}
-                >
-                  {getWorkoutTypeLabel(selectedWorkoutDetail).toLowerCase()}
-                </span>
-              </div>
-
-              <div className="wk-history-glance">
-                <div className="wk-history-glance-card">
-                  <span className="wk-eyebrow">Duration</span>
-                  <strong>{fmtDuration(selectedWorkoutDetail.started_at, selectedWorkoutDetail.completed_at, selectedWorkoutDetail.duration)}</strong>
-                </div>
-                <div className="wk-history-glance-card">
-                  <span className="wk-eyebrow">Volume</span>
-                  <strong>{selectedVolume > 0 ? `${selectedVolume.toLocaleString()} kg` : '—'}</strong>
-                </div>
-                <div className="wk-history-glance-card">
-                  <span className="wk-eyebrow">Sets</span>
-                  <strong>{selectedSetCount || '—'}</strong>
-                </div>
-                <div className="wk-history-glance-card">
-                  <span className="wk-eyebrow">Exercises</span>
-                  <strong>{selectedExercises.length || '—'}</strong>
-                </div>
-              </div>
-
-              <div className="wk-hist-focus-grid">
-                <div className="wk-hist-focus-card">
-                  <p className="wk-eyebrow">Session Notes</p>
-                  {selectedWorkoutDetail.notes ? (
-                    <p className="wk-history-note">{selectedWorkoutDetail.notes}</p>
-                  ) : (
-                    <p className="wk-hist-focus-empty">No overall notes were saved for this session.</p>
-                  )}
-                </div>
-
-                <div className="wk-hist-focus-card">
-                  <p className="wk-eyebrow">Exercises Performed</p>
-                  <div className="wk-hist-focus-list">
-                    {selectedExercises.length === 0 ? (
-                      <p className="wk-hist-focus-empty">No exercises logged for this workout.</p>
-                    ) : (
-                      selectedExercises.slice(0, 4).map((exercise, index) => {
-                        const sets = extractExerciseSets(exercise);
-                        const peak = sets.reduce((max, set) => Math.max(max, setWeightValue(set)), 0);
-                        return (
-                          <div key={exercise.id || `${exercise.exercise_id}-${index}`} className="wk-hist-focus-row">
-                            <div>
-                              <p className="wk-hist-focus-name">{exercise.exercise?.name || exercise.name}</p>
-                              <p className="wk-hist-focus-meta">
-                                {sets.length} sets{peak > 0 ? ` · ${peak}kg peak` : ''}
-                              </p>
-                            </div>
-                            <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#38671a' }}>north_east</span>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="wk-hist-empty-state">
-              <span className="material-symbols-outlined wk-hist-empty-icon">history</span>
-              <h3 className="wk-hist-empty-title">
-                {activeFilterCount > 0 ? 'No sessions match this view' : 'No workout archive yet'}
-              </h3>
-              <p className="wk-hist-empty-body">
-                {activeFilterCount > 0
-                  ? 'Try another date or clear your filters to bring sessions back into view.'
-                  : 'Log your first workout and this space will turn into your training archive.'}
-              </p>
-            </div>
-          )}
-        </section>
       </div>
 
-      {selectedWorkoutDetail && (
-        <section className="wk-history-insights">
-          <div className="wk-history-insight-card">
-            <div className="wk-history-insight-head">
-              <div>
-                <span className="wk-eyebrow">Volume Trend</span>
-                <h3 className="wk-history-insight-title">Recent Rhythm</h3>
-              </div>
-              <p className="wk-history-insight-copy">
-                Last {trendData.length || 0} sessions, using logged duration when available.
-              </p>
-            </div>
-            <div className="wk-history-trend">
-              {trendData.length === 0 ? (
-                <p className="wk-hist-focus-empty">Complete more sessions to see the pattern.</p>
-              ) : (
-                trendData.map((item) => (
-                  <div key={item.id} className="wk-history-trend-item">
-                    <div
-                      className="wk-history-trend-bar"
-                      style={{ height: `${item.ratio}%` }}
-                      title={`${item.label} · ${item.value}`}
-                    />
-                    <span>{item.label}</span>
-                  </div>
-                ))
-              )}
-            </div>
+      {/* Calendar */}
+      <div className="wk-cal-card">
+        <div className="wk-cal-header">
+          <div>
+            <span className="wk-eyebrow">{year}</span>
+            <h3 className="wk-cal-title">{monthName}</h3>
           </div>
-
-          <div className="wk-history-insight-card">
-            <div className="wk-history-insight-head">
-              <div>
-                <span className="wk-eyebrow">Split Focus</span>
-                <h3 className="wk-history-insight-title">Session Breakdown</h3>
+        </div>
+        <div className="wk-cal-grid">
+          {CALENDAR_DAYS.map(d => (
+            <div key={d} className="wk-cal-day-hdr">{d}</div>
+          ))}
+          {Array.from({ length: offset }).map((_, i) => (
+            <div key={`pad-${i}`} className="wk-cal-day wk-cal-day--prev" />
+          ))}
+          {Array.from({ length: daysInMonth }).map((_, i) => {
+            const day = i + 1;
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const hasActivity = calendarDots[dateStr];
+            const isToday = day === now.getDate();
+            return (
+              <div
+                key={day}
+                className={`wk-cal-day${isToday ? ' wk-cal-day--active' : ''}${hasActivity ? ' wk-cal-day--has-dot' : ''}`}
+              >
+                {day}
+                {hasActivity && !isToday && (
+                  <span className="wk-cal-dot" style={{ background: '#38671a' }} />
+                )}
               </div>
-              <p className="wk-history-insight-copy">
-                Main muscle groups captured in the selected workout.
-              </p>
-            </div>
-            <div className="wk-history-split">
-              {splitData.length === 0 ? (
-                <p className="wk-hist-focus-empty">No exercise distribution available yet.</p>
-              ) : (
-                splitData.map((item) => (
-                  <div key={item.label} className="wk-history-split-row">
-                    <div className="wk-history-split-copy">
-                      <strong>{item.label}</strong>
-                      <span>{item.count} exercises</span>
-                    </div>
-                    <div className="wk-history-split-bar">
-                      <span style={{ width: `${item.percent}%`, background: item.tone }} />
-                    </div>
-                    <em>{item.percent}%</em>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </section>
-      )}
+            );
+          })}
+        </div>
+      </div>
 
+      {/* Workout list */}
       {isLoading ? (
         <div style={{ padding: '16px 0' }}>
-          {[1, 2, 3].map((item) => <div key={item} className="wk-skeleton-row-large" style={{ marginBottom: 8 }} />)}
+          {[1, 2, 3].map(i => <div key={i} className="wk-skeleton-row-large" style={{ marginBottom: 8 }} />)}
         </div>
-      ) : visibleWorkouts.length === 0 ? (
-        <div className="wk-hist-empty-state">
-          <span className="material-symbols-outlined wk-hist-empty-icon">fitness_center</span>
-          <h3 className="wk-hist-empty-title">
-            {activeFilterCount > 0 ? 'No workouts match your filters' : 'No workouts yet'}
-          </h3>
-          <p className="wk-hist-empty-body">
-            {activeFilterCount > 0
-              ? 'Try clearing your filters to see all sessions.'
-              : 'Log your first workout and start building your history.'}
-          </p>
-          {activeFilterCount > 0 ? (
-            <button className="wk-create-btn" onClick={clearFilters}>
-              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>filter_alt_off</span>
-              Clear Filters
-            </button>
-          ) : (
-            <button className="wk-start-btn" style={{ marginTop: 8 }} onClick={onStartWorkout}>
-              <span className="material-symbols-outlined" style={{ fontSize: 16, fontVariationSettings: "'FILL' 1" }}>play_circle</span>
-              Start First Workout
-            </button>
-          )}
+      ) : workouts.length === 0 ? (
+        <div className="wk-sess-empty">
+          <span className="material-symbols-outlined wk-empty-icon">event_busy</span>
+          <p>No workout history yet. Complete your first session!</p>
         </div>
       ) : (
-        <>
-          <section className="wk-history-archive-head">
-            <div>
-              <span className="wk-eyebrow">Archive</span>
-              <h3 className="wk-history-archive-title">Session Library</h3>
-            </div>
-            <div className="wk-history-archive-stats">
-              <div className="wk-history-archive-stat">
-                <span>Sessions</span>
-                <strong>{totalSessions}</strong>
-              </div>
-              <div className="wk-history-archive-stat">
-                <span>Volume</span>
-                <strong>{totalVolume > 0 ? `${Math.round(totalVolume).toLocaleString()} kg` : '—'}</strong>
-              </div>
-              <div className="wk-history-archive-stat">
-                <span>Focus Day</span>
-                <strong>{selectedWorkoutDate ? fmtDate(getDateKey(selectedWorkoutDate)) : 'Latest'}</strong>
-              </div>
-            </div>
-          </section>
-
-          <div className="wk-hist-list">
-            {visibleWorkouts.map((workout) => {
-              const isOpen = activeWorkoutId === workout.id;
-              const detailWorkout = isOpen
-                ? (selectedWorkoutDetailData?.workout || selectedWorkoutDetailData?.data || workout)
-                : workout;
-              const exercises = extractWorkoutExercises(detailWorkout);
-              const volume = calcVolume(exercises);
-              const setCount = getWorkoutSetCount(exercises);
-              const accent = getAccentForType(getWorkoutTypeLabel(detailWorkout));
-
-              return (
-                <div
-                  key={workout.id}
-                  className={`wk-hist-ex-item${isOpen ? ' wk-hist-ex-item--active' : ''}`}
-                >
-                  <div className="wk-hist-ex-header-wrap">
-                    <button
-                      className="wk-hist-ex-header wk-history-card-btn"
-                      style={{ flex: 1 }}
-                      onClick={() => {
-                        if (isOpen) {
-                          setExpandedEx(null);
-                          return;
-                        }
-                        selectWorkout(workout);
-                      }}
-                    >
-                      <div className="wk-history-card-date">
-                        <strong>{fmtDate(getWorkoutTimestamp(detailWorkout)) || '—'}</strong>
-                        <span>{getWorkoutTypeLabel(detailWorkout).toUpperCase()}</span>
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
-                          <p className="wk-hist-ex-name">{getWorkoutDisplayName(detailWorkout)}</p>
-                          <span className="wk-hist-type-badge" style={{ background: `${accent}22`, color: accent }}>
-                            {getWorkoutTypeLabel(detailWorkout).toLowerCase()}
-                          </span>
-                        </div>
-                        <p className="wk-hist-ex-meta">
-                          {fmtDuration(detailWorkout.started_at, detailWorkout.completed_at, detailWorkout.duration)}
-                          {volume > 0 ? ` · ${volume.toLocaleString()}kg` : ''}
-                          {setCount > 0 ? ` · ${setCount} sets` : ''}
-                          {exercises.length > 0 ? ` · ${exercises.length} ex` : ''}
-                        </p>
-                      </div>
-                      <span
-                        className="material-symbols-outlined"
-                        style={{
-                          fontSize: 20,
-                          color: '#5b5c5a',
-                          transition: 'transform 0.2s',
-                          transform: isOpen ? 'rotate(180deg)' : 'rotate(0)',
-                          flexShrink: 0,
-                        }}
-                      >
-                        expand_more
-                      </span>
-                    </button>
-                    <button
-                      className="wk-hist-delete-btn"
-                      onClick={() => setDeleteTarget(workout)}
-                      aria-label="Delete workout"
-                    >
-                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
-                    </button>
+        <div className="wk-hist-list">
+          {workouts.map(wo => {
+            const isOpen = selectedWorkout?.id === wo.id;
+            const vol = calcVolume(wo.exercises);
+            return (
+              <div key={wo.id} className="wk-hist-ex-item">
+                <button className="wk-hist-ex-header" onClick={() => { setSelectedWorkout(isOpen ? null : wo); setExpandedEx(null); }}>
+                  <div>
+                    <p className="wk-hist-ex-name">{wo.name || 'Workout Session'}</p>
+                    <p className="wk-hist-ex-meta">
+                      {fmtDate(wo.started_at || wo.created_at)}
+                      {' · '}
+                      {fmtDuration(wo.started_at, wo.completed_at, wo.duration)}
+                      {vol > 0 ? ` · ${vol.toLocaleString()}kg` : ''}
+                    </p>
                   </div>
-                  {isOpen && exercises.length > 0 && (
-                    <div className="wk-hist-ex-detail">
-                      {selectedWorkoutDetailLoading && (
-                        <div style={{ padding: '8px 0' }}>
-                          <div className="wk-skeleton-row" />
-                        </div>
-                      )}
-                      {selectedWorkoutDetailError && selectedWorkoutDetailErrorMeta?.shouldFallback && (
-                        <div className="wk-semantic-active" style={{ margin: '0 8px 8px' }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#b02500' }}>warning</span>
-                          <span>Workout detail unavailable. Showing list snapshot.</span>
-                        </div>
-                      )}
-                      {exercises.map((exercise, index) => {
-                        const exerciseKey = `${workout.id}-${index}`;
-                        const exerciseOpen = expandedEx === exerciseKey;
-                        const sets = extractExerciseSets(exercise);
-                        const peakWeight = sets.reduce((max, set) => Math.max(max, setWeightValue(set)), 0);
-
-                        return (
-                          <div key={exerciseKey}>
-                            <button
-                              className="wk-hist-ex-header"
-                              style={{ paddingLeft: 8, background: 'transparent' }}
-                              onClick={() => setExpandedEx(exerciseOpen ? null : exerciseKey)}
-                            >
-                              <div>
-                                <p className="wk-hist-ex-name" style={{ fontSize: 14 }}>{exercise.exercise?.name || exercise.name}</p>
-                                <p className="wk-hist-ex-meta">
-                                  {sets.length} sets{peakWeight > 0 ? ` · ${peakWeight}kg peak` : ''}
-                                </p>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ fontSize: 20, color: '#5b5c5a', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0)' }}
+                  >
+                    expand_more
+                  </span>
+                </button>
+                {isOpen && wo.exercises?.length > 0 && (
+                  <div className="wk-hist-ex-detail">
+                    {wo.exercises.map((ex, ei) => {
+                      const exOpen = expandedEx === ei;
+                      const peakWeight = (ex.sets || []).reduce((max, s) => Math.max(max, Number(s.weight_kg) || 0), 0);
+                      return (
+                        <div key={ei}>
+                          <button className="wk-hist-ex-header" style={{ paddingLeft: 8, background: 'transparent' }} onClick={() => setExpandedEx(exOpen ? null : ei)}>
+                            <div>
+                              <p className="wk-hist-ex-name" style={{ fontSize: 14 }}>{ex.exercise?.name || ex.name}</p>
+                              <p className="wk-hist-ex-meta">
+                                {(ex.sets || []).length} sets{peakWeight > 0 ? ` · ${peakWeight}kg peak` : ''}
+                              </p>
+                            </div>
+                            <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#5b5c5a', transition: 'transform 0.2s', transform: exOpen ? 'rotate(180deg)' : 'rotate(0)' }}>expand_more</span>
+                          </button>
+                          {exOpen && (
+                            <div style={{ paddingLeft: 16 }}>
+                              <div className="wk-sets-header" style={{ marginBottom: 8 }}>
+                                <span>Set</span><span>Weight</span><span>Reps</span><span></span>
                               </div>
-                              <span
-                                className="material-symbols-outlined"
-                                style={{
-                                  fontSize: 16,
-                                  color: '#5b5c5a',
-                                  transition: 'transform 0.2s',
-                                  transform: exerciseOpen ? 'rotate(180deg)' : 'rotate(0)',
-                                }}
-                              >
-                                expand_more
-                              </span>
-                            </button>
-                            {exerciseOpen && (
-                              <div style={{ paddingLeft: 16 }}>
-                                <div className="wk-sets-header" style={{ marginBottom: 8 }}>
-                                  <span>Set</span><span>Weight</span><span>Reps</span><span></span>
+                              {(ex.sets || []).map((s, si) => (
+                                <div key={si} className="wk-hist-set-row">
+                                  <span className="wk-set-num" style={{ color: '#38671a' }}>{si + 1}</span>
+                                  <span className="wk-hist-set-val">{s.weight_kg > 0 ? `${s.weight_kg}kg` : 'BW'}</span>
+                                  <span className="wk-hist-set-val">{s.reps} reps</span>
+                                  <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#38671a', fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                                 </div>
-                                {sets.map((set, setIndex) => (
-                                  <div key={`${exerciseKey}-${setIndex}`} className="wk-hist-set-row">
-                                    <span className="wk-set-num" style={{ color: '#38671a' }}>{setIndex + 1}</span>
-                                    <span className="wk-hist-set-val">{setWeightValue(set) > 0 ? `${setWeightValue(set)}kg` : 'BW'}</span>
-                                    <span className="wk-hist-set-val">{set.reps} reps</span>
-                                    <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#38671a', fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                                  </div>
-                                ))}
-                                {exercise.notes && (
-                                  <div className="wk-hist-ex-note">
-                                    <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#767775' }}>notes</span>
-                                    <p>{exercise.notes}</p>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {isOpen && exercises.length === 0 && (
-                    <div style={{ padding: '8px 16px', color: '#9f9b93', fontSize: 13 }}>No exercises logged.</div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
-
-      {deleteTarget && (
-        <div className="wk-discard-overlay" onClick={(event) => event.target === event.currentTarget && setDeleteTarget(null)}>
-          <div className="wk-discard-modal">
-            <div className="wk-discard-icon">
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: 28, color: '#b02500' }}>delete_forever</span>
-            </div>
-            <h3 className="wk-discard-title">Delete Workout?</h3>
-            <p className="wk-discard-body">"{getWorkoutDisplayName(deleteTarget)}" will be permanently removed.</p>
-            <div className="wk-discard-actions">
-              <button className="wk-discard-cancel" onClick={() => setDeleteTarget(null)}>Cancel</button>
-              <button
-                className="wk-discard-confirm"
-                onClick={() => {
-                  deleteWorkoutMutation.mutate({ workout_id: deleteTarget.id });
-                  if (activeWorkoutId === deleteTarget.id) {
-                    setSelectedWorkoutId(null);
-                  }
-                  setDeleteTarget(null);
-                }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete_forever</span>
-                Delete
-              </button>
-            </div>
-          </div>
+                              ))}
+                              {ex.notes && (
+                                <div className="wk-hist-ex-note">
+                                  <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#767775' }}>notes</span>
+                                  <p>{ex.notes}</p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -2428,33 +616,18 @@ function HistoryView({ onStartWorkout }) {
 function RestTimer({ defaultSeconds = 60, onSkip }) {
   const [restTime, setRestTime] = useState(defaultSeconds);
   const intervalRef = useRef(null);
-  const onSkipRef = useRef(onSkip);
 
   useEffect(() => {
-    onSkipRef.current = onSkip;
-  }, [onSkip]);
-
-  useEffect(() => {
-    setRestTime(defaultSeconds);
-  }, [defaultSeconds]);
-
-  useEffect(() => {
-    clearInterval(intervalRef.current);
     intervalRef.current = setInterval(() => {
       setRestTime(t => {
-        if (t <= 1) {
-          clearInterval(intervalRef.current);
-          onSkipRef.current?.();
-          return 0;
-        }
+        if (t <= 1) { clearInterval(intervalRef.current); onSkip(); return 0; }
         return t - 1;
       });
     }, 1000);
     return () => clearInterval(intervalRef.current);
-  }, [defaultSeconds]);
+  }, [onSkip]);
 
-  const safeDefaultSeconds = Math.max(1, defaultSeconds);
-  const pct = ((safeDefaultSeconds - restTime) / safeDefaultSeconds) * 100;
+  const pct = ((defaultSeconds - restTime) / defaultSeconds) * 100;
 
   return (
     <div className="wk-rest-overlay">
@@ -2487,164 +660,27 @@ function RestTimer({ defaultSeconds = 60, onSkip }) {
   );
 }
 
-// ── Cardio Block ──────────────────────────────────────────────────────
-
-function CardioBlock({ workoutId, onClose }) {
-  const [type, setType] = useState('running');
-  const [duration, setDuration] = useState('');
-  const [distance, setDistance] = useState('');
-  const [calories, setCalories] = useState('');
-  const [saving, setSaving] = useState(false);
-
-  const addCardioMutation = useAddCardio();
-
-  const CARDIO_TYPES = [
-    { id: 'running', label: 'Run', icon: 'directions_run' },
-    { id: 'cycling', label: 'Bike', icon: 'directions_bike' },
-    { id: 'rowing', label: 'Row', icon: 'rowing' },
-    { id: 'elliptical', label: 'Elliptical', icon: 'accessibility_new' },
-    { id: 'swimming', label: 'Swim', icon: 'pool' },
-    { id: 'other', label: 'Other', icon: 'sports' },
-  ];
-
-  function handleSave() {
-    if (!duration && !distance) return;
-    setSaving(true);
-    addCardioMutation.mutate({
-      workout_id: workoutId,
-      data: {
-        modality: type,
-        duration_minutes: Number(duration) || null,
-        distance: Number(distance) || null,
-        calories_burned: Number(calories) || null,
-      },
-    }, {
-      onSettled: () => { setSaving(false); onClose(); },
-    });
-  }
-
-  return (
-    <div className="wk-modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="wk-modal">
-        <div className="wk-modal-header">
-          <h3 className="wk-modal-title">Log Cardio</h3>
-          <button className="wk-modal-close" onClick={onClose}>
-            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>close</span>
-          </button>
-        </div>
-        <div className="wk-modal-body">
-          {/* Type selector */}
-          <div className="wk-cardio-types">
-            {CARDIO_TYPES.map(ct => (
-              <button
-                key={ct.id}
-                className={`wk-cardio-type-btn${type === ct.id ? ' wk-cardio-type-btn--active' : ''}`}
-                onClick={() => setType(ct.id)}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>{ct.icon}</span>
-                <span>{ct.label}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="wk-cardio-fields">
-            <div className="wk-cardio-field">
-              <label className="wk-eyebrow">DURATION (MIN)</label>
-              <input
-                className="wk-set-input"
-                type="number"
-                inputMode="decimal"
-                placeholder="e.g. 30"
-                value={duration}
-                onChange={e => setDuration(e.target.value)}
-                style={{ width: '100%', textAlign: 'left', fontSize: 18 }}
-              />
-            </div>
-            <div className="wk-cardio-field">
-              <label className="wk-eyebrow">DISTANCE (KM)</label>
-              <input
-                className="wk-set-input"
-                type="number"
-                inputMode="decimal"
-                placeholder="e.g. 5.0"
-                value={distance}
-                onChange={e => setDistance(e.target.value)}
-                style={{ width: '100%', textAlign: 'left', fontSize: 18 }}
-              />
-            </div>
-            <div className="wk-cardio-field">
-              <label className="wk-eyebrow">CALORIES (OPTIONAL)</label>
-              <input
-                className="wk-set-input"
-                type="number"
-                inputMode="numeric"
-                placeholder="e.g. 320"
-                value={calories}
-                onChange={e => setCalories(e.target.value)}
-                style={{ width: '100%', textAlign: 'left', fontSize: 18 }}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="wk-modal-footer">
-          <button
-            className="wk-start-btn"
-            style={{ width: '100%', background: '#3bd3fd', color: '#000' }}
-            onClick={handleSave}
-            disabled={saving || (!duration && !distance)}
-          >
-            {saving ? 'Saving...' : 'Log Cardio'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Active Session ────────────────────────────────────────────────────
 
-const SESSION_TYPES = ['Strength', 'Hypertrophy', 'Cardio', 'Endurance', 'Custom'];
-
-export function ActiveSession({ workoutId, initialExercises = [], programName = '', onFinish, onDiscard }) {
+function ActiveSession({ workoutId, initialExercises = [], onFinish, onDiscard }) {
   const { display: timerDisplay, elapsed } = useTimer(true);
   const [exIndex, setExIndex] = useState(0);
   const [localSets, setLocalSets] = useState(() =>
     initialExercises.map(ex => ({
       ...ex,
-      note: ex.note || ex.notes || '',
-      rest_time: Number(ex.rest_time) || 60,
-      sets: (ex.sets && ex.sets.length > 0)
-        ? ex.sets.map((set, idx) => ({
-            backendSetId: set.backendSetId || set.id || null,
-            setNumber: set.setNumber || set.set_number || idx + 1,
-            weight: String(set.weight ?? ''),
-            reps: String(set.reps ?? ''),
-            done: Boolean(set.done),
-          }))
-        : [{ weight: '', reps: '', done: false }],
+      note: '',
+      sets: [{ weight: '', reps: '', done: false }],
     }))
   );
   const [showRest, setShowRest] = useState(false);
   const [showAddExercise, setShowAddExercise] = useState(false);
   const [showDiscard, setShowDiscard] = useState(false);
-  const [showCardio, setShowCardio] = useState(false);
-  const [showMeta, setShowMeta] = useState(false);
-  const [sessionName, setSessionName] = useState(programName || 'Workout');
-  const [sessionType, setSessionType] = useState('Strength');
-  const [sessionNotes, setSessionNotes] = useState('');
-  const [setToDelete, setSetToDelete] = useState(null); // { exIdx, setIdx }
 
   const addSetMutation = useAddSet();
-  const updateSetMutation = useUpdateSet(workoutId);
   const addExerciseMutation = useAddExercise();
-  const updateWorkoutExerciseMutation = useUpdateWorkoutExercise(workoutId);
-  const deleteSetMutation = useDeleteSet(workoutId);
-  const deleteExMutation = useDeleteWorkoutExercise(workoutId);
 
   const storeAddExercise = workoutStore(s => s.addExercise);
   const storeAddSet = workoutStore(s => s.addSet);
-  const queuePendingSet = workoutStore(s => s.queueSet);
-  const addToast = uiStore(s => s.addToast);
 
   const currentEx = localSets[exIndex];
   const totalExercises = localSets.length;
@@ -2657,75 +693,24 @@ export function ActiveSession({ workoutId, initialExercises = [], programName = 
   }
 
   function toggleDone(exIdx, setIdx) {
-    const s = localSets[exIdx]?.sets?.[setIdx];
-    if (!s) return;
-    const nextDone = !s.done;
-    const workoutExerciseId = localSets[exIdx]?.workoutExerciseId;
-
-    if (workoutId && workoutExerciseId) {
-      if (s.backendSetId) {
-        updateSetMutation.mutate({
-          set_id: s.backendSetId,
-          data: {
-            set_number: setIdx + 1,
-            weight: Number(s.weight) || 0,
-            reps: Number(s.reps) || 0,
-            completed: nextDone,
-          },
-        });
-      } else if (nextDone) {
+    const s = localSets[exIdx].sets[setIdx];
+    if (!s.done) {
+      // Persist to backend
+      if (workoutId && localSets[exIdx].workoutExerciseId) {
         addSetMutation.mutate({
           workout_id: workoutId,
-          exercise_id: workoutExerciseId,
+          exercise_id: localSets[exIdx].workoutExerciseId,
           data: {
             set_number: setIdx + 1,
-            weight: Number(s.weight) || 0,
+            weight_kg: Number(s.weight) || 0,
             reps: Number(s.reps) || 0,
-            rpe: 0,
-            completed: true,
-          },
-        }, {
-          onSuccess: (createdSet) => {
-            const createdSetId = createdSet?.id || createdSet?.set?.id || createdSet?.workout_set?.id;
-            if (!createdSetId) return;
-            setLocalSets(prev => prev.map((ex, ei) => {
-              if (ei !== exIdx) return ex;
-              return {
-                ...ex,
-                sets: ex.sets.map((setEntry, si) => (
-                  si === setIdx ? { ...setEntry, backendSetId: createdSetId } : setEntry
-                )),
-              };
-            }));
-          },
-          onError: (error) => {
-            const mapped = mapApiError(error);
-            if (mapped.isNetwork || mapped.isTimeout || mapped.isServer) {
-              queuePendingSet({
-                workout_id: workoutId,
-                exercise_id: workoutExerciseId,
-                data: {
-                  set_number: setIdx + 1,
-                  weight: Number(s.weight) || 0,
-                  reps: Number(s.reps) || 0,
-                  rpe: 0,
-                  completed: true,
-                },
-              });
-            }
+            rpe: null,
           },
         });
       }
-    }
-
-    if (nextDone) {
+      storeAddSet(exIdx, { weight_kg: Number(s.weight) || 0, reps: Number(s.reps) || 0, set_number: setIdx + 1 });
       setShowRest(true);
     }
-
-    if (nextDone && !s.backendSetId) {
-      storeAddSet(exIdx, { weight: Number(s.weight) || 0, reps: Number(s.reps) || 0, set_number: setIdx + 1 });
-    }
-
     setLocalSets(prev => prev.map((ex, ei) => {
       if (ei !== exIdx) return ex;
       return { ...ex, sets: ex.sets.map((s2, si) => si === setIdx ? { ...s2, done: !s2.done } : s2) };
@@ -2739,91 +724,25 @@ export function ActiveSession({ workoutId, initialExercises = [], programName = 
     }));
   }
 
-  // Repeat last set — copy weight/reps from previous done set
-  function repeatLastSet(exIdx) {
-    setLocalSets(prev => prev.map((ex, ei) => {
-      if (ei !== exIdx) return ex;
-      const doneSets = ex.sets.filter(s => s.done);
-      const last = doneSets[doneSets.length - 1];
-      if (!last) return { ...ex, sets: [...ex.sets, { weight: '', reps: '', done: false }] };
-      return { ...ex, sets: [...ex.sets, { weight: last.weight, reps: last.reps, done: false }] };
-    }));
-  }
-
-  function confirmDeleteSet(exIdx, setIdx) {
-    const s = localSets[exIdx].sets[setIdx];
-    if (s.backendSetId) {
-      deleteSetMutation.mutate({ set_id: s.backendSetId });
-    }
-    setLocalSets(prev => prev.map((ex, ei) => {
-      if (ei !== exIdx) return ex;
-      return { ...ex, sets: ex.sets.filter((_, si) => si !== setIdx) };
-    }));
-    setSetToDelete(null);
-  }
-
-  function deleteExercise(exIdx) {
-    const ex = localSets[exIdx];
-    if (ex.workoutExerciseId) {
-      deleteExMutation.mutate({ exercise_id: ex.workoutExerciseId });
-    }
-    setLocalSets(prev => prev.filter((_, i) => i !== exIdx));
-    setExIndex(i => Math.max(0, Math.min(i, localSets.length - 2)));
-  }
-
   function handleAddExercise(ex) {
-    const localId = `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const newEntry = {
-      ...ex,
-      localId,
-      note: '',
-      rest_time: Number(ex.rest_time) || 60,
-      workoutExerciseId: null,
-      sets: [{ weight: '', reps: '', done: false }],
-    };
+    const newEntry = { ...ex, note: '', workoutExerciseId: null, sets: [{ weight: '', reps: '', done: false }] };
     if (workoutId) {
       addExerciseMutation.mutate(
         { workout_id: workoutId, exercise_id: ex.id, notes: '' },
         { onSuccess: (data) => {
-          const createdWorkoutExerciseId = data?.id || data?.workout_exercise?.id;
-          if (!createdWorkoutExerciseId) return;
-          setLocalSets(prev => prev.map((e) => e.localId === localId ? { ...e, workoutExerciseId: createdWorkoutExerciseId } : e));
+          setLocalSets(prev => prev.map((e, i) => i === prev.length - 1 ? { ...e, workoutExerciseId: data?.id } : e));
         }}
       );
     }
     storeAddExercise(newEntry);
     setLocalSets(prev => [...prev, newEntry]);
-    setExIndex(localSets.length);
+    setExIndex(localSets.length); // go to new exercise
     setShowAddExercise(false);
   }
 
   function updateNote(exIdx, value) {
     setLocalSets(prev => prev.map((ex, ei) => ei === exIdx ? { ...ex, note: value } : ex));
   }
-
-  async function persistExerciseNotes(exercises) {
-    const updates = exercises
-      .filter((exercise) => exercise?.workoutExerciseId && typeof exercise.note === 'string')
-      .map((exercise) => updateWorkoutExerciseMutation.mutateAsync({
-        exercise_id: exercise.workoutExerciseId,
-        data: {
-          notes: exercise.note.trim(),
-        },
-      }));
-
-    if (updates.length === 0) return true;
-
-    try {
-      await Promise.all(updates);
-      return true;
-    } catch {
-      addToast('Some exercise remarks could not be saved yet.', 'error');
-      return false;
-    }
-  }
-
-  // Last done set for repeat button
-  const lastDoneSet = currentEx?.sets.filter(s => s.done).slice(-1)[0];
 
   return (
     <div className="wk-session-root">
@@ -2836,79 +755,12 @@ export function ActiveSession({ workoutId, initialExercises = [], programName = 
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            className="wk-discard-btn-sm"
-            onClick={() => setShowCardio(true)}
-            title="Log cardio"
-            style={{ color: '#3bd3fd' }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>directions_run</span>
-          </button>
-          <button
-            className="wk-discard-btn-sm"
-            onClick={() => setShowMeta(s => !s)}
-            title="Edit workout details"
-            style={{ color: showMeta ? '#38671a' : undefined }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit_note</span>
-          </button>
           <button className="wk-discard-btn-sm" onClick={() => setShowDiscard(true)}>
             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>
           </button>
-          <button
-            className="wk-finish-btn"
-            onClick={async () => {
-              await persistExerciseNotes(localSets);
-              onFinish(localSets, elapsed, { name: sessionName, type: sessionType, notes: sessionNotes });
-            }}
-          >
-            Finish
-          </button>
+          <button className="wk-finish-btn" onClick={() => onFinish(localSets, elapsed)}>Finish</button>
         </div>
       </header>
-
-      {/* Workout metadata edit panel */}
-      {showMeta && (
-        <div className="wk-meta-panel">
-          <div className="wk-meta-field">
-            <label className="wk-eyebrow">WORKOUT NAME</label>
-            <input
-              className="wk-meta-input"
-              type="text"
-              value={sessionName}
-              onChange={e => setSessionName(e.target.value)}
-              placeholder="e.g. Push Day"
-            />
-          </div>
-          <div className="wk-meta-field">
-            <label className="wk-eyebrow" style={{ display: 'block', marginBottom: 6 }}>TYPE</label>
-            <div className="wk-cat-chips">
-                {SESSION_TYPES.map(t => (
-                  <button
-                    key={t}
-                    className={`wk-cat-chip${sessionType === t ? ' wk-cat-chip--active' : ''}`}
-                    onClick={() => setSessionType(t)}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="wk-meta-field">
-            <label className="wk-eyebrow">SESSION NOTES</label>
-            <textarea
-              className="wk-notes-input"
-              placeholder="Any notes for this session..."
-              value={sessionNotes}
-              onChange={e => setSessionNotes(e.target.value)}
-              style={{ minHeight: 60 }}
-            />
-          </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-            <button className="wk-discard-cancel" style={{ flex: 1 }} onClick={() => setShowMeta(false)}>Done</button>
-          </div>
-        </div>
-      )}
 
       <div className="wk-session-scroll">
         {localSets.length === 0 ? (
@@ -2924,25 +776,14 @@ export function ActiveSession({ workoutId, initialExercises = [], programName = 
           <>
             <section className="wk-session-hero">
               <div className="wk-session-hero-top">
-                <div style={{ flex: 1 }}>
+                <div>
                   <h1 className="wk-session-ex-name">{currentEx?.name}</h1>
                   <span className="wk-session-muscle-tag">{currentEx?.muscle_group || currentEx?.primary_muscle || currentEx?.muscle}</span>
-                  <span className="wk-session-rest-tag">{Math.max(0, Number(currentEx?.rest_time) || 0)}s rest</span>
                 </div>
-                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                  <div className="wk-spark-mini">
-                    {[30, 50, 45, 70, 85].map((h, i) => (
-                      <div key={i} className="wk-spark-mini-bar" style={{ height: `${h}%`, opacity: 0.2 + i * 0.18 }} />
-                    ))}
-                  </div>
-                  <button
-                    className="wk-discard-btn-sm"
-                    onClick={() => deleteExercise(exIndex)}
-                    title="Remove exercise"
-                    style={{ color: '#b02500', opacity: 0.7 }}
-                  >
-                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
-                  </button>
+                <div className="wk-spark-mini">
+                  {[30, 50, 45, 70, 85].map((h, i) => (
+                    <div key={i} className="wk-spark-mini-bar" style={{ height: `${h}%`, opacity: 0.2 + i * 0.18 }} />
+                  ))}
                 </div>
               </div>
             </section>
@@ -2953,7 +794,6 @@ export function ActiveSession({ workoutId, initialExercises = [], programName = 
                 <span>Weight (kg)</span>
                 <span>Reps</span>
                 <span>Done</span>
-                <span></span>
               </div>
               {currentEx?.sets.map((s, si) => (
                 <div key={si} className={`wk-set-row${s.done ? ' wk-set-row--done' : si === currentEx.sets.findIndex(s2 => !s2.done) ? ' wk-set-row--active' : ' wk-set-row--future'}`}>
@@ -2985,24 +825,9 @@ export function ActiveSession({ workoutId, initialExercises = [], programName = 
                       : <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#767775' }}>radio_button_unchecked</span>
                     }
                   </button>
-                  <button
-                    className="wk-set-delete"
-                    onClick={() => setSetToDelete({ exIdx: exIndex, setIdx: si })}
-                    aria-label="Delete set"
-                  >
-                    <span className="material-symbols-outlined" style={{ fontSize: 14 }}>close</span>
-                  </button>
                 </div>
               ))}
-              <div className="wk-set-actions">
-                <button className="wk-add-set-btn" onClick={() => addSet(exIndex)}>+ Add Set</button>
-                {lastDoneSet && (
-                  <button className="wk-repeat-set-btn" onClick={() => repeatLastSet(exIndex)}>
-                    <span className="material-symbols-outlined" style={{ fontSize: 14 }}>repeat</span>
-                    Repeat Last
-                  </button>
-                )}
-              </div>
+              <button className="wk-add-set-btn" onClick={() => addSet(exIndex)}>+ Add Set</button>
             </section>
 
             <section className="wk-session-notes">
@@ -3026,13 +851,7 @@ export function ActiveSession({ workoutId, initialExercises = [], programName = 
                   <span className="material-symbols-outlined" style={{ fontSize: 18 }}>arrow_forward</span>
                 </button>
               ) : (
-                <button
-                  className="wk-finish-btn wk-ex-nav-btn--next"
-                  onClick={async () => {
-                    await persistExerciseNotes(localSets);
-                    onFinish(localSets, elapsed, { name: sessionName, type: sessionType, notes: sessionNotes });
-                  }}
-                >
+                <button className="wk-finish-btn wk-ex-nav-btn--next" onClick={() => onFinish(localSets, elapsed)}>
                   Finish
                   <span className="material-symbols-outlined" style={{ fontSize: 18, fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                 </button>
@@ -3057,30 +876,8 @@ export function ActiveSession({ workoutId, initialExercises = [], programName = 
         </button>
       </div>
 
-      {showRest && <RestTimer defaultSeconds={Math.max(15, Number(currentEx?.rest_time) || 60)} onSkip={() => setShowRest(false)} />}
+      {showRest && <RestTimer onSkip={() => setShowRest(false)} />}
       {showAddExercise && <ExerciseSearchModal onClose={() => setShowAddExercise(false)} onSelect={handleAddExercise} />}
-      {showCardio && workoutId && <CardioBlock workoutId={workoutId} onClose={() => setShowCardio(false)} />}
-
-      {/* Delete set confirmation */}
-      {setToDelete && (
-        <div className="wk-discard-overlay" onClick={e => e.target === e.currentTarget && setSetToDelete(null)}>
-          <div className="wk-discard-modal">
-            <div className="wk-discard-icon">
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: 28, color: '#b02500' }}>remove_circle</span>
-            </div>
-            <h3 className="wk-discard-title">Delete Set?</h3>
-            <p className="wk-discard-body">Set {setToDelete.setIdx + 1} will be removed.</p>
-            <div className="wk-discard-actions">
-              <button className="wk-discard-cancel" onClick={() => setSetToDelete(null)}>Cancel</button>
-              <button className="wk-discard-confirm" onClick={() => confirmDeleteSet(setToDelete.exIdx, setToDelete.setIdx)}>
-                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {showDiscard && (
         <div className="wk-discard-overlay" onClick={e => e.target === e.currentTarget && setShowDiscard(false)}>
           <div className="wk-discard-modal">
@@ -3105,15 +902,12 @@ export function ActiveSession({ workoutId, initialExercises = [], programName = 
 
 // ── Workout Summary ───────────────────────────────────────────────────
 
-function WorkoutSummary({ workoutId, sessionData, durationSeconds, programName, sessionMeta = {}, onSave, onDiscard }) {
-  const [notes, setNotes] = useState(sessionMeta.notes || '');
-  const [workoutName, setWorkoutName] = useState(sessionMeta.name || programName || 'Workout');
-  const [workoutType, setWorkoutType] = useState(sessionMeta.type || 'Strength');
+function WorkoutSummary({ workoutId, sessionData, durationSeconds, programName, onSave, onDiscard }) {
+  const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
   const finishWorkoutMutation = useFinishWorkout();
-  const addToast = uiStore(s => s.addToast);
 
   const totalSets = sessionData?.reduce((a, ex) => a + ex.sets.filter(s => s.done).length, 0) || 0;
   const totalExsDone = sessionData?.filter(ex => ex.sets.some(s => s.done)).length || 0;
@@ -3128,22 +922,11 @@ function WorkoutSummary({ workoutId, sessionData, durationSeconds, programName, 
         {
           workout_id: workoutId,
           data: {
+            duration: Math.max(1, Math.round(durationSeconds / 60)),
             notes,
-            name: workoutName,
-            type: workoutType.toLowerCase(),
-            duration: Math.max(0, Math.round(durationSeconds / 60)),
           },
         },
-        {
-          onSuccess: () => {
-            setSaving(false);
-            onSave();
-          },
-          onError: () => {
-            setSaving(false);
-            addToast('Workout save failed. Please try again.', 'error');
-          },
-        }
+        { onSettled: () => { setSaving(false); onSave(); } }
       );
     } else {
       setSaving(false);
@@ -3161,34 +944,6 @@ function WorkoutSummary({ workoutId, sessionData, durationSeconds, programName, 
         {programName && (
           <div className="wk-summary-badge">{programName}</div>
         )}
-      </div>
-
-      {/* Workout name + type editing */}
-      <div className="wk-meta-panel">
-        <div className="wk-meta-field">
-          <label className="wk-eyebrow">WORKOUT NAME</label>
-          <input
-            className="wk-meta-input"
-            type="text"
-            value={workoutName}
-            onChange={e => setWorkoutName(e.target.value)}
-            placeholder="e.g. Push Day"
-          />
-        </div>
-        <div className="wk-meta-field">
-          <label className="wk-eyebrow" style={{ display: 'block', marginBottom: 6 }}>TYPE</label>
-          <div className="wk-cat-chips">
-            {SESSION_TYPES.map(t => (
-              <button
-                key={t}
-                className={`wk-cat-chip${workoutType === t ? ' wk-cat-chip--active' : ''}`}
-                onClick={() => setWorkoutType(t)}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
 
       <div className="wk-summary-bento">
@@ -3232,7 +987,7 @@ function WorkoutSummary({ workoutId, sessionData, durationSeconds, programName, 
       )}
 
       <div className="wk-notes">
-        <label className="wk-eyebrow" style={{ display: 'block', marginBottom: 8 }}>SESSION NOTES</label>
+        <label className="wk-eyebrow" style={{ display: 'block', marginBottom: 8 }}>Session Notes</label>
         <textarea
           className="wk-notes-input"
           placeholder="How did you feel today?"
@@ -3271,42 +1026,44 @@ function WorkoutSummary({ workoutId, sessionData, durationSeconds, programName, 
   );
 }
 
+// ── Floating Active Workout Bar ────────────────────────────────────────
+
+function FloatingSessionBar({ onClick }) {
+  const activeWorkout = workoutStore(s => s.activeWorkout);
+  if (!activeWorkout) return null;
+  return (
+    <button className="wk-floating-bar" onClick={onClick}>
+      <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#38671a', fontVariationSettings: "'FILL' 1" }}>fitness_center</span>
+      <span className="wk-floating-bar-text">Session in progress</span>
+      <span className="material-symbols-outlined" style={{ fontSize: 18 }}>arrow_forward</span>
+    </button>
+  );
+}
+
 // ── Main Workouts ─────────────────────────────────────────────────────
 
 export default function Workouts() {
   const navigate = useNavigate();
+  const location = useLocation();
   const onClose = () => navigate('/dashboard');
 
+  const requestedTab = location.state?.tab;
+  const initialTab = requestedTab === 'library' || requestedTab === 'history' ? requestedTab : 'programs';
+
   const [navVisible, setNavVisible] = useState(false);
-  const [wkTab, setWkTab] = useState('programs');
-  const [previewProgramAssignment, setPreviewProgramAssignment] = useState(null);
+  const [wkTab, setWkTab] = useState(initialTab);
   const [previewTemplate, setPreviewTemplate] = useState(null);
-  const [showTemplateBuilder, setShowTemplateBuilder] = useState(false);
   const [activeWorkoutId, setActiveWorkoutId] = useState(null);
   const [activeInitialExercises, setActiveInitialExercises] = useState([]);
   const [activeProgramName, setActiveProgramName] = useState('');
-  const [activeProgramAssignmentId, setActiveProgramAssignmentId] = useState(null);
-  const [activeProgramSessionId, setActiveProgramSessionId] = useState(null);
-  const [startingSessionId, setStartingSessionId] = useState(null);
-  const [updatingAssignmentId, setUpdatingAssignmentId] = useState(null);
-  const [programProgress, setProgramProgress] = useState(() => readProgramProgress());
   const [sessionData, setSessionData] = useState(null);
   const [sessionDuration, setSessionDuration] = useState(0);
   const [sessionPhase, setSessionPhase] = useState('browse'); // 'browse' | 'active' | 'summary'
-  const currentUserId = authStore((state) => state.user?.id);
 
   const createWorkoutMutation = useCreateWorkout();
-  const createTemplateMutation = useCreateTemplate();
-  const applyTemplateMutation = useApplyTemplate();
-  const updateProgramAssignmentStatusMutation = useUpdateProgramAssignmentStatus();
-  const applyProgramSessionMutation = useApplyProgramSession();
   const startWorkout = workoutStore(s => s.startWorkout);
   const endWorkout = workoutStore(s => s.endWorkout);
-  const pendingSets = workoutStore(s => s.pendingSets);
-  const removePendingSet = workoutStore(s => s.removePendingSet);
   const storeActiveWorkout = workoutStore(s => s.activeWorkout);
-  const addToast = uiStore(s => s.addToast);
-  const [isReplayingPendingSets, setIsReplayingPendingSets] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setNavVisible(true), 80);
@@ -3314,45 +1071,13 @@ export default function Workouts() {
   }, []);
 
   useEffect(() => {
-    if (typeof navigator === 'undefined') return;
-    if (!navigator.onLine || pendingSets.length === 0 || isReplayingPendingSets) return;
+    if (requestedTab !== 'library' && requestedTab !== 'history' && requestedTab !== 'programs') return;
 
-    let cancelled = false;
+    setPreviewTemplate(null);
+    setWkTab(requestedTab);
 
-    async function replayPendingSets() {
-      setIsReplayingPendingSets(true);
-      let replayed = 0;
-      while (!cancelled) {
-        const queued = workoutStore.getState().pendingSets[0];
-        if (!queued) break;
-        try {
-          await workoutsAPI.addSet(queued.workout_id, queued.exercise_id, queued.data);
-          workoutStore.getState().removePendingSet(0);
-          replayed += 1;
-        } catch (error) {
-          const mapped = mapApiError(error);
-          // Conflict/validation means this queued item cannot be replayed; drop it and continue.
-          if (mapped.status === 400 || mapped.status === 404 || mapped.status === 409) {
-            workoutStore.getState().removePendingSet(0);
-            continue;
-          }
-          break;
-        }
-      }
-      if (!cancelled && replayed > 0) {
-        addToast(`${replayed} queued set${replayed > 1 ? 's' : ''} synced.`, 'success');
-      }
-      if (!cancelled) {
-        setIsReplayingPendingSets(false);
-      }
-    }
-
-    replayPendingSets();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [pendingSets, isReplayingPendingSets, addToast, removePendingSet]);
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, navigate, requestedTab]);
 
   // If store has active workout on mount, resume it
   useEffect(() => {
@@ -3360,23 +1085,40 @@ export default function Workouts() {
       setActiveWorkoutId(storeActiveWorkout.id || null);
       setActiveInitialExercises(storeActiveWorkout.exercises || []);
       setActiveProgramName(storeActiveWorkout.name || '');
-      setActiveProgramAssignmentId(storeActiveWorkout.programAssignmentId || null);
-      setActiveProgramSessionId(storeActiveWorkout.programSessionId || null);
       setSessionPhase('active');
     }
     // Only run on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function handleQuickStart(seedWorkout = null) {
-    const workoutName = seedWorkout?.name || 'Workout';
-    const initialExercises = seedWorkout?.exercises || [];
+  async function handleProgramStart(template) {
+    const workoutName = template?.name || 'Workout';
+    const templateExercises = asArray(template?.exercises);
 
-    // Create workout in backend
     let workoutId = null;
+    let initialExercises = templateExercises;
+
     try {
-      const data = await createWorkoutMutation.mutateAsync({ name: workoutName });
-      workoutId = data?.id || data?.workout?.id;
+      const createPayload = {
+        name: workoutName,
+        exercises: templateExercises
+          .filter((ex) => ex.exercise_id || ex.id)
+          .map((ex, index) => ({
+            exercise_id: ex.exercise_id || ex.id,
+            order: index + 1,
+            sets: ex.sets_count || ex.sets?.length || 0,
+            reps: ex.reps || 0,
+            weight: ex.weight_kg || 0,
+            rest_time: ex.rest_time || 0,
+            notes: ex.notes || '',
+          })),
+      };
+
+      const data = await createWorkoutMutation.mutateAsync(createPayload);
+      workoutId = data?.id || data?.workout?.id || null;
+      if (Array.isArray(data?.exercises)) {
+        initialExercises = data.exercises;
+      }
     } catch {
       // Offline — continue locally
     }
@@ -3385,179 +1127,12 @@ export default function Workouts() {
     setActiveWorkoutId(workoutId);
     setActiveInitialExercises(initialExercises);
     setActiveProgramName(workoutName);
-    setActiveProgramAssignmentId(null);
-    setActiveProgramSessionId(null);
     setSessionPhase('active');
   }
 
-  function markProgramSessionCompleted(assignmentId, sessionId) {
-    if (!assignmentId || !sessionId) return;
-    setProgramProgress((prev) => {
-      const existing = getCompletedSessionIds(prev, assignmentId);
-      if (existing.includes(sessionId)) return prev;
-      const next = { ...prev, [assignmentId]: [...existing, sessionId] };
-      writeProgramProgress(next);
-      return next;
-    });
-  }
-
-  function markAssignmentFullyCompletedLocally(assignment) {
-    if (!assignment?.id) return;
-    const sessionIds = flattenProgramSessions(assignment.program)
-      .map((session) => session?.id)
-      .filter(Boolean);
-    setProgramProgress((prev) => {
-      const unique = [...new Set(sessionIds)];
-      const next = { ...prev, [assignment.id]: unique };
-      writeProgramProgress(next);
-      return next;
-    });
-  }
-
-  async function handleTemplateCreate(form) {
-    if (!currentUserId) {
-      addToast('You need to be signed in to create a program.', 'error');
-      return;
-    }
-
-    try {
-      const created = await createTemplateMutation.mutateAsync(buildTemplatePayload(currentUserId, form));
-      setShowTemplateBuilder(false);
-      setPreviewTemplate(created);
-      addToast('Your custom program is ready.', 'success');
-    } catch {
-      addToast('Could not save your program. Please try again.', 'error');
-    }
-  }
-
-  async function handleTemplateStart(template) {
-    if (!template?.id || !currentUserId) {
-      addToast('This custom program is not available yet.', 'error');
-      return;
-    }
-    if (applyTemplateMutation.isPending) {
-      addToast('A custom program is already starting. Please wait.', 'info');
-      return;
-    }
-
-    try {
-      const workout = await applyTemplateMutation.mutateAsync({
-        template_id: template.id,
-        data: {
-          user_id: currentUserId,
-        },
-      });
-      const workoutId = workout?.id || workout?.workout?.id || null;
-      const initialExercises = mapAppliedWorkoutToSessionExercises(workout);
-      const workoutName = workout?.name || template?.name || 'Custom Program';
-
-      startWorkout({
-        id: workoutId,
-        name: workoutName,
-        exercises: initialExercises,
-      });
-      setActiveWorkoutId(workoutId);
-      setActiveInitialExercises(initialExercises);
-      setActiveProgramName(workoutName);
-      setActiveProgramAssignmentId(null);
-      setActiveProgramSessionId(null);
-      setPreviewTemplate(null);
-      setSessionPhase('active');
-    } catch {
-      addToast('Could not start this custom program. Please try again.', 'error');
-    }
-  }
-
-  async function handleProgramSessionStart(assignment, session) {
-    if (!assignment?.id || !session?.id) {
-      addToast('This program session is not available yet.', 'error');
-      return;
-    }
-    if (applyProgramSessionMutation.isPending || startingSessionId) {
-      addToast('A session is already starting. Please wait.', 'info');
-      return;
-    }
-
-    setStartingSessionId(session.id);
-    try {
-      const response = await applyProgramSessionMutation.mutateAsync({
-        session_id: session.id,
-        data: {},
-      });
-
-      const workout = response?.workout || response;
-      const workoutId = workout?.id || null;
-      const initialExercises = mapAppliedWorkoutToSessionExercises(workout);
-      const workoutName = workout?.name || session?.template?.name || assignment?.program?.name || 'Program Workout';
-      const programName = assignment?.program?.name || 'Program';
-
-      startWorkout({
-        id: workoutId,
-        name: workoutName,
-        exercises: initialExercises,
-        programAssignmentId: assignment.id,
-        programSessionId: session.id,
-      });
-      setActiveWorkoutId(workoutId);
-      setActiveInitialExercises(initialExercises);
-      setActiveProgramName(programName);
-      setActiveProgramAssignmentId(assignment.id);
-      setActiveProgramSessionId(session.id);
-      setSessionPhase('active');
-
-      if (assignment.status === 'assigned') {
-        updateProgramAssignmentStatusMutation.mutate({
-          assignment_id: assignment.id,
-          status: 'in_progress',
-        });
-      }
-    } catch {
-      addToast('Could not start this program session. Please try again.', 'error');
-    } finally {
-      setStartingSessionId(null);
-    }
-  }
-
-  function handleAssignedProgramStart(assignment, preferredSession = null) {
-    const completedSessionIds = getCompletedSessionIds(programProgress, assignment?.id);
-    const nextSession = preferredSession
-      || getNextProgramSessionByProgress(assignment, completedSessionIds)
-      || getNextProgramSession(assignment);
-    if (!nextSession) {
-      addToast('No upcoming sessions are available in this program.', 'info');
-      return;
-    }
-    handleProgramSessionStart(assignment, nextSession);
-  }
-
-  async function handleProgramAssignmentStatusChange(assignment, status) {
-    if (!assignment?.id || !status) return;
-    if (updatingAssignmentId) return;
-    setUpdatingAssignmentId(assignment.id);
-    try {
-      const updated = await updateProgramAssignmentStatusMutation.mutateAsync({
-        assignment_id: assignment.id,
-        status,
-      });
-      const nextAssignment = updated?.id ? updated : { ...assignment, status };
-      setPreviewProgramAssignment((prev) => (prev?.id === assignment.id ? nextAssignment : prev));
-      if (status === 'completed') {
-        markAssignmentFullyCompletedLocally(assignment);
-      }
-      addToast(`Program marked as ${getStatusLabel(status).toLowerCase()}.`, 'success');
-    } catch {
-      addToast('Could not update program status. Please try again.', 'error');
-    } finally {
-      setUpdatingAssignmentId(null);
-    }
-  }
-
-  const [sessionMeta, setSessionMeta] = useState({ name: '', type: '', notes: '' });
-
-  function handleSessionFinish(data, durationSecs, meta = {}) {
+  function handleSessionFinish(data, durationSecs) {
     setSessionData(data);
     setSessionDuration(durationSecs);
-    setSessionMeta(meta);
     setSessionPhase('summary');
   }
 
@@ -3566,21 +1141,14 @@ export default function Workouts() {
     setSessionPhase('browse');
     setActiveWorkoutId(null);
     setActiveInitialExercises([]);
-    setActiveProgramAssignmentId(null);
-    setActiveProgramSessionId(null);
     setSessionData(null);
   }
 
   function handleSummarySave() {
-    if (activeProgramAssignmentId && activeProgramSessionId) {
-      markProgramSessionCompleted(activeProgramAssignmentId, activeProgramSessionId);
-    }
     endWorkout();
     setSessionPhase('browse');
     setActiveWorkoutId(null);
     setActiveInitialExercises([]);
-    setActiveProgramAssignmentId(null);
-    setActiveProgramSessionId(null);
     setSessionData(null);
     setWkTab('history');
   }
@@ -3590,7 +1158,6 @@ export default function Workouts() {
       <ActiveSession
         workoutId={activeWorkoutId}
         initialExercises={activeInitialExercises}
-        programName={activeProgramName}
         onFinish={handleSessionFinish}
         onDiscard={handleSessionDiscard}
       />
@@ -3604,7 +1171,6 @@ export default function Workouts() {
         sessionData={sessionData}
         durationSeconds={sessionDuration}
         programName={activeProgramName}
-        sessionMeta={sessionMeta}
         onSave={handleSummarySave}
         onDiscard={handleSessionDiscard}
       />
@@ -3618,71 +1184,28 @@ export default function Workouts() {
           <TemplatePreview
             template={previewTemplate}
             onBack={() => setPreviewTemplate(null)}
-            onStart={handleTemplateStart}
-            isStarting={applyTemplateMutation.isPending}
-          />
-        ) : previewProgramAssignment ? (
-          <ProgramPreview
-            assignment={previewProgramAssignment}
-            onBack={() => setPreviewProgramAssignment(null)}
-            onStartSession={(session) => handleProgramSessionStart(previewProgramAssignment, session)}
-            onStatusChange={(status) => handleProgramAssignmentStatusChange(previewProgramAssignment, status)}
-            progressByAssignment={programProgress}
-            isStartingProgram={applyProgramSessionMutation.isPending || !!startingSessionId}
-            startingSessionId={startingSessionId}
-            isStatusUpdating={updatingAssignmentId === previewProgramAssignment?.id}
+            onStart={handleProgramStart}
           />
         ) : (
           <>
             {wkTab === 'programs' && (
               <ProgramsView
-                onProgramPreview={setPreviewProgramAssignment}
-                onProgramStart={handleAssignedProgramStart}
-                onTemplatePreview={setPreviewTemplate}
-                onTemplateCreate={() => setShowTemplateBuilder(true)}
-                onQuickStart={() => handleQuickStart()}
-                progressByAssignment={programProgress}
-                isStartingTemplate={applyTemplateMutation.isPending}
-                isStartingProgram={applyProgramSessionMutation.isPending || !!startingSessionId}
+                onProgramPreview={t => setPreviewTemplate(t)}
+                onProgramStart={handleProgramStart}
               />
             )}
-            {wkTab === 'library' && (
-              <LibraryView
-                sessionActive={!!storeActiveWorkout}
-                onAddToWorkout={async (ex) => {
-                  // If session active, add exercise directly
-                  if (storeActiveWorkout) {
-                    setActiveInitialExercises(prev => [...prev, ex]);
-                    setSessionPhase('active');
-                  } else {
-                    await handleQuickStart({ name: 'Workout', exercises: [ex] });
-                  }
-                }}
-              />
-            )}
-            {wkTab === 'history' && (
-              <HistoryView
-                onStartWorkout={() => handleQuickStart(null)}
-              />
-            )}
+            {wkTab === 'library' && <LibraryView onStartQuick={() => handleProgramStart(null)} />}
+            {wkTab === 'history' && <HistoryView />}
           </>
         )}
       </div>
 
       <WorkoutContextNav
         active={wkTab}
-        onChange={tab => { setPreviewProgramAssignment(null); setPreviewTemplate(null); setWkTab(tab); }}
+        onChange={tab => { setPreviewTemplate(null); setWkTab(tab); }}
         onClose={onClose}
         visible={navVisible}
       />
-
-      {showTemplateBuilder && (
-        <CustomProgramBuilderModal
-          onClose={() => setShowTemplateBuilder(false)}
-          onSave={handleTemplateCreate}
-          isSaving={createTemplateMutation.isPending}
-        />
-      )}
     </div>
   );
 }

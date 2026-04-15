@@ -1,5 +1,4 @@
 import client from './client';
-import { authStore } from '../stores/authStore';
 
 export const nutritionAPI = {
   // Get meals for a date
@@ -53,12 +52,6 @@ export const nutritionAPI = {
     return response.data;
   },
 
-  // Recent foods
-  getRecentFoods: async (params = {}) => {
-    const response = await client.get('/v1/foods/recent', { params });
-    return response.data;
-  },
-
   // Get food details
   getFood: async (food_id) => {
     const response = await client.get(`/v1/foods/${food_id}`);
@@ -89,24 +82,33 @@ export const nutritionAPI = {
     return response.data;
   },
 
+  // Delete recipe
+  deleteRecipe: async (recipe_id) => {
+    const response = await client.delete(`/v1/recipes/${recipe_id}`);
+    return response.data;
+  },
+
+  // Log recipe to meal
+  logRecipeToMeal: async (recipe_id, data) => {
+    const response = await client.post(`/v1/recipes/${recipe_id}/log-to-meal`, data);
+    return response.data;
+  },
+
   // Get favorite foods
   getFavorites: async (params = {}) => {
-    const user_id = params.user_id || authStore.getState().user?.id;
-    const { user_id: _ignored, ...queryParams } = params;
-    if (!user_id) return { data: [], metadata: { page: 1, limit: 20, total_count: 0, total_pages: 1, has_next: false } };
-    const response = await client.get(`/v1/users/${user_id}/favorites`, { params: queryParams });
+    const response = await client.get('/v1/favorites', { params });
     return response.data;
   },
 
   // Add food to favorites
   addFavorite: async (food_id) => {
-    const response = await client.post(`/v1/foods/${food_id}/favorite`);
+    const response = await client.post('/v1/favorites', { food_id });
     return response.data;
   },
 
   // Remove food from favorites
   removeFavorite: async (food_id) => {
-    const response = await client.delete(`/v1/foods/${food_id}/favorite`);
+    const response = await client.delete(`/v1/favorites/${food_id}`);
     return response.data;
   },
 };
