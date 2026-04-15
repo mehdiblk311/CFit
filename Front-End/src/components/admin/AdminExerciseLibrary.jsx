@@ -1,4 +1,14 @@
-import { useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useMemo, useState } from 'react';
+import ExerciseImagePreview from '../shared/ExerciseImagePreview';
+import {
+  useCreateExercise,
+  useDeleteExerciseMutation,
+  useExerciseMeta,
+  useExercises,
+  useUpdateExerciseMutation,
+} from '../../hooks/queries/useWorkouts';
+import { resolveExerciseImageUrl } from '../../utils/exerciseImages';
 
 const MUSCLE_GROUPS = ['ALL', 'CHEST', 'BACK', 'LEGS', 'SHOULDERS', 'ARMS', 'CORE', 'CARDIO'];
 const DIFFICULTIES  = ['ALL', 'BEGINNER', 'INTERMEDIATE', 'EXPERT'];
@@ -24,43 +34,70 @@ const CAT_LABEL = {
   CARDIO:    'Cardiovascular',
 };
 
-// Exercise placeholder images (solid bg + emoji icon)
-const EXERCISE_BG = {
-  CHEST:     '#f7e8e8',
-  BACK:      '#e8f0e8',
-  LEGS:      '#ede8f7',
-  SHOULDERS: '#f7f2e8',
-  ARMS:      '#e8f4f7',
-  CORE:      '#f7f4e8',
-  CARDIO:    '#f7ede8',
+// Muscle group → Unsplash fallback photo
+const MUSCLE_IMAGE = {
+  CHEST:     'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=120&h=120&fit=crop&auto=format&q=80',
+  BACK:      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=120&h=120&fit=crop&auto=format&q=80',
+  LEGS:      'https://images.unsplash.com/photo-1434608519344-49d77a699e1d?w=120&h=120&fit=crop&auto=format&q=80',
+  SHOULDERS: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=120&h=120&fit=crop&auto=format&q=80',
+  ARMS:      'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=120&h=120&fit=crop&auto=format&q=80',
+  CORE:      'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=120&h=120&fit=crop&auto=format&q=80',
+  CARDIO:    'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=120&h=120&fit=crop&auto=format&q=80',
 };
 
-const INITIAL_EXERCISES = [
-  { id: 1,  name: 'Barbell Bench Press',    muscle: 'CHEST',     cat: 'COMPOUND',  icon: '🏋️', equipment: 'Barbell',      diff: 'INTERMEDIATE', addedOn: 'OCT 12, 2023' },
-  { id: 2,  name: 'Incline Dumbbell Press', muscle: 'CHEST',     cat: 'COMPOUND',  icon: '🏋️', equipment: 'Dumbbells',    diff: 'BEGINNER',     addedOn: 'OCT 14, 2023' },
-  { id: 3,  name: 'Pull-up',                muscle: 'BACK',      cat: 'COMPOUND',  icon: '💪', equipment: 'Bodyweight',   diff: 'INTERMEDIATE', addedOn: 'NOV 01, 2023' },
-  { id: 4,  name: 'Deadlift',               muscle: 'BACK',      cat: 'COMPOUND',  icon: '🔩', equipment: 'Barbell',      diff: 'EXPERT',       addedOn: 'DEC 01, 2023' },
-  { id: 5,  name: 'Barbell Row',            muscle: 'BACK',      cat: 'COMPOUND',  icon: '🏋️', equipment: 'Barbell',      diff: 'INTERMEDIATE', addedOn: 'NOV 15, 2023' },
-  { id: 6,  name: 'Squat',                  muscle: 'LEGS',      cat: 'COMPOUND',  icon: '🦵', equipment: 'Barbell',      diff: 'INTERMEDIATE', addedOn: 'OCT 20, 2023' },
-  { id: 7,  name: 'Romanian Deadlift',      muscle: 'LEGS',      cat: 'COMPOUND',  icon: '🦵', equipment: 'Barbell',      diff: 'INTERMEDIATE', addedOn: 'NOV 04, 2023' },
-  { id: 8,  name: 'Leg Press',              muscle: 'LEGS',      cat: 'COMPOUND',  icon: '🦵', equipment: 'Machine',      diff: 'BEGINNER',     addedOn: 'NOV 10, 2023' },
-  { id: 9,  name: 'Overhead Press',         muscle: 'SHOULDERS', cat: 'COMPOUND',  icon: '🔼', equipment: 'Barbell',      diff: 'INTERMEDIATE', addedOn: 'DEC 05, 2023' },
-  { id: 10, name: 'Lateral Raise',          muscle: 'SHOULDERS', cat: 'ISOLATION', icon: '↔️', equipment: 'Dumbbells',    diff: 'BEGINNER',     addedOn: 'DEC 08, 2023' },
-  { id: 11, name: 'Bicep Curl',             muscle: 'ARMS',      cat: 'ISOLATION', icon: '💪', equipment: 'Dumbbells',    diff: 'BEGINNER',     addedOn: 'JAN 03, 2024' },
-  { id: 12, name: 'Tricep Pushdown',        muscle: 'ARMS',      cat: 'ISOLATION', icon: '⬇️', equipment: 'Cable',        diff: 'BEGINNER',     addedOn: 'JAN 05, 2024' },
-  { id: 13, name: 'Plank',                  muscle: 'CORE',      cat: 'ISOMETRIC', icon: '🧘', equipment: 'Bodyweight',   diff: 'BEGINNER',     addedOn: 'JAN 10, 2024' },
-  { id: 14, name: 'Cable Crunch',           muscle: 'CORE',      cat: 'ISOLATION', icon: '⚡', equipment: 'Cable',        diff: 'INTERMEDIATE', addedOn: 'JAN 12, 2024' },
-  { id: 15, name: 'Running',                muscle: 'CARDIO',    cat: 'CARDIO',    icon: '🏃', equipment: 'Treadmill',    diff: 'BEGINNER',     addedOn: 'FEB 01, 2024' },
-  { id: 16, name: 'Jump Rope',              muscle: 'CARDIO',    cat: 'CARDIO',    icon: '⭕', equipment: 'Bodyweight',   diff: 'BEGINNER',     addedOn: 'FEB 05, 2024' },
-  { id: 17, name: 'Chest Fly',              muscle: 'CHEST',     cat: 'ISOLATION', icon: '🦋', equipment: 'Cable',        diff: 'INTERMEDIATE', addedOn: 'FEB 10, 2024' },
-  { id: 18, name: 'Face Pull',              muscle: 'SHOULDERS', cat: 'ISOLATION', icon: '🔄', equipment: 'Cable',        diff: 'BEGINNER',     addedOn: 'MAR 01, 2024' },
-  { id: 19, name: 'Hip Thrust',             muscle: 'LEGS',      cat: 'COMPOUND',  icon: '🍑', equipment: 'Barbell',      diff: 'INTERMEDIATE', addedOn: 'MAR 05, 2024' },
-];
+function getAdminExerciseImage(ex) {
+  const url = resolveExerciseImageUrl(ex.imageUrl || '');
+  if (url) return url;
+  return MUSCLE_IMAGE[ex.muscle] || MUSCLE_IMAGE.CHEST;
+}
+
+function splitField(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
+  return String(value)
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function normalizeToken(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+function upperToken(value, fallback = 'UNKNOWN') {
+  const token = normalizeToken(value);
+  return token ? token.replace(/\s+/g, '_').toUpperCase() : fallback;
+}
+
+function mapBackendExercise(exercise) {
+  const primaryMuscle = splitField(exercise.primary_muscles)[0] || 'chest';
+  const level = normalizeToken(exercise.level || 'beginner');
+  return {
+    id: exercise.id,
+    name: exercise.name,
+    muscle: upperToken(primaryMuscle, 'CHEST'),
+    cat: upperToken(exercise.category, 'STRENGTH'),
+    equipment: exercise.equipment || 'Bodyweight',
+    diff: upperToken(level === 'advanced' ? 'expert' : level, 'BEGINNER'),
+    icon: '🏋️',
+    imageUrl: exercise.image_url || exercise.alt_image_url || '',
+    altImageUrl: exercise.alt_image_url || '',
+    addedOn: exercise.created_at
+      ? new Date(exercise.created_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase()
+      : 'RECENT',
+    raw: exercise,
+  };
+}
 
 const PAGE_SIZE = 10;
 
+function ModalPortal({ children }) {
+  if (typeof document === 'undefined') return children;
+  return createPortal(children, document.body);
+}
+
 // Custom pill-styled select
-function PillSelect({ value, onChange, options, placeholder }) {
+function PillSelect({ value, onChange, options }) {
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
       <select
@@ -156,6 +193,79 @@ function FormSelect({ value, onChange, options }) {
   );
 }
 
+function ExerciseFilterModal({ initialFilters, muscleOptions, diffOptions, onApply, onClose }) {
+  const [local, setLocal] = useState(initialFilters);
+
+  function setField(key, value) {
+    setLocal((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function applyFilters() {
+    onApply(local);
+    onClose();
+  }
+
+  function clearAndApply() {
+    const cleared = { search: '', muscle: 'ALL', diff: 'ALL' };
+    onApply(cleared);
+    onClose();
+  }
+
+  return (
+    <ModalPortal>
+      <div className="adm-modal-overlay" onClick={(event) => event.target === event.currentTarget && onClose()}>
+        <div className="adm-modal" style={{ maxWidth: 620 }}>
+          <button className="adm-modal-close" onClick={onClose}>
+            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
+          </button>
+          <h2 className="adm-modal-title">Filter Exercises</h2>
+
+          <div className="adm-form-field">
+            <label className="adm-form-label">Search</label>
+            <div className="adm-search-wrap">
+              <span className="material-symbols-outlined adm-search-icon">search</span>
+              <input
+                className="adm-search"
+                value={local.search}
+                onChange={(event) => setField('search', event.target.value)}
+                placeholder="Search exercises..."
+                autoFocus
+              />
+            </div>
+          </div>
+
+          <div className="adm-grid-2">
+            <div className="adm-form-field">
+              <label className="adm-form-label">Muscle Group</label>
+              <FormSelect
+                value={local.muscle}
+                onChange={(value) => setField('muscle', value)}
+                options={muscleOptions.map((value) => ({ value, label: value === 'ALL' ? 'ALL MUSCLES' : value }))}
+              />
+            </div>
+            <div className="adm-form-field">
+              <label className="adm-form-label">Difficulty</label>
+              <FormSelect
+                value={local.diff}
+                onChange={(value) => setField('diff', value)}
+                options={diffOptions.map((value) => ({ value, label: value === 'ALL' ? 'ALL LEVELS' : value }))}
+              />
+            </div>
+          </div>
+
+          <div className="adm-form-actions">
+            <button className="adm-btn-ghost" onClick={clearAndApply}>Clear All</button>
+            <button className="adm-btn-primary" onClick={applyFilters}>
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>tune</span>
+              Apply Filters
+            </button>
+          </div>
+        </div>
+      </div>
+    </ModalPortal>
+  );
+}
+
 function DiffBars({ diff }) {
   const filled = DIFF_BARS[diff] ?? 1;
   return (
@@ -175,11 +285,106 @@ function DiffBars({ diff }) {
   );
 }
 
+function AdminExerciseImageFallback({ exercise }) {
+  return (
+    <div style={{ position: 'absolute', inset: 0 }}>
+      <img
+        src={getAdminExerciseImage(exercise)}
+        alt={exercise.name}
+        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(180deg, rgba(46,47,46,0.08), rgba(46,47,46,0.34))',
+          color: '#fffdf9',
+          fontSize: 24,
+        }}
+      >
+        {exercise.icon}
+      </div>
+    </div>
+  );
+}
+
+function getExerciseDescription(exercise) {
+  const raw = exercise?.raw?.instructions || '';
+  if (!raw) return 'No exercise description available yet.';
+  if (Array.isArray(raw)) {
+    return raw.filter(Boolean).slice(0, 3).join(' ');
+  }
+  const text = String(raw).trim();
+  if (!text) return 'No exercise description available yet.';
+  return text;
+}
+
+function ExerciseInfoModal({ exercise, onClose }) {
+  if (!exercise) return null;
+
+  return (
+    <div className="adm-modal-overlay" onClick={(event) => event.target === event.currentTarget && onClose()}>
+      <div className="adm-modal" style={{ maxWidth: 640 }}>
+        <button className="adm-modal-close" onClick={onClose}>
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
+        </button>
+
+        <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 12 }}>
+          <div style={{ width: 84, height: 84, borderRadius: 14, overflow: 'hidden', border: '2px solid #dad4c8', position: 'relative', flexShrink: 0 }}>
+            <ExerciseImagePreview
+              key={`detail-${exercise.id}-${exercise.imageUrl}-${exercise.altImageUrl || ''}`}
+              exercise={exercise}
+              alt={exercise.name}
+              style={{ position: 'absolute', inset: 0 }}
+              imgStyle={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              animate
+              fallback={<AdminExerciseImageFallback exercise={exercise} />}
+            />
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <h2 className="adm-modal-title" style={{ margin: 0 }}>{exercise.name}</h2>
+            <p style={{ margin: '6px 0 0', fontSize: 12, color: '#5b5c5a' }}>
+              {(CAT_LABEL[exercise.cat] || exercise.cat.replace(/_/g, ' ')).toUpperCase()}
+            </p>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8, marginBottom: 14 }}>
+          <div style={{ border: '2px solid #dad4c8', borderRadius: 12, padding: 10 }}>
+            <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#767775' }}>MUSCLE</p>
+            <p style={{ margin: '4px 0 0', fontSize: 12, fontWeight: 700 }}>{exercise.muscle}</p>
+          </div>
+          <div style={{ border: '2px solid #dad4c8', borderRadius: 12, padding: 10 }}>
+            <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#767775' }}>EQUIPMENT</p>
+            <p style={{ margin: '4px 0 0', fontSize: 12, fontWeight: 700 }}>{exercise.equipment || 'Bodyweight'}</p>
+          </div>
+          <div style={{ border: '2px solid #dad4c8', borderRadius: 12, padding: 10 }}>
+            <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#767775' }}>DIFFICULTY</p>
+            <p style={{ margin: '4px 0 0', fontSize: 12, fontWeight: 700 }}>{exercise.diff}</p>
+          </div>
+          <div style={{ border: '2px solid #dad4c8', borderRadius: 12, padding: 10 }}>
+            <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#767775' }}>ADDED</p>
+            <p style={{ margin: '4px 0 0', fontSize: 12, fontWeight: 700 }}>{exercise.addedOn}</p>
+          </div>
+        </div>
+
+        <div style={{ border: '2px solid #dad4c8', borderRadius: 14, background: '#faf9f7', padding: 12 }}>
+          <p style={{ margin: '0 0 6px', fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: '0.8px', color: '#767775' }}>DESCRIPTION</p>
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: '#2e2f2e' }}>{getExerciseDescription(exercise)}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ExerciseModal({ exercise, onClose, onSave }) {
   const [form, setForm] = useState(
     exercise
-      ? { name: exercise.name, muscle: exercise.muscle, cat: exercise.cat, equipment: exercise.equipment, icon: exercise.icon, diff: exercise.diff }
-      : { name: '', muscle: 'CHEST', cat: 'COMPOUND', equipment: 'Barbell', icon: '🏋️', diff: 'BEGINNER' }
+      ? { name: exercise.name, muscle: exercise.muscle, cat: exercise.cat, equipment: exercise.equipment, icon: exercise.icon, diff: exercise.diff, imageUrl: exercise.imageUrl || '' }
+      : { name: '', muscle: 'CHEST', cat: 'COMPOUND', equipment: 'Barbell', icon: '🏋️', diff: 'BEGINNER', imageUrl: '' }
   );
   function set(k, v) { setForm(f => ({ ...f, [k]: v })); }
 
@@ -201,6 +406,37 @@ function ExerciseModal({ exercise, onClose, onSave }) {
           />
         </div>
 
+        {/* Image preview + URL */}
+        <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 4 }}>
+          <div style={{
+            width: 72, height: 72, borderRadius: 12, overflow: 'hidden',
+            border: '2px solid #dad4c8', flexShrink: 0, background: '#f1f1ef',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28,
+            position: 'relative',
+          }}>
+            <ExerciseImagePreview
+              key={`${form.imageUrl}-${form.muscle}-${form.name}`}
+              exercise={{ imageUrl: form.imageUrl, muscle: form.muscle, name: form.name || 'Exercise' }}
+              alt="preview"
+              style={{ position: 'absolute', inset: 0 }}
+              imgStyle={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              fallback={<AdminExerciseImageFallback exercise={{ imageUrl: '', muscle: form.muscle, name: form.name || 'Exercise', icon: form.icon }} />}
+            />
+          </div>
+          <div className="adm-form-field" style={{ flex: 1, margin: 0 }}>
+            <label className="adm-form-label">Image URL (optional)</label>
+            <input
+              className="adm-form-input"
+              value={form.imageUrl}
+              onChange={e => set('imageUrl', e.target.value)}
+              placeholder="https://… (leave blank to use muscle default)"
+            />
+            <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#9f9b93', marginTop: 4, letterSpacing: '0.5px' }}>
+              Leave blank → auto photo by muscle group
+            </p>
+          </div>
+        </div>
+
         <div className="adm-grid-2">
           <div className="adm-form-field">
             <label className="adm-form-label">Muscle Group</label>
@@ -215,7 +451,7 @@ function ExerciseModal({ exercise, onClose, onSave }) {
             <FormSelect
               value={form.cat}
               onChange={v => set('cat', v)}
-              options={['COMPOUND', 'ISOLATION', 'ISOMETRIC', 'CARDIO']}
+              options={CATEGORIES.filter((item) => item !== 'ALL')}
             />
           </div>
           <div className="adm-form-field">
@@ -236,7 +472,7 @@ function ExerciseModal({ exercise, onClose, onSave }) {
             />
           </div>
           <div className="adm-form-field">
-            <label className="adm-form-label">Icon (emoji)</label>
+            <label className="adm-form-label">Icon (emoji fallback)</label>
             <input
               className="adm-form-input"
               value={form.icon}
@@ -265,37 +501,92 @@ function ExerciseModal({ exercise, onClose, onSave }) {
 export { PillSelect, FormSelect };
 
 export default function AdminExerciseLibrary() {
-  const [exercises, setExercises] = useState(INITIAL_EXERCISES);
-  const [search,    setSearch]    = useState('');
-  const [muscle,    setMuscle]    = useState('ALL');
-  const [diffF,     setDiffF]     = useState('ALL');
+  const [filters,   setFilters]   = useState({ search: '', muscle: 'ALL', diff: 'ALL' });
+  const [showFilters, setShowFilters] = useState(false);
   const [modal,     setModal]     = useState(null);
+  const [detailExercise, setDetailExercise] = useState(null);
   const [toDelete,  setToDelete]  = useState(null);
   const [page,      setPage]      = useState(1);
+  const { data: metaData } = useExerciseMeta();
+  const createExerciseMutation = useCreateExercise();
+  const updateExerciseMutation = useUpdateExerciseMutation();
+  const deleteExerciseMutation = useDeleteExerciseMutation();
 
-  const filtered = exercises.filter(ex => {
-    if (search && !ex.name.toLowerCase().includes(search.toLowerCase())) return false;
-    if (muscle !== 'ALL' && ex.muscle !== muscle) return false;
-    if (diffF  !== 'ALL' && ex.diff  !== diffF)  return false;
-    return true;
-  });
+  const params = {
+    page,
+    limit: PAGE_SIZE,
+    ...(filters.search ? { q: filters.search } : {}),
+    ...(filters.muscle !== 'ALL' ? { muscle: normalizeToken(filters.muscle) } : {}),
+    ...(filters.diff !== 'ALL' ? { level: normalizeToken(filters.diff === 'EXPERT' ? 'advanced' : filters.diff) } : {}),
+  };
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const {
+    data: exercisesData,
+    isLoading,
+    isError,
+    errorMeta,
+  } = useExercises(params, { keepPreviousData: true });
+
+  const exercises = useMemo(() => {
+    const items = exercisesData?.exercises || exercisesData?.data || exercisesData || [];
+    return items.map(mapBackendExercise);
+  }, [exercisesData]);
+  const metadata = exercisesData?.metadata || {};
+  const totalEntries = Number(metadata.total_count) || exercises.length;
+  const totalPages = Math.max(1, Number(metadata.total_pages) || 1);
+  const currentPage = Math.min(page, totalPages);
+  const canPrevPage = currentPage > 1;
+  const canNextPage = Boolean(metadata.has_next) || currentPage < totalPages;
+  const visiblePages = useMemo(() => {
+    const windowSize = 5;
+    const start = Math.max(1, currentPage - Math.floor(windowSize / 2));
+    const end = Math.min(totalPages, start + windowSize - 1);
+    const adjustedStart = Math.max(1, end - windowSize + 1);
+    return Array.from({ length: end - adjustedStart + 1 }, (_, index) => adjustedStart + index);
+  }, [currentPage, totalPages]);
+
+  const availableMuscles = useMemo(() => {
+    const fromMeta = (metaData?.muscles || []).map((item) => upperToken(item)).filter(Boolean);
+    return ['ALL', ...new Set([...MUSCLE_GROUPS.slice(1), ...fromMeta])];
+  }, [metaData]);
+
+  const availableDiffs = useMemo(() => {
+    const fromMeta = (metaData?.levels || []).map((item) => {
+      const normalized = upperToken(item);
+      return normalized === 'ADVANCED' ? 'EXPERT' : normalized;
+    }).filter(Boolean);
+    return ['ALL', ...new Set([...DIFFICULTIES.slice(1), ...fromMeta])];
+  }, [metaData]);
+  const activeFilterCount = Number(Boolean(filters.search)) + Number(filters.muscle !== 'ALL') + Number(filters.diff !== 'ALL');
 
   function handleSave(form) {
-    const now = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase();
+    const payload = {
+      name: form.name.trim(),
+      level: normalizeToken(form.diff === 'EXPERT' ? 'advanced' : form.diff),
+      equipment: form.equipment.trim(),
+      category: normalizeToken(form.cat),
+      primary_muscles: normalizeToken(form.muscle),
+      image_url: form.imageUrl.trim(),
+    };
+
+    if (!payload.name) return;
+
     if (modal?.id) {
-      setExercises(es => es.map(e => e.id === modal.id ? { ...e, ...form } : e));
-    } else {
-      setExercises(es => [...es, { id: Date.now(), ...form, addedOn: now }]);
+      updateExerciseMutation.mutate(
+        { exercise_id: modal.id, data: payload },
+        { onSuccess: () => setModal(null) }
+      );
+      return;
     }
-    setModal(null);
+    createExerciseMutation.mutate(payload, { onSuccess: () => setModal(null) });
   }
 
   function handleDelete() {
-    setExercises(es => es.filter(e => e.id !== toDelete.id));
-    setToDelete(null);
+    if (!toDelete?.id) return;
+    deleteExerciseMutation.mutate(
+      { exercise_id: toDelete.id },
+      { onSettled: () => setToDelete(null) }
+    );
   }
 
   return (
@@ -324,50 +615,31 @@ export default function AdminExerciseLibrary() {
           <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '1.5px', textTransform: 'uppercase', color: '#767775', marginBottom: 10 }}>
             Quick Filters
           </p>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-            <div className="adm-search-wrap">
-              <span className="material-symbols-outlined adm-search-icon">search</span>
-              <input
-                className="adm-search"
-                style={{ width: 220 }}
-                value={search}
-                onChange={e => { setSearch(e.target.value); setPage(1); }}
-                placeholder="Search exercises..."
-              />
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {filters.search && <span className="adm-chip adm-chip--oat">Search: {filters.search}</span>}
+              {filters.muscle !== 'ALL' && <span className="adm-chip adm-chip--green">{filters.muscle}</span>}
+              {filters.diff !== 'ALL' && <span className="adm-chip adm-chip--purple">{filters.diff}</span>}
+              {activeFilterCount === 0 && <span className="adm-chip adm-chip--oat">No active filters</span>}
             </div>
-            <PillSelect
-              value={muscle}
-              onChange={v => { setMuscle(v); setPage(1); }}
-              options={MUSCLE_GROUPS.map(m => ({ value: m, label: m === 'ALL' ? 'Muscle: All' : m }))}
-            />
-            <PillSelect
-              value={diffF}
-              onChange={v => { setDiffF(v); setPage(1); }}
-              options={DIFFICULTIES.map(d => ({ value: d, label: d === 'ALL' ? 'Difficulty: All' : d }))}
-            />
-            {(muscle !== 'ALL' || diffF !== 'ALL' || search) && (
-              <button
-                onClick={() => { setMuscle('ALL'); setDiffF('ALL'); setSearch(''); setPage(1); }}
-                style={{
-                  background: 'transparent',
-                  border: '2px solid #dad4c8',
-                  borderRadius: 9999,
-                  padding: '8px 16px',
-                  fontFamily: "'Space Mono', monospace",
-                  fontSize: 9,
-                  letterSpacing: '0.8px',
-                  textTransform: 'uppercase',
-                  color: '#5b5c5a',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 4,
-                }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>close</span>
-                Reset
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="adm-btn-ghost" onClick={() => setShowFilters(true)}>
+                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>tune</span>
+                Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
               </button>
-            )}
+              {activeFilterCount > 0 && (
+                <button
+                  className="adm-btn-ghost"
+                  onClick={() => {
+                    setFilters({ search: '', muscle: 'ALL', diff: 'ALL' });
+                    setPage(1);
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>
+                  Reset
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -387,7 +659,7 @@ export default function AdminExerciseLibrary() {
             Total Exercises
           </p>
           <p style={{ fontSize: 40, fontWeight: 800, letterSpacing: '-2px', color: '#214f01', lineHeight: 1 }}>
-            {exercises.length}
+            {totalEntries}
           </p>
         </div>
 
@@ -407,12 +679,18 @@ export default function AdminExerciseLibrary() {
             Compound Moves
           </p>
           <p style={{ fontSize: 40, fontWeight: 800, letterSpacing: '-2px', color: '#180058', lineHeight: 1 }}>
-            {exercises.filter(e => e.cat === 'COMPOUND').length}
+            {exercises.filter(e => e.cat === 'STRENGTH').length}
           </p>
         </div>
       </div>
 
       {/* ── Table ─────────────────────────────────────────────── */}
+      {isError && (
+        <div className="adm-chip adm-chip--red" style={{ marginBottom: 12 }}>
+          {errorMeta?.message || 'Exercise library is unavailable right now.'}
+        </div>
+      )}
+
       <div className="adm-table-wrap">
         <table className="adm-table">
           <thead>
@@ -427,34 +705,46 @@ export default function AdminExerciseLibrary() {
             </tr>
           </thead>
           <tbody>
-            {paginated.map(ex => {
+            {isLoading ? (
+              <tr>
+                <td colSpan={7}>
+                  <div className="adm-empty">
+                    <span className="material-symbols-outlined adm-empty-icon">sync</span>
+                    <p className="adm-empty-text">Loading exercise library...</p>
+                  </div>
+                </td>
+              </tr>
+            ) : exercises.map(ex => {
               const mc = MUSCLE_COLOR[ex.muscle] ?? { bg: '#e8e2d6', color: '#555148' };
               return (
                 <tr key={ex.id}>
                   {/* Preview thumbnail */}
                   <td>
-                    <div style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 12,
-                      background: EXERCISE_BG[ex.muscle] ?? '#f1f1ef',
-                      border: '2px solid #dad4c8',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 26,
-                    }}>
-                      {ex.icon}
+                    <div style={{ width: 56, height: 56, borderRadius: 12, overflow: 'hidden', border: '2px solid #dad4c8', background: '#f1f1ef', position: 'relative' }}>
+                      <ExerciseImagePreview
+                        key={`${ex.id}-${ex.imageUrl}-${ex.altImageUrl || ''}`}
+                        exercise={ex}
+                        alt={ex.name}
+                        style={{ position: 'absolute', inset: 0 }}
+                        imgStyle={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        animate={false}
+                        fallback={<AdminExerciseImageFallback exercise={ex} />}
+                      />
                     </div>
                   </td>
 
                   {/* Name + category */}
                   <td>
-                    <p style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.3px', lineHeight: 1.2, marginBottom: 2 }}>
-                      {ex.name}
-                    </p>
+                    <button
+                      style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+                      onClick={() => setDetailExercise(ex)}
+                    >
+                      <p style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.3px', lineHeight: 1.2, marginBottom: 2 }}>
+                        {ex.name}
+                      </p>
+                    </button>
                     <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '0.8px', textTransform: 'uppercase', color: '#767775' }}>
-                      {CAT_LABEL[ex.cat]}
+                      {CAT_LABEL[ex.cat] || ex.cat.replace(/_/g, ' ')}
                     </p>
                   </td>
 
@@ -503,7 +793,7 @@ export default function AdminExerciseLibrary() {
               );
             })}
 
-            {filtered.length === 0 && (
+            {!isLoading && exercises.length === 0 && (
               <tr>
                 <td colSpan={7}>
                   <div className="adm-empty">
@@ -520,33 +810,33 @@ export default function AdminExerciseLibrary() {
       {/* ── Pagination ────────────────────────────────────────── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, padding: '0 4px' }}>
         <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '1px', textTransform: 'uppercase', color: '#767775' }}>
-          Showing {Math.min((page - 1) * PAGE_SIZE + 1, filtered.length)}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length} entries
+          Showing {totalEntries === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1}–{Math.min((currentPage - 1) * PAGE_SIZE + exercises.length, totalEntries)} of {totalEntries} entries
         </p>
         <div style={{ display: 'flex', gap: 6 }}>
           <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
+            onClick={() => setPage(currentPage - 1)}
+            disabled={!canPrevPage}
             style={{
               width: 36, height: 36, borderRadius: '50%',
               border: '2px solid #dad4c8', background: 'transparent',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: page === 1 ? 'not-allowed' : 'pointer',
-              opacity: page === 1 ? 0.4 : 1,
+              cursor: !canPrevPage ? 'not-allowed' : 'pointer',
+              opacity: !canPrevPage ? 0.4 : 1,
               transition: 'background 0.15s',
             }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: 18 }}>chevron_left</span>
           </button>
 
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+          {visiblePages.map(p => (
             <button
               key={p}
               onClick={() => setPage(p)}
               style={{
                 width: 36, height: 36, borderRadius: '50%',
-                border: p === page ? 'none' : '2px solid #dad4c8',
-                background: p === page ? '#38671a' : 'transparent',
-                color: p === page ? '#d6ffb7' : '#2e2f2e',
+                border: p === currentPage ? 'none' : '2px solid #dad4c8',
+                background: p === currentPage ? '#38671a' : 'transparent',
+                color: p === currentPage ? '#d6ffb7' : '#2e2f2e',
                 fontFamily: "'Space Mono', monospace",
                 fontSize: 11,
                 fontWeight: 700,
@@ -560,14 +850,14 @@ export default function AdminExerciseLibrary() {
           ))}
 
           <button
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
+            onClick={() => setPage(currentPage + 1)}
+            disabled={!canNextPage}
             style={{
               width: 36, height: 36, borderRadius: '50%',
               border: '2px solid #dad4c8', background: 'transparent',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: page === totalPages ? 'not-allowed' : 'pointer',
-              opacity: page === totalPages ? 0.4 : 1,
+              cursor: !canNextPage ? 'not-allowed' : 'pointer',
+              opacity: !canNextPage ? 0.4 : 1,
               transition: 'background 0.15s',
             }}
           >
@@ -582,6 +872,12 @@ export default function AdminExerciseLibrary() {
           exercise={modal?.id ? modal : null}
           onClose={() => setModal(null)}
           onSave={handleSave}
+        />
+      )}
+      {detailExercise && (
+        <ExerciseInfoModal
+          exercise={detailExercise}
+          onClose={() => setDetailExercise(null)}
         />
       )}
       {toDelete && (
@@ -605,6 +901,18 @@ export default function AdminExerciseLibrary() {
             </div>
           </div>
         </div>
+      )}
+      {showFilters && (
+        <ExerciseFilterModal
+          initialFilters={filters}
+          muscleOptions={availableMuscles}
+          diffOptions={availableDiffs}
+          onApply={(nextFilters) => {
+            setFilters(nextFilters);
+            setPage(1);
+          }}
+          onClose={() => setShowFilters(false)}
+        />
       )}
     </div>
   );

@@ -1,4 +1,5 @@
 import client from './client';
+import { authStore } from '../stores/authStore';
 
 export const authAPI = {
   // Login with email and password
@@ -36,7 +37,7 @@ export const authAPI = {
 
   // Logout (revoke current session)
   logout: async (allSessions = false) => {
-    const state = (await import('../stores/authStore')).authStore.getState();
+    const state = authStore.getState();
     const body = allSessions
       ? { all_sessions: true }
       : { refresh_token: state.refresh_token };
@@ -52,7 +53,7 @@ export const authAPI = {
 
   // Revoke a specific session
   revokeSession: async (session_id) => {
-    const response = await client.post(`/v1/auth/sessions/${session_id}/revoke`);
+    const response = await client.delete(`/v1/auth/sessions/${session_id}`);
     return response.data;
   },
 

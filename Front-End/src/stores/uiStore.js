@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { nutritionStore } from './nutritionStore';
 
 export const uiStore = create(
   persist(
@@ -71,6 +72,10 @@ export const uiStore = create(
 if (typeof window !== 'undefined') {
   window.addEventListener('online', () => {
     uiStore.getState().setOffline(false);
+    // Do not clear pending workout sets on reconnect.
+    // Replay is handled by the workout feature to avoid data loss.
+    nutritionStore.getState().flushPendingMeals();
+    nutritionStore.getState().flushPendingFoods();
   });
 
   window.addEventListener('offline', () => {

@@ -7,10 +7,9 @@ export function useAuth() {
   const user = authStore((state) => state.user);
   const access_token = authStore((state) => state.access_token);
   const refresh_token = authStore((state) => state.refresh_token);
+  const auth_bootstrapped = authStore((state) => state.auth_bootstrapped);
   const setUser = authStore((state) => state.setUser);
   const setTokens = authStore((state) => state.setTokens);
-  const logout = authStore((state) => state.logout);
-  const updateProfile = authStore((state) => state.updateProfile);
   const isAuthenticated = authStore((state) => state.isAuthenticated());
   const isOnboarded = authStore((state) => state.isOnboarded());
   const isAdmin = authStore((state) => state.isAdmin());
@@ -108,6 +107,7 @@ export function useAuth() {
     user,
     access_token,
     refresh_token,
+    auth_bootstrapped,
     isAuthenticated,
     isOnboarded,
     isAdmin,

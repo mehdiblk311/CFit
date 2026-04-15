@@ -21,25 +21,7 @@ export const notificationsAPI = {
 
   // Mark all notifications as read
   markAllAsRead: async () => {
-    const response = await client.post('/v1/notifications/mark-all-read');
-    return response.data;
-  },
-
-  // Delete notification
-  deleteNotification: async (notification_id) => {
-    const response = await client.delete(`/v1/notifications/${notification_id}`);
-    return response.data;
-  },
-
-  // Get notification preferences
-  getPreferences: async () => {
-    const response = await client.get('/v1/notifications/preferences');
-    return response.data;
-  },
-
-  // Update notification preferences
-  updatePreferences: async (preferences) => {
-    const response = await client.patch('/v1/notifications/preferences', preferences);
+    const response = await client.patch('/v1/notifications/read-all');
     return response.data;
   },
 };

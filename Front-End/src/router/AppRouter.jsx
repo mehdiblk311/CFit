@@ -15,8 +15,14 @@ import AddQuantity         from '../components/user/Nutrition/AddQuantity/AddQua
 import CreateRecipe        from '../components/user/Nutrition/CreateRecipe/CreateRecipe';
 import CustomFood          from '../components/user/Nutrition/CustomFood/CustomFood';
 import AIAssistant         from '../components/user/AIAssistant/AIAssistant';
+import Notifications       from '../components/user/Notifications/Notifications';
 import Settings            from '../components/user/Settings/Settings';
-import Admin               from '../components/admin/Admin';
+import AdminLayout         from '../components/admin/AdminLayout';
+import AdminDashboard      from '../components/admin/AdminDashboard';
+import AdminUserManagement from '../components/admin/AdminUserManagement';
+import AdminExerciseLibrary from '../components/admin/AdminExerciseLibrary';
+import AdminUserPrograms   from '../components/admin/AdminUserPrograms';
+import AdminNutrition      from '../components/admin/Nutrition/AdminNutrition';
 
 const router = createBrowserRouter([
   // Root redirect
@@ -59,6 +65,7 @@ const router = createBrowserRouter([
         ],
       },
       { path: '/ai',        element: <AIAssistant /> },
+      { path: '/notifications', element: <Notifications /> },
       { path: '/settings',  element: <Settings /> },
     ],
   },
@@ -67,8 +74,17 @@ const router = createBrowserRouter([
   {
     element: <AdminRoute />,
     children: [
-      { path: '/admin',   element: <Admin /> },
-      { path: '/admin/*', element: <Admin /> },
+      {
+        path: '/admin',
+        element: <AdminLayout />,
+        children: [
+          { index: true,           element: <AdminDashboard /> },
+          { path: 'users',         element: <AdminUserManagement /> },
+          { path: 'exercises',     element: <AdminExerciseLibrary /> },
+          { path: 'programs',      element: <AdminUserPrograms /> },
+          { path: 'nutrition',     element: <AdminNutrition /> },
+        ],
+      },
     ],
   },
 ]);

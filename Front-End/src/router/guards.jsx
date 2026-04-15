@@ -9,7 +9,8 @@ import AppLayout from '../components/common/AppLayout';
  * If authenticated but not onboarded user → /onboarding
  */
 export function PublicRoute() {
-  const { isAuthenticated, isOnboarded, isAdmin } = useAuth();
+  const { auth_bootstrapped, isAuthenticated, isOnboarded, isAdmin } = useAuth();
+  if (!auth_bootstrapped) return null;
   if (isAuthenticated) {
     if (isAdmin) return <Navigate to="/admin" replace />;
     if (isOnboarded) return <Navigate to="/dashboard" replace />;
@@ -25,7 +26,8 @@ export function PublicRoute() {
  * If already onboarded user → /dashboard
  */
 export function OnboardingRoute() {
-  const { isAuthenticated, isOnboarded, isAdmin } = useAuth();
+  const { auth_bootstrapped, isAuthenticated, isOnboarded, isAdmin } = useAuth();
+  if (!auth_bootstrapped) return null;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (isAdmin)          return <Navigate to="/admin" replace />;
   if (isOnboarded)      return <Navigate to="/dashboard" replace />;
@@ -39,7 +41,8 @@ export function OnboardingRoute() {
  * If authenticated user but not onboarded → /onboarding
  */
 export function ProtectedRoute() {
-  const { isAuthenticated, isOnboarded, isAdmin } = useAuth();
+  const { auth_bootstrapped, isAuthenticated, isOnboarded, isAdmin } = useAuth();
+  if (!auth_bootstrapped) return null;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (isAdmin)          return <Navigate to="/admin" replace />;
   if (!isOnboarded)     return <Navigate to="/onboarding" replace />;
@@ -52,7 +55,8 @@ export function ProtectedRoute() {
  * If authenticated but not admin → /dashboard
  */
 export function AdminRoute() {
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { auth_bootstrapped, isAuthenticated, isAdmin } = useAuth();
+  if (!auth_bootstrapped) return null;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (!isAdmin)         return <Navigate to="/dashboard" replace />;
   return <Outlet />;

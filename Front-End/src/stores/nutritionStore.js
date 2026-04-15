@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 
 export const nutritionStore = create(
   persist(
-    (set, get) => ({
+    (set) => ({
       // Offline queue for pending meals
       pendingMeals: [],
       pendingFoods: [],

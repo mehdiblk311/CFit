@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 
 export const workoutStore = create(
   persist(
-    (set, get) => ({
+    (set) => ({
       // Active workout session
       activeWorkout: null,
       restTimerActive: false,
@@ -17,7 +17,7 @@ export const workoutStore = create(
         set({
           activeWorkout: {
             ...workoutData,
-            exercises: [],
+            exercises: workoutData.exercises || [],
             startedAt: new Date().toISOString(),
             notes: '',
           },

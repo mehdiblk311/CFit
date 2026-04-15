@@ -45,6 +45,25 @@ export function useUnreadCount() {
   });
 }
 
+export function useDashboardWeeklySummary() {
+  return useQuery({
+    queryKey: ['dashboard', 'weekly-summary'],
+    queryFn: () => usersAPI.getWeeklySummary(),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+export function useDashboardCoachSummary() {
+  const userId = authStore((state) => state.user?.id);
+
+  return useQuery({
+    queryKey: ['dashboard', 'coach-summary', userId],
+    queryFn: () => usersAPI.getCoachSummary(userId),
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
 export function useNotifications(params = {}) {
   return useQuery({
     queryKey: ['notifications', params],

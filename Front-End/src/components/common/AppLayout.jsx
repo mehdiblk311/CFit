@@ -13,8 +13,7 @@ export default function AppLayout({ children }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  // Nutrition routes have their own inner nav — hide the global nav there
-  const hideNav = pathname.startsWith('/nutrition');
+  const hideNav = false;
 
   return (
     <div className="app-layout">

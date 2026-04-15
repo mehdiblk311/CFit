@@ -55,7 +55,7 @@ export default function TwoFactorChallenge() {
         await complete2FA(totpCode, null);
       }
       // Auth state update drives routing to dashboard automatically
-    } catch (error) {
+    } catch {
       if (useRecovery) {
         setErrors({ recovery: 'Invalid recovery code.' });
       } else {

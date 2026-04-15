@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { authStore } from '../../stores/authStore';
 import { uiStore } from '../../stores/uiStore';
 import './OnboardingBasicInfo.css';
 
@@ -46,7 +45,7 @@ export default function OnboardingBasicInfo({ onNext, onBack, step = 1, totalSte
         weight: parseFloat(weight),
         gender,
       });
-    } catch (error) {
+    } catch {
       uiStore.getState().addToast('Failed to save profile', 'error');
     } finally {
       setLoading(false);

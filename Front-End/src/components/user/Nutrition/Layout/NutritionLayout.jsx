@@ -1,15 +1,16 @@
+import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import './NutritionLayout.css';
 
-const NAV_ITEMS = [
-  { id: 'journal',  path: '/nutrition',         icon: 'restaurant',  label: 'Journal'  },
-  { id: 'recipes',  path: '/nutrition/recipe',   icon: 'menu_book',   label: 'Recipes'  },
-  { id: 'trends',   path: '/nutrition/history',  icon: 'query_stats', label: 'Trends'   },
-  { id: 'settings', path: '/settings',           icon: 'settings',    label: 'Settings' },
+const CTX_NAV = [
+  { id: 'close',   icon: 'close',        label: 'Close'   },
+  { id: 'journal', path: '/nutrition',         icon: 'restaurant',  label: 'Journal' },
+  { id: 'recipes', path: '/nutrition/recipe',  icon: 'menu_book',   label: 'Recipes' },
+  { id: 'trends',  path: '/nutrition/history', icon: 'query_stats', label: 'Trends'  },
 ];
 
-/* These sub-pages have their own sticky CTAs — hide the tab nav to avoid overlap */
-const HIDE_NAV_PATHS = [
+/* Sub-pages with own sticky CTAs — hide contextual nav to avoid overlap */
+const HIDE_CTX_PATHS = [
   '/nutrition/food-search',
   '/nutrition/add-quantity',
   '/nutrition/custom-food',
@@ -18,48 +19,45 @@ const HIDE_NAV_PATHS = [
 export default function NutritionLayout() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const [navVisible, setNavVisible] = useState(false);
 
-  const hideNav = HIDE_NAV_PATHS.some(p => pathname.startsWith(p));
+  const hideCtx = HIDE_CTX_PATHS.some(p => pathname.startsWith(p));
+
+  useEffect(() => {
+    const t = setTimeout(() => setNavVisible(true), 80);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <div className="nut-layout">
-      <div className={`nut-content${hideNav ? ' nut-content--full' : ''}`}>
+      <div className="nut-content">
         <Outlet />
       </div>
 
-      {!hideNav && (
-        <nav className="nut-nav" aria-label="Nutrition navigation">
-          {/* ← Back to Dashboard */}
-          <button
-            id="nut-nav-dashboard"
-            className="nut-nav-item nut-nav-item--home"
-            onClick={() => navigate('/dashboard')}
-            aria-label="Back to Dashboard"
-          >
-            <span className="material-symbols-outlined nut-nav-icon">home</span>
-            <span className="nut-nav-label">Home</span>
-          </button>
-
-          {NAV_ITEMS.map(item => {
-            const isActive =
+      {/* Contextual nav — slides on top of AppLayout nav, like workouts */}
+      {!hideCtx && (
+        <nav className={`nut-ctx-nav${navVisible ? ' nut-ctx-nav--visible' : ''}`}>
+          {CTX_NAV.map(item => {
+            const isClose = item.id === 'close';
+            const isActive = !isClose && (
               item.id === 'journal'
-                ? pathname === '/nutrition'
-                : pathname.startsWith(item.path);
+                ? pathname === '/nutrition' || pathname === '/nutrition/'
+                : pathname.startsWith(item.path)
+            );
             return (
               <button
                 key={item.id}
-                id={`nut-nav-${item.id}`}
-                className={`nut-nav-item${isActive ? ' nut-nav-item--active' : ''}`}
-                onClick={() => navigate(item.path)}
+                className={`nut-ctx-btn${isActive ? ' nut-ctx-btn--active' : ''}${isClose ? ' nut-ctx-btn--close' : ''}`}
+                onClick={() => isClose ? navigate('/dashboard') : navigate(item.path)}
                 aria-label={item.label}
               >
                 <span
-                  className="material-symbols-outlined nut-nav-icon"
+                  className="material-symbols-outlined nut-ctx-icon"
                   style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}
                 >
                   {item.icon}
                 </span>
-                <span className="nut-nav-label">{item.label}</span>
+                <span className="nut-ctx-label">{item.label}</span>
               </button>
             );
           })}

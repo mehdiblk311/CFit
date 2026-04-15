@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { authStore } from '../../stores/authStore';
 import { uiStore } from '../../stores/uiStore';
 import { usersAPI } from '../../api/users';
 import './OnboardingYourPlan.css';
@@ -26,7 +25,7 @@ function MacroBar({ label, grams, pct, color }) {
   );
 }
 
-export default function OnboardingYourPlan({ step = 3, totalSteps = 3, onBack, tdeeData, basicData, goalsData }) {
+export default function OnboardingYourPlan({ step = 3, totalSteps = 3, onBack, tdeeData, goalsData }) {
   const { user, updateProfile } = useAuth();
   const navigate = useNavigate();
   const [targets, setTargets] = useState(null);
@@ -58,19 +57,18 @@ export default function OnboardingYourPlan({ step = 3, totalSteps = 3, onBack, t
           console.warn('Failed to persist TDEE to backend');
         });
     }
-  }, [tdeeData, user?.id]);
+  }, [tdeeData, updateProfile, user?.id]);
 
   const handleComplete = async () => {
     setCompleting(true);
     try {
-      // Wait for TDEE to be persisted so the returning-user fallback works
+      // Wait for TDEE to be persisted before navigating
+      // Once TDEE is saved, isOnboarded() will return true (has weight + height + goal + tdee)
       if (tdeePromise.current) {
         await tdeePromise.current;
       }
-      // Mark as onboarded — persisted in localStorage via Zustand
-      authStore.getState().updateProfile({ onboarded: true });
       navigate('/dashboard');
-    } catch (error) {
+    } catch {
       uiStore.getState().addToast('Failed to complete onboarding', 'error');
     } finally {
       setCompleting(false);

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../../../hooks/useAuth';
+import { useSendChatMessage } from '../../../hooks/queries/useChat';
 import './AIAssistant.css';
 
 // ── Mock history data ─────────────────────────────────────────────
@@ -219,41 +219,77 @@ export default function AIAssistant() {
   const [showHistory, setShowHistory] = useState(false);
   const [messages, setMessages]       = useState(INITIAL_MESSAGES);
   const [input, setInput]             = useState('');
+  const [conversationId, setConversationId] = useState(null);
   const [loading, setLoading]         = useState(false);
+  const msgIdRef = useRef(INITIAL_MESSAGES.length + 1);
   const bottomRef = useRef(null);
+  const sendChatMessage = useSendChatMessage();
+
+  function nextMessageId() {
+    const id = msgIdRef.current;
+    msgIdRef.current += 1;
+    return id;
+  }
+
+  function nowLabel() {
+    return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  function sendMessage(text) {
+  async function sendMessage(text) {
     if (!text.trim() || loading) return;
+    const messageText = text.trim();
     const userMsg = {
-      id: Date.now(),
+      id: nextMessageId(),
       role: 'user',
-      text: text.trim(),
-      time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      text: messageText,
+      time: nowLabel(),
     };
     setMessages(p => [...p, userMsg]);
     setInput('');
     setLoading(true);
-    setTimeout(() => {
-      setMessages(p => [...p, {
-        id: Date.now() + 1,
-        role: 'ai',
-        text: "Great question! Based on your current training load and nutrition data, I'd recommend focusing on progressive overload for the next 2 weeks. Your recovery metrics look solid — keep it up!",
-        time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-      }]);
+    try {
+      const response = await sendChatMessage.mutateAsync({
+        message: messageText,
+        conversation_id: conversationId,
+      });
+      if (response?.conversation_id) {
+        setConversationId(response.conversation_id);
+      }
+      setMessages((p) => [
+        ...p,
+        {
+          id: nextMessageId(),
+          role: 'ai',
+          text: response?.message || 'I could not generate a reply right now. Please try again.',
+          time: nowLabel(),
+        },
+      ]);
+    } catch {
+      setMessages((p) => [
+        ...p,
+        {
+          id: nextMessageId(),
+          role: 'ai',
+          text: 'I ran into a connection issue. Please retry in a moment.',
+          time: nowLabel(),
+        },
+      ]);
+    } finally {
       setLoading(false);
-    }, 1400);
+    }
   }
 
   function handleHistorySelect(thread) {
     // Load thread preview as a user message and close history
     setMessages([
-      { id: Date.now(), role: 'user', text: thread.preview, time: thread.date },
-      { id: Date.now() + 1, role: 'ai', text: "Let me pick up where we left off. Here's a summary of what we discussed in this session...", time: 'Now' },
+      { id: nextMessageId(), role: 'user', text: thread.preview, time: thread.date },
+      { id: nextMessageId(), role: 'ai', text: "Let me pick up where we left off. Here's a summary of what we discussed in this session...", time: 'Now' },
     ]);
+    setConversationId(null);
     setShowHistory(false);
   }
 

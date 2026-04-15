@@ -1,16 +1,33 @@
 import { useState } from 'react';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import './Admin.css';
 
 const NAV_ITEMS = [
-  { id: 'dashboard', icon: 'dashboard',      label: 'Dashboard'  },
-  { id: 'users',     icon: 'group',           label: 'Users'      },
-  { id: 'exercises', icon: 'fitness_center',  label: 'Exercises'  },
-  { id: 'programs',  icon: 'event_note',      label: 'Programs'   },
-  { id: 'nutrition', icon: 'restaurant',      label: 'Nutrition'  },
+  { id: 'dashboard', path: '/admin',          icon: 'dashboard',      label: 'Dashboard'  },
+  { id: 'users',     path: '/admin/users',     icon: 'group',           label: 'Users'      },
+  { id: 'exercises', path: '/admin/exercises', icon: 'fitness_center',  label: 'Exercises'  },
+  { id: 'programs',  path: '/admin/programs',  icon: 'event_note',      label: 'Programs'   },
+  { id: 'nutrition', path: '/admin/nutrition', icon: 'restaurant',      label: 'Nutrition'  },
 ];
 
-export default function AdminLayout({ activeTab, onTabChange, onLogout, children }) {
+function isActive(item, pathname) {
+  if (item.path === '/admin') return pathname === '/admin' || pathname === '/admin/';
+  return pathname.startsWith(item.path);
+}
+
+export default function AdminLayout() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { logout } = useAuth();
   const [expanded, setExpanded] = useState(false);
+
+  function handleLogout() {
+    logout();
+    navigate('/login');
+  }
+
+  const activeItem = NAV_ITEMS.find(n => isActive(n, location.pathname));
 
   return (
     <div className="adm-shell">
@@ -31,20 +48,25 @@ export default function AdminLayout({ activeTab, onTabChange, onLogout, children
         </div>
 
         <nav className="adm-sidenav-nav">
-          {NAV_ITEMS.map(item => (
-            <button
-              key={item.id}
-              className={`adm-nav-btn${activeTab === item.id ? ' adm-nav-btn--active' : ''}`}
-              onClick={() => onTabChange(item.id)}
-              title={item.label}
-            >
-              <span className="material-symbols-outlined adm-nav-btn-icon"
-                style={activeTab === item.id ? { fontVariationSettings: "'FILL' 1" } : {}}>
-                {item.icon}
-              </span>
-              <span className="adm-nav-btn-label">{item.label}</span>
-            </button>
-          ))}
+          {NAV_ITEMS.map(item => {
+            const active = isActive(item, location.pathname);
+            return (
+              <button
+                key={item.id}
+                className={`adm-nav-btn${active ? ' adm-nav-btn--active' : ''}`}
+                onClick={() => navigate(item.path)}
+                title={item.label}
+              >
+                <span
+                  className="material-symbols-outlined adm-nav-btn-icon"
+                  style={active ? { fontVariationSettings: "'FILL' 1" } : {}}
+                >
+                  {item.icon}
+                </span>
+                <span className="adm-nav-btn-label">{item.label}</span>
+              </button>
+            );
+          })}
         </nav>
 
         <div className="adm-sidenav-footer">
@@ -62,7 +84,7 @@ export default function AdminLayout({ activeTab, onTabChange, onLogout, children
         <header className="adm-topbar">
           <div className="adm-topbar-left">
             <span className="adm-topbar-title">
-              {NAV_ITEMS.find(n => n.id === activeTab)?.label ?? 'Admin'}
+              {activeItem?.label ?? 'Admin'}
             </span>
             <div className="adm-topbar-search-wrap">
               <span className="material-symbols-outlined adm-topbar-search-icon">search</span>
@@ -82,7 +104,7 @@ export default function AdminLayout({ activeTab, onTabChange, onLogout, children
             <button className="adm-topbar-notif">
               <span className="material-symbols-outlined">notifications</span>
             </button>
-            <button className="adm-topbar-logout" onClick={onLogout} title="Back to app">
+            <button className="adm-topbar-logout" onClick={handleLogout} title="Back to app">
               <span className="material-symbols-outlined">logout</span>
             </button>
           </div>
@@ -90,7 +112,7 @@ export default function AdminLayout({ activeTab, onTabChange, onLogout, children
 
         {/* Content */}
         <div className="adm-content">
-          {children}
+          <Outlet />
         </div>
       </div>
     </div>

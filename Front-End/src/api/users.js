@@ -49,6 +49,18 @@ export const usersAPI = {
     return response.data;
   },
 
+  // Get weekly summary (calories, macros, workouts for current week)
+  getWeeklySummary: async () => {
+    const response = await client.get('/v1/weekly-summary');
+    return response.data;
+  },
+
+  // Get AI coach summary for dashboard
+  getCoachSummary: async (user_id) => {
+    const response = await client.get(`/v1/users/${user_id}/coach-summary`);
+    return response.data;
+  },
+
   // Get activity records (PRs, history, etc.)
   getRecords: async (user_id, params = {}) => {
     const response = await client.get(`/v1/users/${user_id}/records`, { params });

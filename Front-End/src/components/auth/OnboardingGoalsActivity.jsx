@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { authStore } from '../../stores/authStore';
 import { uiStore } from '../../stores/uiStore';
 import './OnboardingGoalsActivity.css';
 
@@ -49,7 +48,7 @@ export default function OnboardingGoalsActivity({ step = 2, totalSteps = 3, onNe
       });
       // Pass data up so OnboardingFlow can compute TDEE
       onNext?.({ goal, activityLevel: activity });
-    } catch (error) {
+    } catch {
       uiStore.getState().addToast('Failed to save goals', 'error');
     } finally {
       setLoading(false);

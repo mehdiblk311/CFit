@@ -4,7 +4,7 @@ import { uiStore } from '../../stores/uiStore';
 
 export function useSendChatMessage() {
   return useMutation({
-    mutationFn: (messages) => chatAPI.sendMessage(messages),
+    mutationFn: (payload) => chatAPI.sendMessage(payload),
     onError: (error) => {
       uiStore.getState().addToast('Failed to send message', 'error');
       console.error('Chat error:', error);

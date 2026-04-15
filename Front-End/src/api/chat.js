@@ -2,8 +2,8 @@ import client from './client';
 
 export const chatAPI = {
   // Send message to AI coach
-  sendMessage: async (messages) => {
-    const response = await client.post('/v1/chat', { messages });
+  sendMessage: async ({ message, conversation_id }) => {
+    const response = await client.post('/v1/chat', { message, conversation_id });
     return response.data;
   },
 
@@ -13,9 +13,4 @@ export const chatAPI = {
     return response.data;
   },
 
-  // Clear chat history
-  clearHistory: async () => {
-    const response = await client.delete('/v1/chat/history');
-    return response.data;
-  },
 };
