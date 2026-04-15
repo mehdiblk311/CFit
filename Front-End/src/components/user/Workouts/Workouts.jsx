@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { workoutStore } from '../../../stores/workoutStore';
 import {
   useWorkoutList,
@@ -1044,10 +1044,14 @@ function FloatingSessionBar({ onClick }) {
 
 export default function Workouts() {
   const navigate = useNavigate();
+  const location = useLocation();
   const onClose = () => navigate('/dashboard');
 
+  const requestedTab = location.state?.tab;
+  const initialTab = requestedTab === 'library' || requestedTab === 'history' ? requestedTab : 'programs';
+
   const [navVisible, setNavVisible] = useState(false);
-  const [wkTab, setWkTab] = useState('programs');
+  const [wkTab, setWkTab] = useState(initialTab);
   const [previewTemplate, setPreviewTemplate] = useState(null);
   const [activeWorkoutId, setActiveWorkoutId] = useState(null);
   const [activeInitialExercises, setActiveInitialExercises] = useState([]);
@@ -1065,6 +1069,15 @@ export default function Workouts() {
     const t = setTimeout(() => setNavVisible(true), 80);
     return () => clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    if (requestedTab !== 'library' && requestedTab !== 'history' && requestedTab !== 'programs') return;
+
+    setPreviewTemplate(null);
+    setWkTab(requestedTab);
+
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, navigate, requestedTab]);
 
   // If store has active workout on mount, resume it
   useEffect(() => {
