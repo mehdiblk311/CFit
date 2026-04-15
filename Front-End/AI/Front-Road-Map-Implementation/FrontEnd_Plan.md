@@ -1,5 +1,7 @@
 # Frontend To-Do List for the Fitness App
 
+Status note (2026-04-15): checked items below exist in the current frontend codebase. Some checked items still need backend-fidelity hardening; see review notes after verification.
+
 This plan is based on the backend routes already registered in `api/server.go`, the product goals in `UM6P_FIT_Scope_Definition.md`, and the UI pieces that already exist in:
 
 - `frontend/` → coach demo for auth + exercise search + program generation
@@ -58,13 +60,13 @@ Secondary navigation:
 These are not pages, but they should be done first.
 
 - [ ] Create the real frontend app shell in React + TypeScript
-- [ ] Add auth state, token storage, and refresh-token handling
-- [ ] Add protected routes for signed-in users
+- [x] Add auth state, token storage, and refresh-token handling
+- [x] Add protected routes for signed-in users
 - [ ] Create a typed API layer for `/v1/*`
 - [ ] Reuse the nutrition standalone app design system where possible
 - [ ] Reuse the exercise search/program generator logic from `frontend/app.js`
-- [ ] Add mobile-first layout and bottom/top navigation structure
-- [ ] Add global empty, loading, and error states
+- [x] Add mobile-first layout and bottom/top navigation structure
+- [x] Add global empty, loading, and error states
 
 ---
 
@@ -98,11 +100,11 @@ Let users securely enter the app and manage secure access.
 - `DELETE /v1/auth/sessions/{id}`
 
 **Frontend to-do:**
-- [ ] Build login screen
-- [ ] Build register screen
-- [ ] Build 2FA challenge screen
-- [ ] Build 2FA setup screen with QR / secret / recovery codes
-- [ ] Add session expiry + silent refresh handling
+- [x] Build login screen
+- [x] Build register screen
+- [x] Build 2FA challenge screen
+- [x] Build 2FA setup screen with QR / secret / recovery codes
+- [x] Add session expiry + silent refresh handling
 
 **Important note:**
 There is no forgot-password endpoint in the backend yet, so do **not** design a full reset-password flow right now.
@@ -126,10 +128,10 @@ Collect the user data needed to personalize calories, macros, and goals.
 - `GET /v1/users/{user_id}/nutrition-targets`
 
 **Frontend to-do:**
-- [ ] Build post-signup onboarding wizard
+- [x] Build post-signup onboarding wizard
 - [ ] Build editable profile form
-- [ ] Show target calories, protein, carbs, fat, fiber, water
-- [ ] Add goal-focused copy: build muscle / lose fat / maintain
+- [x] Show target calories, protein, carbs, fat, fiber, water
+- [x] Add goal-focused copy: build muscle / lose fat / maintain
 
 ---
 
@@ -158,11 +160,11 @@ Answer: "What should I do today, and am I on track?"
 - `GET /v1/notifications/unread-count`
 
 **Frontend to-do:**
-- [ ] Build dashboard hero cards
-- [ ] Build macro progress bars/rings
+- [x] Build dashboard hero cards
+- [x] Build macro progress bars/rings
 - [ ] Add recommendation card
-- [ ] Add quick actions: log workout, log meal, add weight
-- [ ] Add mini streak and weekly summary section
+- [x] Add quick actions: log workout, log meal, add weight
+- [x] Add mini streak and weekly summary section
 - [ ] Add empty state for new users with first actions
 
 ---
@@ -185,7 +187,7 @@ Review past sessions and stay consistent.
 - `GET /v1/workouts/{id}`
 
 **Frontend to-do:**
-- [ ] Build workout list page
+- [x] Build workout list page
 - [ ] Add filters for date and workout type
 - [ ] Add empty state and start-workout CTA
 - [ ] Add simple calendar/list toggle if useful
@@ -224,12 +226,12 @@ Log a workout quickly enough that users will actually use it every session.
 - `DELETE /v1/workout-cardio/{id}`
 
 **Frontend to-do:**
-- [ ] Build create workout flow
-- [ ] Build add-exercise flow
-- [ ] Build set logger table
+- [x] Build create workout flow
+- [x] Build add-exercise flow
+- [x] Build set logger table
 - [ ] Add notes, duration, workout type editing
 - [ ] Build cardio block
-- [ ] Add local rest timer as a client-side feature
+- [x] Add local rest timer as a client-side feature
 - [ ] Add fast "repeat last set" / quick entry UX
 
 ---
@@ -255,7 +257,7 @@ Help users choose the right movement fast and understand how to perform it.
 - `GET /v1/exercises/{id}/history`
 
 **Frontend to-do:**
-- [ ] Reuse and improve the current exercise search demo
+- [x] Reuse and improve the current exercise search demo
 - [ ] Build proper filter sidebar/sheet
 - [ ] Build exercise detail page/modal
 - [ ] Show history/progression for the selected exercise
@@ -286,11 +288,11 @@ Log meals quickly and see macro impact immediately.
 - `GET /v1/summary`
 
 **Frontend to-do:**
-- [ ] Build daily meal timeline
+- [x] Build daily meal timeline
 - [ ] Build add meal modal/page
 - [ ] Build edit meal flow
 - [ ] Add clone recent meal shortcut
-- [ ] Show summary strip for calories/protein/carbs/fat
+- [x] Show summary strip for calories/protein/carbs/fat
 
 ---
 
@@ -321,12 +323,12 @@ Make food logging fast enough to become a habit.
 - `GET /v1/users/{user_id}/favorites`
 
 **Frontend to-do:**
-- [ ] Build searchable food picker
+- [x] Build searchable food picker
 - [ ] Add recent foods tab
 - [ ] Add favorites tab
-- [ ] Build quantity editor
-- [ ] Build meal nutrition summary panel
-- [ ] Add optional custom food creation later if needed
+- [x] Build quantity editor
+- [x] Build meal nutrition summary panel
+- [x] Add optional custom food creation later if needed
 
 ---
 
@@ -350,10 +352,10 @@ See whether body-weight trend matches the goal.
 - `DELETE /v1/weight-entries/{id}`
 
 **Frontend to-do:**
-- [ ] Build weight chart page
-- [ ] Add quick weigh-in card
+- [x] Build weight chart page
+- [x] Add quick weigh-in card
 - [ ] Add range filters
-- [ ] Show recent trend summary
+- [x] Show recent trend summary
 
 ---
 
@@ -376,10 +378,10 @@ See reminders and important warnings in one place.
 - `GET /v1/notifications/unread-count`
 
 **Frontend to-do:**
-- [ ] Build notifications page or drawer
+- [x] Build notifications page or drawer
 - [ ] Add unread badge in nav
-- [ ] Add mark-read actions
-- [ ] Map notification types to deep links
+- [x] Add mark-read actions
+- [x] Map notification types to deep links
 
 ---
 
@@ -409,11 +411,11 @@ Give users proof that their effort is working.
 - `GET /v1/exercises/{id}/history`
 
 **Frontend to-do:**
-- [ ] Build progress dashboard
-- [ ] Build PR cards
-- [ ] Build volume/progression charts
-- [ ] Add adherence heatmap/calendar
-- [ ] Add weekly trends module
+- [x] Build progress dashboard
+- [x] Build PR cards
+- [x] Build volume/progression charts
+- [x] Add adherence heatmap/calendar
+- [x] Add weekly trends module
 
 ---
 
@@ -438,9 +440,9 @@ Reduce repeated logging work for common routines.
 - `POST /v1/workout-templates/{id}/apply`
 
 **Frontend to-do:**
-- [ ] Build templates list page
+- [x] Build templates list page
 - [ ] Build template builder
-- [ ] Add apply-to-today flow
+- [x] Add apply-to-today flow
 - [ ] Add create-from-existing-workout shortcut later
 
 ---
@@ -496,10 +498,10 @@ Log repeat home meals faster and keep nutrition accurate.
 - `POST /v1/recipes/{id}/log-to-meal`
 
 **Frontend to-do:**
-- [ ] Build recipe list page
-- [ ] Build recipe builder
-- [ ] Show per-serving nutrition
-- [ ] Add log-to-meal shortcut
+- [x] Build recipe list page
+- [x] Build recipe builder
+- [x] Show per-serving nutrition
+- [x] Add log-to-meal shortcut
 
 ---
 
@@ -524,11 +526,11 @@ Ask natural questions instead of manually interpreting all the data.
 - plus summary/recommendation/streak/records data exposed through coach tools
 
 **Frontend to-do:**
-- [ ] Build coach chat page
-- [ ] Build chat history sidebar/list
-- [ ] Add starter prompt chips
-- [ ] Add thumbs up/down feedback
-- [ ] Add links from coach answers to workouts, nutrition, and exercise pages where possible
+- [x] Build coach chat page
+- [x] Build chat history sidebar/list
+- [x] Add starter prompt chips
+- [x] Add thumbs up/down feedback
+- [x] Add links from coach answers to workouts, nutrition, and exercise pages where possible
 
 **Reuse note:**
 The current `frontend/` coach demo already proves the exercise search and program generation UX patterns.
@@ -551,10 +553,10 @@ Increase accountability and consistency through friendly competition.
 - `GET /v1/leaderboard`
 
 **Frontend to-do:**
-- [ ] Build leaderboard page
-- [ ] Add period filters
-- [ ] Add pillar filters
-- [ ] Highlight current user row
+- [x] Build leaderboard page
+- [x] Add period filters
+- [x] Add pillar filters
+- [x] Highlight current user row
 
 ---
 
@@ -586,10 +588,10 @@ Give users control over their account, privacy, and security.
 
 **Frontend to-do:**
 - [ ] Build profile settings section
-- [ ] Build security section
-- [ ] Build active sessions list
-- [ ] Build export data flow
-- [ ] Build delete account confirmation flow
+- [x] Build security section
+- [x] Build active sessions list
+- [x] Build export data flow
+- [x] Build delete account confirmation flow
 
 ---
 

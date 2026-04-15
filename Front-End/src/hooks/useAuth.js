@@ -15,22 +15,30 @@ export function initAuth() {
   if (_initPromise) return _initPromise;
 
   _initPromise = (async () => {
-    const { refresh_token, access_token, user } = authStore.getState();
+    const store = authStore.getState();
+    const { refresh_token, access_token, user } = store;
 
     // Already authenticated – nothing to do
-    if (access_token && user) return true;
+    if (access_token && user) {
+      store.setAuthBootstrapped(true);
+      return true;
+    }
 
     // No refresh token either – truly logged out
-    if (!refresh_token) return false;
+    if (!refresh_token) {
+      store.setAuthBootstrapped(true);
+      return false;
+    }
 
     // We have a refresh token but no access token → try to refresh
     try {
       const response = await authAPI.refresh(refresh_token);
-      authStore.getState().setTokens(response.access_token, response.refresh_token);
+      store.setTokens(response.access_token, response.refresh_token);
+      store.setAuthBootstrapped(true);
       return true;
     } catch {
       // Refresh failed (token revoked / expired) → clean state
-      authStore.getState().logout();
+      store.logout();
       return false;
     }
   })();
