@@ -313,7 +313,7 @@ export default function AIAssistant() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [pendingMessage, setPendingMessage] = useState(null);
   const [pendingFeedbackKey, setPendingFeedbackKey] = useState('');
-  const [summaryCollapsed, setSummaryCollapsed] = useState(false);
+  const [summaryCollapsed, setSummaryCollapsed] = useState(() => window.innerWidth < 680);
 
   const threadEndRef = useRef(null);
   const composerRef = useRef(null);

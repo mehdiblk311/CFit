@@ -297,7 +297,7 @@ function MiniLineChart({ data, color = 'oklch(0.44 0.15 140)', height = 88 }) {
 
 /* ─── Main Component ──────────────────────────────────────────────────── */
 
-export default function Progress() {
+export default function Progress({ embedded = false }) {
   const navigate  = useNavigate();
   const [prFilter, setPrFilter] = useState('all');
 
@@ -367,12 +367,14 @@ export default function Progress() {
   ];
 
   return (
-    <div className="prog-root">
+    <div className={`prog-root${embedded ? ' prog-root--embedded' : ''}`}>
       {/* ── Header ── */}
       <header className="prog-header">
-        <button className="prog-back-btn" onClick={() => navigate('/dashboard')} aria-label="Back">
-          <span className="material-symbols-outlined">arrow_back</span>
-        </button>
+        {!embedded && (
+          <button className="prog-back-btn" onClick={() => navigate('/dashboard')} aria-label="Back">
+            <span className="material-symbols-outlined">arrow_back</span>
+          </button>
+        )}
         <div className="prog-header-text">
           <h1 className="prog-title">Progress</h1>
           <p className="prog-subtitle">Your effort, visualized</p>

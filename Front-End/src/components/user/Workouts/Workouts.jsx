@@ -36,6 +36,7 @@ import {
 } from '../../../hooks/queries/useAnalytics';
 import { mapApiError } from '../../../utils/apiErrors';
 import { resolveExerciseImageUrl } from '../../../utils/exerciseImages';
+import Progress from '../Progress/Progress';
 import './Workouts.css';
 
 // ── Helpers ────────────────────────────────────────────────────────────
@@ -325,6 +326,7 @@ const CTX_NAV = [
   { id: 'programs', icon: 'grid_view',     label: 'Programs' },
   { id: 'library',  icon: 'book',          label: 'Library'  },
   { id: 'history',  icon: 'history',       label: 'History'  },
+  { id: 'progress', icon: 'trending_up',   label: 'Progress' },
 ];
 
 function WorkoutContextNav({ active, onChange, onClose, visible }) {
@@ -3279,7 +3281,10 @@ export default function Workouts() {
   const onClose = () => navigate('/dashboard');
   const requestedTab = location.state?.tab;
   const initialTab =
-    requestedTab === 'library' || requestedTab === 'history' || requestedTab === 'programs'
+    requestedTab === 'library'
+    || requestedTab === 'history'
+    || requestedTab === 'programs'
+    || requestedTab === 'progress'
       ? requestedTab
       : 'programs';
 
@@ -3320,7 +3325,12 @@ export default function Workouts() {
   }, []);
 
   useEffect(() => {
-    if (requestedTab !== 'library' && requestedTab !== 'history' && requestedTab !== 'programs') {
+    if (
+      requestedTab !== 'library'
+      && requestedTab !== 'history'
+      && requestedTab !== 'programs'
+      && requestedTab !== 'progress'
+    ) {
       return;
     }
 
@@ -3683,6 +3693,9 @@ export default function Workouts() {
               <HistoryView
                 onStartWorkout={() => handleQuickStart(null)}
               />
+            )}
+            {wkTab === 'progress' && (
+              <Progress embedded />
             )}
           </>
         )}

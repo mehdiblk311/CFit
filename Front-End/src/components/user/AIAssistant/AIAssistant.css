@@ -45,11 +45,12 @@
 /* ── Root Container ────────────────────────────────────────────── */
 
 .coach {
-  min-height: calc(100dvh - 96px);
+  height: calc(100dvh - 96px);
   background: var(--coach-cream);
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow: hidden;
 }
 
 /* ── Top Bar ───────────────────────────────────────────────────── */
@@ -182,6 +183,7 @@
   grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   flex: 1;
+  min-height: 0;
   position: relative;
 }
 
@@ -366,7 +368,7 @@
   box-shadow: var(--coach-shadow-clay);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  min-height: calc(100dvh - 192px);
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -1080,6 +1082,52 @@
 @keyframes coach-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* ── Responsive: Small phones ────────────────────────────────── */
+
+@media (max-width: 389px) {
+  .coach-topbar__new span:last-child {
+    display: none;
+  }
+
+  .coach-topbar__new {
+    padding: 10px;
+  }
+
+  .coach-bubble__copy p {
+    font-size: 14px;
+  }
+
+  .coach-prompt {
+    font-size: 11px;
+    padding: 7px 10px;
+  }
+}
+
+/* ── Responsive: Mobile (default, <680px) ────────────────────── */
+
+@media (max-width: 679px) {
+  .coach-ctx__kpis {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .coach-ctx__kpis::-webkit-scrollbar {
+    display: none;
+  }
+
+  .coach-kpi {
+    min-width: 100px;
+    flex-shrink: 0;
+  }
+
+  .coach-bubble {
+    max-width: 88%;
+  }
 }
 
 /* ── Responsive: Tablet ──────────────────────────────────────── */

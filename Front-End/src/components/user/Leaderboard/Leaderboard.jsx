@@ -300,7 +300,11 @@ export default function Leaderboard() {
   return (
     <div className="lb-root">
       <header className="lb-header">
-        <button className="lb-back-btn" onClick={() => navigate('/progress')} aria-label="Back to progress">
+        <button
+          className="lb-back-btn"
+          onClick={() => navigate('/workouts', { state: { tab: 'progress' } })}
+          aria-label="Back to progress"
+        >
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
 

@@ -62,6 +62,11 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.prog-root--embedded {
+  min-height: auto;
+  background: transparent;
+}
+
 /* ── Header ──────────────────────────────────────────────────────────── */
 
 .prog-header {
@@ -76,6 +81,14 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 2px dashed var(--oat);
+}
+
+.prog-root--embedded .prog-header {
+  position: static;
+  padding: 0 0 16px;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .prog-back-btn {
@@ -201,6 +214,11 @@
   gap: 20px;
   max-width: 520px;
   margin: 0 auto;
+}
+
+.prog-root--embedded .prog-main {
+  padding: 0;
+  max-width: none;
 }
 
 /* ── Card / Section ──────────────────────────────────────────────────── */
