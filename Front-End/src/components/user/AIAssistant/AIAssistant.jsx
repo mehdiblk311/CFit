@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../hooks/useAuth';
 import {
   useChatConversations,
   useConversationMessages,
@@ -11,16 +10,16 @@ import {
 import './AIAssistant.css';
 
 const STARTER_PROMPTS = [
-  'Analyze my week and tell me what to improve',
-  'Build me a recovery-focused training day',
-  'Am I hitting enough protein for muscle gain?',
-  'Give me a practical meal plan for today',
+  { label: 'Weekly analysis', prompt: 'Analyze my week and tell me what to improve' },
+  { label: 'Recovery day', prompt: 'Build me a recovery-focused training day' },
+  { label: 'Protein check', prompt: 'Am I hitting enough protein for muscle gain?' },
+  { label: 'Meal plan', prompt: 'Give me a practical meal plan for today' },
 ];
 
 const CONTEXT_LINKS = [
   {
     id: 'workouts',
-    label: 'Open Workouts',
+    label: 'Workouts',
     icon: 'fitness_center',
     path: '/workouts',
     state: { tab: 'programs' },
@@ -28,14 +27,14 @@ const CONTEXT_LINKS = [
   },
   {
     id: 'nutrition',
-    label: 'Open Nutrition',
+    label: 'Nutrition',
     icon: 'restaurant',
     path: '/nutrition',
     keywords: ['nutrition', 'meal', 'calorie', 'protein', 'carbs', 'fat', 'macro', 'food'],
   },
   {
     id: 'exercise-library',
-    label: 'Exercise Library',
+    label: 'Exercises',
     icon: 'menu_book',
     path: '/workouts',
     state: { tab: 'library' },
@@ -54,38 +53,40 @@ function clampPercent(value) {
   return value;
 }
 
+function formatWholeNumber(value) {
+  if (!Number.isFinite(value)) return '0';
+  return Math.round(value).toLocaleString('en-US');
+}
+
+function formatMetricLabel(value, unit = '') {
+  return `${formatWholeNumber(value)}${unit}`;
+}
+
+function formatMetricTarget(value, unit = '') {
+  if (!Number.isFinite(value) || value <= 0) return '—';
+  return `${formatWholeNumber(value)}${unit}`;
+}
+
 function formatClock(value) {
-  if (!value) return 'now';
-
+  if (!value) return '';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'now';
-
-  return date.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 }
 
 function formatThreadDate(value) {
   if (!value) return 'Just now';
-
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return 'Just now';
-
   const now = new Date();
   const sameDay = date.toDateString() === now.toDateString();
   if (sameDay) return `Today · ${formatClock(value)}`;
-
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  });
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 function inferContextLinks(content) {
   const normalized = (content || '').toLowerCase();
   if (!normalized) return [];
-
   return CONTEXT_LINKS.filter((link) =>
     link.keywords.some((keyword) => normalized.includes(keyword))
   );
@@ -95,26 +96,37 @@ function getConversationPreview(conversation) {
   const messages = toArray(conversation?.messages);
   const candidate = [...messages]
     .reverse()
-    .find((message) => (message?.role === 'assistant' || message?.role === 'user') && message?.content);
-
+    .find((m) => (m?.role === 'assistant' || m?.role === 'user') && m?.content);
   return candidate?.content || '';
 }
 
 function getConversationTitle(conversation) {
   const rawTitle = (conversation?.title || '').trim();
   if (rawTitle && rawTitle.toLowerCase() !== 'new conversation') return rawTitle;
-
   const preview = getConversationPreview(conversation);
   if (preview) return preview;
-
   return 'New coaching conversation';
+}
+
+function sortMessagesChronologically(messages) {
+  return toArray(messages)
+    .map((message, index) => ({ message, index }))
+    .sort((a, b) => {
+      const aTime = Date.parse(a.message?.created_at || '') || 0;
+      const bTime = Date.parse(b.message?.created_at || '') || 0;
+      if (aTime !== bTime) return aTime - bTime;
+      return a.index - b.index;
+    })
+    .map((entry) => entry.message);
 }
 
 function summarizeCoachContext(rawSummary) {
   const daily = rawSummary?.daily_summary || {};
   const streaks = rawSummary?.streaks?.streaks || {};
   const adherence = rawSummary?.streaks?.adherence_summary || {};
-  const recommendations = toArray(rawSummary?.recommendations?.rules).filter((rule) => rule?.applies !== false);
+  const recommendations = toArray(rawSummary?.recommendations?.rules).filter(
+    (rule) => rule?.applies !== false
+  );
   const records = toArray(rawSummary?.records);
 
   const caloriesTotal = Number(daily.total_calories || 0);
@@ -137,37 +149,37 @@ function summarizeCoachContext(rawSummary) {
   };
 }
 
-function MessageBubble({
-  message,
-  onFeedback,
-  feedbackPending,
-  onNavigate,
-}) {
+/* ── Message Bubble ────────────────────────────────────────────── */
+
+function MessageBubble({ message, onFeedback, feedbackPending, onNavigate }) {
   const isUser = message.role === 'user';
   const links = isUser ? [] : inferContextLinks(message.content);
-  const feedbackValue = message.feedback;
 
   return (
-    <article className={`ai-coach-message ${isUser ? 'ai-coach-message--user' : 'ai-coach-message--assistant'}`}>
-      <div className={`ai-coach-bubble ${isUser ? 'ai-coach-bubble--user' : 'ai-coach-bubble--assistant'}`}>
-        {!isUser && <span className="ai-coach-badge">Coach AI</span>}
+    <article
+      className={`coach-msg${isUser ? ' coach-msg--user' : ' coach-msg--assistant'}`}
+    >
+      <div className={`coach-bubble${isUser ? ' coach-bubble--user' : ' coach-bubble--assistant'}`}>
+        {!isUser && (
+          <span className="coach-badge">Coach AI</span>
+        )}
 
-        <div className="ai-coach-copy">
+        <div className="coach-bubble__copy">
           {String(message.content || '')
             .split('\n')
             .filter((line) => line.trim())
-            .map((line, index) => (
-              <p key={`${message.id || message.created_at || 'msg'}-${index}`}>{line}</p>
+            .map((line, i) => (
+              <p key={`${message.id || message.created_at || 'm'}-${i}`}>{line}</p>
             ))}
         </div>
 
         {!isUser && links.length > 0 && (
-          <div className="ai-coach-links" role="group" aria-label="Context links">
+          <div className="coach-bubble__links" role="group" aria-label="Context links">
             {links.map((link) => (
               <button
-                key={`${message.id || message.created_at || 'msg'}-${link.id}`}
+                key={`${message.id || message.created_at || 'm'}-${link.id}`}
                 type="button"
-                className="ai-coach-link"
+                className="coach-ctx-link"
                 onClick={() => onNavigate(link.path, link.state)}
               >
                 <span className="material-symbols-outlined">{link.icon}</span>
@@ -178,53 +190,142 @@ function MessageBubble({
         )}
 
         {!isUser && message.id && (
-          <div className="ai-coach-feedback" role="group" aria-label="Rate this answer">
+          <div className="coach-feedback" role="group" aria-label="Rate this answer">
             <button
               type="button"
-              className={`ai-coach-feedback-btn${feedbackValue === 1 ? ' ai-coach-feedback-btn--active' : ''}`}
+              className={`coach-feedback__btn${message.feedback === 1 ? ' coach-feedback__btn--up' : ''}`}
               onClick={() => onFeedback(message.id, 1)}
               disabled={feedbackPending}
+              aria-label="Helpful"
             >
               <span className="material-symbols-outlined">thumb_up</span>
-              Helpful
             </button>
             <button
               type="button"
-              className={`ai-coach-feedback-btn${feedbackValue === -1 ? ' ai-coach-feedback-btn--active' : ''}`}
+              className={`coach-feedback__btn${message.feedback === -1 ? ' coach-feedback__btn--down' : ''}`}
               onClick={() => onFeedback(message.id, -1)}
               disabled={feedbackPending}
+              aria-label="Needs improvement"
             >
               <span className="material-symbols-outlined">thumb_down</span>
-              Improve
             </button>
           </div>
         )}
       </div>
 
-      <span className="ai-coach-time">{formatClock(message.created_at)}</span>
+      <span className="coach-msg__time">{formatClock(message.created_at)}</span>
     </article>
   );
 }
 
+/* ── Context Panel ─────────────────────────────────────────────── */
+
+function ContextPanel({ context, loading }) {
+  if (loading) {
+    return (
+      <div className="coach-ctx coach-ctx--loading">
+        <div className="coach-ctx__shimmer" />
+        <div className="coach-ctx__shimmer coach-ctx__shimmer--short" />
+        <div className="coach-ctx__shimmer coach-ctx__shimmer--narrow" />
+      </div>
+    );
+  }
+
+  return (
+    <aside className="coach-ctx">
+      <div className="coach-ctx__head">
+        <h2>Today&apos;s Context</h2>
+        <span className="coach-ctx__label">Grounded in your data</span>
+      </div>
+
+      <div className="coach-ctx__meters">
+        <div className="coach-meter">
+          <div className="coach-meter__row">
+            <span>Calories</span>
+            <strong>
+              {formatMetricLabel(context.caloriesTotal)} / {formatMetricTarget(context.caloriesTarget)}
+            </strong>
+          </div>
+          <div className="coach-meter__track">
+            <div
+              className="coach-meter__fill"
+              style={{ width: `${context.caloriesProgress}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="coach-meter">
+          <div className="coach-meter__row">
+            <span>Protein</span>
+            <strong>
+              {formatMetricLabel(context.proteinTotal, 'g')} / {formatMetricTarget(context.proteinTarget, 'g')}
+            </strong>
+          </div>
+          <div className="coach-meter__track">
+            <div
+              className="coach-meter__fill coach-meter__fill--ube"
+              style={{ width: `${context.proteinProgress}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="coach-ctx__kpis">
+        <div className="coach-kpi">
+          <span className="coach-kpi__label">Workout streak</span>
+          <strong className="coach-kpi__value">{context.workoutStreak}<small>wk</small></strong>
+        </div>
+        <div className="coach-kpi">
+          <span className="coach-kpi__label">Meal streak</span>
+          <strong className="coach-kpi__value">{context.mealStreak}<small>d</small></strong>
+        </div>
+        <div className="coach-kpi">
+          <span className="coach-kpi__label">7-day adherence</span>
+          <strong className="coach-kpi__value">{Math.round(context.adherence7)}<small>%</small></strong>
+        </div>
+        <div className="coach-kpi">
+          <span className="coach-kpi__label">Tracked records</span>
+          <strong className="coach-kpi__value">{context.recordsCount}</strong>
+        </div>
+      </div>
+
+      {context.recommendations.length > 0 && (
+        <div className="coach-ctx__recs">
+          {context.recommendations.slice(0, 2).map((rule) => (
+            <div key={rule.id || rule.name} className="coach-rec">
+              <span className="material-symbols-outlined">assistant</span>
+              <span>{rule.name || 'Recommendation'}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </aside>
+  );
+}
+
+/* ── Main Component ─────────────────────────────────────────────── */
+
 export default function AIAssistant() {
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   const [activeConversationId, setActiveConversationId] = useState(null);
   const [composerValue, setComposerValue] = useState('');
   const [historyOpen, setHistoryOpen] = useState(false);
   const [pendingMessage, setPendingMessage] = useState(null);
   const [pendingFeedbackKey, setPendingFeedbackKey] = useState('');
+  const [summaryCollapsed, setSummaryCollapsed] = useState(false);
 
   const threadEndRef = useRef(null);
   const composerRef = useRef(null);
   const pendingIdRef = useRef(0);
-  const conversationSelectionVersionRef = useRef(0);
+  const conversationVersionRef = useRef(0);
 
   const historyParams = useMemo(() => ({ page: 1, limit: 40 }), []);
 
-  const { data: conversationsData, isLoading: conversationsLoading } = useChatConversations(historyParams);
-  const { data: conversationData, isLoading: conversationLoading } = useConversationMessages(activeConversationId);
+  const { data: conversationsData, isLoading: conversationsLoading } =
+    useChatConversations(historyParams);
+  const { data: conversationData, isLoading: conversationLoading } =
+    useConversationMessages(activeConversationId);
   const { data: coachSummaryData, isLoading: coachSummaryLoading } = useCoachSummary();
 
   const sendMessage = useSendChatMessage();
@@ -236,10 +337,15 @@ export default function AIAssistant() {
     return [];
   }, [conversationsData]);
 
+  const context = useMemo(
+    () => summarizeCoachContext(coachSummaryData),
+    [coachSummaryData]
+  );
+
   const renderedMessages = useMemo(() => {
-    const serverMessages = toArray(conversationData?.messages).filter((message) => {
-      if (message?.role !== 'assistant' && message?.role !== 'user') return false;
-      if (!message?.content) return false;
+    const serverMessages = sortMessagesChronologically(conversationData?.messages).filter((m) => {
+      if (m?.role !== 'assistant' && m?.role !== 'user') return false;
+      if (!m?.content) return false;
       return true;
     });
 
@@ -254,170 +360,163 @@ export default function AIAssistant() {
         },
       ];
     }
-
     return serverMessages;
   }, [activeConversationId, conversationData?.messages, pendingMessage]);
 
-  const context = useMemo(() => summarizeCoachContext(coachSummaryData), [coachSummaryData]);
-
+  /* auto-scroll */
   useEffect(() => {
     threadEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [renderedMessages.length, sendMessage.isPending]);
 
+  /* auto-resize textarea */
   useEffect(() => {
     const textarea = composerRef.current;
     if (!textarea) return;
-
     textarea.style.height = '0px';
     textarea.style.height = `${Math.min(textarea.scrollHeight, 140)}px`;
   }, [composerValue]);
 
-  function selectConversation(conversationId) {
-    conversationSelectionVersionRef.current += 1;
-    setActiveConversationId(conversationId);
-  }
+  const selectConversation = useCallback((id) => {
+    conversationVersionRef.current += 1;
+    setActiveConversationId(id);
+  }, []);
 
-  function startNewConversation() {
+  const startNewConversation = useCallback(() => {
     selectConversation(null);
     setHistoryOpen(false);
     setPendingMessage(null);
-  }
+  }, [selectConversation]);
 
-  function handleSend(rawMessage) {
-    const message = String(rawMessage || '').trim();
-    if (!message || sendMessage.isPending) return;
+  const handleSend = useCallback(
+    (raw) => {
+      const message = String(raw || '').trim();
+      if (!message || sendMessage.isPending) return;
 
-    pendingIdRef.current += 1;
-    const sourceConversationId = activeConversationId;
-    const sourceSelectionVersion = conversationSelectionVersionRef.current;
+      pendingIdRef.current += 1;
+      const srcId = activeConversationId;
+      const srcVersion = conversationVersionRef.current;
 
-    const optimistic = {
-      id: `pending-${pendingIdRef.current}`,
-      content: message,
-      created_at: new Date().toISOString(),
-      conversationId: sourceConversationId,
-    };
+      const optimistic = {
+        id: `pending-${pendingIdRef.current}`,
+        content: message,
+        created_at: new Date().toISOString(),
+        conversationId: srcId,
+      };
 
-    setPendingMessage(optimistic);
-    setComposerValue('');
+      setPendingMessage(optimistic);
+      setComposerValue('');
 
-    sendMessage.mutate(
-      {
-        message,
-        conversationId: sourceConversationId,
-      },
-      {
-        onSuccess: (response) => {
-          if (
-            response?.conversation_id &&
-            conversationSelectionVersionRef.current === sourceSelectionVersion
-          ) {
-            setActiveConversationId(response.conversation_id);
-          }
-          setPendingMessage((current) => (current?.id === optimistic.id ? null : current));
-        },
-        onError: () => {
-          setPendingMessage((current) => (current?.id === optimistic.id ? null : current));
-        },
-      }
-    );
-  }
+      sendMessage.mutate(
+        { message, conversationId: srcId },
+        {
+          onSuccess: (response) => {
+            if (response?.conversation_id && conversationVersionRef.current === srcVersion) {
+              setActiveConversationId(response.conversation_id);
+            }
+            setPendingMessage((cur) => (cur?.id === optimistic.id ? null : cur));
+          },
+          onError: () => {
+            setPendingMessage((cur) => (cur?.id === optimistic.id ? null : cur));
+          },
+        }
+      );
+    },
+    [activeConversationId, sendMessage]
+  );
 
-  function handleFeedback(messageId, feedback) {
-    if (!activeConversationId || !messageId) return;
+  const handleFeedback = useCallback(
+    (messageId, feedback) => {
+      if (!activeConversationId || !messageId) return;
+      const key = `${messageId}:${feedback}`;
+      setPendingFeedbackKey(key);
+      submitFeedback.mutate(
+        { messageId, feedback, conversationId: activeConversationId },
+        { onSettled: () => setPendingFeedbackKey('') }
+      );
+    },
+    [activeConversationId, submitFeedback]
+  );
 
-    const key = `${messageId}:${feedback}`;
-    setPendingFeedbackKey(key);
-
-    submitFeedback.mutate(
-      {
-        messageId,
-        feedback,
-        conversationId: activeConversationId,
-      },
-      {
-        onSettled: () => {
-          setPendingFeedbackKey('');
-        },
-      }
-    );
-  }
-
-  function handleNavigate(path, state) {
-    navigate(path, state ? { state } : undefined);
-  }
+  const handleNavigate = useCallback(
+    (path, state) => navigate(path, state ? { state } : undefined),
+    [navigate]
+  );
 
   return (
-    <div className="ai-coach-root">
-      <header className="ai-coach-topbar">
-        <div className="ai-coach-topbar-left">
+    <div className="coach">
+      {/* ── Top Bar ─────────────────────────────────────────── */}
+      <header className="coach-topbar">
+        <div className="coach-topbar__left">
           <button
             type="button"
-            className="ai-coach-topbar-history"
+            className="coach-topbar__menu"
             onClick={() => setHistoryOpen(true)}
-            aria-label="Open conversation history"
+            aria-label="Conversation history"
           >
             <span className="material-symbols-outlined">history</span>
           </button>
-          <div>
-            <p className="ai-coach-eyebrow">AI Coach</p>
-            <h1 className="ai-coach-title">Kinetic Coaching</h1>
+          <div className="coach-topbar__brand">
+            <span className="coach-topbar__eyebrow">Coach</span>
+            <h1 className="coach-topbar__title">Kinetic AI</h1>
           </div>
         </div>
 
-        <div className="ai-coach-topbar-right">
-          <div className="ai-coach-user-pill">
-            <span className="material-symbols-outlined">face</span>
-            <span>{user?.name || 'Athlete'}</span>
-          </div>
-          <button type="button" className="ai-coach-new-btn" onClick={startNewConversation}>
+        <div className="coach-topbar__right">
+          <button
+            type="button"
+            className="coach-topbar__new"
+            onClick={startNewConversation}
+          >
             <span className="material-symbols-outlined">add</span>
-            New Chat
+            <span>New chat</span>
           </button>
         </div>
       </header>
 
-      <div className="ai-coach-shell">
-        <aside className={`ai-coach-history${historyOpen ? ' ai-coach-history--open' : ''}`}>
-          <div className="ai-coach-history-head">
-            <h2>Conversations</h2>
-            <button type="button" onClick={startNewConversation}>
+      {/* ── Shell ───────────────────────────────────────────── */}
+      <div className="coach-shell">
+        {/* ── History Drawer ──────────────────────────────── */}
+        <aside className={`coach-history${historyOpen ? ' coach-history--open' : ''}`}>
+          <div className="coach-history__head">
+            <h2>Threads</h2>
+            <button type="button" className="coach-history__fresh" onClick={startNewConversation}>
               <span className="material-symbols-outlined">add</span>
-              Fresh Session
+              <span>New</span>
             </button>
           </div>
 
-          <div className="ai-coach-history-list">
+          <div className="coach-history__list">
             {conversationsLoading ? (
-              <div className="ai-coach-history-loading">
-                {[1, 2, 3].map((row) => (
-                  <div key={row} className="ai-coach-history-skeleton" />
+              <div className="coach-history__skeletons">
+                {[1, 2, 3].map((n) => (
+                  <div key={n} className="coach-history__skeleton" />
                 ))}
               </div>
             ) : conversations.length === 0 ? (
-              <div className="ai-coach-history-empty">
+              <div className="coach-history__empty">
                 <span className="material-symbols-outlined">chat_bubble_outline</span>
-                <p>No saved threads yet.</p>
+                <p>No saved threads yet</p>
               </div>
             ) : (
-              conversations.map((conversation) => {
-                const title = getConversationTitle(conversation);
-                const preview = getConversationPreview(conversation) || 'Tap to continue this coaching thread.';
-                const isActive = conversation.id === activeConversationId;
-
+              conversations.map((conv) => {
+                const title = getConversationTitle(conv);
+                const preview = getConversationPreview(conv) || 'Continue this thread';
+                const isActive = conv.id === activeConversationId;
                 return (
                   <button
-                    key={conversation.id}
+                    key={conv.id}
                     type="button"
-                    className={`ai-coach-history-card${isActive ? ' ai-coach-history-card--active' : ''}`}
+                    className={`coach-history__card${isActive ? ' coach-history__card--active' : ''}`}
                     onClick={() => {
-                      selectConversation(conversation.id);
+                      selectConversation(conv.id);
                       setHistoryOpen(false);
                     }}
                   >
-                    <span className="ai-coach-history-card-title">{title}</span>
-                    <span className="ai-coach-history-card-preview">{preview}</span>
-                    <span className="ai-coach-history-card-date">{formatThreadDate(conversation.updated_at)}</span>
+                    <span className="coach-history__card-title">{title}</span>
+                    <span className="coach-history__card-preview">{preview}</span>
+                    <span className="coach-history__card-date">
+                      {formatThreadDate(conv.updated_at)}
+                    </span>
                   </button>
                 );
               })
@@ -425,88 +524,38 @@ export default function AIAssistant() {
           </div>
         </aside>
 
-        <section className="ai-coach-panel">
-          <section className="ai-coach-summary">
-            <div className="ai-coach-summary-head">
-              <h2>Today&apos;s Context</h2>
-              <span>Grounded in your data</span>
-            </div>
+        {/* ── Main Panel ──────────────────────────────────── */}
+        <section className="coach-panel">
+          {/* Context summary – collapsible */}
+          <div className={`coach-ctx-wrapper${summaryCollapsed ? ' coach-ctx-wrapper--collapsed' : ''}`}>
+            <ContextPanel context={context} loading={coachSummaryLoading} />
+            <button
+              type="button"
+              className="coach-ctx-toggle"
+              onClick={() => setSummaryCollapsed((v) => !v)}
+              aria-label={summaryCollapsed ? 'Expand context' : 'Collapse context'}
+            >
+              <span className="material-symbols-outlined">
+                {summaryCollapsed ? 'expand_more' : 'expand_less'}
+              </span>
+            </button>
+          </div>
 
-            {coachSummaryLoading ? (
-              <div className="ai-coach-summary-loading" />
-            ) : (
-              <>
-                <div className="ai-coach-meters">
-                  <div className="ai-coach-meter">
-                    <div className="ai-coach-meter-row">
-                      <span>Calories</span>
-                      <strong>
-                        {Math.round(context.caloriesTotal)} / {context.caloriesTarget || '—'}
-                      </strong>
-                    </div>
-                    <div className="ai-coach-meter-track">
-                      <div className="ai-coach-meter-fill" style={{ width: `${context.caloriesProgress}%` }} />
-                    </div>
-                  </div>
-
-                  <div className="ai-coach-meter">
-                    <div className="ai-coach-meter-row">
-                      <span>Protein</span>
-                      <strong>
-                        {Math.round(context.proteinTotal)}g / {context.proteinTarget || '—'}g
-                      </strong>
-                    </div>
-                    <div className="ai-coach-meter-track">
-                      <div className="ai-coach-meter-fill ai-coach-meter-fill--purple" style={{ width: `${context.proteinProgress}%` }} />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="ai-coach-kpis">
-                  <div>
-                    <span>Workout streak</span>
-                    <strong>{context.workoutStreak} wk</strong>
-                  </div>
-                  <div>
-                    <span>Meal streak</span>
-                    <strong>{context.mealStreak} d</strong>
-                  </div>
-                  <div>
-                    <span>7-day adherence</span>
-                    <strong>{Math.round(context.adherence7)}%</strong>
-                  </div>
-                  <div>
-                    <span>Tracked records</span>
-                    <strong>{context.recordsCount}</strong>
-                  </div>
-                </div>
-
-                {context.recommendations.length > 0 && (
-                  <div className="ai-coach-recommendations">
-                    {context.recommendations.slice(0, 2).map((rule) => (
-                      <div key={rule.id || rule.name} className="ai-coach-rec-chip">
-                        <span className="material-symbols-outlined">assistant</span>
-                        <span>{rule.name || 'Recommendation'}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-          </section>
-
-          <section className="ai-coach-thread" aria-live="polite">
+          {/* Thread */}
+          <section className="coach-thread" aria-live="polite">
             {activeConversationId && conversationLoading ? (
-              <div className="ai-coach-thread-loading">
-                <div className="ai-coach-thread-spinner" />
-                Loading conversation…
+              <div className="coach-thread__loading">
+                <div className="coach-thread__spinner" />
+                <span>Loading conversation…</span>
               </div>
             ) : renderedMessages.length === 0 ? (
-              <div className="ai-coach-empty">
-                <span className="material-symbols-outlined">smart_toy</span>
+              <div className="coach-thread__empty">
+                <div className="coach-thread__empty-icon">
+                  <span className="material-symbols-outlined">smart_toy</span>
+                </div>
                 <h3>Ask your coach anything</h3>
                 <p>
-                  Use a starter prompt or ask about workouts, nutrition, recovery, and progress.
+                  Workouts, nutrition, recovery, progress — your AI coach is rooted in your real data.
                 </p>
               </div>
             ) : (
@@ -524,13 +573,11 @@ export default function AIAssistant() {
             )}
 
             {sendMessage.isPending && (
-              <article className="ai-coach-message ai-coach-message--assistant">
-                <div className="ai-coach-bubble ai-coach-bubble--assistant ai-coach-bubble--typing">
-                  <span className="ai-coach-badge">Coach AI</span>
-                  <div className="ai-coach-typing">
-                    <span />
-                    <span />
-                    <span />
+              <article className="coach-msg coach-msg--assistant">
+                <div className="coach-bubble coach-bubble--assistant coach-bubble--typing">
+                  <span className="coach-badge">Coach AI</span>
+                  <div className="coach-typing">
+                    <span /><span /><span />
                   </div>
                 </div>
               </article>
@@ -539,45 +586,48 @@ export default function AIAssistant() {
             <div ref={threadEndRef} />
           </section>
 
+          {/* Composer */}
           <form
-            className="ai-coach-composer"
-            onSubmit={(event) => {
-              event.preventDefault();
+            className="coach-composer"
+            onSubmit={(e) => {
+              e.preventDefault();
               handleSend(composerValue);
             }}
           >
-            <div className="ai-coach-prompts" role="group" aria-label="Starter prompts">
-              {STARTER_PROMPTS.map((prompt) => (
-                <button
-                  key={prompt}
-                  type="button"
-                  className="ai-coach-prompt"
-                  onClick={() => handleSend(prompt)}
-                  disabled={sendMessage.isPending}
-                >
-                  {prompt}
-                </button>
-              ))}
-            </div>
+            {renderedMessages.length === 0 && (
+              <div className="coach-prompts" role="group" aria-label="Starter prompts">
+                {STARTER_PROMPTS.map((sp) => (
+                  <button
+                    key={sp.label}
+                    type="button"
+                    className="coach-prompt"
+                    onClick={() => handleSend(sp.prompt)}
+                    disabled={sendMessage.isPending}
+                  >
+                    {sp.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
-            <div className="ai-coach-composer-row">
+            <div className="coach-composer__row">
               <textarea
                 ref={composerRef}
-                className="ai-coach-input"
+                className="coach-composer__input"
                 value={composerValue}
                 rows={1}
-                placeholder="Ask for a plan, nutrition adjustment, or recovery strategy…"
-                onChange={(event) => setComposerValue(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' && !event.shiftKey) {
-                    event.preventDefault();
+                placeholder="Ask about training, nutrition, or recovery…"
+                onChange={(e) => setComposerValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
                     handleSend(composerValue);
                   }
                 }}
               />
               <button
                 type="submit"
-                className="ai-coach-send"
+                className="coach-composer__send"
                 disabled={!composerValue.trim() || sendMessage.isPending}
                 aria-label="Send message"
               >
@@ -588,11 +638,12 @@ export default function AIAssistant() {
         </section>
       </div>
 
+      {/* ── Backdrop ──────────────────────────────────────── */}
       {historyOpen && (
         <button
           type="button"
-          className="ai-coach-backdrop"
-          aria-label="Close conversation history"
+          className="coach-backdrop"
+          aria-label="Close history"
           onClick={() => setHistoryOpen(false)}
         />
       )}
