@@ -44,8 +44,8 @@ export const adminAPI = {
   },
 
   // Delete user
-  deleteUser: async (user_id) => {
-    const response = await client.delete(`/v1/admin/users/${user_id}`);
+  deleteUser: async (user_id, params = { confirm: 'true' }) => {
+    const response = await client.delete(`/v1/admin/users/${user_id}`, { params });
     return response.data;
   },
 

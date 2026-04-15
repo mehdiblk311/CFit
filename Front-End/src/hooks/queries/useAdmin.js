@@ -72,8 +72,10 @@ export function useBanUser() {
 
   return useMutation({
     mutationFn: ({ user_id, reason }) => adminAPI.banUser(user_id, reason),
-    onSuccess: () => {
+    onSuccess: (_, { user_id }) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users', user_id] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'metrics'] });
     },
   });
 }
@@ -83,8 +85,10 @@ export function useUnbanUser() {
 
   return useMutation({
     mutationFn: (user_id) => adminAPI.unbanUser(user_id),
-    onSuccess: () => {
+    onSuccess: (_, user_id) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users', user_id] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'metrics'] });
     },
   });
 }
@@ -108,6 +112,7 @@ export function useDeleteAdminUser() {
     mutationFn: (user_id) => adminAPI.deleteUser(user_id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'metrics'] });
     },
   });
 }
