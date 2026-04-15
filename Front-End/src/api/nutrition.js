@@ -89,6 +89,18 @@ export const nutritionAPI = {
     return response.data;
   },
 
+  // Delete recipe
+  deleteRecipe: async (recipe_id) => {
+    const response = await client.delete(`/v1/recipes/${recipe_id}`);
+    return response.data;
+  },
+
+  // Log recipe to meal
+  logRecipeToMeal: async (recipe_id, data) => {
+    const response = await client.post(`/v1/recipes/${recipe_id}/log-to-meal`, data);
+    return response.data;
+  },
+
   // Get favorite foods
   getFavorites: async (params = {}) => {
     const user_id = params.user_id || authStore.getState().user?.id;

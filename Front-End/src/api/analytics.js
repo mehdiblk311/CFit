@@ -1,21 +1,15 @@
 import client from './client';
 
 export const analyticsAPI = {
-  // Get analytics dashboard data
-  getDashboard: async (user_id, params = {}) => {
-    const response = await client.get(`/v1/users/${user_id}/analytics`, { params });
-    return response.data;
-  },
-
-  // Get workout volume (total weight lifted)
-  getWorkoutVolume: async (user_id, params = {}) => {
-    const response = await client.get(`/v1/users/${user_id}/analytics/volume`, { params });
-    return response.data;
-  },
-
-  // Get personal records by exercise
+  // Get personal records
   getRecords: async (user_id, params = {}) => {
     const response = await client.get(`/v1/users/${user_id}/records`, { params });
+    return response.data;
+  },
+
+  // Get workout stats
+  getWorkoutStats: async (user_id, params = {}) => {
+    const response = await client.get(`/v1/users/${user_id}/workout-stats`, { params });
     return response.data;
   },
 
@@ -25,15 +19,21 @@ export const analyticsAPI = {
     return response.data;
   },
 
-  // Get weekly stats
-  getWeeklyStats: async (user_id, params = {}) => {
-    const response = await client.get(`/v1/users/${user_id}/weekly-stats`, { params });
+  // Get streaks & adherence
+  getStreaks: async (user_id, params = {}) => {
+    const response = await client.get(`/v1/users/${user_id}/streaks`, { params });
     return response.data;
   },
 
-  // Get body measurements progress
-  getMeasurements: async (user_id, params = {}) => {
-    const response = await client.get(`/v1/users/${user_id}/measurements`, { params });
+  // Get weekly summary
+  getWeeklySummary: async (user_id, params = {}) => {
+    const response = await client.get(`/v1/users/${user_id}/weekly-summary`, { params });
+    return response.data;
+  },
+
+  // Get exercise history / progression
+  getExerciseHistory: async (exercise_id, params = {}) => {
+    const response = await client.get(`/v1/exercises/${exercise_id}/history`, { params });
     return response.data;
   },
 };

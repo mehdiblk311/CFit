@@ -46,8 +46,8 @@ export const authAPI = {
   },
 
   // Get list of active sessions
-  getSessions: async () => {
-    const response = await client.get('/v1/auth/sessions');
+  getSessions: async (params = {}) => {
+    const response = await client.get('/v1/auth/sessions', { params });
     return response.data;
   },
 

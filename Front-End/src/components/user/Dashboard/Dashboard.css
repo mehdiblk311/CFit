@@ -168,6 +168,12 @@
   border-style: solid;
 }
 
+.dash-stat-box--soft {
+  background: rgba(255, 247, 237, 0.65);
+  border: 2px solid rgba(245, 217, 176, 0.9);
+  border-style: solid;
+}
+
 .dash-stat-label {
   font-family: 'Space Mono', monospace;
   font-size: 8px;
@@ -190,10 +196,65 @@
   color: #2e2f2e;
 }
 
+.dash-stat-val--compact {
+  font-size: 15px;
+  line-height: 1.3;
+}
+
 .dash-stat-sub {
   font-family: 'Space Mono', monospace;
   font-size: 9px;
   color: #5b5c5a;
+}
+
+.dash-stat-copy {
+  margin: 0;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: #5b5c5a;
+  letter-spacing: 0.4px;
+  line-height: 1.5;
+}
+
+.dash-stat-icon {
+  color: #38671a;
+  font-size: 18px;
+  font-variation-settings: 'FILL' 1;
+}
+
+.dash-summary-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.dash-flag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid #dad4c8;
+  background: #f7f4ee;
+  color: #5b5c5a;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.dash-flag-chip--alert {
+  background: #fff2ed;
+  border-color: #f2c7bc;
+  color: #a53f21;
+}
+
+.dash-flag-chip--soft {
+  background: rgba(56, 103, 26, 0.08);
+  border-color: rgba(56, 103, 26, 0.18);
+  color: #2c5a0d;
 }
 
 /* ── Macro Rings ────────────────────────────────────────────────────── */
@@ -244,6 +305,14 @@
   color: #5b5c5a;
 }
 
+.dash-ring-target {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  color: #85867f;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
 /* ── Skeleton ───────────────────────────────────────────────────────── */
 @keyframes dash-shimmer {
   0%   { background-position: -400px 0; }
@@ -253,6 +322,38 @@
   background: linear-gradient(90deg, #e8e6e0 25%, #f0ede8 50%, #e8e6e0 75%);
   background-size: 800px 100%;
   animation: dash-shimmer 1.4s infinite linear;
+}
+
+.dash-skeleton--title {
+  height: 26px;
+  width: 60%;
+  border-radius: 999px;
+  margin-bottom: 10px;
+}
+
+.dash-skeleton--subtitle {
+  height: 12px;
+  width: 42%;
+  border-radius: 999px;
+  margin-bottom: 18px;
+}
+
+.dash-skeleton--box {
+  height: 54px;
+  width: 100%;
+  border-radius: 12px;
+}
+
+.dash-skeleton--ring {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+}
+
+.dash-skeleton--label {
+  width: 58px;
+  height: 10px;
+  border-radius: 999px;
 }
 
 /* ── Empty State ─────────────────────────────────────────────────────── */
@@ -286,6 +387,20 @@
   display: flex;
   gap: 12px;
   margin-top: 8px;
+}
+
+.dash-card--notice {
+  padding: 18px 20px;
+  background: #fff7ed;
+  border-color: #f5d9b0;
+  box-shadow: -5px 5px 0 #7b4b10, inset 2px 2px 0 rgba(255,255,255,0.6);
+}
+
+.dash-notice-copy {
+  margin: 10px 0 0;
+  color: #70461a;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 /* ── Quick Actions ──────────────────────────────────────────────────── */
@@ -484,6 +599,31 @@
   padding: 20px 24px;
 }
 
+.dash-weekly-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #5b5c5a;
+}
+
+.dash-weekly-footer {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.4px;
+  color: #5b5c5a;
+}
+
 /* ── Recommendation Card ────────────────────────────────────────────── */
 .dash-card--recs {
   padding: 20px 24px 24px;
@@ -528,4 +668,29 @@
   letter-spacing: 0.3px;
   margin: 0;
   line-height: 1.5;
+}
+
+@media (max-width: 420px) {
+  .dash-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-empty-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .dash-weekly-meta {
+    align-items: flex-start;
+  }
+
+  .dash-counter-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
 }

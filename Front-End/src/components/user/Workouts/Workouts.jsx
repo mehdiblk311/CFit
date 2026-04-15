@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { workoutStore } from '../../../stores/workoutStore';
 import { uiStore } from '../../../stores/uiStore';
@@ -3275,10 +3275,16 @@ function WorkoutSummary({ workoutId, sessionData, durationSeconds, programName, 
 
 export default function Workouts() {
   const navigate = useNavigate();
+  const location = useLocation();
   const onClose = () => navigate('/dashboard');
+  const requestedTab = location.state?.tab;
+  const initialTab =
+    requestedTab === 'library' || requestedTab === 'history' || requestedTab === 'programs'
+      ? requestedTab
+      : 'programs';
 
   const [navVisible, setNavVisible] = useState(false);
-  const [wkTab, setWkTab] = useState('programs');
+  const [wkTab, setWkTab] = useState(initialTab);
   const [previewProgramAssignment, setPreviewProgramAssignment] = useState(null);
   const [previewTemplate, setPreviewTemplate] = useState(null);
   const [showTemplateBuilder, setShowTemplateBuilder] = useState(false);
@@ -3312,6 +3318,19 @@ export default function Workouts() {
     const t = setTimeout(() => setNavVisible(true), 80);
     return () => clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    if (requestedTab !== 'library' && requestedTab !== 'history' && requestedTab !== 'programs') {
+      return;
+    }
+
+    setPreviewProgramAssignment(null);
+    setPreviewTemplate(null);
+    setShowTemplateBuilder(false);
+    setWkTab(requestedTab);
+
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, navigate, requestedTab]);
 
   useEffect(() => {
     if (typeof navigator === 'undefined') return;
