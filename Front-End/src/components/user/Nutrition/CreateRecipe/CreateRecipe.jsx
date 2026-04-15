@@ -1,7 +1,23 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useCreateRecipe, useRecipes, useDeleteRecipe } from '../../../../hooks/queries/useNutrition';
+import { useCreateRecipe, useRecipes, useDeleteRecipe, useLogRecipeToMeal, useMeals } from '../../../../hooks/queries/useNutrition';
 import './CreateRecipe.css';
+
+function getLocalDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getDateKey(value) {
+  if (!value) return '';
+  if (typeof value === 'string') return value.slice(0, 10);
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return '';
+  return getLocalDateKey(parsed);
+}
 
 function getDraftFromState(state) {
   return {
@@ -49,7 +65,15 @@ function RecipesListView() {
   const navigate = useNavigate();
   const { data: recipesData, isLoading, isError } = useRecipes({ limit: 50 });
   const deleteRecipe = useDeleteRecipe();
+  const logRecipe = useLogRecipeToMeal();
   
+  const [loggingRecipeId, setLoggingRecipeId] = useState(null);
+  const [logMealType, setLogMealType] = useState('snack');
+  
+  const todayKey = getLocalDateKey();
+  const { data: mealsData } = useMeals({ date: todayKey });
+  const todayMeals = Array.isArray(mealsData?.data) ? mealsData.data : Array.isArray(mealsData) ? mealsData : [];
+
   const recipes = Array.isArray(recipesData?.data)
     ? recipesData.data
     : Array.isArray(recipesData)
@@ -139,6 +163,13 @@ function RecipesListView() {
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <span className="cr-recipe-card-chip">{perServing.kcal} kcal / serving</span>
                       <button
+                        className="cr-log-btn"
+                        onClick={(e) => { e.stopPropagation(); setLoggingRecipeId(recipe.id); }}
+                        title="Log to Meal"
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>add_task</span>
+                      </button>
+                      <button
                         className="cr-remove-btn"
                         onClick={(e) => handleDelete(e, recipe.id)}
                         disabled={deleteRecipe.isPending}
@@ -163,6 +194,56 @@ function RecipesListView() {
                       {recipe.items.length > 3 && (
                         <span className="cr-recipe-card-item-pill">+{recipe.items.length - 3} more</span>
                       )}
+                    </div>
+                  )}
+
+                  {loggingRecipeId === recipe.id && (
+                    <div className="cr-log-panel">
+                      <select 
+                        value={logMealType} 
+                        onChange={e => setLogMealType(e.target.value)} 
+                        className="cr-recipe-input" 
+                        style={{ marginTop: 0, padding: '6px 10px', width: 'auto' }}
+                      >
+                        <option value="breakfast">Breakfast</option>
+                        <option value="lunch">Lunch</option>
+                        <option value="dinner">Dinner</option>
+                        <option value="snack">Snack</option>
+                      </select>
+                      <button
+                        className="cr-save-btn"
+                        style={{ padding: '8px 16px', fontSize: '12px', flex: 1 }}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          try {
+                            const existingMeal = todayMeals.find((meal) =>
+                              meal.meal_type === logMealType && getDateKey(meal.date) === todayKey
+                            );
+                            await logRecipe.mutateAsync({
+                              recipe_id: recipe.id,
+                              data: {
+                                date: todayKey,
+                                meal_type: logMealType,
+                                servings: 1,
+                                ...(existingMeal ? { meal_id: existingMeal.id } : {})
+                              }
+                            });
+                            setLoggingRecipeId(null);
+                            navigate('/nutrition');
+                          } catch (err) {
+                            console.error(err);
+                          }
+                        }}
+                        disabled={logRecipe.isPending}
+                      >
+                        {logRecipe.isPending ? 'Logging...' : 'Log 1 Serving'}
+                      </button>
+                      <button
+                        className="cr-remove-btn"
+                        onClick={(e) => { e.stopPropagation(); setLoggingRecipeId(null); }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>
+                      </button>
                     </div>
                   )}
                 </div>

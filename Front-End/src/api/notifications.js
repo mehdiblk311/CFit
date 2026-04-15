@@ -2,11 +2,24 @@ import client from './client';
 
 const NOTIFICATIONS_PAGE_SIZE = 100;
 
+function parsePayload(payloadJson) {
+  if (!payloadJson) return null;
+  if (typeof payloadJson === 'object') return payloadJson;
+  if (typeof payloadJson !== 'string') return null;
+
+  try {
+    return JSON.parse(payloadJson);
+  } catch {
+    return null;
+  }
+}
+
 function normalizeNotification(notification) {
   if (!notification || typeof notification !== 'object') return notification;
 
   return {
     ...notification,
+    payload: parsePayload(notification.payload_json),
     read_at: notification.read_at || null,
     created_at: notification.created_at || null,
   };

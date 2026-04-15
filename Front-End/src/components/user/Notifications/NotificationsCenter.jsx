@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { accountAPI } from '../../../api/account';
 import { notificationsAPI } from '../../../api/notifications';
 import { useNavigate } from 'react-router-dom';
 import './NotificationsCenter.css';
@@ -19,9 +21,34 @@ function markNotificationListAsRead(notifications, notificationId = null) {
   });
 }
 
+function extractExportId(notification) {
+  if (notification?.payload?.export_id) return notification.payload.export_id;
+  if (typeof notification?.payload_json !== 'string') return null;
+
+  try {
+    const parsed = JSON.parse(notification.payload_json);
+    return parsed?.export_id || null;
+  } catch {
+    return null;
+  }
+}
+
+function triggerBrowserDownload(blob, filename, contentType) {
+  const fileBlob = blob instanceof Blob ? blob : new Blob([blob], { type: contentType });
+  const objectUrl = window.URL.createObjectURL(fileBlob);
+  const link = document.createElement('a');
+  link.href = objectUrl;
+  link.download = filename || 'export.json';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(objectUrl);
+}
+
 export default function NotificationsCenter() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [downloadingNotificationId, setDownloadingNotificationId] = useState(null);
 
   const { data: notifications = [], isLoading, isError } = useQuery({
     queryKey: ['notifications'],
@@ -123,7 +150,7 @@ export default function NotificationsCenter() {
     }
   };
 
-  const handleNotificationClick = (notification) => {
+  const handleNotificationClick = async (notification) => {
     if (!notification.read_at) {
       markAsReadMutation.mutate(notification.id);
     }
@@ -138,9 +165,29 @@ export default function NotificationsCenter() {
       case 'recovery_warning':
         navigate('/workouts');
         break;
-      case 'export_ready':
-        navigate('/settings');
+      case 'export_ready': {
+        const exportId = extractExportId(notification);
+        if (!exportId) {
+          navigate('/settings');
+          break;
+        }
+
+        try {
+          setDownloadingNotificationId(notification.id);
+          const file = await accountAPI.downloadExport(exportId);
+          triggerBrowserDownload(file.blob, file.filename, file.contentType);
+        } catch (error) {
+          if (error?.response?.status === 409) {
+            alert('Your export is not ready yet. Please try again in a moment.');
+          } else {
+            alert('Could not download export data right now.');
+          }
+          navigate('/settings');
+        } finally {
+          setDownloadingNotificationId(null);
+        }
         break;
+      }
       default:
         break;
     }
@@ -148,6 +195,7 @@ export default function NotificationsCenter() {
 
   const isMutatingReadState =
     markAsReadMutation.isPending || markAllAsReadMutation.isPending;
+  const isBusy = isMutatingReadState || Boolean(downloadingNotificationId);
 
   if (isLoading) {
     return (
@@ -219,14 +267,16 @@ export default function NotificationsCenter() {
               <div 
                 key={notif.id} 
                 className={`notif-card ${!notif.read_at ? 'notif-card-unread' : ''}`}
-                onClick={() => !isMutatingReadState && handleNotificationClick(notif)}
+                onClick={() => !isBusy && handleNotificationClick(notif)}
               >
                 <div className="notif-card-icon" style={{ backgroundColor: getNotificationColor(notif.type) }}>
                   <span className="material-symbols-outlined">{getNotificationIcon(notif.type)}</span>
                 </div>
                 <div className="notif-card-content">
                   <h3 className="notif-card-title">{notif.title}</h3>
-                  <p className="notif-card-msg">{notif.message}</p>
+                  <p className="notif-card-msg">
+                    {downloadingNotificationId === notif.id ? 'Preparing download...' : notif.message}
+                  </p>
                   <span className="notif-card-time notif-label-mono">
                     {new Date(notif.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' })}
                   </span>

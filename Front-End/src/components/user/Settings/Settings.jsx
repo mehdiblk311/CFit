@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import { authStore } from '../../../stores/authStore';
 import TwoFactorSetup from '../../auth/TwoFactorSetup';
+import SessionsManager from './SessionsManager';
+import ExportManager from './ExportManager';
+import DeleteAccountManager from './DeleteAccountManager';
 import './Settings.css';
 
 function Toggle({ checked, onChange }) {
@@ -24,6 +27,9 @@ export default function Settings() {
   const [darkMode,   setDarkMode]   = useState(false);
   const [language,   setLanguage]   = useState('EN');
   const [show2FA,    setShow2FA]    = useState(false);
+  const [showSessions, setShowSessions] = useState(false);
+  const [showExport, setShowExport]     = useState(false);
+  const [showDelete, setShowDelete]     = useState(false);
   const twoFactorEnabled = user?.two_factor_enabled ?? false;
 
   const name  = user?.name  ?? 'Athlete';
@@ -163,7 +169,7 @@ export default function Settings() {
         {/* ── Security / 2FA ── */}
         <section className="st-card st-card--shadow" id="security">
           <h2 className="st-section-title">Security</h2>
-          <div className="st-2fa-row">
+          <div className="st-2fa-row" style={{marginBottom: '16px'}}>
             <div className="st-2fa-left">
               <div className="st-2fa-icon" aria-hidden="true">{twoFactorEnabled ? '🔐' : '🛡️'}</div>
               <div className="st-2fa-info">
@@ -178,6 +184,24 @@ export default function Settings() {
               onClick={() => setShow2FA(true)}
             >
               {twoFactorEnabled ? 'Manage' : 'Enable'}
+            </button>
+          </div>
+
+          <div className="st-2fa-row">
+            <div className="st-2fa-left">
+              <div className="st-2fa-icon" aria-hidden="true">💻</div>
+              <div className="st-2fa-info">
+                <span className="st-2fa-label">Active Sessions</span>
+                <span className="st-2fa-status" style={{background: '#f5f4f2', color: '#5b5c5a', border: '2px solid #dad4c8'}}>
+                  Manage Devices
+                </span>
+              </div>
+            </div>
+            <button
+              className="st-2fa-btn st-2fa-btn--manage"
+              onClick={() => setShowSessions(true)}
+            >
+              View All
             </button>
           </div>
         </section>
@@ -212,17 +236,19 @@ export default function Settings() {
 
         {/* ── Legal ── */}
         <section className="st-section" id="legal">
-          {[
-            ['Privacy Policy',   'chevron_right'],
-            ['Terms of Service', 'chevron_right'],
-            ['Export My Data',   'download'     ],
-          ].map(([label, icon]) => (
-            <div key={label} className="st-legal-row">
-              <span>{label}</span>
-              <span className="material-symbols-outlined" style={{ color: '#5b5c5a', fontSize: 20 }}>{icon}</span>
-            </div>
-          ))}
-          <div className="st-legal-row st-legal-row--danger">
+          <div className="st-legal-row">
+            <span>Privacy Policy</span>
+            <span className="material-symbols-outlined" style={{ color: '#5b5c5a', fontSize: 20 }}>chevron_right</span>
+          </div>
+          <div className="st-legal-row">
+            <span>Terms of Service</span>
+            <span className="material-symbols-outlined" style={{ color: '#5b5c5a', fontSize: 20 }}>chevron_right</span>
+          </div>
+          <div className="st-legal-row" onClick={() => setShowExport(true)}>
+            <span>Export My Data</span>
+            <span className="material-symbols-outlined" style={{ color: '#5b5c5a', fontSize: 20 }}>download</span>
+          </div>
+          <div className="st-legal-row st-legal-row--danger" onClick={() => setShowDelete(true)}>
             <span>Delete Account</span>
             <span className="material-symbols-outlined" style={{ color: '#b02500', fontSize: 20 }}>delete_forever</span>
           </div>
@@ -238,6 +264,7 @@ export default function Settings() {
         </footer>
 
       </main>
+
       {show2FA && (
         <TwoFactorSetup
           isEnabled={twoFactorEnabled}
@@ -249,6 +276,9 @@ export default function Settings() {
           }}
         />
       )}
+      {showSessions && <SessionsManager onClose={() => setShowSessions(false)} />}
+      {showExport && <ExportManager onClose={() => setShowExport(false)} />}
+      {showDelete && <DeleteAccountManager onClose={() => setShowDelete(false)} />}
     </div>
   );
 }

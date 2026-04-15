@@ -110,6 +110,42 @@
   gap: 3px;
 }
 
+.prog-header-actions {
+  margin-left: auto;
+}
+
+.prog-motivate-btn {
+  border: 1px solid var(--oat);
+  background: var(--white);
+  color: var(--charcoal);
+  border-radius: 1584px;
+  padding: 7px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: var(--clay-shadow);
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: transform 0.25s cubic-bezier(0.16,1,0.3,1),
+              box-shadow 0.25s ease,
+              background 0.25s ease,
+              color 0.25s ease;
+}
+
+.prog-motivate-btn .material-symbols-outlined {
+  font-size: 16px;
+}
+
+.prog-motivate-btn:hover {
+  transform: rotateZ(-8deg) translateY(-4px);
+  box-shadow: var(--shadow-hard);
+  background: var(--lemon-bg);
+  color: var(--ink);
+}
+
 .prog-title {
   font-size: clamp(1.5rem, 5vw, 2rem);
   font-weight: 600;

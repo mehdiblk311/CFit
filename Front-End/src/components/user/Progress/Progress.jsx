@@ -377,6 +377,12 @@ export default function Progress() {
           <h1 className="prog-title">Progress</h1>
           <p className="prog-subtitle">Your effort, visualized</p>
         </div>
+        <div className="prog-header-actions">
+          <button className="prog-motivate-btn" onClick={() => navigate('/leaderboard')}>
+            <span className="material-symbols-outlined">emoji_events</span>
+            <span>Motivation</span>
+          </button>
+        </div>
       </header>
 
       {isLoading ? (

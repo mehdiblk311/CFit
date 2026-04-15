@@ -45,14 +45,14 @@ export const authAPI = {
   },
 
   // Get list of active sessions
-  getSessions: async () => {
-    const response = await client.get('/v1/auth/sessions');
+  getSessions: async (params = {}) => {
+    const response = await client.get('/v1/auth/sessions', { params });
     return response.data;
   },
 
   // Revoke a specific session
   revokeSession: async (session_id) => {
-    const response = await client.post(`/v1/auth/sessions/${session_id}/revoke`);
+    const response = await client.delete(`/v1/auth/sessions/${session_id}`);
     return response.data;
   },
 

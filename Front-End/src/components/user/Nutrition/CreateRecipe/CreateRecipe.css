@@ -376,6 +376,27 @@
 }
 .cr-remove-btn:hover { background: #f95630; color: #fff; border-color: #f95630; }
 
+.cr-log-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1px solid #dad4c8;
+  background: transparent;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: #38671a;
+  transition: background 0.15s, color 0.15s;
+}
+.cr-log-btn:hover { background: #38671a; color: #fff; border-color: #38671a; }
+
+.cr-log-panel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #dad4c8;
+}
+
 /* ── Actions ────────────────────────────────────────── */
 .cr-actions {
   display: flex;
