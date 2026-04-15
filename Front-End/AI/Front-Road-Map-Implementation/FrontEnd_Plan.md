@@ -1,4 +1,4 @@
-# Frontend To-Do List for the Fitness App
+ # Frontend To-Do List for the Fitness App
 
 Status note (2026-04-15): checked items below exist in the current frontend codebase. Some checked items still need backend-fidelity hardening; see review notes after verification.
 
@@ -162,10 +162,10 @@ Answer: "What should I do today, and am I on track?"
 **Frontend to-do:**
 - [x] Build dashboard hero cards
 - [x] Build macro progress bars/rings
-- [ ] Add recommendation card
+- [x] Add recommendation card
 - [x] Add quick actions: log workout, log meal, add weight
 - [x] Add mini streak and weekly summary section
-- [ ] Add empty state for new users with first actions
+- [x] Add empty state for new users with first actions
 
 ---
 
