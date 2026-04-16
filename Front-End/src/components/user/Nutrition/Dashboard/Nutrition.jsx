@@ -77,8 +77,12 @@ function buildMealGroup(meals) {
 }
 
 function getWeightDateLabel(value, locale) {
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return 'N/A';
+  const dateKey = getEntryDateKey(value);
+  if (!dateKey) return 'N/A';
+
+  const parsed = new Date(`${dateKey}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return dateKey;
+
   return parsed.toLocaleDateString(locale, { month: 'short', day: '2-digit' }).toUpperCase();
 }
 
@@ -253,29 +257,44 @@ export default function Nutrition() {
     [weightEntriesData],
   );
 
-  const todayWeightEntry = useMemo(
-    () => [...weightEntries].sort((a, b) => new Date(b.updated_at || b.created_at || b.date) - new Date(a.updated_at || a.created_at || a.date))
-      .find((entry) => getEntryDateKey(entry.date) === today) || null,
-    [weightEntries, today],
-  );
-
   const logWeight = useMutation({
     mutationFn: async (data) => {
-      if (todayWeightEntry?.id) {
-        return weightAPI.updateEntry(todayWeightEntry.id, {
+      const existingResponse = await weightAPI.getEntriesPage({ date: data.date, limit: 1 });
+      const existingEntry = Array.isArray(existingResponse?.data) ? existingResponse.data[0] : null;
+
+      if (existingEntry?.id) {
+        const entry = await weightAPI.updateEntry(existingEntry.id, {
           weight: data.weight,
           date: data.date,
-          notes: todayWeightEntry.notes || '',
+          notes: existingEntry.notes || '',
         });
+        return { entry, mode: 'updated' };
       }
 
-      return weightAPI.addEntry(data);
+      try {
+        const entry = await weightAPI.addEntry(data);
+        return { entry, mode: 'created' };
+      } catch (error) {
+        const fallbackResponse = await weightAPI.getEntriesPage({ date: data.date, limit: 1 });
+        const fallbackEntry = Array.isArray(fallbackResponse?.data) ? fallbackResponse.data[0] : null;
+
+        if (fallbackEntry?.id) {
+          const entry = await weightAPI.updateEntry(fallbackEntry.id, {
+            weight: data.weight,
+            date: data.date,
+            notes: fallbackEntry.notes || '',
+          });
+          return { entry, mode: 'updated' };
+        }
+
+        throw error;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['weightEntries', user?.id] });
       setWeightInput('');
       setWeightError('');
-      setWeightFeedback(todayWeightEntry?.id ? t('nutritionDashboard.weightUpdated') : t('nutritionDashboard.weightLogged'));
+      setWeightFeedback(result?.mode === 'updated' ? t('nutritionDashboard.weightUpdated') : t('nutritionDashboard.weightLogged'));
     },
     onError: () => {
       setWeightFeedback('');
@@ -318,35 +337,43 @@ export default function Nutrition() {
   const offset = ringCirc * (1 - progress);
 
   const sortedWeightEntries = useMemo(
-    () => [...weightEntries].sort((a, b) => new Date(a.date) - new Date(b.date)),
+    () =>
+      [...weightEntries]
+        .map((entry) => ({ ...entry, dateKey: getEntryDateKey(entry.date) }))
+        .filter((entry) => entry.dateKey)
+        .sort((a, b) => a.dateKey.localeCompare(b.dateKey)),
     [weightEntries],
   );
-  const recentWeightEntries = sortedWeightEntries.slice(-7);
+
+  const monthlyWeightEntries = useMemo(() => {
+    const monthAgo = new Date();
+    monthAgo.setHours(0, 0, 0, 0);
+    monthAgo.setDate(monthAgo.getDate() - 30);
+    const monthAgoKey = getEntryDateKey(monthAgo);
+
+    return sortedWeightEntries.filter((entry) => entry.dateKey >= monthAgoKey);
+  }, [sortedWeightEntries]);
 
   const weightChartBars = useMemo(() => {
-    if (recentWeightEntries.length === 0) return [];
-    const values = recentWeightEntries.map((entry) => Number(entry.weight) || 0);
+    if (monthlyWeightEntries.length === 0) return [];
+
+    const values = monthlyWeightEntries.map((entry) => Number(entry.weight) || 0);
     const minWeight = Math.min(...values);
     const maxWeight = Math.max(...values);
+
     return values.map((value) => {
       if (minWeight === maxWeight) return 70;
       return 35 + (((value - minWeight) / (maxWeight - minWeight)) * 55);
     });
-  }, [recentWeightEntries]);
+  }, [monthlyWeightEntries]);
 
   const monthlyDelta = useMemo(() => {
-    if (sortedWeightEntries.length < 2) return null;
-    const monthAgo = new Date();
-    monthAgo.setDate(monthAgo.getDate() - 30);
-    const inWindow = sortedWeightEntries.filter((entry) => {
-      const parsed = new Date(entry.date);
-      return !Number.isNaN(parsed.getTime()) && parsed >= monthAgo;
-    });
-    if (inWindow.length < 2) return null;
-    const firstWeight = Number(inWindow[0].weight) || 0;
-    const latestWeight = Number(inWindow[inWindow.length - 1].weight) || 0;
+    if (monthlyWeightEntries.length < 2) return null;
+
+    const firstWeight = Number(monthlyWeightEntries[0].weight) || 0;
+    const latestWeight = Number(monthlyWeightEntries[monthlyWeightEntries.length - 1].weight) || 0;
     return latestWeight - firstWeight;
-  }, [sortedWeightEntries]);
+  }, [monthlyWeightEntries]);
 
   const handleOpenMealLogger = async (mealType) => {
     if (isReadOnly) return;
@@ -702,7 +729,7 @@ export default function Nutrition() {
                   ))}
                 </div>
                 <div className="nd-chart-x-labels">
-                  {recentWeightEntries.map((entry) => <span key={entry.id}>{getWeightDateLabel(entry.date, locale)}</span>)}
+                  {monthlyWeightEntries.map((entry) => <span key={entry.id}>{getWeightDateLabel(entry.dateKey, locale)}</span>)}
                 </div>
               </>
             )}
