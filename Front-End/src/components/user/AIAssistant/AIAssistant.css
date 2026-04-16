@@ -45,12 +45,14 @@
 /* ── Root Container ────────────────────────────────────────────── */
 
 .coach {
-  height: calc(100dvh - 96px);
+  height: 100dvh;
+  max-height: 100dvh;
   background: var(--coach-cream);
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* ── Top Bar ───────────────────────────────────────────────────── */
@@ -63,7 +65,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  padding: 14px 16px;
+  padding: calc(14px + env(safe-area-inset-top)) 16px 14px;
   background: rgba(250, 249, 247, 0.94);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -179,8 +181,9 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 12px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   flex: 1;
   min-height: 0;
@@ -366,8 +369,9 @@
   border: 2px solid var(--coach-oat);
   border-radius: var(--coach-radius-lg);
   box-shadow: var(--coach-shadow-clay);
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   min-height: 0;
   overflow: hidden;
 }
@@ -377,7 +381,7 @@
 .coach-ctx-wrapper {
   display: grid;
   position: relative;
-  grid-row: span 1;
+  flex-shrink: 0;
   overflow: hidden;
   transition: grid-template-rows 0.35s var(--coach-ease-expo);
   grid-template-rows: 1fr;
@@ -851,7 +855,7 @@
   align-items: center;
   border: 2px solid var(--coach-ink);
   border-radius: var(--coach-radius-pill);
-  padding: 3px 10px;
+  padding: var(--coach-spacing-xs) 10px;
   background: var(--coach-ube-badge);
   color: #1f1060;
   font-family: var(--coach-mono);
@@ -1211,6 +1215,7 @@
 @media (max-width: 679px) {
   .coach-shell {
     padding: 8px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
     gap: 8px;
   }
 
@@ -1401,7 +1406,7 @@
 
 @media (min-width: 1024px) {
   .coach-topbar {
-    padding: 16px 24px;
+    padding: calc(16px + env(safe-area-inset-top)) 24px 16px;
   }
 
   .coach-topbar__menu {
@@ -1409,6 +1414,7 @@
   }
 
   .coach-shell {
+    display: grid;
     grid-template-columns: 320px minmax(0, 1fr);
     gap: 16px;
     padding: 20px;

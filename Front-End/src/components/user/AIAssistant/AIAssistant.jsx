@@ -335,7 +335,19 @@ export default function AIAssistant() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [pendingMessage, setPendingMessage] = useState(null);
   const [pendingFeedbackKey, setPendingFeedbackKey] = useState('');
-  const [summaryCollapsed, setSummaryCollapsed] = useState(() => window.innerWidth < 680);
+  const [summaryCollapsed, setSummaryCollapsed] = useState(() => 
+    typeof window !== 'undefined' && window.innerWidth < 680
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 680) {
+        setSummaryCollapsed(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const threadEndRef = useRef(null);
   const composerRef = useRef(null);
