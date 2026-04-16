@@ -1,5 +1,7 @@
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
+import { uiStore } from '../../../stores/uiStore';
 import {
   useDashboardCoachSummary,
   useDashboardRecommendations,
@@ -9,6 +11,8 @@ import {
   useUnreadCount,
 } from '../../../hooks/queries/useDashboard';
 import './Dashboard.css';
+
+/* ── Helpers ─────────────────────────────────────────────────────── */
 
 function toArray(value) {
   return Array.isArray(value) ? value : [];
@@ -39,17 +43,6 @@ function formatTarget(value, unit = '') {
   return `${formatWholeNumber(value)}${unit}`;
 }
 
-function formatDateRange(startDate, endDate) {
-  if (!startDate || !endDate) return 'This week';
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 'This week';
-
-  const startText = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  const endText = end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  return `${startText} - ${endText}`;
-}
-
 function normalizeSummary(summary, coachSummary) {
   const fallbackDaily = coachSummary?.daily_summary || {};
   const hasPrimarySummary =
@@ -63,7 +56,7 @@ function normalizeSummary(summary, coachSummary) {
   const workouts = toArray(source?.workouts);
   const flaggedDeficiencies = toArray(source?.flagged_deficiencies).filter(Boolean);
   const completedWorkout = workouts.find(
-    (workout) => workout?.completed_at || workout?.status === 'completed'
+    (w) => w?.completed_at || w?.status === 'completed'
   );
   const anyWorkout = completedWorkout || workouts[0] || null;
   const workoutName =
@@ -99,15 +92,12 @@ function normalizeWeeklySummary(summary) {
   const source = summary || {};
   const totalCalories = toNumber(source?.total_calories);
   const targetCalories = toNumber(source?.target_calories);
-
   return {
     workoutCount: toNumber(source?.workout_count),
     mealCount: toNumber(source?.meal_count),
     totalCalories,
     targetCalories,
-    calorieProgress: targetCalories > 0 ? clampPercent((totalCalories / targetCalories) * 100) : 0,
     flaggedDeficiencies: toArray(source?.flagged_deficiencies).filter(Boolean),
-    dateRange: formatDateRange(source?.start_date, source?.end_date),
   };
 }
 
@@ -121,7 +111,6 @@ function normalizeStreaks(streaks, coachSummary) {
   const source = hasPrimaryStreaks ? streaks || {} : coachSummary?.streaks || {};
   const streakValues = source?.streaks || source;
   const adherence = source?.adherence_summary || {};
-
   return {
     workoutStreak: toNumber(streakValues?.workout_streak),
     mealStreak: toNumber(streakValues?.meal_streak),
@@ -135,7 +124,6 @@ function normalizeRecommendations(recommendations, coachSummary) {
   const source =
     primaryRules.length > 0 ? recommendations || {} : coachSummary?.recommendations || {};
   const rules = toArray(source?.rules || source);
-
   return rules
     .filter((rule) => rule && rule.applies !== false)
     .map((rule, index) => ({
@@ -146,48 +134,101 @@ function normalizeRecommendations(recommendations, coachSummary) {
     }));
 }
 
+/* Builds Mon–Sun for the current week, marking done days via streak count */
+function buildWeekCalendar(workoutStreak) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const dayOfWeek = today.getDay();
+  const mondayOffset = (dayOfWeek + 6) % 7;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - mondayOffset);
+
+  const doneDates = new Set();
+  for (let i = 0; i < workoutStreak; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    doneDates.add(d.toDateString());
+  }
+
+  const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  return DAY_NAMES.map((name, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return {
+      name,
+      isToday: d.toDateString() === today.toDateString(),
+      isDone: doneDates.has(d.toDateString()),
+    };
+  });
+}
+
+/* ── AvatarDisplay ───────────────────────────────────────────────── */
+
+function AvatarDisplay({ user, onClick }) {
+  const [hasError, setHasError] = useState(false);
+  const name = user?.name ?? user?.email?.split('@')[0] ?? 'A';
+  const initial = name.charAt(0).toUpperCase();
+
+  if (user?.avatar && !hasError) {
+    return (
+      <button className="dash-avatar-btn" type="button" onClick={onClick} aria-label="Profile">
+        <img
+          src={user.avatar}
+          alt={name}
+          className="dash-avatar-img"
+          onError={() => setHasError(true)}
+        />
+      </button>
+    );
+  }
+  return (
+    <button className="dash-avatar-btn" type="button" onClick={onClick} aria-label="Profile">
+      <span className="dash-avatar-initial">{initial}</span>
+    </button>
+  );
+}
+
+/* ── MacroRing ───────────────────────────────────────────────────── */
+
 function MacroRing({ value, total, color, label }) {
   const safeTotal = Math.max(toNumber(total), 1);
   const safeValue = Math.max(toNumber(value), 0);
-  const r = 34;
+  const r = 36;
   const circ = 2 * Math.PI * r;
-  const offset = circ - clampPercent((safeValue / safeTotal) * 100) / 100 * circ;
+  const offset = circ - (clampPercent((safeValue / safeTotal) * 100) / 100) * circ;
 
   return (
     <div className="dash-ring-wrap">
-      <svg className="dash-ring-svg" viewBox="0 0 80 80">
-        <circle
-          cx="40"
-          cy="40"
-          r={r}
-          fill="transparent"
-          stroke="#e2e3e0"
-          strokeWidth="8"
-        />
-        <circle
-          cx="40"
-          cy="40"
-          r={r}
-          fill="transparent"
-          stroke={color}
-          strokeWidth="8"
-          strokeDasharray={circ}
-          strokeDashoffset={offset}
-          style={{
-            transform: 'rotate(-90deg)',
-            transformOrigin: '50% 50%',
-            transition: 'stroke-dashoffset 0.8s ease-out',
-          }}
-        />
-      </svg>
-      <div className="dash-ring-center">
-        <span className="dash-ring-val">{formatMetric(value, 'g')}</span>
+      <div className="dash-ring-svg-wrap">
+        <svg className="dash-ring-svg" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r={r} fill="transparent" stroke="#e2e3e0" strokeWidth="8" />
+          <circle
+            cx="40"
+            cy="40"
+            r={r}
+            fill="transparent"
+            stroke={color}
+            strokeWidth="8"
+            strokeDasharray={circ}
+            strokeDashoffset={offset}
+            style={{
+              transform: 'rotate(-90deg)',
+              transformOrigin: '50% 50%',
+              transition: 'stroke-dashoffset 0.8s ease-out',
+            }}
+          />
+        </svg>
+        <div className="dash-ring-center">
+          <span className="dash-ring-val">{formatMetric(value, 'g')}</span>
+        </div>
       </div>
       <span className="dash-ring-label">{label}</span>
-      <span className="dash-ring-target">Target {formatTarget(total, 'g')}</span>
     </div>
   );
 }
+
+/* ── DashboardSkeleton ───────────────────────────────────────────── */
 
 function DashboardSkeleton() {
   return (
@@ -204,7 +245,6 @@ function DashboardSkeleton() {
           </div>
         </div>
       </section>
-
       <section className="dash-card dash-card--macros">
         <div className="dash-skeleton dash-skeleton--subtitle" />
         <div className="dash-rings">
@@ -220,9 +260,12 @@ function DashboardSkeleton() {
   );
 }
 
+/* ── Dashboard (main) ────────────────────────────────────────────── */
+
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const workoutFrequency = uiStore((s) => s.workoutFrequency ?? 4);
 
   const summaryQuery = useDashboardSummary();
   const weeklyQuery = useDashboardWeeklySummary();
@@ -233,11 +276,12 @@ export default function Dashboard() {
 
   const name = user?.name ?? user?.first_name ?? user?.email?.split('@')[0] ?? 'Athlete';
   const firstName = name.charAt(0).toUpperCase() + name.slice(1);
-  const today = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  });
+
+  const now = new Date();
+  const weekday = now.toLocaleDateString('en-US', { weekday: 'long' });
+  const monthDay = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+  const todayCardDate = `Today, ${weekday} ${monthDay}`;
+
   const unreadCount = toNumber(unreadCountQuery.data?.unread_count);
 
   const summary = normalizeSummary(summaryQuery.data, coachSummaryQuery.data);
@@ -248,10 +292,25 @@ export default function Dashboard() {
     coachSummaryQuery.data
   );
 
+  const weekDays = useMemo(
+    () => buildWeekCalendar(streaks.workoutStreak),
+    [streaks.workoutStreak]
+  );
+
+  const workoutDots = useMemo(
+    () =>
+      Array.from(
+        { length: Math.min(Math.max(workoutFrequency, 1), 7) },
+        (_, i) => i < weekly.workoutCount
+      ),
+    [workoutFrequency, weekly.workoutCount]
+  );
+
   const showInitialLoading =
     !summaryQuery.data &&
     !coachSummaryQuery.data &&
     (summaryQuery.isLoading || coachSummaryQuery.isLoading);
+
   const hasAnyDashboardData =
     summary.hasActivity ||
     weekly.workoutCount > 0 ||
@@ -259,12 +318,14 @@ export default function Dashboard() {
     streaks.workoutStreak > 0 ||
     streaks.mealStreak > 0 ||
     streaks.weighInStreak > 0;
+
   const showEmptyState =
     !showInitialLoading &&
     !hasAnyDashboardData &&
     !summaryQuery.isError &&
     !weeklyQuery.isError &&
     !coachSummaryQuery.isError;
+
   const showFallbackBanner =
     !showInitialLoading &&
     !hasAnyDashboardData &&
@@ -272,10 +333,11 @@ export default function Dashboard() {
 
   return (
     <div className="dash-root">
+      {/* ── Header ── */}
       <header className="dash-header">
         <div className="dash-header-left">
           <h1 className="dash-greeting">Hey, {firstName}</h1>
-          <p className="dash-tagline">The Kinetic Craft is a journey.</p>
+          <p className="dash-tagline">The Kinetic Craft is a journey, not a destination.</p>
         </div>
         <div className="dash-header-right">
           <button
@@ -286,9 +348,7 @@ export default function Dashboard() {
             <span className="material-symbols-outlined">notifications</span>
             {unreadCount > 0 && <span className="dash-notif-badge">{unreadCount}</span>}
           </button>
-          <div className="dash-avatar">
-            <span>{firstName.charAt(0).toUpperCase()}</span>
-          </div>
+          <AvatarDisplay user={user} onClick={() => navigate('/settings')} />
         </div>
       </header>
 
@@ -297,23 +357,23 @@ export default function Dashboard() {
           <DashboardSkeleton />
         ) : (
           <>
+            {/* ── Fallback banner ── */}
             {showFallbackBanner && (
               <section className="dash-card dash-card--notice">
                 <span className="dash-section-label">Sync issue</span>
                 <p className="dash-notice-copy">
-                  Your latest dashboard snapshot could not fully load, but logging meals, workouts,
-                  and weight is still available.
+                  Latest snapshot could not fully load — logging is still available.
                 </p>
               </section>
             )}
 
+            {/* ── Empty state ── */}
             {showEmptyState && (
               <section className="dash-card dash-card--empty">
                 <span className="material-symbols-outlined dash-empty-icon">rocket_launch</span>
                 <h2 className="dash-empty-title">Build your first day of momentum</h2>
                 <p className="dash-empty-sub">
-                  Start with one action so the app can generate your dashboard, streaks, and
-                  recommendations.
+                  Start with one action so the app can generate your dashboard.
                 </p>
                 <div className="dash-empty-actions">
                   <button
@@ -336,6 +396,7 @@ export default function Dashboard() {
               </section>
             )}
 
+            {/* ── Today's Summary ── */}
             <section className="dash-card dash-card--summary">
               <div className="dash-card-bg-icon">
                 <span
@@ -348,21 +409,20 @@ export default function Dashboard() {
               <div className="dash-summary-top">
                 <div>
                   <span className="dash-section-label">Today&apos;s Summary</span>
-                  <h2 className="dash-date">{today}</h2>
+                  <h2 className="dash-date">{todayCardDate}</h2>
                 </div>
               </div>
               <div className="dash-summary-grid">
                 <div className="dash-stat-box">
                   <span className="dash-stat-label">Calories</span>
                   <div className="dash-stat-row">
-                    <span className="dash-stat-val">{formatWholeNumber(summary.totalCalories)}</span>
+                    <span className="dash-stat-val">
+                      {formatWholeNumber(summary.totalCalories)}
+                    </span>
                     <span className="dash-stat-sub">
                       / {formatTarget(summary.targetCalories)} kcal
                     </span>
                   </div>
-                  <p className="dash-stat-copy">
-                    {summary.mealCount} meal{summary.mealCount === 1 ? '' : 's'} logged
-                  </p>
                 </div>
                 <div
                   className={`dash-stat-box ${
@@ -378,26 +438,11 @@ export default function Dashboard() {
                       {summary.workoutDone ? 'check_circle' : 'schedule'}
                     </span>
                   </div>
-                  <p className="dash-stat-copy">
-                    {summary.workoutDone
-                      ? `${summary.workoutsCount} workout${summary.workoutsCount === 1 ? '' : 's'} today`
-                      : 'Start a session when you are ready'}
-                  </p>
                 </div>
-              </div>
-              <div className="dash-summary-footer">
-                {summary.flaggedDeficiencies.length > 0 ? (
-                  summary.flaggedDeficiencies.map((flag) => (
-                    <span key={flag} className="dash-flag-chip dash-flag-chip--alert">
-                      {flag}
-                    </span>
-                  ))
-                ) : (
-                  <span className="dash-flag-chip">No nutrition flags today</span>
-                )}
               </div>
             </section>
 
+            {/* ── Macro Rings ── */}
             <section className="dash-card dash-card--macros">
               <span className="dash-section-label" style={{ color: '#5d3fd3' }}>
                 Macro Progress
@@ -424,27 +469,7 @@ export default function Dashboard() {
               </div>
             </section>
 
-            {recommendations.length > 0 && (
-              <section className="dash-card dash-card--recs">
-                <span className="dash-section-label" style={{ color: '#b36200' }}>
-                  Recommendations
-                </span>
-                <ul className="dash-recs-list">
-                  {recommendations.slice(0, 3).map((recommendation) => (
-                    <li key={recommendation.id} className="dash-rec-item">
-                      <span className="material-symbols-outlined dash-rec-icon">tips_and_updates</span>
-                      <div>
-                        <p className="dash-rec-name">{recommendation.name}</p>
-                        <p className="dash-rec-adj">
-                          {recommendation.adjustment || recommendation.description}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-
+            {/* ── Quick Actions — 2 big pills ── */}
             <div className="dash-actions">
               <button
                 className="dash-action-btn dash-action-btn--primary"
@@ -462,83 +487,104 @@ export default function Dashboard() {
                 <span className="material-symbols-outlined">fitness_center</span>
                 <span>Start Workout</span>
               </button>
-              <button
-                className="dash-action-btn dash-action-btn--secondary"
-                type="button"
-                style={{ borderColor: '#078a52' }}
-                onClick={() => navigate('/weight')}
-              >
-                <span className="material-symbols-outlined" style={{ color: '#078a52' }}>
-                  monitor_weight
-                </span>
-                <span>Log Weight</span>
-              </button>
             </div>
 
-            <section className="dash-card dash-card--counter dash-card--weekly">
+            <button
+              className="dash-log-weight-link"
+              type="button"
+              onClick={() => navigate('/weight')}
+            >
+              <span className="material-symbols-outlined">monitor_weight</span>
+              Log Weight
+            </button>
+
+            {/* ── Weekly Counter ── */}
+            <section className="dash-card dash-card--counter">
               <div className="dash-counter-top">
                 <div>
-                  <h3 className="dash-counter-num">{weekly.workoutCount} workouts this week</h3>
-                  <p className="dash-section-label">{weekly.dateRange}</p>
+                  <h3 className="dash-counter-num">
+                    {weekly.workoutCount} / {workoutFrequency} workouts
+                  </h3>
+                  <p className="dash-section-label">This Week&apos;s Goal</p>
                 </div>
-                <div className="dash-weekly-meta">
-                  <span>{weekly.mealCount} meals</span>
-                  <span>{formatWholeNumber(weekly.totalCalories)} kcal</span>
+                <div className="dash-counter-dots">
+                  {workoutDots.map((done, i) => (
+                    <div
+                      key={i}
+                      className={`dash-counter-dot${done ? ' dash-counter-dot--done' : ''}`}
+                    />
+                  ))}
                 </div>
               </div>
               <div className="dash-progress-track">
                 <div
                   className="dash-progress-fill"
-                  style={{ width: `${weekly.calorieProgress}%` }}
+                  style={{
+                    width: `${(weekly.workoutCount / Math.max(workoutFrequency, 1)) * 100}%`,
+                  }}
                 />
-              </div>
-              <div className="dash-weekly-footer">
-                <span>
-                  {formatWholeNumber(weekly.totalCalories)} / {formatTarget(weekly.targetCalories)}{' '}
-                  weekly kcal target
-                </span>
-                {weekly.flaggedDeficiencies[0] && (
-                  <span className="dash-flag-chip dash-flag-chip--soft">
-                    {weekly.flaggedDeficiencies[0]}
-                  </span>
-                )}
               </div>
             </section>
 
+            {/* ── Training Streak — 7-day calendar ── */}
             <section className="dash-card dash-card--streak">
               <div className="dash-streak-top">
                 <span className="dash-section-label" style={{ color: '#38671a' }}>
-                  Consistency
+                  Training Streak
                 </span>
-                <div className="dash-streak-badge">7d adherence {formatWholeNumber(streaks.adherence7)}%</div>
+                <div className="dash-streak-pill">
+                  {streaks.workoutStreak > 0
+                    ? `🔥 ${streaks.workoutStreak} Days`
+                    : 'Start Today'}
+                </div>
               </div>
-              <div className="dash-streak-badges">
-                <div
-                  className={`dash-streak-badge-item${
-                    streaks.workoutStreak > 0 ? ' dash-streak-badge-item--active' : ''
-                  }`}
-                >
-                  <span className="material-symbols-outlined">fitness_center</span>
-                  <span>{streaks.workoutStreak} workout streak</span>
-                </div>
-                <div
-                  className={`dash-streak-badge-item${
-                    streaks.mealStreak > 0 ? ' dash-streak-badge-item--active' : ''
-                  }`}
-                >
-                  <span className="material-symbols-outlined">restaurant</span>
-                  <span>{streaks.mealStreak} meal streak</span>
-                </div>
-                <div
-                  className={`dash-streak-badge-item${
-                    streaks.weighInStreak > 0 ? ' dash-streak-badge-item--active' : ''
-                  }`}
-                >
-                  <span className="material-symbols-outlined">monitor_weight</span>
-                  <span>{streaks.weighInStreak} weigh-in streak</span>
-                </div>
+              <div className="dash-calendar">
+                {weekDays.map((day) => (
+                  <div key={day.name} className="dash-day-col">
+                    <span
+                      className={`dash-day-name${day.isToday ? ' dash-day-name--today' : ''}`}
+                    >
+                      {day.name}
+                    </span>
+                    <div
+                      className={[
+                        'dash-day-dot',
+                        day.isDone ? 'dash-day-dot--done' : '',
+                        day.isToday ? 'dash-day-dot--today' : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                    >
+                      {day.isDone && (
+                        <span className="material-symbols-outlined dash-day-check">done</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </section>
+
+            {/* ── Recommendations ── */}
+            {recommendations.length > 0 && (
+              <section className="dash-card dash-card--recs">
+                <span className="dash-section-label" style={{ color: '#b36200' }}>
+                  Recommendations
+                </span>
+                <ul className="dash-recs-list">
+                  {recommendations.slice(0, 3).map((rec) => (
+                    <li key={rec.id} className="dash-rec-item">
+                      <span className="material-symbols-outlined dash-rec-icon">
+                        tips_and_updates
+                      </span>
+                      <div>
+                        <p className="dash-rec-name">{rec.name}</p>
+                        <p className="dash-rec-adj">{rec.adjustment || rec.description}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
           </>
         )}
       </main>
