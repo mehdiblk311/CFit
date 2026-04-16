@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, useEffect } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../../hooks/useAuth';
@@ -121,14 +121,6 @@ function ProfileSection({ profile, onSave, saving }) {
   const [genderDraft, setGenderDraft] = useState(profile?.gender || 'male');
   const [avatarPreview, setAvatarPreview] = useState(profile?.avatar || '');
   const [fileError, setFileError] = useState(null);
-
-  useEffect(() => {
-    setAvatarPreview(profile?.avatar || '');
-  }, [profile?.avatar]);
-
-  useEffect(() => {
-    setGenderDraft(profile?.gender || 'male');
-  }, [profile?.gender]);
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -599,6 +591,7 @@ export default function Settings() {
 
         {/* ── Profile ── */}
         <ProfileSection
+          key={`ps-${profile?.id || ''}-${profile?.updated_at || ''}-${profile?.avatar || ''}-${profile?.gender || ''}`}
           profile={profile}
           onSave={(patch) => saveProfilePatch(patch, 'profile')}
           saving={profileSaving}

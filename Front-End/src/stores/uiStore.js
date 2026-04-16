@@ -2,6 +2,26 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { nutritionStore } from './nutritionStore';
 
+export function applyLanguageToDocument(lang) {
+  if (typeof document === 'undefined') return;
+
+  const safeLang = lang || 'en';
+  const dir = safeLang === 'ar' ? 'rtl' : 'ltr';
+  const html = document.documentElement;
+  const body = document.body;
+
+  html.setAttribute('dir', dir);
+  html.setAttribute('lang', safeLang);
+  html.classList.toggle('is-rtl', dir === 'rtl');
+  html.classList.toggle('is-ltr', dir !== 'rtl');
+
+  if (body) {
+    body.setAttribute('dir', dir);
+    body.dataset.dir = dir;
+    body.dataset.lang = safeLang;
+  }
+}
+
 export const uiStore = create(
   persist(
     (set, get) => ({
@@ -25,15 +45,7 @@ export const uiStore = create(
 
       setLanguage: (lang) => {
         set({ language: lang });
-        // Apply RTL for Arabic
-        const html = document.documentElement;
-        if (lang === 'ar') {
-          html.setAttribute('dir', 'rtl');
-          html.setAttribute('lang', 'ar');
-        } else {
-          html.setAttribute('dir', 'ltr');
-          html.setAttribute('lang', lang);
-        }
+        applyLanguageToDocument(lang);
       },
 
       setOffline: (offline) => {
@@ -93,9 +105,8 @@ if (typeof window !== 'undefined') {
     uiStore.getState().setOffline(true);
   });
 
-  // Initialize language on load
-  const { language } = uiStore.getState();
-  if (language === 'ar') {
-    document.documentElement.setAttribute('dir', 'rtl');
-  }
+  applyLanguageToDocument(uiStore.getState().language);
+  uiStore.persist?.onFinishHydration?.((state) => {
+    applyLanguageToDocument(state.language);
+  });
 }

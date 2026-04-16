@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import './Signup.css';
 
-const IMG_GOOGLE = 'https://www.figma.com/api/mcp/asset/de0ce486-b6f9-4afd-82d5-3688a617a41d';
-
 function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim()); }
 
 function getStrength(pw) {
@@ -233,19 +231,6 @@ export default function Signup() {
             )}
           </button>
         </form>
-
-        {/* Divider */}
-        <div className="su-divider">
-          <div className="su-divider-line" />
-          <span className="su-divider-label">or</span>
-        </div>
-
-        {/* Google */}
-        <button className="su-google-btn" type="button">
-          <img src={IMG_GOOGLE} alt="Google" />
-          <span className="su-google-label">Continue with Google</span>
-        </button>
-
         {/* Login link */}
         <div className="su-footer-link">
           <span>Already have an account?</span>

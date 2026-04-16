@@ -19,8 +19,10 @@ client.interceptors.request.use(
   (config) => {
     const state = authStore.getState();
     const token = state.access_token;
+    const url = config.url || '';
+    const shouldSkipAuthHeader = /\/auth\/(refresh|login|register)/.test(url);
 
-    if (token) {
+    if (token && !shouldSkipAuthHeader) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
@@ -34,10 +36,13 @@ client.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
 
     // Skip token refresh for auth endpoints (login, signup, register) — let them handle 401 naturally
     const url = originalRequest.url || '';
-    const isAuthEndpoint = /\/(login|signup|register|2fa)/.test(url);
+    const isAuthEndpoint = /\/auth\/(login|signup|register|refresh|2fa)/.test(url);
 
     // If 401 and we haven't retried yet (and not an auth endpoint)
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {

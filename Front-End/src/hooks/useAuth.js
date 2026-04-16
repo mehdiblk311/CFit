@@ -1,4 +1,4 @@
-import { authStore } from '../stores/authStore';
+import { authStore, readSessionAccessToken } from '../stores/authStore';
 import { authAPI } from '../api/auth';
 import { usersAPI } from '../api/users';
 import { uiStore } from '../stores/uiStore';
@@ -17,9 +17,18 @@ export function initAuth() {
   _initPromise = (async () => {
     const store = authStore.getState();
     const { refresh_token, access_token, user } = store;
+    const sessionAccessToken = readSessionAccessToken();
 
     // Already authenticated – nothing to do
     if (access_token && user) {
+      store.setAuthBootstrapped(true);
+      return true;
+    }
+
+    // Same-tab hard refresh: reuse the last in-tab access token so we do not
+    // rotate the refresh token on every browser reload.
+    if (!access_token && sessionAccessToken && user && refresh_token) {
+      store.setTokens(sessionAccessToken, refresh_token);
       store.setAuthBootstrapped(true);
       return true;
     }

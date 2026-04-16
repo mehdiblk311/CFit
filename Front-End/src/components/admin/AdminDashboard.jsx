@@ -41,16 +41,6 @@ function formatPercent(value, digits = 0) {
   return `${toNumber(value).toFixed(digits)}%`;
 }
 
-function formatDateLabel(value) {
-  if (!value) return 'N/A';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'N/A';
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-  }).format(date);
-}
-
 function formatTimestamp(value) {
   if (!value) return 'No sync';
   const date = new Date(value);
@@ -95,59 +85,6 @@ function formatAction(action) {
 function shortId(value) {
   if (!value) return 'system';
   return String(value).slice(0, 8);
-}
-
-function buildGrowthBars(rows) {
-  const data = asArray(rows)
-    .map((row) => ({
-      date: row?.date || row?.stat_date,
-      value: toNumber(row?.new_users || row?.count || row?.value),
-    }))
-    .filter((row) => row.date)
-    .reverse()
-    .slice(-12);
-
-  const max = Math.max(1, ...data.map((row) => row.value));
-
-  return data.map((row) => ({
-    ...row,
-    height: Math.max(10, (row.value / max) * 100),
-    label: formatDateLabel(row.date),
-  }));
-}
-
-function buildActivityBars(rows) {
-  const data = asArray(rows)
-    .map((row) => {
-      const workouts = toNumber(row?.total_workouts);
-      const meals = toNumber(row?.total_meals);
-      const weights = toNumber(row?.total_weights);
-      return {
-        date: row?.stat_date || row?.date,
-        workouts,
-        meals,
-        weights,
-        total: workouts + meals + weights,
-      };
-    })
-    .filter((row) => row.date)
-    .reverse()
-    .slice(-12);
-
-  const max = Math.max(1, ...data.map((row) => row.total));
-
-  return data.map((row) => {
-    const containerHeight = Math.max(10, (row.total / max) * 100);
-    const total = row.total || 1;
-    return {
-      ...row,
-      containerHeight,
-      label: formatDateLabel(row.date),
-      workoutHeight: (row.workouts / total) * 100,
-      mealHeight: (row.meals / total) * 100,
-      weightHeight: (row.weights / total) * 100,
-    };
-  });
 }
 
 function buildPopularExercises(rows) {
@@ -231,7 +168,6 @@ export default function AdminDashboard() {
 
   const dashboard = dashboardQuery.data?.item || {};
   const summary = dashboard.summary || {};
-  const trends = asArray(dashboard.trends);
   const metrics = metricsQuery.data?.item || {};
   const userStats = metrics.users || {};
   const workoutStats = metrics.workouts || {};
@@ -284,8 +220,6 @@ export default function AdminDashboard() {
     },
   ];
 
-  const growthBars = buildGrowthBars(asArray(userStats.growth).length ? userStats.growth : trends);
-  const activityBars = buildActivityBars(trends);
   const popularExercises = buildPopularExercises(workoutStats.popular_exercises);
   const goalBreakdown = buildGoalBreakdown(userStats.goal_breakdown, firstNumber(userStats.total_users, summary.total_users));
   const recentActivity = buildRecentActivity(logs);
@@ -366,82 +300,6 @@ export default function AdminDashboard() {
             barColor={card.barColor}
           />
         ))}
-      </div>
-
-      <div className="adm-grid-2" style={{ marginBottom: 28 }}>
-        <div className="adm-card" style={{ padding: 28 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, letterSpacing: '1px', textTransform: 'uppercase', color: '#38671a', fontWeight: 700 }}>
-              User Growth Trend
-            </p>
-            <span className="material-symbols-outlined" style={{ color: '#767775' }}>show_chart</span>
-          </div>
-          {growthBars.length ? (
-            <>
-              <div className="adm-bar-chart" style={{ height: 140 }}>
-                {growthBars.map((bar) => (
-                  <div
-                    key={`${bar.date}-${bar.value}`}
-                    className="adm-bar-segment"
-                    title={`${bar.label}: ${bar.value} new users`}
-                    style={{ height: `${bar.height}%`, background: `rgba(56,103,26,${0.28 + bar.height / 180})` }}
-                  />
-                ))}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '1px', color: '#767775' }}>
-                {growthBars.map((bar) => (
-                  <span key={bar.date}>{bar.label}</span>
-                ))}
-              </div>
-            </>
-          ) : (
-            <p style={{ color: '#5b5c5a', margin: 0 }}>No user growth data has been recorded yet.</p>
-          )}
-        </div>
-
-        <div className="adm-card" style={{ padding: 28 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, letterSpacing: '1px', textTransform: 'uppercase', color: '#5d3fd3', fontWeight: 700 }}>
-              Platform Activity (30d)
-            </p>
-            <span className="material-symbols-outlined" style={{ color: '#767775' }}>monitoring</span>
-          </div>
-          {activityBars.length ? (
-            <>
-              <div className="adm-bar-chart" style={{ height: 140, alignItems: 'flex-end' }}>
-                {activityBars.map((bar) => (
-                  <div
-                    key={bar.date}
-                    title={`${bar.label}: ${bar.workouts} workouts, ${bar.meals} meals, ${bar.weights} weigh-ins`}
-                    style={{
-                      width: '100%',
-                      maxWidth: 22,
-                      height: `${bar.containerHeight}%`,
-                      minHeight: 10,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'flex-end',
-                      borderRadius: 9999,
-                      overflow: 'hidden',
-                      background: '#ece7dc',
-                    }}
-                  >
-                    {bar.weightHeight > 0 ? <div style={{ height: `${bar.weightHeight}%`, background: '#f8cc65' }} /> : null}
-                    {bar.mealHeight > 0 ? <div style={{ height: `${bar.mealHeight}%`, background: '#b4a5ff' }} /> : null}
-                    {bar.workoutHeight > 0 ? <div style={{ height: `${bar.workoutHeight}%`, background: '#38671a' }} /> : null}
-                  </div>
-                ))}
-              </div>
-              <div style={{ display: 'flex', gap: 12, marginTop: 14, flexWrap: 'wrap' }}>
-                <span className="adm-chip adm-chip--green">Workouts</span>
-                <span className="adm-chip adm-chip--purple">Meals</span>
-                <span className="adm-chip adm-chip--oat" style={{ background: '#f8cc65', color: '#7c5507' }}>Weigh-ins</span>
-              </div>
-            </>
-          ) : (
-            <p style={{ color: '#5b5c5a', margin: 0 }}>No cross-product activity trend is available yet.</p>
-          )}
-        </div>
       </div>
 
       <div className="adm-grid-2" style={{ marginBottom: 28 }}>

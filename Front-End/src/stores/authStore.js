@@ -1,6 +1,27 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+const SESSION_ACCESS_TOKEN_KEY = 'um6p_fit_access_token_session';
+
+function writeSessionAccessToken(token) {
+  if (typeof window === 'undefined') return;
+  if (!token) {
+    window.sessionStorage.removeItem(SESSION_ACCESS_TOKEN_KEY);
+    return;
+  }
+  window.sessionStorage.setItem(SESSION_ACCESS_TOKEN_KEY, token);
+}
+
+export function readSessionAccessToken() {
+  if (typeof window === 'undefined') return null;
+  return window.sessionStorage.getItem(SESSION_ACCESS_TOKEN_KEY);
+}
+
+export function clearSessionAccessToken() {
+  if (typeof window === 'undefined') return;
+  window.sessionStorage.removeItem(SESSION_ACCESS_TOKEN_KEY);
+}
+
 export const authStore = create(
   persist(
     (set, get) => ({
@@ -16,6 +37,7 @@ export const authStore = create(
       setUser: (user) => set({ user }),
 
       setTokens: (access_token, refresh_token) => {
+        writeSessionAccessToken(access_token);
         set({ access_token, refresh_token });
       },
 
@@ -24,6 +46,7 @@ export const authStore = create(
       },
 
       login: (user, access_token, refresh_token) => {
+        writeSessionAccessToken(access_token);
         set({
           user,
           access_token,
@@ -36,6 +59,7 @@ export const authStore = create(
 
       // Initiate 2FA challenge (save token, show challenge screen)
       initiate2FA: (user, twoFactorToken) => {
+        clearSessionAccessToken();
         set({
           user,
           two_factor_token: twoFactorToken,
@@ -47,6 +71,7 @@ export const authStore = create(
       },
 
       logout: () => {
+        clearSessionAccessToken();
         set({
           user: null,
           access_token: null,

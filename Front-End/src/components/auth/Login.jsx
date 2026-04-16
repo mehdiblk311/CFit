@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import './Login.css';
 
-const IMG_GOOGLE = 'https://www.figma.com/api/mcp/asset/782a9f22-34dc-433c-8213-40c23ce0a9f4';
-
 function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim()); }
 
 export default function Login() {
@@ -166,19 +164,6 @@ export default function Login() {
               {loading ? <div className="login-spinner" /> : 'Sign In'}
             </button>
           </form>
-
-          {/* Divider */}
-          <div className="login-divider">
-            <div className="login-divider-line" />
-            <span className="login-divider-label">or</span>
-            <div className="login-divider-line" />
-          </div>
-
-          {/* Google */}
-          <button className="login-google-btn" type="button">
-            <img src={IMG_GOOGLE} alt="Google" />
-            <span className="login-google-label">Continue with Google</span>
-          </button>
         </div>
 
         {/* Footer */}

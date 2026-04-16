@@ -9,6 +9,7 @@ import {
   useUpdateExerciseMutation,
 } from '../../hooks/queries/useWorkouts';
 import { resolveExerciseImageUrl } from '../../utils/exerciseImages';
+import { uiStore } from '../../stores/uiStore';
 
 const MUSCLE_GROUPS = ['ALL', 'CHEST', 'BACK', 'LEGS', 'SHOULDERS', 'ARMS', 'CORE', 'CARDIO'];
 const DIFFICULTIES  = ['ALL', 'BEGINNER', 'INTERMEDIATE', 'EXPERT'];
@@ -34,6 +35,8 @@ const CAT_LABEL = {
   CARDIO:    'Cardiovascular',
 };
 
+const INLINE_IMAGE_LIMIT = 500;
+
 // Muscle group → Unsplash fallback photo
 const MUSCLE_IMAGE = {
   CHEST:     'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=120&h=120&fit=crop&auto=format&q=80',
@@ -49,6 +52,60 @@ function getAdminExerciseImage(ex) {
   const url = resolveExerciseImageUrl(ex.imageUrl || '');
   if (url) return url;
   return MUSCLE_IMAGE[ex.muscle] || MUSCLE_IMAGE.CHEST;
+}
+
+async function readFileAsDataURL(file) {
+  return await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('Could not read the selected file.'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function loadImageElement(src) {
+  return await new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('The selected file is not a valid image.'));
+    image.src = src;
+  });
+}
+
+async function compressExerciseImageFile(file) {
+  const source = await readFileAsDataURL(file);
+  const image = await loadImageElement(source);
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+
+  if (!context) {
+    throw new Error('Image compression is not available in this browser.');
+  }
+
+  let maxSide = 160;
+  let quality = 0.62;
+  while (maxSide >= 48) {
+    const ratio = Math.min(1, maxSide / Math.max(image.width, image.height));
+    canvas.width = Math.max(1, Math.round(image.width * ratio));
+    canvas.height = Math.max(1, Math.round(image.height * ratio));
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    let nextQuality = quality;
+    while (nextQuality >= 0.18) {
+      const candidate = canvas.toDataURL('image/webp', nextQuality);
+      if (candidate.length <= INLINE_IMAGE_LIMIT) {
+        return candidate;
+      }
+      nextQuality -= 0.08;
+    }
+
+    maxSide -= 24;
+  }
+
+  throw new Error(
+    `This API currently stores image strings only. "${file.name}" is still too large after compression. Use a hosted image URL or a much smaller asset.`
+  );
 }
 
 function splitField(value) {
@@ -79,7 +136,6 @@ function mapBackendExercise(exercise) {
     cat: upperToken(exercise.category, 'STRENGTH'),
     equipment: exercise.equipment || 'Bodyweight',
     diff: upperToken(level === 'advanced' ? 'expert' : level, 'BEGINNER'),
-    icon: '🏋️',
     imageUrl: exercise.image_url || exercise.alt_image_url || '',
     altImageUrl: exercise.alt_image_url || '',
     addedOn: exercise.created_at
@@ -302,10 +358,14 @@ function AdminExerciseImageFallback({ exercise }) {
           justifyContent: 'center',
           background: 'linear-gradient(180deg, rgba(46,47,46,0.08), rgba(46,47,46,0.34))',
           color: '#fffdf9',
-          fontSize: 24,
         }}
       >
-        {exercise.icon}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 22 }}>image</span>
+          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, letterSpacing: '1px', textTransform: 'uppercase' }}>
+            {exercise.muscle || 'Exercise'}
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -383,14 +443,52 @@ function ExerciseInfoModal({ exercise, onClose }) {
 function ExerciseModal({ exercise, onClose, onSave }) {
   const [form, setForm] = useState(
     exercise
-      ? { name: exercise.name, muscle: exercise.muscle, cat: exercise.cat, equipment: exercise.equipment, icon: exercise.icon, diff: exercise.diff, imageUrl: exercise.imageUrl || '' }
-      : { name: '', muscle: 'CHEST', cat: 'COMPOUND', equipment: 'Barbell', icon: '🏋️', diff: 'BEGINNER', imageUrl: '' }
+      ? {
+          name: exercise.name,
+          muscle: exercise.muscle,
+          cat: exercise.cat,
+          equipment: exercise.equipment,
+          diff: exercise.diff,
+          imageUrl: exercise.imageUrl || '',
+          altImageUrl: exercise.altImageUrl || '',
+          instructions: exercise.raw?.instructions || '',
+        }
+      : {
+          name: '',
+          muscle: 'CHEST',
+          cat: 'COMPOUND',
+          equipment: 'Barbell',
+          diff: 'BEGINNER',
+          imageUrl: '',
+          altImageUrl: '',
+          instructions: '',
+        }
   );
+  const [fileState, setFileState] = useState({ primary: '', alternate: '', error: '' });
   function set(k, v) { setForm(f => ({ ...f, [k]: v })); }
+
+  async function handleImageImport(kind, file) {
+    if (!file) return;
+
+    try {
+      const compactImage = await compressExerciseImageFile(file);
+      set(kind, compactImage);
+      setFileState((prev) => ({
+        ...prev,
+        [kind === 'imageUrl' ? 'primary' : 'alternate']: file.name,
+        error: '',
+      }));
+      uiStore.getState().addToast(`${file.name} imported`, 'success');
+    } catch (error) {
+      const message = error?.message || 'Could not import that image file.';
+      setFileState((prev) => ({ ...prev, error: message }));
+      uiStore.getState().addToast(message, 'error');
+    }
+  }
 
   return (
     <div className="adm-modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="adm-modal" style={{ maxWidth: 540 }}>
+      <div className="adm-modal" style={{ maxWidth: 620 }}>
         <button className="adm-modal-close" onClick={onClose}>
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
         </button>
@@ -406,35 +504,91 @@ function ExerciseModal({ exercise, onClose, onSave }) {
           />
         </div>
 
-        {/* Image preview + URL */}
-        <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 4 }}>
-          <div style={{
-            width: 72, height: 72, borderRadius: 12, overflow: 'hidden',
-            border: '2px solid #dad4c8', flexShrink: 0, background: '#f1f1ef',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28,
-            position: 'relative',
-          }}>
-            <ExerciseImagePreview
-              key={`${form.imageUrl}-${form.muscle}-${form.name}`}
-              exercise={{ imageUrl: form.imageUrl, muscle: form.muscle, name: form.name || 'Exercise' }}
-              alt="preview"
-              style={{ position: 'absolute', inset: 0 }}
-              imgStyle={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-              fallback={<AdminExerciseImageFallback exercise={{ imageUrl: '', muscle: form.muscle, name: form.name || 'Exercise', icon: form.icon }} />}
-            />
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 14 }}>
+            <div style={{ border: '2px solid #dad4c8', borderRadius: 18, overflow: 'hidden', background: '#f1f1ef', minHeight: 180, position: 'relative' }}>
+              <ExerciseImagePreview
+                key={`${form.imageUrl}-${form.altImageUrl}-${form.muscle}-${form.name}`}
+                exercise={{ imageUrl: form.imageUrl, altImageUrl: form.altImageUrl, muscle: form.muscle, name: form.name || 'Exercise' }}
+                alt="preview"
+                style={{ position: 'absolute', inset: 0 }}
+                imgStyle={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                animate={Boolean(form.altImageUrl)}
+                fallback={<AdminExerciseImageFallback exercise={{ imageUrl: '', muscle: form.muscle, name: form.name || 'Exercise' }} />}
+              />
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ border: '2px dashed #dad4c8', borderRadius: 18, background: '#faf9f7', padding: 14 }}>
+                <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: '1px', textTransform: 'uppercase', color: '#2e2f2e' }}>
+                  Primary image
+                </p>
+                <p style={{ margin: '6px 0 10px', fontSize: 13, lineHeight: 1.5, color: '#5b5c5a' }}>
+                  Pick a file from your computer or paste a hosted image URL.
+                </p>
+                <label className="adm-btn-ghost" style={{ width: '100%', justifyContent: 'center', marginBottom: 8, cursor: 'pointer' }}>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={(event) => handleImageImport('imageUrl', event.target.files?.[0])}
+                  />
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>upload</span>
+                  Import File
+                </label>
+                <input
+                  className="adm-form-input"
+                  value={form.imageUrl}
+                  onChange={e => set('imageUrl', e.target.value)}
+                  placeholder="https://... or /exercise-images/..."
+                />
+                {fileState.primary ? (
+                  <p style={{ margin: '8px 0 0', fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '0.5px', color: '#38671a' }}>
+                    Imported: {fileState.primary}
+                  </p>
+                ) : null}
+              </div>
+
+              <div style={{ border: '2px dashed #dad4c8', borderRadius: 18, background: '#faf9f7', padding: 14 }}>
+                <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: '1px', textTransform: 'uppercase', color: '#2e2f2e' }}>
+                  Alternate frame
+                </p>
+                <p style={{ margin: '6px 0 10px', fontSize: 13, lineHeight: 1.5, color: '#5b5c5a' }}>
+                  Optional second image for motion-style preview.
+                </p>
+                <label className="adm-btn-ghost" style={{ width: '100%', justifyContent: 'center', marginBottom: 8, cursor: 'pointer' }}>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={(event) => handleImageImport('altImageUrl', event.target.files?.[0])}
+                  />
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>imagesmode</span>
+                  Import Alt File
+                </label>
+                <input
+                  className="adm-form-input"
+                  value={form.altImageUrl}
+                  onChange={e => set('altImageUrl', e.target.value)}
+                  placeholder="https://... or /exercise-images/..."
+                />
+                {fileState.alternate ? (
+                  <p style={{ margin: '8px 0 0', fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '0.5px', color: '#38671a' }}>
+                    Imported: {fileState.alternate}
+                  </p>
+                ) : null}
+              </div>
+            </div>
           </div>
-          <div className="adm-form-field" style={{ flex: 1, margin: 0 }}>
-            <label className="adm-form-label">Image URL (optional)</label>
-            <input
-              className="adm-form-input"
-              value={form.imageUrl}
-              onChange={e => set('imageUrl', e.target.value)}
-              placeholder="https://… (leave blank to use muscle default)"
-            />
-            <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#9f9b93', marginTop: 4, letterSpacing: '0.5px' }}>
-              Leave blank → auto photo by muscle group
+
+          <div style={{ marginTop: 10, padding: '12px 14px', borderRadius: 14, background: '#fff8ea', border: '2px solid #f4d28a' }}>
+            <p style={{ margin: 0, fontSize: 12, lineHeight: 1.55, color: '#7c5507' }}>
+              Imported files are compacted into image strings because the current backend only stores image URLs/paths. If a file is too large, use a hosted image URL or a tiny asset.
             </p>
           </div>
+          {fileState.error ? (
+            <p style={{ margin: '8px 0 0', fontSize: 12, color: '#b02500' }}>{fileState.error}</p>
+          ) : null}
         </div>
 
         <div className="adm-grid-2">
@@ -471,16 +625,18 @@ function ExerciseModal({ exercise, onClose, onSave }) {
               placeholder="e.g. Barbell, Dumbbells"
             />
           </div>
-          <div className="adm-form-field">
-            <label className="adm-form-label">Icon (emoji fallback)</label>
-            <input
-              className="adm-form-input"
-              value={form.icon}
-              onChange={e => set('icon', e.target.value)}
-              placeholder="🏋️"
-              maxLength={2}
-            />
-          </div>
+        </div>
+
+        <div className="adm-form-field">
+          <label className="adm-form-label">Instructions</label>
+          <textarea
+            className="adm-form-input"
+            value={form.instructions}
+            onChange={e => set('instructions', e.target.value)}
+            placeholder="Short coaching cues or execution notes..."
+            rows={4}
+            style={{ borderRadius: 18, minHeight: 108, resize: 'vertical', paddingTop: 14 }}
+          />
         </div>
 
         <div className="adm-form-actions">
@@ -567,6 +723,8 @@ export default function AdminExerciseLibrary() {
       category: normalizeToken(form.cat),
       primary_muscles: normalizeToken(form.muscle),
       image_url: form.imageUrl.trim(),
+      alt_image_url: form.altImageUrl.trim(),
+      instructions: form.instructions.trim(),
     };
 
     if (!payload.name) return;
@@ -883,7 +1041,9 @@ export default function AdminExerciseLibrary() {
       {toDelete && (
         <div className="adm-modal-overlay" onClick={e => e.target === e.currentTarget && setToDelete(null)}>
           <div className="adm-modal" style={{ maxWidth: 400, textAlign: 'center' }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>{toDelete.icon}</div>
+            <div style={{ width: 64, height: 64, margin: '0 auto 12px', borderRadius: '50%', background: '#fff4f1', border: '2px solid #f1c2b4', display: 'grid', placeItems: 'center' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 28, color: '#b02500' }}>delete_forever</span>
+            </div>
             <h2 className="adm-modal-title">Delete Exercise?</h2>
             <p style={{ color: '#5b5c5a', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
               Remove <strong>{toDelete.name}</strong> from the library?
