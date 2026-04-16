@@ -173,6 +173,12 @@
 .fs-row--tilt-right:hover { transform: rotate(1deg); }
 .fs-row--tilt-right-sm:hover { transform: rotate(0.5deg); }
 
+.fs-row--suggested {
+  background: linear-gradient(148deg, #fbfff7 0%, #f8f9f4 58%, #f2f5ec 100%);
+  border-color: #c8d8b9;
+  box-shadow: -6px 6px 0 rgba(56, 103, 26, 0.18);
+}
+
 .fs-row-left {
   display: flex;
   align-items: center;
@@ -196,6 +202,16 @@
   align-items: center;
   gap: 6px;
   margin-bottom: 5px;
+}
+
+.fs-suggested-kicker {
+  margin: 0 0 6px;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #38671a;
+  font-weight: 700;
 }
 
 .fs-food-name {
@@ -232,16 +248,10 @@
 
 .fs-row-right {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
-
-.fs-food-emoji {
-  font-size: 22px;
-  filter: grayscale(1);
-  transition: filter 0.2s;
-}
-.fs-row:hover .fs-food-emoji { filter: none; }
 
 .fs-add-btn {
   width: 38px; height: 38px;
@@ -256,6 +266,31 @@
   background: #38671a;
   color: #fff;
   border-color: #38671a;
+}
+
+.fs-fav-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid #dad4c8;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #8f8a82;
+  transition: all 0.2s;
+}
+
+.fs-fav-btn:hover {
+  border-color: #f95630;
+  color: #f95630;
+}
+
+.fs-fav-btn--active {
+  background: rgba(249, 86, 48, 0.12);
+  border-color: #f95630;
+  color: #f95630;
 }
 
 /* ── Custom Food Callout ────────────────────────────── */

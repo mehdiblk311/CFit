@@ -1,6 +1,6 @@
  # Frontend To-Do List for the Fitness App
 
-Status note (2026-04-15): checked items below exist in the current frontend codebase. Some checked items still need backend-fidelity hardening; see review notes after verification.
+Status note (2026-04-16): checked items below exist in the current frontend codebase. Nutrition meal creation/edit/clone and food picker reuse flows were wired in this pass; some analytics/history surfaces still need backend-fidelity hardening.
 
 This plan is based on the backend routes already registered in `api/server.go`, the product goals in `UM6P_FIT_Scope_Definition.md`, and the UI pieces that already exist in:
 
@@ -289,9 +289,9 @@ Log meals quickly and see macro impact immediately.
 
 **Frontend to-do:**
 - [x] Build daily meal timeline
-- [ ] Build add meal modal/page
-- [ ] Build edit meal flow
-- [ ] Add clone recent meal shortcut
+- [x] Build add meal modal/page
+- [x] Build edit meal flow
+- [x] Add clone recent meal shortcut
 - [x] Show summary strip for calories/protein/carbs/fat
 
 ---
@@ -324,8 +324,8 @@ Make food logging fast enough to become a habit.
 
 **Frontend to-do:**
 - [x] Build searchable food picker
-- [ ] Add recent foods tab
-- [ ] Add favorites tab
+- [x] Add recent foods tab
+- [x] Add favorites tab
 - [x] Build quantity editor
 - [x] Build meal nutrition summary panel
 - [x] Add optional custom food creation later if needed
@@ -617,6 +617,12 @@ Only build these if the product needs an internal operations dashboard.
 **Use:**
 Operations visibility, system health, product usage, moderation insight.
 
+**Frontend to-do:**
+- [x] Wire dashboard to backend summary + trends + metrics + audit logs (no mock data)
+- [x] Render safe loading/empty/error states (partial-data friendly)
+- [ ] Optionally add realtime WS panel (`GET /v1/admin/dashboard/realtime`) if needed
+- [ ] Optionally add system health panel (`GET /v1/admin/system/health`) if needed
+
 ---
 
 ### 19. Admin User Management
@@ -632,6 +638,15 @@ Operations visibility, system health, product usage, moderation insight.
 
 **Use:**
 Support, moderation, account review.
+
+**Frontend to-do:**
+- [x] List users with backend pagination (`GET /v1/admin/users`)
+- [x] Server-side filters: `name/email`, `role`, `status`
+- [x] User detail modal (`GET /v1/admin/users/{id}`)
+- [x] Update user (`PATCH /v1/admin/users/{id}`) using backend-supported roles (`admin/user/moderator`)
+- [x] Ban / unban (`POST /v1/admin/users/{id}/ban`, `POST /v1/admin/users/{id}/unban`)
+- [x] Hard delete user with confirm flag (`DELETE /v1/admin/users/{id}?confirm=true`)
+- [ ] Add a lightweight “user stats” row (workouts/meals) in the main table if desired
 
 ---
 

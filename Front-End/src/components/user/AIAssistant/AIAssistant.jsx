@@ -231,63 +231,85 @@ function ContextPanel({ context, loading }) {
     );
   }
 
+  const hasAnyData =
+    context.caloriesTarget > 0 ||
+    context.proteinTarget > 0 ||
+    context.workoutStreak > 0 ||
+    context.mealStreak > 0 ||
+    context.adherence7 > 0 ||
+    context.recordsCount > 0;
+
   return (
     <aside className="coach-ctx">
       <div className="coach-ctx__head">
         <h2>Today&apos;s Context</h2>
-        <span className="coach-ctx__label">Grounded in your data</span>
+        <span className="coach-ctx__label">{hasAnyData ? 'Grounded in your data' : 'Getting started'}</span>
       </div>
 
-      <div className="coach-ctx__meters">
-        <div className="coach-meter">
-          <div className="coach-meter__row">
-            <span>Calories</span>
-            <strong>
-              {formatMetricLabel(context.caloriesTotal)} / {formatMetricTarget(context.caloriesTarget)}
-            </strong>
-          </div>
-          <div className="coach-meter__track">
-            <div
-              className="coach-meter__fill"
-              style={{ width: `${context.caloriesProgress}%` }}
-            />
+      {!hasAnyData ? (
+        <div className="coach-ctx__onboard">
+          <span className="material-symbols-outlined coach-ctx__onboard-icon">rocket_launch</span>
+          <div className="coach-ctx__onboard-body">
+            <p className="coach-ctx__onboard-title">Track to unlock insights</p>
+            <p className="coach-ctx__onboard-desc">
+              Log a workout or meal and your stats will appear here. Your coach gets smarter with every entry.
+            </p>
           </div>
         </div>
+      ) : (
+        <>
+          <div className="coach-ctx__meters">
+            <div className="coach-meter">
+              <div className="coach-meter__row">
+                <span>Calories</span>
+                <strong>
+                  {formatMetricLabel(context.caloriesTotal)} / {formatMetricTarget(context.caloriesTarget)}
+                </strong>
+              </div>
+              <div className="coach-meter__track">
+                <div
+                  className="coach-meter__fill"
+                  style={{ width: `${context.caloriesProgress}%` }}
+                />
+              </div>
+            </div>
 
-        <div className="coach-meter">
-          <div className="coach-meter__row">
-            <span>Protein</span>
-            <strong>
-              {formatMetricLabel(context.proteinTotal, 'g')} / {formatMetricTarget(context.proteinTarget, 'g')}
-            </strong>
+            <div className="coach-meter">
+              <div className="coach-meter__row">
+                <span>Protein</span>
+                <strong>
+                  {formatMetricLabel(context.proteinTotal, 'g')} / {formatMetricTarget(context.proteinTarget, 'g')}
+                </strong>
+              </div>
+              <div className="coach-meter__track">
+                <div
+                  className="coach-meter__fill coach-meter__fill--ube"
+                  style={{ width: `${context.proteinProgress}%` }}
+                />
+              </div>
+            </div>
           </div>
-          <div className="coach-meter__track">
-            <div
-              className="coach-meter__fill coach-meter__fill--ube"
-              style={{ width: `${context.proteinProgress}%` }}
-            />
-          </div>
-        </div>
-      </div>
 
-      <div className="coach-ctx__kpis">
-        <div className="coach-kpi">
-          <span className="coach-kpi__label">Workout streak</span>
-          <strong className="coach-kpi__value">{context.workoutStreak}<small>wk</small></strong>
-        </div>
-        <div className="coach-kpi">
-          <span className="coach-kpi__label">Meal streak</span>
-          <strong className="coach-kpi__value">{context.mealStreak}<small>d</small></strong>
-        </div>
-        <div className="coach-kpi">
-          <span className="coach-kpi__label">7-day adherence</span>
-          <strong className="coach-kpi__value">{Math.round(context.adherence7)}<small>%</small></strong>
-        </div>
-        <div className="coach-kpi">
-          <span className="coach-kpi__label">Tracked records</span>
-          <strong className="coach-kpi__value">{context.recordsCount}</strong>
-        </div>
-      </div>
+          <div className="coach-ctx__kpis">
+            <div className="coach-kpi">
+              <span className="coach-kpi__label">Workout streak</span>
+              <strong className="coach-kpi__value">{context.workoutStreak}<small>wk</small></strong>
+            </div>
+            <div className="coach-kpi">
+              <span className="coach-kpi__label">Meal streak</span>
+              <strong className="coach-kpi__value">{context.mealStreak}<small>d</small></strong>
+            </div>
+            <div className="coach-kpi">
+              <span className="coach-kpi__label">7-day adherence</span>
+              <strong className="coach-kpi__value">{Math.round(context.adherence7)}<small>%</small></strong>
+            </div>
+            <div className="coach-kpi">
+              <span className="coach-kpi__label">Tracked records</span>
+              <strong className="coach-kpi__value">{context.recordsCount}</strong>
+            </div>
+          </div>
+        </>
+      )}
 
       {context.recommendations.length > 0 && (
         <div className="coach-ctx__recs">
@@ -555,8 +577,12 @@ export default function AIAssistant() {
                 </div>
                 <h3>Ask your coach anything</h3>
                 <p>
-                  Workouts, nutrition, recovery, progress — your AI coach is rooted in your real data.
+                  Workouts, nutrition, recovery, progress — your coach is rooted in your real data.
                 </p>
+                <div className="coach-thread__empty-hint">
+                  <span className="material-symbols-outlined">touch_app</span>
+                  <span>Tap a suggestion below or type your question</span>
+                </div>
               </div>
             ) : (
               renderedMessages.map((message) => (

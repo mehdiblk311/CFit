@@ -9,6 +9,21 @@
   font-family: 'Roobert', Arial, sans-serif;
 }
 
+.nh-root--week {
+  --nh-accent: #2f6a18;
+  --nh-accent-soft: #d4f7b8;
+}
+
+.nh-root--month {
+  --nh-accent: #5d3fd3;
+  --nh-accent-soft: #dcd3ff;
+}
+
+.nh-root--quarter {
+  --nh-accent: #9d4a00;
+  --nh-accent-soft: #ffd7b5;
+}
+
 /* ── Header ─────────────────────────────────────────── */
 .nh-header {
   position: fixed;
@@ -81,6 +96,31 @@
   gap: 28px;
 }
 
+.nh-loading-state,
+.nh-error-card {
+  background: #f1f1ef;
+  border: 2px solid #dad4c8;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: -7px 7px 0 rgba(46,47,46,1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  text-align: center;
+}
+
+.nh-loading-state span {
+  font-size: 32px;
+  color: #38671a;
+}
+
+.nh-loading-state p,
+.nh-error-card p {
+  margin: 0;
+  color: #5b5c5a;
+}
+
 /* ── Calendar + Summary ─────────────────────────────── */
 .nh-cal-section {
   display: grid;
@@ -129,6 +169,10 @@
   transition: background 0.2s;
 }
 .nh-cal-nav-btn:hover { background: #e8e2d6; }
+.nh-cal-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
 
 .nh-cal-grid {
   display: grid;
@@ -166,6 +210,10 @@
   gap: 3px;
 }
 .nh-cal-cell--btn:hover { background: #e8e2d6; }
+.nh-cal-cell--future {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
 
 .nh-cal-cell--selected {
   background: #5d3fd3 !important;
@@ -193,6 +241,21 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.nh-root--week .nh-summary-card {
+  border-color: #38671a;
+  background: #eaf7df;
+}
+
+.nh-root--month .nh-summary-card {
+  border-color: #5d3fd3;
+  background: #ebe6ff;
+}
+
+.nh-root--quarter .nh-summary-card {
+  border-color: #9d4a00;
+  background: #f9e8d9;
 }
 
 .nh-summary-tag {
@@ -238,8 +301,52 @@
 
 .nh-progress-fill {
   height: 100%;
-  background: #38671a;
+  background: var(--nh-accent, #38671a);
   border-radius: 9999px;
+}
+
+.nh-day-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nh-day-log-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px dashed #c7c1b6;
+  border-radius: 12px;
+  padding: 8px 10px;
+  background: rgba(250, 249, 247, 0.7);
+}
+
+.nh-day-log-type {
+  margin: 0;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #38671a;
+}
+
+.nh-day-log-meta {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: #5b5c5a;
+}
+
+.nh-day-log-kcal {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: #2e2f2e;
+}
+
+.nh-day-log-empty {
+  margin: 0;
+  font-size: 13px;
+  color: #5b5c5a;
 }
 
 .nh-macros-grid {
@@ -318,7 +425,7 @@
 }
 .nh-range-btn:hover:not(.nh-range-btn--active) { color: #38671a; }
 .nh-range-btn--active {
-  background: #38671a;
+  background: var(--nh-accent, #38671a);
   color: #d6ffb7;
   box-shadow: -3px 3px 0 rgba(46,47,46,1);
 }
@@ -342,6 +449,22 @@
   box-shadow: -7px 7px 0 rgba(46,47,46,1);
 }
 
+.nh-chart-card--wide {
+  grid-column: 1 / -1;
+}
+
+.nh-chart-card--week {
+  background: linear-gradient(160deg, #f7fbf2 0%, #edf6e4 100%);
+}
+
+.nh-chart-card--month {
+  background: linear-gradient(160deg, #f6f2ff 0%, #ece5ff 100%);
+}
+
+.nh-chart-card--quarter {
+  background: linear-gradient(160deg, #fff5ec 0%, #fce9d8 100%);
+}
+
 .nh-chart-card-header {
   display: flex;
   align-items: center;
@@ -355,6 +478,10 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   color: #5b5c5a;
+}
+
+.nh-chart-icon {
+  color: var(--nh-accent, #38671a);
 }
 
 /* Bar chart */
@@ -384,18 +511,25 @@
 
 .nh-bar-col {
   position: relative;
+  flex: 1;
+  min-width: 6px;
   display: flex;
+  justify-content: center;
   align-items: flex-end;
 }
 
 .nh-bar-item {
-  width: 8px;
+  width: min(100%, 12px);
   background: rgba(56,103,26,0.2);
   border-radius: 4px 4px 0 0;
 }
 
+.nh-bar-item--empty {
+  background: rgba(46,47,46,0.12);
+}
+
 .nh-bar-item--accent {
-  background: #38671a;
+  background: var(--nh-accent, #38671a);
   box-shadow: -3px 3px 0 rgba(46,47,46,1);
 }
 

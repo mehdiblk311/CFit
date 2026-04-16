@@ -23,7 +23,8 @@ export const weightAPI = {
       });
 
       entries.push(...(response.data || []));
-      hasNext = Boolean(response.metadata?.has_next);
+      const totalPages = Number(response.metadata?.total_pages || 0);
+      hasNext = Boolean(response.metadata?.has_next) || (totalPages > 0 && page < totalPages) || (response.data || []).length === (params.limit ?? WEIGHT_ENTRY_PAGE_SIZE);
       page += 1;
     }
 

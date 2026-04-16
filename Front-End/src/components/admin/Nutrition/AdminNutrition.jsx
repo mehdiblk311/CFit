@@ -1,118 +1,309 @@
-import { useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
+import {
+  useAdminFoods,
+  useCreateAdminFood,
+  useDeleteAdminFood,
+  useUpdateAdminFood,
+} from '../../../hooks/queries/useAdmin';
+import './AdminNutrition.css';
 
-const INITIAL_FOODS = [
-  { id: '1', name: 'Greek Yogurt (Full Fat)', category: 'Dairy', kcal: 59, p: 10, c: 4, f: 5, status: 'verified' },
-  { id: '2', name: 'Oatmeal (Raw)', category: 'Grains', kcal: 68, p: 6, c: 28, f: 3, status: 'verified' },
-  { id: '3', name: 'Amlou', category: 'Spreads', kcal: 598, p: 15, c: 30, f: 45, status: 'verified' },
-  { id: '4', name: 'Homemade Lasagna', category: 'Custom', kcal: 180, p: 12, c: 18, f: 8, status: 'pending' },
-  { id: '5', name: 'Harcha', category: 'Baked', kcal: 420, p: 8, c: 60, f: 14, status: 'verified' },
-];
+const FOOD_FORM_INITIAL = {
+  name: '',
+  brand: '',
+  serving_size: 100,
+  serving_unit: 'g',
+  calories: 0,
+  protein: 0,
+  carbohydrates: 0,
+  fat: 0,
+  fiber: 0,
+  sugar: 0,
+  sodium: 0,
+};
+
+function toNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function formatCompact(value) {
+  return new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(toNumber(value));
+}
+
+function formatDateTime(value) {
+  if (!value) return 'No sync yet';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'No sync yet';
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(date);
+}
+
+function sourceTone(source) {
+  switch (String(source || '').toLowerCase()) {
+    case 'usda':
+      return 'adm-chip adm-chip--green';
+    case 'user':
+      return 'adm-chip adm-chip--purple';
+    default:
+      return 'adm-chip adm-chip--oat';
+  }
+}
+
+function sourceLabel(source) {
+  const normalized = String(source || '').trim().toLowerCase();
+  if (!normalized) return 'manual';
+  return normalized.replaceAll('_', ' ');
+}
+
+function categoryLabel(category) {
+  return category || 'uncategorized';
+}
+
+function macroTotal(food) {
+  return toNumber(food?.protein) + toNumber(food?.carbohydrates) + toNumber(food?.fat);
+}
+
+function buildExportRows(items) {
+  const headers = ['Name', 'Brand', 'Source', 'Category', 'Serving Size', 'Serving Unit', 'Calories', 'Protein', 'Carbohydrates', 'Fat', 'Fiber', 'Sugar', 'Sodium'];
+  const rows = items.map((item) => [
+    `"${String(item?.name || '').replace(/"/g, '""')}"`,
+    `"${String(item?.brand || '').replace(/"/g, '""')}"`,
+    sourceLabel(item?.source),
+    categoryLabel(item?.category),
+    toNumber(item?.serving_size),
+    item?.serving_unit || '',
+    toNumber(item?.calories),
+    toNumber(item?.protein),
+    toNumber(item?.carbohydrates),
+    toNumber(item?.fat),
+    toNumber(item?.fiber),
+    toNumber(item?.sugar),
+    toNumber(item?.sodium),
+  ]);
+
+  return [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
+}
+
+function FoodEditorModal({
+  mode,
+  food,
+  form,
+  onClose,
+  onChange,
+  onSubmit,
+  isPending,
+}) {
+  return (
+    <div className="adm-modal-overlay">
+      <div className="adm-modal adm-nut-modal">
+        <button className="adm-modal-close" onClick={onClose} aria-label="Close nutrition editor">
+          <span className="material-symbols-outlined">close</span>
+        </button>
+
+        <div className="adm-nut-modal-copy">
+          <p className="adm-page-eyebrow">Nutrition Control Room</p>
+          <h2 className="adm-modal-title">{mode === 'edit' ? 'Refine Food Entry' : 'Add Manual Food'}</h2>
+          <p className="adm-nut-modal-desc">
+            Taha can only edit the fields the backend truly accepts: label, serving reference, and nutrition values.
+          </p>
+        </div>
+
+        <form onSubmit={onSubmit} className="adm-nut-form">
+          <div className="adm-grid-2">
+            <label className="adm-form-field">
+              <span className="adm-form-label">Food Name</span>
+              <input className="adm-form-input" name="name" value={form.name} onChange={onChange} required />
+            </label>
+            <label className="adm-form-field">
+              <span className="adm-form-label">Brand</span>
+              <input className="adm-form-input" name="brand" value={form.brand} onChange={onChange} placeholder="Optional" />
+            </label>
+          </div>
+
+          <div className="adm-grid-2">
+            <label className="adm-form-field">
+              <span className="adm-form-label">Serving Size</span>
+              <input className="adm-form-input" type="number" min="0" step="0.01" name="serving_size" value={form.serving_size} onChange={onChange} required />
+            </label>
+            <label className="adm-form-field">
+              <span className="adm-form-label">Serving Unit</span>
+              <input className="adm-form-input" name="serving_unit" value={form.serving_unit} onChange={onChange} required />
+            </label>
+          </div>
+
+          {mode === 'edit' ? (
+            <div className="adm-nut-modal-meta">
+              <span className={sourceTone(food?.source)}>{sourceLabel(food?.source)}</span>
+              <span className="adm-chip adm-chip--oat">{categoryLabel(food?.category)}</span>
+              <span className="adm-chip adm-chip--oat">Updated {formatDateTime(food?.updated_at || food?.created_at)}</span>
+            </div>
+          ) : null}
+
+          <div className="adm-nut-macro-grid">
+            {[
+              ['calories', 'Calories', 'kcal'],
+              ['protein', 'Protein', 'g'],
+              ['carbohydrates', 'Carbs', 'g'],
+              ['fat', 'Fat', 'g'],
+              ['fiber', 'Fiber', 'g'],
+              ['sugar', 'Sugar', 'g'],
+              ['sodium', 'Sodium', 'mg'],
+            ].map(([key, label, unit]) => (
+              <label key={key} className="adm-form-field">
+                <span className="adm-form-label">{label}</span>
+                <div className="adm-nut-field-unit">
+                  <input
+                    className="adm-form-input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    name={key}
+                    value={form[key]}
+                    onChange={onChange}
+                  />
+                  <span>{unit}</span>
+                </div>
+              </label>
+            ))}
+          </div>
+
+          <div className="adm-form-actions">
+            <button type="button" className="adm-btn-ghost" onClick={onClose}>Cancel</button>
+            <button type="submit" className="adm-btn-primary" disabled={isPending}>
+              <span className="material-symbols-outlined">{isPending ? 'progress_activity' : 'check_circle'}</span>
+              {isPending ? 'Saving…' : mode === 'edit' ? 'Save Food' : 'Create Food'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminNutrition() {
-  const [foods, setFoods] = useState(INITIAL_FOODS);
-  
-  // Search and Filter State
   const [search, setSearch] = useState('');
-  const [filterCat, setFilterCat] = useState('All');
+  const [page, setPage] = useState(1);
+  const [editorMode, setEditorMode] = useState('create');
+  const [editingFood, setEditingFood] = useState(null);
+  const [form, setForm] = useState(FOOD_FORM_INITIAL);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [actionError, setActionError] = useState('');
 
-  // Modal State
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState(null); // null = Creating new food
-  const [formData, setFormData] = useState({
-    name: '', category: 'Dairy', kcal: '', p: '', c: '', f: '', status: 'verified'
+  const deferredSearch = useDeferredValue(search.trim());
+
+  const foodsQuery = useAdminFoods({
+    page,
+    limit: 20,
+    ...(deferredSearch ? { name: deferredSearch } : {}),
   });
+  const createFood = useCreateAdminFood();
+  const updateFood = useUpdateAdminFood();
+  const deleteFood = useDeleteAdminFood();
 
-  const filteredFoods = foods.filter(f => {
-    const matchSearch = f.name.toLowerCase().includes(search.toLowerCase());
-    const matchCat = filterCat === 'All' || f.category === filterCat;
-    return matchSearch && matchCat;
-  });
+  const foods = useMemo(() => foodsQuery.data?.items || [], [foodsQuery.data?.items]);
+  const foodsMeta = foodsQuery.data?.metadata || {};
+  const totalFoods = Number(foodsMeta?.total_count || foods.length || 0);
+  const totalPages = Number(foodsMeta?.total_pages || 1);
 
-  const getChipClass = (status, category) => {
-    if (status === 'pending') return 'adm-chip--purple';
-    if (category === 'Dairy' || category === 'Grains') return 'adm-chip--oat';
-    return 'adm-chip--green';
+  const handleOpenCreate = () => {
+    setEditorMode('create');
+    setEditingFood(null);
+    setForm(FOOD_FORM_INITIAL);
+    setActionError('');
+    setModalOpen(true);
   };
 
-  /* Modal Helpers */
-  const openAddModal = () => {
-    setEditingId(null);
-    setFormData({ name: '', category: 'Dairy', kcal: '', p: '', c: '', f: '', status: 'verified' });
-    setIsModalOpen(true);
+  const handleOpenEdit = (food) => {
+    setEditorMode('edit');
+    setEditingFood(food);
+    setForm({
+      name: food?.name || '',
+      brand: food?.brand || '',
+      serving_size: toNumber(food?.serving_size, 100),
+      serving_unit: food?.serving_unit || 'g',
+      calories: toNumber(food?.calories),
+      protein: toNumber(food?.protein),
+      carbohydrates: toNumber(food?.carbohydrates),
+      fat: toNumber(food?.fat),
+      fiber: toNumber(food?.fiber),
+      sugar: toNumber(food?.sugar),
+      sodium: toNumber(food?.sodium),
+    });
+    setActionError('');
+    setModalOpen(true);
   };
 
-  const openEditModal = (food) => {
-    setEditingId(food.id);
-    setFormData({ ...food });
-    setIsModalOpen(true);
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setEditingFood(null);
+    setActionError('');
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
+  const handleFormChange = (event) => {
+    const { name, value } = event.target;
+    const numericFields = new Set(['serving_size', 'calories', 'protein', 'carbohydrates', 'fat', 'fiber', 'sugar', 'sodium']);
+    setForm((prev) => ({
+      ...prev,
+      [name]: numericFields.has(name) ? value : value,
+    }));
   };
 
-  /* Form Actions */
-  const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  const handleSaveFood = async (event) => {
+    event.preventDefault();
+    setActionError('');
 
-  const handleSaveFood = (e) => {
-    e.preventDefault();
-    
-    // Convert macros to numbers
     const payload = {
-      ...formData,
-      kcal: Number(formData.kcal),
-      p: Number(formData.p),
-      c: Number(formData.c),
-      f: Number(formData.f),
+      name: form.name.trim(),
+      brand: form.brand.trim(),
+      serving_size: toNumber(form.serving_size, 100),
+      serving_unit: String(form.serving_unit || '').trim() || 'g',
+      calories: toNumber(form.calories),
+      protein: toNumber(form.protein),
+      carbohydrates: toNumber(form.carbohydrates),
+      fat: toNumber(form.fat),
+      fiber: toNumber(form.fiber),
+      sugar: toNumber(form.sugar),
+      sodium: toNumber(form.sodium),
     };
 
-    if (editingId) {
-      // Update
-      setFoods(prev => prev.map(f => f.id === editingId ? { ...payload, id: editingId } : f));
-    } else {
-      // Create
-      const newId = String(Math.max(...foods.map(f => Number(f.id)), 0) + 1);
-      setFoods(prev => [{ ...payload, id: newId }, ...prev]);
-    }
-    
-    closeModal();
-  };
-
-  const handleDeleteFood = (id) => {
-    if (window.confirm("Are you sure you want to delete this food item?")) {
-      setFoods(prev => prev.filter(f => f.id !== id));
+    try {
+      if (editorMode === 'edit' && editingFood?.id) {
+        await updateFood.mutateAsync({ food_id: editingFood.id, data: payload });
+      } else {
+        await createFood.mutateAsync(payload);
+      }
+      handleCloseModal();
+    } catch (error) {
+      setActionError(error?.response?.data?.error || 'Could not save this food right now.');
     }
   };
 
-  const handleExportCSV = () => {
-    // 1. Create CSV Headers
-    const headers = ['ID', 'Food Name', 'Category', 'Calories', 'Protein (g)', 'Carbs (g)', 'Fats (g)', 'Status'];
-    
-    // 2. Map data rows
-    const rows = filteredFoods.map(f => [
-      f.id,
-      `"${f.name.replace(/"/g, '""')}"`, // Escape commas/quotes in the name
-      f.category,
-      f.kcal,
-      f.p,
-      f.c,
-      f.f,
-      f.status
-    ]);
+  const handleDeleteFood = async (food) => {
+    if (!food?.id) return;
+    if (!window.confirm(`Delete "${food.name}" from the library?`)) return;
 
-    // 3. Combine into a single string
-    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    try {
+      await deleteFood.mutateAsync(food.id);
+      setActionError('');
+    } catch (error) {
+      setActionError(error?.response?.data?.error || 'Could not delete this food right now.');
+    }
+  };
 
-    // 4. Create Blob and trigger download
+  const handleExport = () => {
+    const csvContent = buildExportRows(foods);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', 'cfit_nutrition_db_export.csv');
+    link.setAttribute('download', 'cfit_admin_foods_export.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -120,226 +311,157 @@ export default function AdminNutrition() {
   };
 
   return (
-    <div>
-      {/* ── Page Header ─────────────────────────────────────────────── */}
+    <div className="adm-nut-page">
       <div className="adm-page-header">
         <div>
-          <div className="adm-page-eyebrow">Database Administration</div>
-          <h1 className="adm-page-title">Nutrition DB</h1>
+          <div className="adm-page-eyebrow">Coach Nutrition Ops</div>
+          <h1 className="adm-page-title">Nutrition Library</h1>
         </div>
         <div className="adm-page-actions">
-          <button className="adm-btn-ghost" onClick={handleExportCSV}>
-            <span className="material-symbols-outlined">download</span> Export CSV
+          <button className="adm-btn-ghost" onClick={handleExport}>
+            <span className="material-symbols-outlined">download</span>
+            Export Current View
           </button>
-          <button className="adm-btn-primary" onClick={openAddModal}>
-            <span className="material-symbols-outlined">add</span> Add Food
+          <button className="adm-btn-primary" onClick={handleOpenCreate}>
+            <span className="material-symbols-outlined">add</span>
+            Add Manual Food
           </button>
         </div>
       </div>
 
-      {/* ── Metrics Grid ────────────────────────────────────────────── */}
-      <div className="adm-grid-3" style={{ marginBottom: 32 }}>
-        <div className="adm-metric-card">
-          <div className="adm-metric-badge">LIVE</div>
-          <div className="adm-metric-label">Total Verified Foods</div>
-          <div className="adm-metric-value">{foods.filter(f => f.status === 'verified').length}</div>
-          <div className="adm-metric-bar-wrap">
-            <div className="adm-metric-bar" style={{ width: '80%' }}></div>
-          </div>
-        </div>
-        <div className="adm-metric-card">
-          <div className="adm-metric-badge" style={{ background: '#b4a5ff', color: '#180058' }}>REVIEW</div>
-          <div className="adm-metric-label">Pending Custom Foods</div>
-          <div className="adm-metric-value">{foods.filter(f => f.status === 'pending').length}</div>
-          <div className="adm-metric-bar-wrap">
-            <div className="adm-metric-bar" style={{ width: '20%', background: '#b4a5ff' }}></div>
-          </div>
-        </div>
-        <div className="adm-metric-card">
-          <div className="adm-metric-badge">OK</div>
-          <div className="adm-metric-label">API Integrations (USDA)</div>
-          <div className="adm-metric-value">SYNCED</div>
-          <div className="adm-metric-bar-wrap">
-            <div className="adm-metric-bar" style={{ width: '100%' }}></div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Constraints & Table ─────────────────────────────────────── */}
-      <div className="adm-table-wrap">
-        <div style={{ display: 'flex', gap: 16, padding: '20px 24px', borderBottom: '2px dashed #dad4c8', alignItems: 'center', flexWrap: 'wrap' }}>
-          <div className="adm-search-wrap" style={{ flex: 1, minWidth: 240 }}>
+      <section className="adm-table-wrap adm-nut-table-shell">
+        <div className="adm-nut-table-toolbar">
+          <div className="adm-search-wrap adm-nut-toolbar-search">
             <span className="material-symbols-outlined adm-search-icon">search</span>
             <input
               type="text"
               className="adm-search"
-              placeholder="SEARCH FOOD OR ID..."
+              placeholder="Search food name..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
-              style={{ width: '100%' }}
+              onChange={(event) => {
+                setSearch(event.target.value);
+                setPage(1);
+              }}
             />
           </div>
-          <select className="adm-select" value={filterCat} onChange={e => setFilterCat(e.target.value)}>
-            <option value="All">All Categories</option>
-            <option value="Dairy">Dairy</option>
-            <option value="Grains">Grains</option>
-            <option value="Spreads">Spreads</option>
-            <option value="Custom">Custom</option>
-            <option value="Baked">Baked</option>
-          </select>
+        </div>
+
+        {actionError ? <div className="adm-nut-inline-error">{actionError}</div> : null}
+        {foodsQuery.isError ? <div className="adm-nut-inline-error">{foodsQuery.errorMeta?.message || 'Could not load food library.'}</div> : null}
+
+        <div className="adm-nut-table-header">
+          <div>
+            <p className="adm-page-eyebrow">Food Library</p>
+            <h3 className="adm-nut-section-title">Backend inventory</h3>
+          </div>
+          <span className="adm-chip adm-chip--oat">
+            {foodsQuery.isFetching ? 'Refreshing…' : `${formatCompact(totalFoods)} foods`}
+          </span>
         </div>
 
         <div style={{ overflowX: 'auto' }}>
           <table className="adm-table">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Food Item</th>
-                <th>Category</th>
-                <th>Macros (P/C/F)</th>
-                <th>KCAL / 100g</th>
-                <th>Status</th>
+                <th>Food</th>
+                <th>Source</th>
+                <th>Serving</th>
+                <th>Macros</th>
+                <th>Micros</th>
+                <th>Updated</th>
                 <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredFoods.map(f => (
-                <tr key={f.id}>
-                  <td className="adm-td-mono">#{f.id.padStart(4, '0')}</td>
-                  <td style={{ fontWeight: 600 }}>{f.name}</td>
+              {foodsQuery.isLoading ? (
+                <tr>
+                  <td colSpan={7}>
+                    <div className="adm-empty">
+                      <span className="material-symbols-outlined adm-empty-icon">progress_activity</span>
+                      <div className="adm-empty-text">Loading food database…</div>
+                    </div>
+                  </td>
+                </tr>
+              ) : foods.length === 0 ? (
+                <tr>
+                  <td colSpan={7}>
+                    <div className="adm-empty">
+                      <span className="material-symbols-outlined adm-empty-icon">search_off</span>
+                      <div className="adm-empty-text">No foods match this query.</div>
+                    </div>
+                  </td>
+                </tr>
+              ) : foods.map((food) => (
+                <tr key={food.id}>
                   <td>
-                    <span className={`adm-chip ${getChipClass(f.status, f.category)}`}>
-                      {f.category}
-                    </span>
+                    <div className="adm-nut-food-cell">
+                      <div className="adm-nut-food-mark">
+                        <span className="material-symbols-outlined">restaurant</span>
+                      </div>
+                      <div>
+                        <p className="adm-nut-food-name">{food.name}</p>
+                        <p className="adm-nut-food-meta">
+                          {[food.brand, categoryLabel(food.category)].filter(Boolean).join(' · ')}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span className={sourceTone(food.source)}>{sourceLabel(food.source)}</span></td>
+                  <td className="adm-td-mono">{toNumber(food.serving_size, 100)} {food.serving_unit || 'g'}</td>
+                  <td>
+                    <div className="adm-nut-macro-pills">
+                      <span className="adm-chip adm-chip--green">P {toNumber(food.protein)}g</span>
+                      <span className="adm-chip adm-chip--purple">C {toNumber(food.carbohydrates)}g</span>
+                      <span className="adm-chip adm-chip--oat">F {toNumber(food.fat)}g</span>
+                    </div>
+                    <p className="adm-nut-macro-total">{toNumber(food.calories)} kcal · total macro mass {macroTotal(food).toFixed(1)}g</p>
                   </td>
                   <td className="adm-td-mono">
-                    {f.p}g / {f.c}g / {f.f}g
+                    Fiber {toNumber(food.fiber)}g<br />
+                    Sugar {toNumber(food.sugar)}g<br />
+                    Sodium {toNumber(food.sodium)}mg
                   </td>
-                  <td style={{ fontWeight: 800 }}>{f.kcal}</td>
+                  <td className="adm-td-mono">{formatDateTime(food.updated_at || food.created_at)}</td>
                   <td>
-                    {f.status === 'verified' ? (
-                      <span className="adm-td-mono" style={{ color: '#38671a', display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: 14 }}>verified</span>
-                        Verified
-                      </span>
-                    ) : (
-                      <span className="adm-td-mono" style={{ color: '#b02500', display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: 14 }}>pending</span>
-                        Pending
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                      <button 
-                        className="adm-icon-btn adm-icon-btn--edit" 
-                        title="Edit Food"
-                        onClick={() => openEditModal(f)}
-                      >
+                    <div className="adm-nut-actions">
+                      <button className="adm-icon-btn adm-icon-btn--edit" onClick={() => handleOpenEdit(food)} title="Edit food">
                         <span className="material-symbols-outlined">edit</span>
                       </button>
-                      <button 
-                        className="adm-icon-btn adm-icon-btn--danger" 
-                        title="Delete Food"
-                        onClick={() => handleDeleteFood(f.id)}
-                      >
+                      <button className="adm-icon-btn adm-icon-btn--danger" onClick={() => handleDeleteFood(food)} title="Delete food">
                         <span className="material-symbols-outlined">delete</span>
                       </button>
                     </div>
                   </td>
                 </tr>
               ))}
-              {filteredFoods.length === 0 && (
-                <tr>
-                  <td colSpan={7}>
-                    <div className="adm-empty">
-                      <span className="material-symbols-outlined adm-empty-icon">search_off</span>
-                      <div className="adm-empty-text">No foods found</div>
-                    </div>
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
-      </div>
 
-      {/* ── Modal Form ──────────────────────────────────────────────── */}
-      {isModalOpen && (
-        <div className="adm-modal-overlay">
-          <div className="adm-modal">
-            <button className="adm-modal-close" onClick={closeModal} aria-label="Close">
-              <span className="material-symbols-outlined">close</span>
-            </button>
-            <h2 className="adm-modal-title">
-              {editingId ? 'Edit Food Entry' : 'Create New Food'}
-            </h2>
-            
-            <form onSubmit={handleSaveFood}>
-              <div className="adm-form-field">
-                <label className="adm-form-label">Food Name</label>
-                <input 
-                  type="text" 
-                  name="name" 
-                  className="adm-form-input" 
-                  value={formData.name} 
-                  onChange={handleFormChange}
-                  placeholder="e.g. Grandma's Lasagna"
-                  required 
-                />
-              </div>
-
-              <div className="adm-grid-2" style={{ marginBottom: 18 }}>
-                <div className="adm-form-field" style={{ marginBottom: 0 }}>
-                  <label className="adm-form-label">Category</label>
-                  <select name="category" className="adm-form-select" value={formData.category} onChange={handleFormChange}>
-                    <option value="Dairy">Dairy</option>
-                    <option value="Grains">Grains</option>
-                    <option value="Spreads">Spreads</option>
-                    <option value="Custom">Custom</option>
-                    <option value="Baked">Baked</option>
-                  </select>
-                </div>
-                
-                <div className="adm-form-field" style={{ marginBottom: 0 }}>
-                  <label className="adm-form-label">Status</label>
-                  <select name="status" className="adm-form-select" value={formData.status} onChange={handleFormChange}>
-                    <option value="verified">Verified (Live)</option>
-                    <option value="pending">Pending Review</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="adm-form-field">
-                <label className="adm-form-label">Macros (per 100g)</label>
-                <div className="adm-grid-4">
-                  <div style={{ position: 'relative' }}>
-                    <input type="number" name="kcal" placeholder="KCAL" className="adm-form-input" value={formData.kcal} onChange={handleFormChange} required min="0" />
-                  </div>
-                  <div>
-                    <input type="number" name="p" placeholder="P (g)" className="adm-form-input" value={formData.p} onChange={handleFormChange} required min="0" />
-                  </div>
-                  <div>
-                    <input type="number" name="c" placeholder="C (g)" className="adm-form-input" value={formData.c} onChange={handleFormChange} required min="0" />
-                  </div>
-                  <div>
-                    <input type="number" name="f" placeholder="F (g)" className="adm-form-input" value={formData.f} onChange={handleFormChange} required min="0" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="adm-form-actions">
-                <button type="button" className="adm-btn-ghost" onClick={closeModal}>
-                  Cancel
-                </button>
-                <button type="submit" className="adm-btn-primary">
-                  {editingId ? 'Save Changes' : 'Create Food'}
-                </button>
-              </div>
-            </form>
-          </div>
+        <div className="adm-nut-pagination">
+          <button className="adm-btn-ghost" onClick={() => setPage((prev) => Math.max(1, prev - 1))} disabled={page <= 1}>
+            <span className="material-symbols-outlined">chevron_left</span>
+            Prev
+          </button>
+          <span className="adm-chip adm-chip--oat">Page {page} / {Math.max(1, totalPages)}</span>
+          <button className="adm-btn-ghost" onClick={() => setPage((prev) => Math.min(Math.max(1, totalPages), prev + 1))} disabled={page >= Math.max(1, totalPages)}>
+            Next
+            <span className="material-symbols-outlined">chevron_right</span>
+          </button>
         </div>
-      )}
+      </section>
+
+      {modalOpen ? (
+        <FoodEditorModal
+          mode={editorMode}
+          food={editingFood}
+          form={form}
+          onClose={handleCloseModal}
+          onChange={handleFormChange}
+          onSubmit={handleSaveFood}
+          isPending={createFood.isPending || updateFood.isPending}
+        />
+      ) : null}
     </div>
   );
 }

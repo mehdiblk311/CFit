@@ -67,6 +67,31 @@ export const adminAPI = {
     };
   },
 
+  getNutritionStats: async (params = {}) => {
+    const response = await client.get('/v1/admin/nutrition/stats', { params });
+    return response.data;
+  },
+
+  getFoods: async (params = {}) => {
+    const response = await client.get('/v1/foods', { params });
+    return response.data;
+  },
+
+  createFood: async (data) => {
+    const response = await client.post('/v1/foods', data);
+    return response.data;
+  },
+
+  updateFood: async (food_id, data) => {
+    const response = await client.patch(`/v1/foods/${food_id}`, data);
+    return response.data;
+  },
+
+  deleteFood: async (food_id) => {
+    const response = await client.delete(`/v1/foods/${food_id}`);
+    return response.data;
+  },
+
   // Get activity logs
   getLogs: async (params = {}) => {
     const response = await client.get('/v1/admin/audit-logs', { params });

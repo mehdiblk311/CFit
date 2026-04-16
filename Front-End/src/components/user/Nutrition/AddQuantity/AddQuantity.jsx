@@ -1,6 +1,7 @@
+import { createPortal } from 'react-dom';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { useAddFoodToMeal, useFood } from '../../../../hooks/queries/useNutrition';
+import { useAddFoodToMeal, useFood, useUpdateMealFood } from '../../../../hooks/queries/useNutrition';
 import {
   formatMeasureValue,
   formatMeasurement,
@@ -26,6 +27,11 @@ function getIngredientPresentation(food) {
   };
 }
 
+function StickyCTA({ children }) {
+  if (typeof document === 'undefined') return children;
+  return createPortal(children, document.body);
+}
+
 export default function AddQuantity() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -33,12 +39,18 @@ export default function AddQuantity() {
   const foodId = searchParams.get('foodId') || '';
   const legacyMeal = searchParams.get('meal') || '';
   const mealId = searchParams.get('mealId') || '';
+  const mealFoodId = searchParams.get('mealFoodId') || '';
+  const ingredientKey = searchParams.get('ingredientKey') || '';
+  const initialQuantityMultiplier = Number(searchParams.get('quantity'));
   const mealType = searchParams.get('mealType') || legacyMeal || 'meal';
   const isRecipeFlow = mealType === 'recipe';
+  const isEditIngredientFlow = Boolean(mealFoodId && mealId);
+  const isRecipeIngredientEditFlow = Boolean(isRecipeFlow && ingredientKey);
   const mealLabel = mealType === 'snack' ? 'Snacks' : mealType.charAt(0).toUpperCase() + mealType.slice(1);
 
   const { data: food, isLoading, isError } = useFood(foodId);
   const addFoodToMeal = useAddFoodToMeal();
+  const updateMealFood = useUpdateMealFood();
 
   const [qty, setQty] = useState(100);
 
@@ -46,7 +58,6 @@ export default function AddQuantity() {
   const [addError, setAddError] = useState('');
 
   const {
-    gramBased,
     referenceLabel,
     referenceQuantity,
     servingSize,
@@ -58,18 +69,16 @@ export default function AddQuantity() {
       return;
     }
 
-    setQty(referenceQuantity);
-  }, [food?.id, referenceQuantity]);
+    if (isEditIngredientFlow && Number.isFinite(initialQuantityMultiplier) && initialQuantityMultiplier > 0) {
+      setQty(initialQuantityMultiplier * servingSize);
+      return;
+    }
 
-  /*
-   * Gram-based foods stay on a per-100g reference for easier comparison.
-   * Foods stored in other units keep their serving metadata (for example 1 cup),
-   * and the backend quantity stays a multiplier over the stored serving size.
-   */
+    setQty(referenceQuantity);
+  }, [food?.id, referenceQuantity, initialQuantityMultiplier, isEditIngredientFlow, servingSize]);
+
   const perReference = (key) => (
-    gramBased
-      ? ((food?.[key] || 0) / servingSize) * referenceQuantity
-      : (food?.[key] || 0)
+    ((food?.[key] || 0) / servingSize) * referenceQuantity
   );
   const calc = (key) => Math.round((perReference(key) * qty) / referenceQuantity);
   const apiMultiplier = servingSize > 0 ? qty / servingSize : 0;
@@ -100,26 +109,51 @@ export default function AddQuantity() {
             mode: 'builder',
             recipeName,
             servings,
-            ingredients: [
-              ...ingredients,
-              {
-                id: `${food.id}-${Date.now()}`,
-                foodId: food.id,
-                quantity: apiMultiplier,
-                name: food.name,
-                desc: [food.brand, food.category].filter(Boolean).join(' / ') || 'Custom ingredient',
-                qty: formatMeasurement(qty, servingUnit),
-                icon: presentation.icon,
-                iconColor: presentation.iconColor,
-                iconBg: presentation.iconBg,
-                macros: {
-                  kcal: calc('calories'),
-                  p: calc('protein'),
-                  c: calc('carbohydrates'),
-                  f: calc('fat'),
+            recipeId: location.state?.recipeId || '',
+            notes: typeof location.state?.notes === 'string' ? location.state.notes : '',
+            originalItemsSignature: Array.isArray(location.state?.originalItemsSignature) ? location.state.originalItemsSignature : [],
+            ingredients: isRecipeIngredientEditFlow
+              ? ingredients.map((ingredient) => (
+                ingredient.id === ingredientKey
+                  ? {
+                    ...ingredient,
+                    foodId: food.id,
+                    quantity: apiMultiplier,
+                    name: food.name,
+                    desc: [food.brand, food.category].filter(Boolean).join(' / ') || 'Custom ingredient',
+                    qty: formatMeasurement(qty, servingUnit),
+                    icon: presentation.icon,
+                    iconColor: presentation.iconColor,
+                    iconBg: presentation.iconBg,
+                    macros: {
+                      kcal: calc('calories'),
+                      p: calc('protein'),
+                      c: calc('carbohydrates'),
+                      f: calc('fat'),
+                    },
+                  }
+                  : ingredient
+              ))
+              : [
+                ...ingredients,
+                {
+                  id: `${food.id}-${Date.now()}`,
+                  foodId: food.id,
+                  quantity: apiMultiplier,
+                  name: food.name,
+                  desc: [food.brand, food.category].filter(Boolean).join(' / ') || 'Custom ingredient',
+                  qty: formatMeasurement(qty, servingUnit),
+                  icon: presentation.icon,
+                  iconColor: presentation.iconColor,
+                  iconBg: presentation.iconBg,
+                  macros: {
+                    kcal: calc('calories'),
+                    p: calc('protein'),
+                    c: calc('carbohydrates'),
+                    f: calc('fat'),
+                  },
                 },
-              },
-            ],
+              ],
           },
         });
         return;
@@ -127,15 +161,22 @@ export default function AddQuantity() {
 
       if (!mealId) return;
 
-      await addFoodToMeal.mutateAsync({
-        meal_id: mealId,
-        food_id: food.id,
-        quantity: apiMultiplier,
-      });
+      if (isEditIngredientFlow) {
+        await updateMealFood.mutateAsync({
+          meal_food_id: mealFoodId,
+          data: { quantity: apiMultiplier },
+        });
+      } else {
+        await addFoodToMeal.mutateAsync({
+          meal_id: mealId,
+          food_id: food.id,
+          quantity: apiMultiplier,
+        });
+      }
       navigate('/nutrition');
     } catch (err) {
       console.error('Error logging food:', err);
-      setAddError('Failed to add food. Please try again.');
+      setAddError(isEditIngredientFlow ? 'Failed to update ingredient. Please try again.' : 'Failed to add food. Please try again.');
     } finally {
       setAdding(false);
     }
@@ -233,8 +274,8 @@ export default function AddQuantity() {
               value={qty}
               onChange={handleInput}
               min={0}
-              step={gramBased ? 1 : 0.25}
-              aria-label={`Quantity in ${servingUnit}`}
+              step={1}
+              aria-label="Quantity in grams"
             />
             <span className="aq-qty-unit">{servingUnit}</span>
           </div>
@@ -295,19 +336,29 @@ export default function AddQuantity() {
       </main>
 
       {/* ── Sticky CTA ───────────────────────────────────────────── */}
-      <div className="aq-sticky-cta">
-        <div className="aq-cta-inner">
-          <button
-            id="aq-add-btn"
-            className="aq-add-btn"
-            onClick={handleAddFood}
-            disabled={adding || qty <= 0 || (!mealId && !isRecipeFlow)}
-          >
-            <span className="material-symbols-outlined">{adding ? 'progress_activity' : 'add_circle'}</span>
-            {adding ? 'Adding…' : `Add to ${mealLabel}`}
-          </button>
+      <StickyCTA>
+        <div className="aq-sticky-cta">
+          <div className="aq-cta-inner">
+            <button
+              id="aq-add-btn"
+              className="aq-add-btn"
+              onClick={handleAddFood}
+              disabled={adding || qty <= 0 || (!mealId && !isRecipeFlow)}
+            >
+              <span className="material-symbols-outlined">{adding ? 'progress_activity' : 'add_circle'}</span>
+              {adding
+                ? (isEditIngredientFlow ? 'Updating…' : 'Adding…')
+                : isRecipeFlow
+                  ? 'Add Ingredient'
+                  : isEditIngredientFlow
+                    ? 'Update Ingredient'
+                    : isRecipeIngredientEditFlow
+                      ? 'Update Ingredient'
+                      : `Add Ingredient to ${mealLabel}`}
+            </button>
+          </div>
         </div>
-      </div>
+      </StickyCTA>
     </div>
   );
 }

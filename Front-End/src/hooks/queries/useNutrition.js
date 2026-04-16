@@ -61,6 +61,23 @@ export function useFavorites(params = {}) {
   });
 }
 
+export function useRecentFoods(params = {}) {
+  return useQuery({
+    queryKey: ['foods', 'recent', params],
+    queryFn: () => nutritionAPI.getRecentFoods(params),
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+export function useMealFoods(meal_id, params = {}) {
+  return useQuery({
+    queryKey: ['meal-foods', meal_id, params],
+    queryFn: () => nutritionAPI.getMealFoods(meal_id, params),
+    enabled: !!meal_id,
+    staleTime: 1000 * 30,
+  });
+}
+
 export function useCreateMeal() {
   const queryClient = useQueryClient();
 
@@ -103,6 +120,39 @@ export function useAddFoodToMeal() {
       nutritionAPI.addFoodToMeal(meal_id, food_id, quantity),
     onSuccess: (_, { meal_id }) => {
       queryClient.invalidateQueries({ queryKey: ['meals', meal_id] });
+      queryClient.invalidateQueries({ queryKey: ['meal-foods', meal_id] });
+      queryClient.invalidateQueries({ queryKey: ['foods', 'recent'] });
+      queryClient.invalidateQueries({ queryKey: ['meals'] });
+    },
+  });
+}
+
+export function useUpdateMealFood() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ meal_food_id, data }) => nutritionAPI.updateMealFood(meal_food_id, data),
+    onSuccess: (result) => {
+      const mealId = result?.meal_id;
+      if (mealId) {
+        queryClient.invalidateQueries({ queryKey: ['meal-foods', mealId] });
+        queryClient.invalidateQueries({ queryKey: ['meals', mealId] });
+      }
+      queryClient.invalidateQueries({ queryKey: ['meals'] });
+    },
+  });
+}
+
+export function useDeleteMealFood() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ meal_food_id }) => nutritionAPI.removeFoodFromMeal(meal_food_id),
+    onSuccess: (_, variables) => {
+      if (variables?.meal_id) {
+        queryClient.invalidateQueries({ queryKey: ['meal-foods', variables.meal_id] });
+        queryClient.invalidateQueries({ queryKey: ['meals', variables.meal_id] });
+      }
       queryClient.invalidateQueries({ queryKey: ['meals'] });
     },
   });
@@ -115,6 +165,20 @@ export function useCreateRecipe() {
     mutationFn: (data) => nutritionAPI.createRecipe(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
+    },
+  });
+}
+
+export function useUpdateRecipe() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ recipe_id, data }) => nutritionAPI.updateRecipe(recipe_id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['recipes'] });
+      if (variables?.recipe_id) {
+        queryClient.invalidateQueries({ queryKey: ['recipes', variables.recipe_id] });
+      }
     },
   });
 }
@@ -147,6 +211,7 @@ export function useAddFavorite() {
   return useMutation({
     mutationFn: (food_id) => nutritionAPI.addFavorite(food_id),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['foods', 'recent'] });
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
     },
   });
@@ -158,7 +223,20 @@ export function useRemoveFavorite() {
   return useMutation({
     mutationFn: (food_id) => nutritionAPI.removeFavorite(food_id),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['foods', 'recent'] });
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
+    },
+  });
+}
+
+export function useCreateFood() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data) => nutritionAPI.createFood(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['foods'] });
+      queryClient.invalidateQueries({ queryKey: ['foods', 'recent'] });
     },
   });
 }

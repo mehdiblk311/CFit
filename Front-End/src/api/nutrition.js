@@ -42,8 +42,20 @@ export const nutritionAPI = {
   },
 
   // Remove food from meal
-  removeFoodFromMeal: async (meal_id, food_id) => {
-    const response = await client.delete(`/v1/meals/${meal_id}/foods/${food_id}`);
+  removeFoodFromMeal: async (meal_food_id) => {
+    const response = await client.delete(`/v1/meal-foods/${meal_food_id}`);
+    return response.data;
+  },
+
+  // Update meal food
+  updateMealFood: async (meal_food_id, data) => {
+    const response = await client.patch(`/v1/meal-foods/${meal_food_id}`, data);
+    return response.data;
+  },
+
+  // List foods inside meal
+  getMealFoods: async (meal_id, params = {}) => {
+    const response = await client.get(`/v1/meals/${meal_id}/foods`, { params });
     return response.data;
   },
 
@@ -86,6 +98,12 @@ export const nutritionAPI = {
   // Create recipe
   createRecipe: async (data) => {
     const response = await client.post('/v1/recipes', data);
+    return response.data;
+  },
+
+  // Update recipe metadata
+  updateRecipe: async (recipe_id, data) => {
+    const response = await client.patch(`/v1/recipes/${recipe_id}`, data);
     return response.data;
   },
 

@@ -1,17 +1,26 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useCreateFood } from '../../../../hooks/queries/useNutrition';
 import './CustomFood.css';
 
 export default function CustomFood() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const createFood = useCreateFood();
   const [formData, setFormData] = useState({
     name: '',
     brand: '',
-    kcal: '',
+    servingSize: '100',
+    servingUnit: 'g',
+    calories: '',
     protein: '',
-    carbs: '',
-    fats: ''
+    carbohydrates: '',
+    fat: '',
+    fiber: '',
+    sugar: '',
+    sodium: '',
   });
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,27 +29,39 @@ export default function CustomFood() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    setError('');
 
     try {
-      // Send the request to the backend to create the custom food
-      const response = await fetch('/api/nutrition/custom-food', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
+      const food = await createFood.mutateAsync({
+        name: formData.name.trim(),
+        brand: formData.brand.trim(),
+        serving_size: Number(formData.servingSize) || 100,
+        serving_unit: formData.servingUnit.trim() || 'g',
+        calories: Number(formData.calories) || 0,
+        protein: Number(formData.protein) || 0,
+        carbohydrates: Number(formData.carbohydrates) || 0,
+        fat: Number(formData.fat) || 0,
+        fiber: Number(formData.fiber) || 0,
+        sugar: Number(formData.sugar) || 0,
+        sodium: Number(formData.sodium) || 0,
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to save custom food');
+      const params = new URLSearchParams();
+      const mealId = searchParams.get('mealId');
+      const mealType = searchParams.get('mealType');
+
+      params.set('foodId', food.id);
+      if (mealId) {
+        params.set('mealId', mealId);
+      }
+      if (mealType) {
+        params.set('mealType', mealType);
       }
 
-      // Once successfully saved, return to the main nutrition dashboard
-      navigate('/nutrition');
+      navigate(`/nutrition/add-quantity?${params.toString()}`);
     } catch (error) {
-      console.error("Error saving custom food:", error);
-      // In a real app we'd display a toast notification here
-      navigate('/nutrition'); // Still navigating back for demonstration purposes
+      console.error('Error saving custom food:', error);
+      setError(error?.response?.data?.error || 'Failed to save custom food.');
     }
   };
 
@@ -105,6 +126,38 @@ export default function CustomFood() {
                 onChange={handleChange}
               />
             </div>
+
+            <div className="cf-serving-grid">
+              <div className="cf-input-group">
+                <label htmlFor="servingSize" className="cf-label">Serving Size</label>
+                <input
+                  type="number"
+                  id="servingSize"
+                  name="servingSize"
+                  className="cf-input"
+                  placeholder="100"
+                  value={formData.servingSize}
+                  onChange={handleChange}
+                  required
+                  min="0.25"
+                  step="0.25"
+                />
+              </div>
+
+              <div className="cf-input-group">
+                <label htmlFor="servingUnit" className="cf-label">Serving Unit</label>
+                <input
+                  type="text"
+                  id="servingUnit"
+                  name="servingUnit"
+                  className="cf-input"
+                  placeholder="g"
+                  value={formData.servingUnit}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
           </div>
 
           <div className="cf-form-section">
@@ -119,11 +172,11 @@ export default function CustomFood() {
                 <div className="cf-macro-input-wrap">
                   <input
                     type="number"
-                    id="kcal"
-                    name="kcal"
+                    id="calories"
+                    name="calories"
                     className="cf-input cf-input--large"
                     placeholder="0"
-                    value={formData.kcal}
+                    value={formData.calories}
                     onChange={handleChange}
                     required
                     min="0"
@@ -134,30 +187,34 @@ export default function CustomFood() {
 
               {[
                 { id: 'protein', label: 'Protein' },
-                { id: 'carbs', label: 'Carbs' },
-                { id: 'fats', label: 'Fats' },
+                { id: 'carbohydrates', label: 'Carbs' },
+                { id: 'fat', label: 'Fats' },
+                { id: 'fiber', label: 'Fiber' },
+                { id: 'sugar', label: 'Sugar' },
+                { id: 'sodium', label: 'Sodium (mg)' },
               ].map(macro => (
                 <div key={macro.id} className="cf-input-group cf-input-group--macro">
                   <label htmlFor={macro.id} className="cf-label">{macro.label}</label>
                   <div className="cf-macro-input-wrap">
                     <input
-                      type="number"
-                      id={macro.id}
-                      name={macro.id}
-                      className="cf-input cf-input--large"
-                      placeholder="0"
+                    type="number"
+                    id={macro.id}
+                    name={macro.id}
+                    className="cf-input cf-input--large"
+                    placeholder="0"
                       value={formData[macro.id]}
-                      onChange={handleChange}
-                      required
-                      min="0"
-                    />
-                    <span className="cf-input-unit">g</span>
+                    onChange={handleChange}
+                    min="0"
+                  />
+                    <span className="cf-input-unit">{macro.id === 'sodium' ? 'mg' : 'g'}</span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         </form>
+
+        {error && <p className="cf-error">{error}</p>}
       </main>
 
       {/* ── Sticky CTA ───────────────────────────────────────────── */}
@@ -168,10 +225,10 @@ export default function CustomFood() {
             id="cf-save-btn"
             className="cf-save-btn"
             onClick={handleSave}
-            disabled={!formData.name || !formData.kcal}
+            disabled={!formData.name || !formData.calories || createFood.isPending}
           >
-            <span className="material-symbols-outlined">check_circle</span>
-            Confirm &amp; Return
+            <span className="material-symbols-outlined">{createFood.isPending ? 'progress_activity' : 'check_circle'}</span>
+            {createFood.isPending ? 'Saving...' : 'Create & Continue'}
           </button>
         </div>
       </div>

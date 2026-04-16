@@ -75,6 +75,17 @@ export function normalizeExerciseHistoryListVM(payload) {
   };
 }
 
+export function normalizeFoodListVM(payload) {
+  const { items, metadata } = normalizeListPayload(payload, ['foods']);
+  return {
+    items,
+    foods: items,
+    data: items,
+    metadata,
+    raw: payload,
+  };
+}
+
 export function normalizeProgramAssignmentListVM(payload) {
   const { items, metadata } = normalizeListPayload(payload, ['assignments', 'program_assignments']);
   return {

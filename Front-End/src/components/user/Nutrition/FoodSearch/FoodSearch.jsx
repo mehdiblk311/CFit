@@ -2,7 +2,14 @@ import { useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { nutritionAPI } from '../../../../api/nutrition';
-import { useRecipes, useLogRecipeToMeal } from '../../../../hooks/queries/useNutrition';
+import {
+  useAddFavorite,
+  useFavorites,
+  useLogRecipeToMeal,
+  useRecentFoods,
+  useRecipes,
+  useRemoveFavorite,
+} from '../../../../hooks/queries/useNutrition';
 import { getFoodMeasurementMeta } from '../foodMeasurement';
 import './FoodSearch.css';
 
@@ -41,6 +48,22 @@ function getCategoryEmoji(category = '') {
   return '🍽️';
 }
 
+function normalizeList(payload) {
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.items)) return payload.items;
+  if (Array.isArray(payload)) return payload;
+  return [];
+}
+
+function filterFoods(foods, query) {
+  const normalizedQuery = query.trim().toLowerCase();
+  if (!normalizedQuery) return foods;
+  return foods.filter((food) => {
+    const haystack = `${food?.name || ''} ${food?.brand || ''} ${food?.category || ''}`.toLowerCase();
+    return haystack.includes(normalizedQuery);
+  });
+}
+
 export default function FoodSearch() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -71,14 +94,46 @@ export default function FoodSearch() {
     staleTime: 1000 * 60 * 5,
   });
 
-  const isLoading = isSearching ? searchLoading : suggestedLoading;
-  const foods = isSearching ? (searchData?.data ?? []) : (suggestedData?.data ?? []);
-  
+  const { data: customData, isLoading: customLoading } = useQuery({
+    queryKey: ['foods', 'custom', query],
+    queryFn: () => nutritionAPI.searchFoods(query, { limit: 20, source: 'user' }),
+    staleTime: 1000 * 30,
+  });
+  const { data: recentData, isLoading: recentLoading } = useRecentFoods({ limit: 20 });
+  const { data: favoritesData, isLoading: favoritesLoading } = useFavorites({ limit: 50 });
   const logRecipeToMeal = useLogRecipeToMeal();
+  const addFavorite = useAddFavorite();
+  const removeFavorite = useRemoveFavorite();
   const { data: recipesData, isLoading: recipesLoading } = useRecipes({ limit: 50 });
   const recipes = Array.isArray(recipesData?.data) ? recipesData.data : (Array.isArray(recipesData) ? recipesData : []);
+  const defaultFoods = isSearching ? normalizeList(searchData) : normalizeList(suggestedData);
+  const customFoods = normalizeList(customData);
+  const recentFoods = normalizeList(recentData);
+  const favoriteEntries = normalizeList(favoritesData);
+  const favoriteFoods = favoriteEntries.map((entry) => entry.food).filter(Boolean);
+  const favoriteIds = new Set(favoriteEntries.map((entry) => String(entry.food_id || entry.food?.id || '')));
 
-  const resultsLabel = active === 'My Recipes' ? 'Your Recipes' : (isSearching ? `${foods.length} Results for "${query}"` : 'Suggested Foods');
+  let foods = defaultFoods;
+  let isLoading = isSearching ? searchLoading : suggestedLoading;
+  let resultsLabel = isSearching ? `${defaultFoods.length} Results for "${query}"` : 'Suggested Foods';
+
+  if (active === 'Recent') {
+    foods = filterFoods(recentFoods, query);
+    isLoading = recentLoading;
+    resultsLabel = query ? `Recent matches for "${query}"` : 'Recent Foods';
+  } else if (active === 'Favorites') {
+    foods = filterFoods(favoriteFoods, query);
+    isLoading = favoritesLoading;
+    resultsLabel = query ? `Favorite matches for "${query}"` : 'Favorite Foods';
+  } else if (active === 'Custom') {
+    foods = customFoods;
+    isLoading = customLoading;
+    resultsLabel = query ? `Custom foods for "${query}"` : 'Your Custom Foods';
+  } else if (active === 'My Recipes') {
+    isLoading = recipesLoading;
+    resultsLabel = 'Your Recipes';
+  }
+  const isSuggestedMode = active === 'All' && !isSearching;
 
   const handleLogRecipe = async (recipe) => {
     if (!mealType || mealType === 'recipe') return;
@@ -96,6 +151,19 @@ export default function FoodSearch() {
     } catch (err) {
       console.error('Failed to log recipe:', err);
       alert('Failed to log recipe.');
+    }
+  };
+
+  const toggleFavorite = async (event, food) => {
+    event.stopPropagation();
+    try {
+      if (favoriteIds.has(String(food.id))) {
+        await removeFavorite.mutateAsync(food.id);
+      } else {
+        await addFavorite.mutateAsync(food.id);
+      }
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error);
     }
   };
 
@@ -141,7 +209,7 @@ export default function FoodSearch() {
           >
             <span className="material-symbols-outlined fs-back-icon">arrow_back</span>
           </button>
-          <h1 className="fs-title">Add to {mealLabel}</h1>
+          <h1 className="fs-title">Add Ingredient to {mealLabel}</h1>
         </div>
         <div className="fs-avatar">
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: 20, color: '#38671a' }}>person</span>
@@ -241,30 +309,53 @@ export default function FoodSearch() {
                 <div style={{ textAlign: 'center', padding: '32px 16px', color: '#888' }}>
                   <span className="material-symbols-outlined" style={{ fontSize: 40, display: 'block', marginBottom: 8 }}>search_off</span>
                   <p style={{ margin: 0, fontSize: 14 }}>No foods found for <strong>"{query}"</strong></p>
-                  <p style={{ margin: '4px 0 0', fontSize: 12 }}>Try a different name or create a custom food below</p>
+                  <p style={{ margin: '4px 0 0', fontSize: 12 }}>
+                    {active === 'Favorites'
+                      ? 'Favorite a food first, or search another name.'
+                      : active === 'Recent'
+                        ? 'Log a few foods and they will show up here.'
+                        : 'Try a different name or create a custom food below.'}
+                  </p>
+                </div>
+              )}
+
+              {!isLoading && foods.length === 0 && !isSearching && active === 'Favorites' && (
+                <div style={{ textAlign: 'center', padding: '32px 16px', color: '#888' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 40, display: 'block', marginBottom: 8 }}>favorite</span>
+                  <p style={{ margin: 0, fontSize: 14 }}>No favorite foods yet.</p>
+                  <p style={{ margin: '4px 0 0', fontSize: 12 }}>Tap the heart on foods you want to reuse quickly.</p>
+                </div>
+              )}
+
+              {!isLoading && foods.length === 0 && !isSearching && active === 'Recent' && (
+                <div style={{ textAlign: 'center', padding: '32px 16px', color: '#888' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 40, display: 'block', marginBottom: 8 }}>history</span>
+                  <p style={{ margin: 0, fontSize: 14 }}>No recent foods yet.</p>
+                  <p style={{ margin: '4px 0 0', fontSize: 12 }}>Your recently logged foods will show up here.</p>
                 </div>
               )}
 
               {foods.map((food, i) => {
                 const emoji = getCategoryEmoji(food.category);
-                const { gramBased, referenceLabel, referenceQuantity, servingSize } = getFoodMeasurementMeta(food);
+                const { referenceLabel, referenceQuantity, servingSize } = getFoodMeasurementMeta(food);
+                const isFavorite = favoriteIds.has(String(food.id));
+                const isSuggested = isSuggestedMode && i < 3;
                 const referenceValue = (key) => Math.round(
-                  gramBased
-                    ? ((food[key] || 0) / servingSize) * referenceQuantity
-                    : (food[key] || 0)
+                  ((food[key] || 0) / servingSize) * referenceQuantity
                 );
 
                 return (
                   <div
                     key={food.id}
                     id={`fs-food-${food.id}`}
-                    className={`fs-row ${tilts[i % tilts.length]}`}
+                    className={`fs-row ${tilts[i % tilts.length]}${isSuggested ? ' fs-row--suggested' : ''}`}
                     onClick={() => goToAddQuantity(food)}
                     role="button"
                   >
                     <div className="fs-row-left">
                       <div className="fs-thumbnail">{emoji}</div>
                       <div>
+                        {isSuggested && <p className="fs-suggested-kicker">Suggested Pick</p>}
                         <div className="fs-food-name-row">
                           <h3 className="fs-food-name">{food.name}</h3>
                         </div>
@@ -283,7 +374,15 @@ export default function FoodSearch() {
                       </div>
                     </div>
                     <div className="fs-row-right">
-                      <span className="fs-food-emoji">{emoji}</span>
+                      <button
+                        className={`fs-fav-btn${isFavorite ? ' fs-fav-btn--active' : ''}`}
+                        onClick={(event) => toggleFavorite(event, food)}
+                        aria-label={isFavorite ? `Remove ${food.name} from favorites` : `Add ${food.name} to favorites`}
+                      >
+                        <span className="material-symbols-outlined" style={isFavorite ? { fontVariationSettings: "'FILL' 1" } : undefined}>
+                          favorite
+                        </span>
+                      </button>
                       <button
                         id={`fs-add-${food.id}`}
                         className="fs-add-btn"
@@ -304,13 +403,22 @@ export default function FoodSearch() {
         <section className="fs-custom-callout">
           <span className="material-symbols-outlined fs-custom-icon">inventory_2</span>
           <div>
-            <p className="fs-custom-title">Can't find your food?</p>
-            <p className="fs-custom-desc">Create a unique entry for your macro tracking.</p>
+            <p className="fs-custom-title">{active === 'Custom' ? 'Add a custom food to your library' : "Can't find your food?"}</p>
+            <p className="fs-custom-desc">
+              {active === 'Custom'
+                ? 'Create a reusable food entry and log it right away.'
+                : 'Create a unique entry for your macro tracking.'}
+            </p>
           </div>
           <button
             id="fs-create-custom-btn"
             className="fs-custom-btn"
-            onClick={() => navigate('/nutrition/custom-food')}
+            onClick={() => {
+              const params = new URLSearchParams();
+              if (mealId) params.set('mealId', mealId);
+              if (mealType) params.set('mealType', mealType);
+              navigate(`/nutrition/custom-food?${params.toString()}`);
+            }}
           >
             Create Custom Food
           </button>

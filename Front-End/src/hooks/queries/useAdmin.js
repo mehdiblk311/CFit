@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminAPI } from '../../api/admin';
 import {
   normalizeEntity,
+  normalizeFoodListVM,
   normalizeProgramAssignmentEntityVM,
   normalizeProgramAssignmentListVM,
   normalizeProgramEntityVM,
@@ -52,6 +53,28 @@ export function useAdminMetrics(params = {}) {
     refetchInterval: 1000 * 60, // Refetch every minute
     retry: (failureCount, error) => shouldRetryQuery(error, failureCount),
     select: normalizeEntity,
+  });
+  return { ...query, errorMeta: mapApiError(query.error) };
+}
+
+export function useAdminNutritionStats(params = {}) {
+  const query = useQuery({
+    queryKey: ['admin', 'nutrition-stats', params],
+    queryFn: () => adminAPI.getNutritionStats(params),
+    staleTime: 1000 * 30,
+    retry: (failureCount, error) => shouldRetryQuery(error, failureCount),
+    select: normalizeEntity,
+  });
+  return { ...query, errorMeta: mapApiError(query.error) };
+}
+
+export function useAdminFoods(params = {}) {
+  const query = useQuery({
+    queryKey: ['admin', 'foods', params],
+    queryFn: () => adminAPI.getFoods(params),
+    staleTime: 1000 * 30,
+    retry: (failureCount, error) => shouldRetryQuery(error, failureCount),
+    select: normalizeFoodListVM,
   });
   return { ...query, errorMeta: mapApiError(query.error) };
 }
@@ -113,6 +136,38 @@ export function useDeleteAdminUser() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'metrics'] });
+    },
+  });
+}
+
+export function useCreateAdminFood() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => adminAPI.createFood(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'foods'] });
+    },
+  });
+}
+
+export function useUpdateAdminFood() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ food_id, data }) => adminAPI.updateFood(food_id, data),
+    onSuccess: (_, { food_id }) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'foods'] });
+      queryClient.invalidateQueries({ queryKey: ['foods', food_id] });
+    },
+  });
+}
+
+export function useDeleteAdminFood() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (food_id) => adminAPI.deleteFood(food_id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'foods'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'nutrition-stats'] });
     },
   });
 }

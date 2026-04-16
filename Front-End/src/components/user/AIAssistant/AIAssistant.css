@@ -565,10 +565,11 @@
 }
 
 .coach-kpi {
-  border: 2px dashed var(--coach-oat);
+  border: 2px solid var(--coach-oat);
   border-radius: var(--coach-radius-sm);
   background: var(--coach-white);
-  padding: 12px;
+  padding: 14px;
+  min-height: 48px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -604,6 +605,49 @@
   font-weight: 600;
   letter-spacing: 0;
   color: var(--coach-charcoal);
+}
+
+/* ── Context Onboard (zero-state) ────────────────────────────────── */
+
+.coach-ctx__onboard {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 2px dashed var(--coach-oat);
+  border-radius: var(--coach-radius-md);
+  background: var(--coach-cream);
+  padding: 14px 16px;
+}
+
+.coach-ctx__onboard-icon {
+  font-size: 24px;
+  color: var(--coach-matcha);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.coach-ctx__onboard-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.coach-ctx__onboard-title {
+  font-family: var(--coach-font);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--coach-ink);
+  letter-spacing: -0.2px;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.coach-ctx__onboard-desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--coach-charcoal);
+  margin: 0;
 }
 
 /* ── Recommendations ────────────────────────────────────────────── */
@@ -650,8 +694,7 @@
   background: #fefdfb;
 }
 
-.coach-thread__loading,
-.coach-thread__empty {
+.coach-thread__loading {
   margin: auto;
   width: min(100%, 380px);
   border: 2px dashed var(--coach-oat);
@@ -664,6 +707,21 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
+}
+
+.coach-thread__empty {
+  margin: auto;
+  width: min(92%, 340px);
+  border: 2px dashed var(--coach-oat);
+  border-radius: var(--coach-radius-lg);
+  background: var(--coach-white);
+  text-align: center;
+  color: var(--coach-charcoal);
+  padding: 24px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
 .coach-thread__loading {
@@ -685,35 +743,57 @@
 }
 
 .coach-thread__empty-icon {
-  width: 64px;
-  height: 64px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: var(--coach-matcha-soft);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .coach-thread__empty-icon .material-symbols-outlined {
-  font-size: 32px;
+  font-size: 26px;
   color: var(--coach-matcha);
 }
 
 .coach-thread__empty h3 {
   font-family: var(--coach-font);
   font-feature-settings: "ss01", "ss03", "ss10", "ss11", "ss12";
-  font-size: 24px;
-  letter-spacing: -0.7px;
+  font-size: 20px;
+  letter-spacing: -0.5px;
   color: var(--coach-ink);
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.15;
+  margin: 0;
+  word-wrap: break-word;
 }
 
 .coach-thread__empty p {
-  font-size: 14px;
-  line-height: 1.55;
+  font-size: 12px;
+  line-height: 1.5;
   color: var(--coach-charcoal);
+  margin: 0;
+  padding: 0 4px;
+}
+
+.coach-thread__empty-hint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  font-family: var(--coach-mono);
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--coach-silver);
+}
+
+.coach-thread__empty-hint .material-symbols-outlined {
+  font-size: 14px;
+  color: var(--coach-matcha);
 }
 
 /* ── Message Bubbles ────────────────────────────────────────────── */
@@ -927,7 +1007,8 @@
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 2px;
+  padding-bottom: 4px;
+  margin-bottom: 4px;
   scrollbar-width: none;
 }
 
@@ -940,14 +1021,15 @@
   border-radius: var(--coach-radius-pill);
   background: var(--coach-cream);
   color: var(--coach-ink);
-  padding: 8px 14px;
+  padding: 10px 16px;
   white-space: nowrap;
   font-family: var(--coach-font);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.22s var(--coach-ease), box-shadow 0.22s ease, border-color 0.2s ease;
   flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .coach-prompt:hover {
@@ -1028,7 +1110,7 @@
 }
 
 .coach-composer__send:disabled {
-  opacity: 0.35;
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
@@ -1087,30 +1169,88 @@
 /* ── Responsive: Small phones ────────────────────────────────── */
 
 @media (max-width: 389px) {
-  .coach-topbar__new span:last-child {
-    display: none;
+  .coach-topbar {
+    padding: 10px 12px;
+  }
+
+  .coach-topbar__menu {
+    width: 36px;
+    height: 36px;
+  }
+
+  .coach-topbar__title {
+    font-size: 22px;
   }
 
   .coach-topbar__new {
-    padding: 10px;
+    padding: 8px 10px;
+    font-size: 12px;
   }
 
-  .coach-bubble__copy p {
-    font-size: 14px;
+  .coach-topbar__new span:last-child {
+    display: none;
   }
 
   .coach-prompt {
     font-size: 11px;
     padding: 7px 10px;
   }
+
+  .coach-thread__empty {
+    width: 92%;
+    padding: 18px 12px 14px;
+  }
+
+  .coach-thread__empty h3 {
+    font-size: 16px;
+  }
 }
 
 /* ── Responsive: Mobile (default, <680px) ────────────────────── */
 
 @media (max-width: 679px) {
+  .coach-shell {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .coach-panel {
+    border-radius: var(--coach-radius-md);
+  }
+
+  .coach-ctx {
+    padding: 12px 14px 14px;
+    gap: 10px;
+  }
+
+  .coach-ctx__head h2 {
+    font-size: 16px;
+    letter-spacing: -0.3px;
+  }
+
+  .coach-ctx__label {
+    font-size: 8px;
+  }
+
+  .coach-ctx__meters {
+    gap: 8px;
+  }
+
+  .coach-meter__row span {
+    font-size: 9px;
+  }
+
+  .coach-meter__row strong {
+    font-size: 12px;
+  }
+
+  .coach-meter__track {
+    height: 8px;
+  }
+
   .coach-ctx__kpis {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     overflow-x: auto;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
@@ -1121,12 +1261,119 @@
   }
 
   .coach-kpi {
-    min-width: 100px;
+    min-width: 90px;
     flex-shrink: 0;
+    padding: 10px;
+    min-height: auto;
+  }
+
+  .coach-kpi__label {
+    font-size: 8px;
+  }
+
+  .coach-kpi__value {
+    font-size: 18px;
+  }
+
+  .coach-kpi__value small {
+    font-size: 11px;
+  }
+
+  .coach-ctx__onboard {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .coach-ctx__onboard-icon {
+    font-size: 20px;
+  }
+
+  .coach-ctx__onboard-title {
+    font-size: 13px;
+  }
+
+  .coach-ctx__onboard-desc {
+    font-size: 12px;
+  }
+
+  .coach-thread {
+    padding: 14px 12px;
+    gap: 12px;
+  }
+
+  .coach-thread__empty {
+    width: min(94%, 300px);
+    padding: 20px 14px 16px;
+  }
+
+  .coach-thread__empty-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .coach-thread__empty-icon .material-symbols-outlined {
+    font-size: 22px;
+  }
+
+  .coach-thread__empty h3 {
+    font-size: 18px;
+  }
+
+  .coach-thread__empty p {
+    font-size: 12px;
+  }
+
+  .coach-composer {
+    padding: 10px 12px 14px;
+    gap: 8px;
+  }
+
+  .coach-composer__row {
+    padding: 6px;
+    border-radius: 18px;
+    box-shadow: var(--coach-shadow-hard-xs);
+  }
+
+  .coach-composer__input {
+    font-size: 14px;
+    padding: 3px 6px;
+  }
+
+  .coach-composer__send {
+    width: 38px;
+    height: 38px;
   }
 
   .coach-bubble {
     max-width: 88%;
+    padding: 12px 14px;
+    border-radius: 20px;
+  }
+
+  .coach-bubble--assistant {
+    border-radius: 4px 20px 20px 20px;
+  }
+
+  .coach-bubble--user {
+    border-radius: 20px 4px 20px 20px;
+  }
+
+  .coach-bubble__copy p {
+    font-size: 14px;
+  }
+
+  .coach-rec {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .coach-prompts {
+    gap: 6px;
+  }
+
+  .coach-prompt {
+    font-size: 12px;
+    padding: 8px 12px;
   }
 }
 

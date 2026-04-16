@@ -1,6 +1,14 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useCreateRecipe, useRecipes, useDeleteRecipe, useLogRecipeToMeal, useMeals } from '../../../../hooks/queries/useNutrition';
+import {
+  useCreateRecipe,
+  useDeleteRecipe,
+  useLogRecipeToMeal,
+  useMeals,
+  useRecipes,
+  useUpdateRecipe,
+} from '../../../../hooks/queries/useNutrition';
+import { formatMeasurement, getFoodMeasurementMeta } from '../foodMeasurement';
 import './CreateRecipe.css';
 
 function getLocalDateKey(date = new Date()) {
@@ -22,9 +30,12 @@ function getDateKey(value) {
 function getDraftFromState(state) {
   return {
     mode: state?.mode === 'builder' ? 'builder' : 'list',
+    recipeId: typeof state?.recipeId === 'string' ? state.recipeId : '',
     recipeName: typeof state?.recipeName === 'string' ? state.recipeName : '',
     servings: typeof state?.servings === 'number' && state.servings > 0 ? state.servings : 1,
+    notes: typeof state?.notes === 'string' ? state.notes : '',
     ingredients: Array.isArray(state?.ingredients) ? state.ingredients : [],
+    originalItemsSignature: Array.isArray(state?.originalItemsSignature) ? state.originalItemsSignature : [],
   };
 }
 
@@ -59,6 +70,64 @@ function roundTotals(totals) {
     c: Math.round(totals.c || 0),
     f: Math.round(totals.f || 0),
   };
+}
+
+function getIngredientPresentation(food) {
+  const haystack = `${food?.name || ''} ${food?.category || ''}`.toLowerCase();
+
+  if (haystack.includes('egg')) {
+    return { icon: 'egg', iconColor: '#b02500', iconBg: 'rgba(249, 86, 48, 0.12)' };
+  }
+
+  if (haystack.includes('oat') || haystack.includes('grain') || haystack.includes('bread') || haystack.includes('flour')) {
+    return { icon: 'nutrition', iconColor: '#5d3fd3', iconBg: '#e7e0ff' };
+  }
+
+  if (haystack.includes('milk') || haystack.includes('dairy') || haystack.includes('protein') || haystack.includes('meat') || haystack.includes('fish')) {
+    return { icon: 'grain', iconColor: '#38671a', iconBg: '#dff4cf' };
+  }
+
+  return { icon: 'restaurant', iconColor: '#8a5a00', iconBg: '#f7ecd8' };
+}
+
+function buildRecipeIngredient(item) {
+  const food = item?.food || {};
+  const { servingSize, servingUnit } = getFoodMeasurementMeta(food);
+  const quantity = Number(item?.quantity || 0);
+  const presentation = getIngredientPresentation(food);
+  const totalQuantity = quantity * servingSize;
+
+  return {
+    id: item?.id || `${food.id}-${Date.now()}`,
+    foodId: food.id,
+    quantity,
+    name: food.name || 'Ingredient',
+    desc: [food.brand, food.category].filter(Boolean).join(' / ') || 'Saved ingredient',
+    qty: formatMeasurement(totalQuantity, servingUnit),
+    icon: presentation.icon,
+    iconColor: presentation.iconColor,
+    iconBg: presentation.iconBg,
+    macros: {
+      kcal: Math.round((Number(food.calories) || 0) * quantity),
+      p: Math.round((Number(food.protein) || 0) * quantity),
+      c: Math.round((Number(food.carbohydrates) || 0) * quantity),
+      f: Math.round((Number(food.fat) || 0) * quantity),
+    },
+  };
+}
+
+function getItemsSignature(items) {
+  return items
+    .map((item) => ({
+      foodId: item.foodId,
+      quantity: Number(Number(item.quantity || 0).toFixed(4)),
+    }))
+    .filter((item) => item.foodId && item.quantity > 0)
+    .sort((a, b) => {
+      const idCompare = String(a.foodId).localeCompare(String(b.foodId));
+      if (idCompare !== 0) return idCompare;
+      return a.quantity - b.quantity;
+    });
 }
 
 function RecipesListView() {
@@ -101,7 +170,7 @@ function RecipesListView() {
             className="cr-cal-btn"
             aria-label="Create recipe"
             onClick={() => navigate('/nutrition/recipe', {
-              state: { mode: 'builder', recipeName: '', servings: 1, ingredients: [] },
+              state: { mode: 'builder', recipeId: '', recipeName: '', servings: 1, notes: '', ingredients: [], originalItemsSignature: [] },
             })}
           >
             <span className="material-symbols-outlined" style={{ color: '#38671a' }}>add_circle</span>
@@ -119,7 +188,7 @@ function RecipesListView() {
             id="cr-create-recipe-btn"
             className="cr-save-btn"
             onClick={() => navigate('/nutrition/recipe', {
-              state: { mode: 'builder', recipeName: '', servings: 1, ingredients: [] },
+              state: { mode: 'builder', recipeId: '', recipeName: '', servings: 1, notes: '', ingredients: [], originalItemsSignature: [] },
             })}
           >
             <span className="material-symbols-outlined">add_circle</span>
@@ -162,6 +231,28 @@ function RecipesListView() {
                     </div>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <span className="cr-recipe-card-chip">{perServing.kcal} kcal / serving</span>
+                      <button
+                        className="cr-log-btn"
+                        onClick={() => navigate('/nutrition/recipe', {
+                          state: {
+                            mode: 'builder',
+                            recipeId: recipe.id,
+                            recipeName: recipe.name,
+                            servings,
+                            notes: recipe.notes || '',
+                            ingredients: (recipe.items || []).map(buildRecipeIngredient),
+                            originalItemsSignature: getItemsSignature(
+                              (recipe.items || []).map((item) => ({
+                                foodId: item.food?.id,
+                                quantity: item.quantity,
+                              })),
+                            ),
+                          },
+                        })}
+                        title="Edit Recipe"
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>edit</span>
+                      </button>
                       <button
                         className="cr-log-btn"
                         onClick={(e) => { e.stopPropagation(); setLoggingRecipeId(recipe.id); }}
@@ -259,14 +350,25 @@ function RecipesListView() {
 function RecipeBuilderView({ initialDraft }) {
   const navigate = useNavigate();
   const createRecipe = useCreateRecipe();
+  const updateRecipe = useUpdateRecipe();
+  const deleteRecipe = useDeleteRecipe();
   const [ingredients, setIngredients] = useState(initialDraft.ingredients);
+  const [recipeId] = useState(initialDraft.recipeId);
   const [recipeName, setRecipeName] = useState(initialDraft.recipeName);
   const [servings, setServings] = useState(initialDraft.servings);
+  const [notes, setNotes] = useState(initialDraft.notes);
   const [saveError, setSaveError] = useState('');
+  const originalItemsSignature = useMemo(
+    () => initialDraft.originalItemsSignature || [],
+    [initialDraft.originalItemsSignature],
+  );
+  const isEditingExistingRecipe = Boolean(recipeId);
 
   const totals = getTotalsFromIngredients(ingredients);
   const validItems = ingredients.filter(ingredient => ingredient.foodId && ingredient.quantity > 0);
   const safeServings = servings > 0 ? servings : 1;
+  const currentItemsSignature = useMemo(() => getItemsSignature(validItems), [validItems]);
+  const didIngredientListChange = JSON.stringify(currentItemsSignature) !== JSON.stringify(originalItemsSignature);
   const perServing = roundTotals({
     kcal: totals.kcal / safeServings,
     p: totals.p / safeServings,
@@ -297,15 +399,33 @@ function RecipeBuilderView({ initialDraft }) {
     setSaveError('');
 
     try {
-      await createRecipe.mutateAsync({
+      const payload = {
         name: recipeName.trim(),
         servings: safeServings,
-        notes: '',
+        notes: notes.trim(),
         items: validItems.map(ingredient => ({
           food_id: ingredient.foodId,
           quantity: ingredient.quantity,
         })),
-      });
+      };
+
+      if (isEditingExistingRecipe) {
+        if (didIngredientListChange) {
+          await createRecipe.mutateAsync(payload);
+          await deleteRecipe.mutateAsync(recipeId);
+        } else {
+          await updateRecipe.mutateAsync({
+            recipe_id: recipeId,
+            data: {
+              name: payload.name,
+              servings: payload.servings,
+              notes: payload.notes,
+            },
+          });
+        }
+      } else {
+        await createRecipe.mutateAsync(payload);
+      }
 
       navigate('/nutrition/recipe', { replace: true });
     } catch (error) {
@@ -339,7 +459,7 @@ function RecipeBuilderView({ initialDraft }) {
       <main className="cr-main">
         <section className="cr-total-card">
           <span className="cr-step-label">Recipe Builder</span>
-          <h2 className="cr-recipe-name">{recipeName.trim() || 'New Recipe'}</h2>
+          <h2 className="cr-recipe-name">{recipeName.trim() || (isEditingExistingRecipe ? 'Edit Recipe' : 'New Recipe')}</h2>
           <input
             id="cr-recipe-name-input"
             className="cr-recipe-input"
@@ -373,6 +493,15 @@ function RecipeBuilderView({ initialDraft }) {
             <span>Per serving</span>
             <span>{perServing.kcal} kcal · {perServing.p}g P · {perServing.c}g C · {perServing.f}g F</span>
           </div>
+
+          <textarea
+            className="cr-recipe-input cr-recipe-notes"
+            value={notes}
+            onChange={event => setNotes(event.target.value)}
+            rows={3}
+            placeholder="Recipe notes, prep tips, or reminders."
+            aria-label="Recipe notes"
+          />
 
           <div className="cr-deco-icon">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: 80, opacity: 0.1 }}>restaurant</span>
@@ -415,6 +544,15 @@ function RecipeBuilderView({ initialDraft }) {
                   <div className="cr-item-right">
                     <span className="cr-item-qty">({ingredient.qty})</span>
                     <button
+                      className="cr-edit-ingredient-btn"
+                      onClick={() => navigate(`/nutrition/add-quantity?meal=recipe&foodId=${ingredient.foodId}&ingredientKey=${ingredient.id}&quantity=${ingredient.quantity}`, {
+                        state: { mode: 'builder', ingredients, recipeId, recipeName, notes, servings: safeServings, originalItemsSignature },
+                      })}
+                      aria-label={`Edit ${ingredient.name}`}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>
+                    </button>
+                    <button
                       className="cr-remove-btn"
                       onClick={() => removeIngredient(ingredient.id)}
                       aria-label={`Remove ${ingredient.name}`}
@@ -435,7 +573,7 @@ function RecipeBuilderView({ initialDraft }) {
             id="cr-add-ingredient-btn"
             className="cr-add-ingredient-btn"
             onClick={() => navigate('/nutrition/food-search?meal=recipe', {
-              state: { mode: 'builder', ingredients, recipeName, servings: safeServings },
+              state: { mode: 'builder', ingredients, recipeId, recipeName, notes, servings: safeServings, originalItemsSignature },
             })}
           >
             <span className="material-symbols-outlined">add_circle</span>
@@ -445,9 +583,13 @@ function RecipeBuilderView({ initialDraft }) {
             id="cr-save-btn"
             className="cr-save-btn"
             onClick={handleSaveRecipe}
-            disabled={createRecipe.isPending}
+            disabled={createRecipe.isPending || updateRecipe.isPending || deleteRecipe.isPending}
           >
-            {createRecipe.isPending ? 'Saving…' : 'Save Recipe'}
+            {createRecipe.isPending || updateRecipe.isPending || deleteRecipe.isPending
+              ? 'Saving…'
+              : isEditingExistingRecipe
+                ? 'Save Changes'
+                : 'Save Recipe'}
             <span className="material-symbols-outlined">arrow_forward</span>
           </button>
         </section>

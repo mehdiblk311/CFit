@@ -132,6 +132,12 @@
   border-color: #38671a;
 }
 
+.cr-recipe-notes {
+  margin-top: 14px;
+  resize: vertical;
+  min-height: 88px;
+}
+
 .cr-library-copy {
   margin-top: 10px;
   max-width: 440px;
@@ -375,6 +381,26 @@
   transition: background 0.15s, color 0.15s;
 }
 .cr-remove-btn:hover { background: #f95630; color: #fff; border-color: #f95630; }
+
+.cr-edit-ingredient-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid #dad4c8;
+  background: #faf9f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #38671a;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.cr-edit-ingredient-btn:hover {
+  background: #38671a;
+  border-color: #38671a;
+  color: #fff;
+}
 
 .cr-log-btn {
   width: 28px; height: 28px;
