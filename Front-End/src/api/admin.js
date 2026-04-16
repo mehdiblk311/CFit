@@ -1,5 +1,59 @@
 import client from './client';
 
+function getListItems(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.users)) return payload.users;
+  return [];
+}
+
+function getMetadata(payload) {
+  return payload?.metadata || payload?.pagination || payload?.meta || null;
+}
+
+function normalizePositiveInt(value, fallback) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function createdAtTime(user) {
+  const time = new Date(user?.created_at || 0).getTime();
+  return Number.isNaN(time) ? 0 : time;
+}
+
+function mergeUserSearchPayloads(payloads, page, limit) {
+  const usersById = new Map();
+
+  payloads.forEach((payload) => {
+    getListItems(payload).forEach((user) => {
+      const key = user?.id ?? user?.email;
+      if (key != null && !usersById.has(key)) {
+        usersById.set(key, user);
+      }
+    });
+  });
+
+  const mergedUsers = Array.from(usersById.values()).sort((a, b) => createdAtTime(b) - createdAtTime(a));
+  const start = (page - 1) * limit;
+  const end = start + limit;
+  const metadata = payloads.map(getMetadata).filter(Boolean);
+  const hasUnfetchedMatches = metadata.some((item) => Boolean(item.has_next));
+  const reportedTotal = metadata.reduce((sum, item) => sum + (Number(item.total_count) || 0), 0);
+  const totalCount = hasUnfetchedMatches ? Math.max(reportedTotal, mergedUsers.length) : mergedUsers.length;
+  const totalPages = Math.ceil(totalCount / limit);
+
+  return {
+    data: mergedUsers.slice(start, end),
+    metadata: {
+      page,
+      limit,
+      total_count: totalCount,
+      total_pages: totalPages,
+      has_next: end < mergedUsers.length || hasUnfetchedMatches,
+    },
+  };
+}
+
 export const adminAPI = {
   // Get admin dashboard data
   getDashboard: async (params = {}) => {
@@ -15,6 +69,22 @@ export const adminAPI = {
 
   // Get list of users (admin)
   getUsers: async (params = {}) => {
+    const { search, ...restParams } = params;
+    const searchValue = String(search || '').trim();
+
+    if (searchValue) {
+      const page = normalizePositiveInt(restParams.page, 1);
+      const limit = normalizePositiveInt(restParams.limit, 20);
+      const searchLimit = Math.min(page * limit, 100);
+      const searchParams = { ...restParams, page: 1, limit: searchLimit };
+      const [nameResponse, emailResponse] = await Promise.all([
+        client.get('/v1/admin/users', { params: { ...searchParams, name: searchValue } }),
+        client.get('/v1/admin/users', { params: { ...searchParams, email: searchValue } }),
+      ]);
+
+      return mergeUserSearchPayloads([nameResponse.data, emailResponse.data], page, limit);
+    }
+
     const response = await client.get('/v1/admin/users', { params });
     return response.data;
   },

@@ -108,6 +108,10 @@ function getUserStatus(user) {
   return isBanned(user) ? 'banned' : 'active';
 }
 
+function isSameUserId(firstId, secondId) {
+  return firstId != null && secondId != null && String(firstId) === String(secondId);
+}
+
 function buildUserSummary(items) {
   const users = Array.isArray(items) ? items : [];
   return {
@@ -119,11 +123,12 @@ function buildUserSummary(items) {
   };
 }
 
-function UserModal({ userId, onClose, onSave, isSaving }) {
+function UserModal({ userId, currentUserId, onClose, onSave, isSaving }) {
   const userQuery = useAdminUser(userId);
   const detail = userQuery.data?.item || {};
   const user = detail.user || null;
   const stats = detail.stats || {};
+  const isCurrentUser = isSameUserId(user?.id, currentUserId);
 
   return (
     <ModalPortal>
@@ -141,14 +146,14 @@ function UserModal({ userId, onClose, onSave, isSaving }) {
             <p style={{ color: '#b02500', marginTop: 0 }}>We could not load this user’s details.</p>
           ) : null}
 
-          {user ? <UserModalForm key={user.id} user={user} stats={stats} onClose={onClose} onSave={onSave} isSaving={isSaving} /> : null}
+          {user ? <UserModalForm key={user.id} user={user} stats={stats} isCurrentUser={isCurrentUser} onClose={onClose} onSave={onSave} isSaving={isSaving} /> : null}
         </div>
       </div>
     </ModalPortal>
   );
 }
 
-function UserModalForm({ user, stats, onClose, onSave, isSaving }) {
+function UserModalForm({ user, stats, isCurrentUser, onClose, onSave, isSaving }) {
   const [form, setForm] = useState({
     name: user.name || '',
     email: user.email || '',
@@ -190,7 +195,7 @@ function UserModalForm({ user, stats, onClose, onSave, isSaving }) {
       <div className="adm-grid-2">
         <div className="adm-form-field">
           <label className="adm-form-label">Role</label>
-          <FormSelect value={form.role} onChange={(value) => setField('role', value)} options={ROLE_OPTIONS} />
+          <FormSelect value={form.role} onChange={(value) => setField('role', value)} options={ROLE_OPTIONS} disabled={isCurrentUser} />
         </div>
         <div className="adm-form-field">
           <label className="adm-form-label">Goal</label>
@@ -323,7 +328,7 @@ export default function AdminUserManagement() {
   const queryParams = {
     page,
     limit: PAGE_SIZE,
-    ...(searchValue ? (searchValue.includes('@') ? { email: searchValue } : { name: searchValue }) : {}),
+    ...(searchValue ? { search: searchValue } : {}),
     ...(roleFilter !== 'ALL' ? { role: roleFilter.toLowerCase() } : {}),
     ...(statusFilter !== 'all' ? { status: statusFilter } : {}),
   };
@@ -341,17 +346,23 @@ export default function AdminUserManagement() {
 
   function handleSaveUser(form) {
     if (!selectedUserId) return;
+    const isCurrentUser = isSameUserId(selectedUserId, currentUserId);
+    const data = {
+      name: form.name.trim(),
+      email: form.email.trim(),
+      goal: form.goal || '',
+      activity_level: form.activity_level || '',
+      avatar: form.avatar?.trim() || '',
+    };
+
+    if (!isCurrentUser) {
+      data.role = form.role;
+    }
+
     updateUser.mutate(
       {
         user_id: selectedUserId,
-        data: {
-          name: form.name.trim(),
-          email: form.email.trim(),
-          role: form.role,
-          goal: form.goal || '',
-          activity_level: form.activity_level || '',
-          avatar: form.avatar?.trim() || '',
-        },
+        data,
       },
       {
         onSuccess: () => {
@@ -476,7 +487,7 @@ export default function AdminUserManagement() {
               {users.map((user, index) => {
                 const role = normalizeRole(user.role);
                 const status = getUserStatus(user);
-                const isCurrentUser = String(user.id) === String(currentUserId);
+                const isCurrentUser = isSameUserId(user.id, currentUserId);
 
                 return (
                   <tr key={user.id}>
@@ -578,6 +589,7 @@ export default function AdminUserManagement() {
       {selectedUserId ? (
         <UserModal
           userId={selectedUserId}
+          currentUserId={currentUserId}
           onClose={() => setSelectedUserId(null)}
           onSave={handleSaveUser}
           isSaving={updateUser.isPending}

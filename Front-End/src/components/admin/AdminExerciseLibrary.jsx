@@ -202,29 +202,31 @@ function PillSelect({ value, onChange, options }) {
 }
 
 // Modal select (inside form)
-function FormSelect({ value, onChange, options }) {
+function FormSelect({ value, onChange, options, disabled = false }) {
   return (
     <div style={{ position: 'relative' }}>
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
+        disabled={disabled}
         style={{
           width: '100%',
           appearance: 'none',
           WebkitAppearance: 'none',
-          background: '#fff',
+          background: disabled ? '#f4f1ea' : '#fff',
           border: '2px solid #dad4c8',
           borderRadius: 9999,
           padding: '12px 42px 12px 18px',
           fontFamily: "'Plus Jakarta Sans', sans-serif",
           fontSize: 14,
           color: '#2e2f2e',
-          cursor: 'pointer',
+          cursor: disabled ? 'not-allowed' : 'pointer',
           outline: 'none',
           boxSizing: 'border-box',
           transition: 'border-color 0.2s',
+          opacity: disabled ? 0.72 : 1,
         }}
-        onFocus={e => { e.target.style.borderColor = '#38671a'; }}
+        onFocus={e => { if (!disabled) e.target.style.borderColor = '#38671a'; }}
         onBlur={e => { e.target.style.borderColor = '#dad4c8'; }}
       >
         {options.map(o => (
