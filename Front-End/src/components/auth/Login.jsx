@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useI18n } from '../../i18n/useI18n';
 import './Login.css';
 
 function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim()); }
@@ -8,6 +9,7 @@ function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim()); }
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
   const [showPw,   setShowPw]   = useState(false);
@@ -18,9 +20,9 @@ export default function Login() {
 
   function validate() {
     const e = {};
-    if (!email.trim())        e.email    = 'Email is required.';
-    else if (!isValidEmail(email)) e.email = 'Not a valid email.';
-    if (!password)            e.password = 'Password is required.';
+    if (!email.trim()) e.email = t('auth.login.errors.emailRequired');
+    else if (!isValidEmail(email)) e.email = t('auth.login.errors.emailInvalid');
+    if (!password) e.password = t('auth.login.errors.passwordRequired');
     return e;
   }
 
@@ -40,13 +42,13 @@ export default function Login() {
     } catch (err) {
       const detail = err?.detail ?? err?.message ?? '';
       if (err?.status === 401 || detail.toLowerCase().includes('invalid') || detail.toLowerCase().includes('credentials')) {
-        setErrors({ email: 'Invalid email or password.' });
+        setErrors({ email: t('auth.login.errors.invalidCredentials') });
       } else if (err?.status === 403) {
-        setErrors({ email: 'Account is disabled. Contact support.' });
+        setErrors({ email: t('auth.login.errors.accountDisabled') });
       } else if (detail) {
         setErrors({ email: detail });
       } else {
-        setErrors({ email: 'Login failed. Please try again.' });
+        setErrors({ email: t('auth.login.errors.loginFailed') });
       }
     } finally {
       setLoading(false);
@@ -67,19 +69,19 @@ export default function Login() {
         <div className="login-desktop-hero">
           <div className="login-desktop-sticker" aria-hidden="true">
             <span className="login-desktop-sticker-icon">⚡</span>
-            <span>READY TO TRAIN?</span>
+            <span>{t('auth.login.sticker')}</span>
           </div>
           <h2 className="login-desktop-hero-title">
-            Your kinetic<br/>fitness<br/>journal.
+            {t('auth.login.heroLine1')}<br/>{t('auth.login.heroLine2')}<br/>{t('auth.login.heroLine3')}
           </h2>
           <p className="login-desktop-hero-subtitle">
-            Track workouts, fuel with precision, and unlock your performance data — all in one artisanal space built for UM6P athletes.
+            {t('auth.login.heroSubtitle')}
           </p>
           <div className="login-desktop-features">
             {[
-              { icon: '🏋️', text: 'Personalized workout programs with PR tracking' },
-              { icon: '🥗', text: 'Smart nutrition logging and macro analysis' },
-              { icon: '🤖', text: 'AI coaching with real-time performance insights' },
+              { icon: '🏋️', text: t('auth.login.featurePrograms') },
+              { icon: '🥗', text: t('auth.login.featureNutrition') },
+              { icon: '🤖', text: t('auth.login.featureCoach') },
             ].map((f, i) => (
               <div className="login-desktop-feature" key={i}>
                 <span className="login-desktop-feature-emoji">{f.icon}</span>
@@ -89,13 +91,13 @@ export default function Login() {
           </div>
           {/* Desktop signup CTA — visible only on md+ */}
           <div className="login-desktop-signup">
-            <span className="login-desktop-signup-label">New to UM6P_FIT?</span>
+            <span className="login-desktop-signup-label">{t('auth.login.desktopPrompt')}</span>
             <button
               type="button"
               className="login-desktop-signup-btn"
               onClick={() => navigate('/signup')}
             >
-              Create free account →
+              {t('auth.login.desktopAction')} →
             </button>
           </div>
         </div>
@@ -103,20 +105,20 @@ export default function Login() {
         <div className="login-card">
           {/* Heading */}
           <div className="login-heading">
-            <h1 className="login-title">Welcome<br/>back</h1>
-            <p className="login-subtitle">Personalized Performance Portal</p>
+            <h1 className="login-title">{t('auth.login.welcomeTop')}<br/>{t('auth.login.welcomeBottom')}</h1>
+            <p className="login-subtitle">{t('auth.login.portal')}</p>
           </div>
 
           {/* Form */}
           <form className="login-form" onSubmit={handleSubmit} noValidate>
             {/* Email */}
             <div className="login-field">
-              <label className="login-field-label" htmlFor="login-email">Email address</label>
+              <label className="login-field-label" htmlFor="login-email">{t('auth.login.emailLabel')}</label>
               <input
                 id="login-email"
                 type="email"
                 className={`login-input${errors.email ? ' login-input--error' : ''}`}
-                placeholder="name@example.com"
+                placeholder={t('auth.login.emailPlaceholder')}
                 value={email}
                 onChange={e => { setEmail(e.target.value); clearError('email'); }}
                 autoComplete="email"
@@ -127,12 +129,12 @@ export default function Login() {
 
             {/* Password */}
             <div className="login-field">
-              <label className="login-field-label" htmlFor="login-pw">Password</label>
+              <label className="login-field-label" htmlFor="login-pw">{t('auth.login.passwordLabel')}</label>
               <input
                 id="login-pw"
                 type={showPw ? 'text' : 'password'}
                 className={`login-input${errors.password ? ' login-input--error' : ''}`}
-                placeholder="••••••••"
+                placeholder={t('auth.login.passwordPlaceholder')}
                 value={password}
                 onChange={e => { setPassword(e.target.value); clearError('password'); }}
                 autoComplete="current-password"
@@ -141,7 +143,7 @@ export default function Login() {
                 type="button"
                 className="login-input-icon"
                 onClick={() => setShowPw(v => !v)}
-                aria-label={showPw ? 'Hide password' : 'Show password'}
+                aria-label={showPw ? t('common.actions.hidePassword') : t('common.actions.showPassword')}
               >
                 {showPw ? (
                   <svg width="22" height="18" viewBox="0 0 22 18" fill="none">
@@ -161,15 +163,15 @@ export default function Login() {
 
             {/* Sign In */}
             <button type="submit" className="login-btn" disabled={!isReady || loading}>
-              {loading ? <div className="login-spinner" /> : 'Sign In'}
+              {loading ? <div className="login-spinner" /> : t('common.actions.signIn')}
             </button>
           </form>
         </div>
 
         {/* Footer */}
         <div className="login-footer-link">
-          <span>Don't have an account?</span>
-          <button type="button" onClick={() => navigate('/signup')}>Sign up</button>
+          <span>{t('auth.login.footerPrompt')}</span>
+          <button type="button" onClick={() => navigate('/signup')}>{t('auth.login.footerAction')}</button>
         </div>
       </div>
     </div>

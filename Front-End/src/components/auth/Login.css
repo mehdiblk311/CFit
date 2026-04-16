@@ -299,6 +299,40 @@
 .login-desktop-sticker   { display: none; }
 .login-desktop-signup    { display: none; }
 
+html[dir='rtl'] .login-root {
+  direction: rtl;
+}
+
+html[dir='rtl'] .login-heading,
+html[dir='rtl'] .login-footer-link,
+html[dir='rtl'] .login-desktop-hero {
+  text-align: right;
+}
+
+html[dir='rtl'] .login-field-label {
+  left: auto;
+  right: 4px;
+}
+
+html[dir='rtl'] .login-input {
+  padding: 13px 20px 13px 50px;
+  text-align: right;
+}
+
+html[dir='rtl'] .login-input-icon {
+  right: auto;
+  left: 18px;
+}
+
+html[dir='rtl'] .login-error-msg {
+  padding-left: 0;
+  padding-right: 16px;
+}
+
+html[dir='rtl'] .login-footer-link {
+  flex-direction: row-reverse;
+}
+
 /* ── Desktop Layout ─────────────────────────────────────────────── */
 @media (min-width: 768px) {
   .login-root {
@@ -467,6 +501,39 @@
 
   /* Hide mobile footer link on desktop */
   .login-footer-link { display: none; }
+
+  html[dir='rtl'] .login-container {
+    grid-template-columns: 440px 1fr;
+  }
+
+  html[dir='rtl'] .login-wordmark {
+    left: auto;
+    right: 32px;
+  }
+
+  html[dir='rtl'] .login-blob-green {
+    right: auto;
+    left: -100px;
+  }
+
+  html[dir='rtl'] .login-blob-purple {
+    left: auto;
+    right: -80px;
+  }
+
+  html[dir='rtl'] .login-desktop-hero {
+    padding: 40px 0 40px 40px;
+  }
+
+  html[dir='rtl'] .login-desktop-sticker {
+    align-self: flex-end;
+    transform: rotate(2deg);
+  }
+
+  html[dir='rtl'] .login-desktop-feature,
+  html[dir='rtl'] .login-desktop-signup {
+    flex-direction: row-reverse;
+  }
 }
 
 /* ── Tablet ──────────────────────────────────────────────────────── */

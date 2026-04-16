@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import { uiStore } from '../../../stores/uiStore';
+import { useI18n } from '../../../i18n/useI18n';
 import {
   useDashboardCoachSummary,
   useDashboardRecommendations,
@@ -30,17 +31,17 @@ function clampPercent(value) {
   return value;
 }
 
-function formatWholeNumber(value) {
-  return Math.round(toNumber(value)).toLocaleString('en-US');
+function formatWholeNumber(value, locale) {
+  return Math.round(toNumber(value)).toLocaleString(locale);
 }
 
-function formatMetric(value, unit = '') {
-  return `${formatWholeNumber(value)}${unit}`;
+function formatMetric(value, unit = '', locale) {
+  return `${formatWholeNumber(value, locale)}${unit}`;
 }
 
-function formatTarget(value, unit = '') {
+function formatTarget(value, unit = '', locale) {
   if (toNumber(value) <= 0) return '0';
-  return `${formatWholeNumber(value)}${unit}`;
+  return `${formatWholeNumber(value, locale)}${unit}`;
 }
 
 function normalizeSummary(summary, coachSummary) {
@@ -64,7 +65,7 @@ function normalizeSummary(summary, coachSummary) {
     anyWorkout?.title ||
     anyWorkout?.workout_type ||
     anyWorkout?.type ||
-    'Workout ready';
+    '';
 
   return {
     totalCalories: toNumber(source?.total_calories),
@@ -128,14 +129,14 @@ function normalizeRecommendations(recommendations, coachSummary) {
     .filter((rule) => rule && rule.applies !== false)
     .map((rule, index) => ({
       id: rule.id || `rec-${index}`,
-      name: rule.name || 'Today recommendation',
+      name: rule.name || '',
       description: rule.description || '',
       adjustment: rule.adjustment || '',
     }));
 }
 
 /* Builds Mon–Sun for the current week, marking done days via streak count */
-function buildWeekCalendar(workoutStreak) {
+function buildWeekCalendar(workoutStreak, locale) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -151,12 +152,11 @@ function buildWeekCalendar(workoutStreak) {
     doneDates.add(d.toDateString());
   }
 
-  const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  return DAY_NAMES.map((name, i) => {
+  return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
     return {
-      name,
+      name: d.toLocaleDateString(locale, { weekday: 'short' }),
       isToday: d.toDateString() === today.toDateString(),
       isDone: doneDates.has(d.toDateString()),
     };
@@ -165,14 +165,14 @@ function buildWeekCalendar(workoutStreak) {
 
 /* ── AvatarDisplay ───────────────────────────────────────────────── */
 
-function AvatarDisplay({ user, onClick }) {
+function AvatarDisplay({ user, onClick, ariaLabel }) {
   const [hasError, setHasError] = useState(false);
   const name = user?.name ?? user?.email?.split('@')[0] ?? 'A';
   const initial = name.charAt(0).toUpperCase();
 
   if (user?.avatar && !hasError) {
     return (
-      <button className="dash-avatar-btn" type="button" onClick={onClick} aria-label="Profile">
+      <button className="dash-avatar-btn" type="button" onClick={onClick} aria-label={ariaLabel}>
         <img
           src={user.avatar}
           alt={name}
@@ -183,7 +183,7 @@ function AvatarDisplay({ user, onClick }) {
     );
   }
   return (
-    <button className="dash-avatar-btn" type="button" onClick={onClick} aria-label="Profile">
+    <button className="dash-avatar-btn" type="button" onClick={onClick} aria-label={ariaLabel}>
       <span className="dash-avatar-initial">{initial}</span>
     </button>
   );
@@ -191,7 +191,7 @@ function AvatarDisplay({ user, onClick }) {
 
 /* ── MacroRing ───────────────────────────────────────────────────── */
 
-function MacroRing({ value, total, color, label }) {
+function MacroRing({ value, total, color, label, locale }) {
   const safeTotal = Math.max(toNumber(total), 1);
   const safeValue = Math.max(toNumber(value), 0);
   const r = 36;
@@ -220,7 +220,7 @@ function MacroRing({ value, total, color, label }) {
           />
         </svg>
         <div className="dash-ring-center">
-          <span className="dash-ring-val">{formatMetric(value, 'g')}</span>
+          <span className="dash-ring-val">{formatMetric(value, 'g', locale)}</span>
         </div>
       </div>
       <span className="dash-ring-label">{label}</span>
@@ -266,6 +266,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const workoutFrequency = uiStore((s) => s.workoutFrequency ?? 4);
+  const { t, locale } = useI18n();
 
   const summaryQuery = useDashboardSummary();
   const weeklyQuery = useDashboardWeeklySummary();
@@ -274,13 +275,13 @@ export default function Dashboard() {
   const coachSummaryQuery = useDashboardCoachSummary();
   const unreadCountQuery = useUnreadCount();
 
-  const name = user?.name ?? user?.first_name ?? user?.email?.split('@')[0] ?? 'Athlete';
+  const name = user?.name ?? user?.first_name ?? user?.email?.split('@')[0] ?? t('dashboard.defaults.athlete');
   const firstName = name.charAt(0).toUpperCase() + name.slice(1);
 
   const now = new Date();
-  const weekday = now.toLocaleDateString('en-US', { weekday: 'long' });
-  const monthDay = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-  const todayCardDate = `Today, ${weekday} ${monthDay}`;
+  const weekday = now.toLocaleDateString(locale, { weekday: 'long' });
+  const monthDay = now.toLocaleDateString(locale, { month: 'long', day: 'numeric' });
+  const todayCardDate = t('dashboard.todayDate', { weekday, monthDay });
 
   const unreadCount = toNumber(unreadCountQuery.data?.unread_count);
 
@@ -293,8 +294,8 @@ export default function Dashboard() {
   );
 
   const weekDays = useMemo(
-    () => buildWeekCalendar(streaks.workoutStreak),
-    [streaks.workoutStreak]
+    () => buildWeekCalendar(streaks.workoutStreak, locale),
+    [streaks.workoutStreak, locale]
   );
 
   const workoutDots = useMemo(
@@ -336,19 +337,19 @@ export default function Dashboard() {
       {/* ── Header ── */}
       <header className="dash-header">
         <div className="dash-header-left">
-          <h1 className="dash-greeting">Hey, {firstName}</h1>
-          <p className="dash-tagline">The Kinetic Craft is a journey, not a destination.</p>
+          <h1 className="dash-greeting">{t('dashboard.greeting', { name: firstName })}</h1>
+          <p className="dash-tagline">{t('dashboard.tagline')}</p>
         </div>
         <div className="dash-header-right">
           <button
             className="dash-notif-btn"
-            aria-label="Notifications"
+            aria-label={t('common.labels.notifications')}
             onClick={() => navigate('/notifications')}
           >
             <span className="material-symbols-outlined">notifications</span>
             {unreadCount > 0 && <span className="dash-notif-badge">{unreadCount}</span>}
           </button>
-          <AvatarDisplay user={user} onClick={() => navigate('/settings')} />
+          <AvatarDisplay user={user} onClick={() => navigate('/settings')} ariaLabel={t('common.labels.profile')} />
         </div>
       </header>
 
@@ -360,9 +361,9 @@ export default function Dashboard() {
             {/* ── Fallback banner ── */}
             {showFallbackBanner && (
               <section className="dash-card dash-card--notice">
-                <span className="dash-section-label">Sync issue</span>
+                <span className="dash-section-label">{t('dashboard.syncIssue')}</span>
                 <p className="dash-notice-copy">
-                  Latest snapshot could not fully load — logging is still available.
+                  {t('dashboard.syncIssueBody')}
                 </p>
               </section>
             )}
@@ -371,9 +372,9 @@ export default function Dashboard() {
             {showEmptyState && (
               <section className="dash-card dash-card--empty">
                 <span className="material-symbols-outlined dash-empty-icon">rocket_launch</span>
-                <h2 className="dash-empty-title">Build your first day of momentum</h2>
+                <h2 className="dash-empty-title">{t('dashboard.emptyTitle')}</h2>
                 <p className="dash-empty-sub">
-                  Start with one action so the app can generate your dashboard.
+                  {t('dashboard.emptyBody')}
                 </p>
                 <div className="dash-empty-actions">
                   <button
@@ -382,7 +383,7 @@ export default function Dashboard() {
                     onClick={() => navigate('/nutrition')}
                   >
                     <span className="material-symbols-outlined">restaurant</span>
-                    <span>Log Meal</span>
+                    <span>{t('dashboard.logMeal')}</span>
                   </button>
                   <button
                     className="dash-action-btn dash-action-btn--secondary"
@@ -390,7 +391,7 @@ export default function Dashboard() {
                     onClick={() => navigate('/workouts')}
                   >
                     <span className="material-symbols-outlined">fitness_center</span>
-                    <span>Start Workout</span>
+                    <span>{t('dashboard.startWorkout')}</span>
                   </button>
                 </div>
               </section>
@@ -408,19 +409,19 @@ export default function Dashboard() {
               </div>
               <div className="dash-summary-top">
                 <div>
-                  <span className="dash-section-label">Today&apos;s Summary</span>
+                  <span className="dash-section-label">{t('dashboard.todaySummary')}</span>
                   <h2 className="dash-date">{todayCardDate}</h2>
                 </div>
               </div>
               <div className="dash-summary-grid">
                 <div className="dash-stat-box">
-                  <span className="dash-stat-label">Calories</span>
+                  <span className="dash-stat-label">{t('dashboard.calories')}</span>
                   <div className="dash-stat-row">
                     <span className="dash-stat-val">
-                      {formatWholeNumber(summary.totalCalories)}
+                      {formatWholeNumber(summary.totalCalories, locale)}
                     </span>
                     <span className="dash-stat-sub">
-                      / {formatTarget(summary.targetCalories)} kcal
+                      / {formatTarget(summary.targetCalories, '', locale)} {t('common.units.kcal')}
                     </span>
                   </div>
                 </div>
@@ -429,10 +430,10 @@ export default function Dashboard() {
                     summary.workoutDone ? 'dash-stat-box--green' : 'dash-stat-box--soft'
                   }`}
                 >
-                  <span className="dash-stat-label">Workout</span>
+                  <span className="dash-stat-label">{t('dashboard.workout')}</span>
                   <div className="dash-stat-row">
                     <span className="dash-stat-val dash-stat-val--compact">
-                      {summary.workoutDone ? summary.workoutName : 'Not logged yet'}
+                      {summary.workoutDone ? (summary.workoutName || t('dashboard.defaults.workoutReady')) : t('dashboard.notLoggedYet')}
                     </span>
                     <span className="material-symbols-outlined dash-stat-icon">
                       {summary.workoutDone ? 'check_circle' : 'schedule'}
@@ -445,26 +446,29 @@ export default function Dashboard() {
             {/* ── Macro Rings ── */}
             <section className="dash-card dash-card--macros">
               <span className="dash-section-label" style={{ color: '#5d3fd3' }}>
-                Macro Progress
+                {t('dashboard.macroProgress')}
               </span>
               <div className="dash-rings">
                 <MacroRing
                   value={summary.totalProtein}
                   total={summary.targetProtein}
                   color="#38671a"
-                  label="Protein"
+                  label={t('dashboard.protein')}
+                  locale={locale}
                 />
                 <MacroRing
                   value={summary.totalCarbs}
                   total={summary.targetCarbs}
                   color="#5d3fd3"
-                  label="Carbs"
+                  label={t('dashboard.carbs')}
+                  locale={locale}
                 />
                 <MacroRing
                   value={summary.totalFat}
                   total={summary.targetFat}
                   color="#f95630"
-                  label="Fats"
+                  label={t('dashboard.fats')}
+                  locale={locale}
                 />
               </div>
             </section>
@@ -477,7 +481,7 @@ export default function Dashboard() {
                 onClick={() => navigate('/nutrition')}
               >
                 <span className="material-symbols-outlined">nutrition</span>
-                <span>Log Meal</span>
+                <span>{t('dashboard.logMeal')}</span>
               </button>
               <button
                 className="dash-action-btn dash-action-btn--secondary"
@@ -485,7 +489,7 @@ export default function Dashboard() {
                 onClick={() => navigate('/workouts')}
               >
                 <span className="material-symbols-outlined">fitness_center</span>
-                <span>Start Workout</span>
+                <span>{t('dashboard.startWorkout')}</span>
               </button>
             </div>
 
@@ -495,7 +499,7 @@ export default function Dashboard() {
               onClick={() => navigate('/weight')}
             >
               <span className="material-symbols-outlined">monitor_weight</span>
-              Log Weight
+              {t('dashboard.logWeight')}
             </button>
 
             {/* ── Weekly Counter ── */}
@@ -503,9 +507,9 @@ export default function Dashboard() {
               <div className="dash-counter-top">
                 <div>
                   <h3 className="dash-counter-num">
-                    {weekly.workoutCount} / {workoutFrequency} workouts
+                    {t('dashboard.workoutsCount', { count: weekly.workoutCount, target: workoutFrequency })}
                   </h3>
-                  <p className="dash-section-label">This Week&apos;s Goal</p>
+                  <p className="dash-section-label">{t('dashboard.weeklyGoal')}</p>
                 </div>
                 <div className="dash-counter-dots">
                   {workoutDots.map((done, i) => (
@@ -530,12 +534,12 @@ export default function Dashboard() {
             <section className="dash-card dash-card--streak">
               <div className="dash-streak-top">
                 <span className="dash-section-label" style={{ color: '#38671a' }}>
-                  Training Streak
+                  {t('dashboard.trainingStreak')}
                 </span>
                 <div className="dash-streak-pill">
                   {streaks.workoutStreak > 0
-                    ? `🔥 ${streaks.workoutStreak} Days`
-                    : 'Start Today'}
+                    ? t('dashboard.streakDays', { count: streaks.workoutStreak })
+                    : t('dashboard.startToday')}
                 </div>
               </div>
               <div className="dash-calendar">
@@ -568,7 +572,7 @@ export default function Dashboard() {
             {recommendations.length > 0 && (
               <section className="dash-card dash-card--recs">
                 <span className="dash-section-label" style={{ color: '#b36200' }}>
-                  Recommendations
+                  {t('dashboard.recommendations')}
                 </span>
                 <ul className="dash-recs-list">
                   {recommendations.slice(0, 3).map((rec) => (
@@ -577,7 +581,7 @@ export default function Dashboard() {
                         tips_and_updates
                       </span>
                       <div>
-                        <p className="dash-rec-name">{rec.name}</p>
+                        <p className="dash-rec-name">{rec.name || t('dashboard.todayRecommendation')}</p>
                         <p className="dash-rec-adj">{rec.adjustment || rec.description}</p>
                       </div>
                     </li>

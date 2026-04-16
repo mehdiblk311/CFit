@@ -1,17 +1,19 @@
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useI18n } from '../../i18n/useI18n';
 import './AppLayout.css';
 
 const NAV_ITEMS = [
-  { id: 'dashboard', path: '/dashboard', icon: 'dashboard',      label: 'Home'      },
-  { id: 'workouts',  path: '/workouts',  icon: 'fitness_center',  label: 'Workout',  match: ['/workouts', '/leaderboard', '/progress'] },
-  { id: 'nutrition', path: '/nutrition', icon: 'restaurant',      label: 'Nutrition' },
-  { id: 'ai',        path: '/ai',        icon: 'smart_toy',        label: 'Coach'     },
-  { id: 'settings',  path: '/settings',  icon: 'settings',         label: 'Settings'  },
+  { id: 'dashboard', path: '/dashboard', icon: 'dashboard', labelKey: 'common.nav.home' },
+  { id: 'workouts', path: '/workouts', icon: 'fitness_center', labelKey: 'common.nav.workout', match: ['/workouts', '/leaderboard', '/progress'] },
+  { id: 'nutrition', path: '/nutrition', icon: 'restaurant', labelKey: 'common.nav.nutrition' },
+  { id: 'ai', path: '/ai', icon: 'smart_toy', labelKey: 'common.nav.coach' },
+  { id: 'settings', path: '/settings', icon: 'settings', labelKey: 'common.nav.settings' },
 ];
 
 export default function AppLayout({ children }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { t } = useI18n();
 
   const hideNav = false;
 
@@ -26,12 +28,13 @@ export default function AppLayout({ children }) {
           {NAV_ITEMS.map(item => {
             const paths = item.match || [item.path];
             const isActive = paths.some((path) => pathname === path || pathname.startsWith(path + '/'));
+            const label = t(item.labelKey);
             return (
               <button
                 key={item.id}
                 className={`app-nav-item${isActive ? ' app-nav-item--active' : ''}`}
                 onClick={() => navigate(item.path)}
-                aria-label={item.label}
+                aria-label={label}
               >
                 <span
                   className="material-symbols-outlined app-nav-icon"
@@ -39,7 +42,7 @@ export default function AppLayout({ children }) {
                 >
                   {item.icon}
                 </span>
-                <span className="app-nav-label">{item.label}</span>
+                <span className="app-nav-label">{label}</span>
               </button>
             );
           })}

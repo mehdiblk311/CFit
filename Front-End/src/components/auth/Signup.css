@@ -321,6 +321,60 @@
   padding: 0;
 }
 
+html[dir='rtl'] .su-root {
+  direction: rtl;
+}
+
+html[dir='rtl'] .su-heading-group,
+html[dir='rtl'] .su-form,
+html[dir='rtl'] .su-footer-link {
+  text-align: right;
+}
+
+html[dir='rtl'] .su-back-btn svg,
+html[dir='rtl'] .su-btn-arrow svg {
+  transform: scaleX(-1);
+}
+
+html[dir='rtl'] .su-label {
+  left: auto;
+  right: 16px;
+}
+
+html[dir='rtl'] .su-input {
+  padding: 15px 22px 15px 52px;
+  text-align: right;
+}
+
+html[dir='rtl'] .su-input-icon {
+  right: auto;
+  left: 20px;
+}
+
+html[dir='rtl'] .su-error {
+  padding-left: 0;
+  padding-right: 16px;
+}
+
+html[dir='rtl'] .su-strength-label {
+  padding-left: 0;
+  padding-right: 8px;
+}
+
+html[dir='rtl'] .su-footer-link {
+  flex-direction: row-reverse;
+}
+
+html[dir='rtl'] .su-blob-green {
+  left: auto;
+  right: 40px;
+}
+
+html[dir='rtl'] .su-blob-purple {
+  right: auto;
+  left: 40px;
+}
+
 /* ── Desktop ─────────────────────────────────────────────────────── */
 @media (min-width: 768px) {
   .su-root {
@@ -342,4 +396,14 @@
   .su-title { font-size: 44px; }
   .su-blob-green { width: 500px; height: 500px; filter: blur(80px); left: -100px; opacity: 0.15; }
   .su-blob-purple { width: 400px; height: 400px; filter: blur(70px); right: -100px; opacity: 0.15; }
+
+  html[dir='rtl'] .su-blob-green {
+    left: auto;
+    right: -100px;
+  }
+
+  html[dir='rtl'] .su-blob-purple {
+    right: auto;
+    left: -100px;
+  }
 }

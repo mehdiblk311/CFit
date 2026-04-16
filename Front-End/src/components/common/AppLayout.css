@@ -83,3 +83,11 @@
   font-weight: 700;
   line-height: 1;
 }
+
+html[dir='rtl'] .app-nav {
+  flex-direction: row-reverse;
+}
+
+html[dir='rtl'] .app-nav-item:hover:not(.app-nav-item--active) {
+  transform: translateY(-3px) rotate(6deg);
+}

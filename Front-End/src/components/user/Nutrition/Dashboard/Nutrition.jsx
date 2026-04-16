@@ -11,6 +11,7 @@ import {
 } from '../../../../hooks/queries/useNutrition';
 import { weightAPI } from '../../../../api/weight';
 import { authStore } from '../../../../stores/authStore';
+import { useI18n } from '../../../../i18n/useI18n';
 import './Nutrition.css';
 
 function getTodayDateKey() {
@@ -30,10 +31,10 @@ function normalizeDateKey(value) {
   return trimmed;
 }
 
-function formatHeaderDate(dateKey) {
+function formatHeaderDate(dateKey, locale) {
   const parsed = new Date(`${dateKey}T00:00:00`);
   if (Number.isNaN(parsed.getTime())) return dateKey;
-  return parsed.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+  return parsed.toLocaleDateString(locale, { month: 'long', day: 'numeric' });
 }
 
 function normalizeList(payload) {
@@ -44,10 +45,10 @@ function normalizeList(payload) {
 }
 
 const MEAL_CONFIGS = [
-  { type: 'breakfast', label: 'Breakfast' },
-  { type: 'lunch', label: 'Lunch' },
-  { type: 'dinner', label: 'Dinner' },
-  { type: 'snack', label: 'Snacks' },
+  { type: 'breakfast' },
+  { type: 'lunch' },
+  { type: 'dinner' },
+  { type: 'snack' },
 ];
 
 function getMealTimestamp(meal) {
@@ -75,10 +76,10 @@ function buildMealGroup(meals) {
   };
 }
 
-function getWeightDateLabel(value) {
+function getWeightDateLabel(value, locale) {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return 'N/A';
-  return parsed.toLocaleDateString('en-US', { month: 'short', day: '2-digit' }).toUpperCase();
+  return parsed.toLocaleDateString(locale, { month: 'short', day: '2-digit' }).toUpperCase();
 }
 
 function getEntryDateKey(value) {
@@ -112,6 +113,7 @@ function MealEditorModal({
   isDeleting,
   deletingIngredientId,
 }) {
+  const { t } = useI18n();
   const [form, setForm] = useState({
     notes: meal?.notes || '',
   });
@@ -120,25 +122,25 @@ function MealEditorModal({
     <ModalPortal>
       <div className="nd-modal-overlay" onClick={(event) => event.target === event.currentTarget && onClose()}>
         <div className="nd-modal">
-          <button className="nd-modal-close" onClick={onClose} aria-label="Close meal editor">
+          <button className="nd-modal-close" onClick={onClose} aria-label={t('nutritionDashboard.mealEditor.close')}>
             <span className="material-symbols-outlined">close</span>
           </button>
 
           <div className="nd-modal-copy">
-            <p className="nd-modal-eyebrow">Meal Journal</p>
-            <h3 className="nd-modal-title">Edit Meal</h3>
+            <p className="nd-modal-eyebrow">{t('nutritionDashboard.mealEditor.eyebrow')}</p>
+            <h3 className="nd-modal-title">{t('nutritionDashboard.mealEditor.title')}</h3>
             <p className="nd-modal-desc">
-              Keep your notes clean, remove ingredients you do not want, and jump into each ingredient page to edit quantity.
+              {t('nutritionDashboard.mealEditor.desc')}
             </p>
           </div>
 
           <label className="nd-modal-field">
-            <span>Notes</span>
+            <span>{t('nutritionDashboard.mealEditor.notes')}</span>
             <textarea
               value={form.notes}
               onChange={(event) => setForm((prev) => ({ ...prev, notes: event.target.value }))}
               rows={3}
-              placeholder="Add context like meal prep, family dinner, or post-workout meal."
+              placeholder={t('nutritionDashboard.mealEditor.notesPlaceholder')}
             />
           </label>
 
@@ -149,28 +151,30 @@ function MealEditorModal({
               disabled={isSaving}
             >
               <span className="material-symbols-outlined">{isSaving ? 'progress_activity' : 'check_circle'}</span>
-              {isSaving ? 'Saving…' : 'Save Notes'}
+              {isSaving ? t('nutritionDashboard.mealEditor.saving') : t('nutritionDashboard.mealEditor.saveNotes')}
             </button>
           </div>
 
           <div className="nd-modal-meal-items">
             <div className="nd-modal-items-head">
-              <span>Current Ingredients</span>
-              <span>{meal?.items?.length || 0} items</span>
+              <span>{t('nutritionDashboard.mealEditor.currentIngredients')}</span>
+              <span>{t('nutritionDashboard.mealEditor.itemsCount', { count: meal?.items?.length || 0 })}</span>
             </div>
 
             {!meal?.items?.length ? (
-              <p className="nd-modal-empty">No ingredients yet. Add your first ingredient below.</p>
+              <p className="nd-modal-empty">{t('nutritionDashboard.mealEditor.noIngredients')}</p>
             ) : (
               <div className="nd-modal-item-list">
                 {meal.items.map((item) => {
                   return (
                     <div key={item.id} className="nd-modal-item-row nd-modal-item-row--editable">
                       <div className="nd-modal-item-info">
-                        <span className="nd-modal-item-name" title={item.food?.name || 'Ingredient'}>
-                          {item.food?.name || 'Ingredient'}
+                        <span className="nd-modal-item-name" title={item.food?.name || t('nutritionDashboard.mealEditor.ingredient')}>
+                          {item.food?.name || t('nutritionDashboard.mealEditor.ingredient')}
                         </span>
-                        <span className="nd-modal-item-meta">{Number(item.quantity || 0).toFixed(2)} x serving</span>
+                        <span className="nd-modal-item-meta">
+                          {t('nutritionDashboard.mealEditor.quantityServing', { quantity: Number(item.quantity || 0).toFixed(2) })}
+                        </span>
                       </div>
 
                       <div className="nd-modal-item-actions">
@@ -178,14 +182,14 @@ function MealEditorModal({
                           className="nd-modal-mini"
                           onClick={() => onEditIngredient(item)}
                         >
-                          Edit
+                          {t('nutritionDashboard.mealEditor.edit')}
                         </button>
                         <button
                           className="nd-modal-mini nd-modal-mini--danger"
                           onClick={() => onRemoveIngredient(item)}
                           disabled={deletingIngredientId === item.id}
                         >
-                          {deletingIngredientId === item.id ? 'Removing…' : 'Remove'}
+                          {deletingIngredientId === item.id ? t('nutritionDashboard.mealEditor.removing') : t('nutritionDashboard.mealEditor.remove')}
                         </button>
                       </div>
                     </div>
@@ -197,13 +201,13 @@ function MealEditorModal({
           </div>
 
           <button className="nd-modal-add-cta" onClick={onAddIngredient}>
-            <span>Add Ingredient</span>
+            <span>{t('nutritionDashboard.mealEditor.addIngredient')}</span>
             <span className="material-symbols-outlined">arrow_forward</span>
           </button>
 
           <button className="nd-modal-danger" onClick={onDelete} disabled={isDeleting}>
             <span className="material-symbols-outlined">delete</span>
-            {isDeleting ? 'Deleting…' : 'Delete Meal'}
+            {isDeleting ? t('nutritionDashboard.mealEditor.deletingMeal') : t('nutritionDashboard.mealEditor.deleteMeal')}
           </button>
         </div>
       </div>
@@ -216,12 +220,13 @@ export default function Nutrition() {
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const user = authStore((state) => state.user);
+  const { t, locale } = useI18n();
   const today = getTodayDateKey();
 
   const requestedDate = normalizeDateKey(searchParams.get('date'));
   const isReadOnly = searchParams.get('readonly') === '1';
   const journalDate = isReadOnly && requestedDate ? requestedDate : today;
-  const headerDate = formatHeaderDate(journalDate);
+  const headerDate = formatHeaderDate(journalDate, locale);
 
   const [mealEditor, setMealEditor] = useState(null);
   const [creatingMealType, setCreatingMealType] = useState('');
@@ -270,11 +275,11 @@ export default function Nutrition() {
       queryClient.invalidateQueries({ queryKey: ['weightEntries', user?.id] });
       setWeightInput('');
       setWeightError('');
-      setWeightFeedback(todayWeightEntry?.id ? 'Today’s weight was updated.' : 'Weight logged successfully.');
+      setWeightFeedback(todayWeightEntry?.id ? t('nutritionDashboard.weightUpdated') : t('nutritionDashboard.weightLogged'));
     },
     onError: () => {
       setWeightFeedback('');
-      setWeightError('Could not log weight right now. Please try again.');
+      setWeightError(t('nutritionDashboard.weightFailed'));
     },
   });
 
@@ -288,6 +293,10 @@ export default function Nutrition() {
   const mealGroupsByType = Object.fromEntries(
     MEAL_CONFIGS.map(({ type }) => [type, buildMealGroup(mealsByType[type] ?? [])]),
   );
+  const mealConfigs = MEAL_CONFIGS.map((config) => ({
+    ...config,
+    label: t(`nutrition.mealTypes.${config.type}`),
+  }));
 
   const totalCalories = Math.round(meals.reduce((sum, meal) => sum + (meal.total_calories || 0), 0));
   const totalProtein = Math.round(meals.reduce((sum, meal) => sum + (meal.total_protein || 0), 0));
@@ -431,19 +440,19 @@ export default function Nutrition() {
   const handleLogWeight = () => {
     if (isReadOnly) {
       setWeightFeedback('');
-      setWeightError('History view is read-only. Return to today to log weight.');
+      setWeightError(t('nutritionDashboard.readOnlyError'));
       return;
     }
 
     const numericWeight = Number(weightInput);
     if (!user?.id) {
       setWeightFeedback('');
-      setWeightError('You need to be logged in to log weight.');
+      setWeightError(t('nutritionDashboard.authError'));
       return;
     }
     if (!Number.isFinite(numericWeight) || numericWeight <= 0) {
       setWeightFeedback('');
-      setWeightError('Enter a valid weight in kg.');
+      setWeightError(t('nutritionDashboard.weightInputError'));
       return;
     }
 
@@ -465,18 +474,22 @@ export default function Nutrition() {
               person
             </span>
           </div>
-          <h1 className="nd-title">Nutrition</h1>
+          <h1 className="nd-title">{t('nutritionDashboard.title')}</h1>
         </div>
         <div className="nd-header-right">
           <div className="nd-date-pill">
-            <span className="nd-date-text">{isReadOnly ? `History, ${headerDate}` : `Today, ${headerDate}`}</span>
+            <span className="nd-date-text">
+              {isReadOnly
+                ? t('nutritionDashboard.historyDate', { date: headerDate })
+                : t('nutritionDashboard.todayDate', { date: headerDate })}
+            </span>
             <span className="material-symbols-outlined nd-date-icon">calendar_today</span>
           </div>
           <button
             id="nd-history-btn"
             className="nd-icon-btn"
             onClick={() => navigate('/nutrition/history')}
-            aria-label="View nutrition history"
+            aria-label={t('nutritionDashboard.viewHistory')}
           >
             <span className="material-symbols-outlined">history</span>
           </button>
@@ -486,8 +499,8 @@ export default function Nutrition() {
       <main className="nd-main">
         {isReadOnly && (
           <section className="nd-readonly-banner">
-            <p className="nd-readonly-copy">Read-only journal view for {headerDate}. Adding or editing is muted.</p>
-            <button className="nd-readonly-btn" onClick={() => navigate('/nutrition')}>Back To Today</button>
+            <p className="nd-readonly-copy">{t('nutritionDashboard.readonlyBanner', { date: headerDate })}</p>
+            <button className="nd-readonly-btn" onClick={() => navigate('/nutrition')}>{t('nutritionDashboard.backToToday')}</button>
           </section>
         )}
 
@@ -512,27 +525,27 @@ export default function Nutrition() {
               </svg>
               <div className="nd-ring-center">
                 {isLoading ? (
-                  <span className="nd-ring-goal" style={{ fontSize: 13 }}>Loading…</span>
+                  <span className="nd-ring-goal" style={{ fontSize: 13 }}>{t('nutritionDashboard.loading')}</span>
                 ) : (
                   <>
-                    <span className="nd-ring-kcal">{totalCalories.toLocaleString()}</span>
-                    <span className="nd-ring-goal">/ {goals.calories.toLocaleString()} KCAL</span>
+                    <span className="nd-ring-kcal">{totalCalories.toLocaleString(locale)}</span>
+                    <span className="nd-ring-goal">/ {goals.calories.toLocaleString(locale)} {t('common.units.kcal').toUpperCase()}</span>
                   </>
                 )}
               </div>
-              {!isLoading && <div className="nd-ring-sticker">{kcalLeft} KCAL LEFT</div>}
+              {!isLoading && <div className="nd-ring-sticker">{t('nutritionDashboard.kcalLeft', { value: kcalLeft.toLocaleString(locale) })}</div>}
             </div>
 
             <div className="nd-bars">
               {[
-                { label: 'Protein', consumed: totalProtein, goal: goals.protein, color: '#38671a' },
-                { label: 'Carbs', consumed: totalCarbs, goal: goals.carbs, color: '#5d3fd3' },
-                { label: 'Fats', consumed: totalFat, goal: goals.fat, color: '#f95630' },
+                { label: t('nutritionDashboard.protein'), consumed: totalProtein, goal: goals.protein, color: '#38671a' },
+                { label: t('nutritionDashboard.carbs'), consumed: totalCarbs, goal: goals.carbs, color: '#5d3fd3' },
+                { label: t('nutritionDashboard.fats'), consumed: totalFat, goal: goals.fat, color: '#f95630' },
               ].map(({ label, consumed, goal, color }) => (
                 <div key={label} className="nd-bar-row">
                   <div className="nd-bar-labels">
                     <span>{label}</span>
-                    <span>{consumed}g / {goal}g</span>
+                    <span>{consumed}{t('common.units.grams')} / {goal}{t('common.units.grams')}</span>
                   </div>
                   <div className="nd-bar-track">
                     <div
@@ -547,7 +560,7 @@ export default function Nutrition() {
         </section>
 
         <div className="nd-meals-grid">
-          {MEAL_CONFIGS.map((config, index) => {
+          {mealConfigs.map((config, index) => {
             const mealGroup = mealGroupsByType[config.type];
             const items = mealGroup?.items ?? [];
             const isEmpty = !mealGroup || items.length === 0;
@@ -563,10 +576,10 @@ export default function Nutrition() {
                   className={`nd-card nd-card--empty${isReadOnly ? ' nd-card--disabled' : ''}`}
                   onClick={() => !isReadOnly && handleOpenMealLogger(config.type)}
                   role="button"
-                  aria-label={`Create ${config.label}`}
+                  aria-label={t('nutritionDashboard.createMeal', { meal: config.label })}
                 >
                   <h3 className="nd-card-title nd-card-title--faded">{config.label}</h3>
-                  <span className="nd-card-empty-label">{isReadOnly ? 'READ ONLY' : 'NO ITEMS LOGGED'}</span>
+                  <span className="nd-card-empty-label">{isReadOnly ? t('nutritionDashboard.readOnly') : t('nutritionDashboard.noItemsLogged')}</span>
                   <button className="nd-card-add-circle" tabIndex={-1} disabled={isReadOnly || isCreating}>
                     <span className="material-symbols-outlined">{isCreating ? 'progress_activity' : 'add'}</span>
                   </button>
@@ -582,7 +595,7 @@ export default function Nutrition() {
                       <h3 className="nd-card-title">{config.label}</h3>
                       {mealGroup.mealCount > 1 && (
                         <p style={{ margin: '4px 0 0', fontSize: 11, color: '#888' }}>
-                          {mealGroup.mealCount} meals merged
+                          {t('nutritionDashboard.mealsMerged', { count: mealGroup.mealCount })}
                         </p>
                       )}
                     </div>
@@ -590,7 +603,7 @@ export default function Nutrition() {
                       {!isReadOnly && (
                         <button
                           className="nd-icon-btn nd-card-icon"
-                          title="Edit Meal"
+                          title={t('nutritionDashboard.editMeal')}
                           onClick={() => openEditMeal(config.type, mealGroup.primaryMeal)}
                         >
                           <span className="material-symbols-outlined" style={{ fontSize: 14 }}>edit</span>
@@ -604,12 +617,12 @@ export default function Nutrition() {
                     {items.slice(0, 4).map((item) => (
                       <li key={item.id} className="nd-card-item">
                         <div className="nd-item-thumb">🍽️</div>
-                        <span className="nd-item-name">{item.food?.name ?? 'Food'}</span>
+                        <span className="nd-item-name">{item.food?.name ?? t('nutritionDashboard.food')}</span>
                       </li>
                     ))}
                     {items.length > 4 && (
                       <li className="nd-card-item" style={{ opacity: 0.6, fontSize: 11 }}>
-                        +{items.length - 4} more items
+                        {t('nutritionDashboard.moreItems', { count: items.length - 4 })}
                       </li>
                     )}
                   </ul>
@@ -624,7 +637,7 @@ export default function Nutrition() {
                   <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
                     {isCreating ? 'progress_activity' : 'add'}
                   </span>
-                  {isReadOnly ? 'READ ONLY' : 'ADD INGREDIENT'}
+                  {isReadOnly ? t('nutritionDashboard.readOnly') : t('nutritionDashboard.addIngredient')}
                 </button>
               </div>
             );
@@ -634,8 +647,8 @@ export default function Nutrition() {
         <section className="nd-weight-card">
           <div className="nd-weight-top">
             <div>
-              <h3 className="nd-weight-title">Weekly&nbsp;&nbsp;&nbsp;Weight&nbsp;&nbsp;&nbsp;&nbsp;Log</h3>
-              <p className="nd-weight-desc">Stay consistent with your progress tracking.</p>
+              <h3 className="nd-weight-title">{t('nutritionDashboard.weightTitle')}</h3>
+              <p className="nd-weight-desc">{t('nutritionDashboard.weightDesc')}</p>
             </div>
             <div className="nd-weight-input-row">
               <div className="nd-weight-input-wrap">
@@ -646,12 +659,12 @@ export default function Nutrition() {
                   min="0"
                   className="nd-weight-input"
                   placeholder="00.0"
-                  aria-label="Enter weight in kg"
+                  aria-label={t('nutritionDashboard.enterWeightKg')}
                   value={weightInput}
                   onChange={(event) => setWeightInput(event.target.value)}
                   disabled={isReadOnly}
                 />
-                <span className="nd-weight-unit">KG</span>
+                <span className="nd-weight-unit">{t('common.units.kg').toUpperCase()}</span>
               </div>
               <button
                 id="nd-log-weight-btn"
@@ -659,7 +672,7 @@ export default function Nutrition() {
                 onClick={handleLogWeight}
                 disabled={logWeight.isPending || isReadOnly}
               >
-                {logWeight.isPending ? 'LOGGING…' : 'LOG WEIGHT'}
+                {logWeight.isPending ? t('nutritionDashboard.loggingWeight') : t('nutritionDashboard.logWeight')}
               </button>
             </div>
           </div>
@@ -668,13 +681,15 @@ export default function Nutrition() {
 
           <div className="nd-chart-section">
             <div className="nd-chart-labels">
-              <span className="nd-chart-period">1M TREND</span>
+              <span className="nd-chart-period">{t('nutritionDashboard.trendLabel')}</span>
               <span className="nd-chart-delta">
-                {monthlyDelta === null ? 'LOG 2 ENTRIES TO SEE TREND' : `${monthlyDelta > 0 ? '+' : ''}${monthlyDelta.toFixed(1)} KG THIS MONTH`}
+                {monthlyDelta === null
+                  ? t('nutritionDashboard.needTwoEntries')
+                  : t('nutritionDashboard.thisMonthDelta', { delta: `${monthlyDelta > 0 ? '+' : ''}${monthlyDelta.toFixed(1)}` })}
               </span>
             </div>
             {weightChartBars.length === 0 ? (
-              <p className="nd-weight-empty">No weight entries yet. Log your first weigh-in above.</p>
+              <p className="nd-weight-empty">{t('nutritionDashboard.noWeightEntries')}</p>
             ) : (
               <>
                 <div className="nd-chart-bars">
@@ -687,7 +702,7 @@ export default function Nutrition() {
                   ))}
                 </div>
                 <div className="nd-chart-x-labels">
-                  {recentWeightEntries.map((entry) => <span key={entry.id}>{getWeightDateLabel(entry.date)}</span>)}
+                  {recentWeightEntries.map((entry) => <span key={entry.id}>{getWeightDateLabel(entry.date, locale)}</span>)}
                 </div>
               </>
             )}

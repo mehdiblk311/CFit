@@ -36,6 +36,7 @@ import {
 } from '../../../hooks/queries/useAnalytics';
 import { mapApiError } from '../../../utils/apiErrors';
 import { resolveExerciseImageUrl } from '../../../utils/exerciseImages';
+import { useI18n } from '../../../i18n/useI18n';
 import Progress from '../Progress/Progress';
 import './Workouts.css';
 
@@ -170,14 +171,14 @@ function flattenProgramSessions(program) {
   });
 }
 
-function getStatusLabel(status) {
+function getStatusLabel(status, t = (value) => value) {
   const map = {
-    assigned: 'Assigned',
-    in_progress: 'In Progress',
-    completed: 'Completed',
-    cancelled: 'Cancelled',
+    assigned: t('workouts.status.assigned'),
+    in_progress: t('workouts.status.inProgress'),
+    completed: t('workouts.status.completed'),
+    cancelled: t('workouts.status.cancelled'),
   };
-  return map[status] || 'Assigned';
+  return map[status] || map.assigned;
 }
 
 function getStatusColor(status) {
@@ -244,18 +245,18 @@ function mapAppliedWorkoutToSessionExercises(workout) {
     const plannedCount = Math.max(backendSets.length, Number(exercise?.sets) || 0, 1);
     const prefilledSets = backendSets.length > 0
       ? backendSets.map((set, setIndex) => ({
-          backendSetId: set.id,
-          setNumber: set.set_number || setIndex + 1,
-          weight: String(setWeightValue(set) || ''),
-          reps: String(set.reps ?? ''),
-          done: false,
-        }))
+        backendSetId: set.id,
+        setNumber: set.set_number || setIndex + 1,
+        weight: String(setWeightValue(set) || ''),
+        reps: String(set.reps ?? ''),
+        done: false,
+      }))
       : Array.from({ length: plannedCount }, (_, setIndex) => ({
-          setNumber: setIndex + 1,
-          weight: String(Number(exercise?.weight) || ''),
-          reps: String(Number(exercise?.reps) || ''),
-          done: false,
-        }));
+        setNumber: setIndex + 1,
+        weight: String(Number(exercise?.weight) || ''),
+        reps: String(Number(exercise?.reps) || ''),
+        done: false,
+      }));
 
     return {
       id: exercise.exercise?.id || exercise.exercise_id || `program-ex-${index + 1}`,
@@ -322,28 +323,30 @@ function useTimer(running = true) {
 // ── Context Nav ───────────────────────────────────────────────────────
 
 const CTX_NAV = [
-  { id: 'close',    icon: 'close',         label: 'Close'    },
-  { id: 'programs', icon: 'grid_view',     label: 'Programs' },
-  { id: 'library',  icon: 'book',          label: 'Library'  },
-  { id: 'history',  icon: 'history',       label: 'History'  },
-  { id: 'progress', icon: 'trending_up',   label: 'Progress' },
+  { id: 'close', icon: 'close', labelKey: 'workouts.nav.close' },
+  { id: 'programs', icon: 'grid_view', labelKey: 'workouts.nav.programs' },
+  { id: 'library', icon: 'book', labelKey: 'workouts.nav.library' },
+  { id: 'history', icon: 'history', labelKey: 'workouts.nav.history' },
+  { id: 'progress', icon: 'trending_up', labelKey: 'workouts.nav.progress' },
 ];
 
 function WorkoutContextNav({ active, onChange, onClose, visible }) {
+  const { t } = useI18n();
   return (
     <nav className={`wk-ctx-nav${visible ? ' wk-ctx-nav--visible' : ''}`}>
       {CTX_NAV.map(item => {
         const isClose = item.id === 'close';
         const isActive = !isClose && item.id === active;
+        const label = t(item.labelKey);
         return (
           <button
             key={item.id}
             className={`wk-ctx-btn${isActive ? ' wk-ctx-btn--active' : ''}${isClose ? ' wk-ctx-btn--close' : ''}`}
             onClick={() => isClose ? onClose() : onChange(item.id)}
-            aria-label={item.label}
+            aria-label={label}
           >
             <span className="material-symbols-outlined wk-ctx-icon">{item.icon}</span>
-            <span className="wk-ctx-label">{item.label}</span>
+            <span className="wk-ctx-label">{label}</span>
           </button>
         );
       })}
@@ -354,6 +357,7 @@ function WorkoutContextNav({ active, onChange, onClose, visible }) {
 // ── Exercise Search Modal ──────────────────────────────────────────────
 
 function ExerciseSearchModal({ onClose, onSelect }) {
+  const { t } = useI18n();
   const [search, setSearch] = useState('');
   const [cat, setCat] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -387,13 +391,13 @@ function ExerciseSearchModal({ onClose, onSelect }) {
     meta?.muscles || [],
     ['chest', 'back', 'shoulders', 'arms', 'legs', 'core', 'cardio']
   );
-  const chips = [{ label: 'All', value: '' }, ...muscleOptions.slice(0, 8).map((value) => ({ label: formatExerciseOption(value), value }))];
+  const chips = [{ label: t('workouts.search.all'), value: '' }, ...muscleOptions.slice(0, 8).map((value) => ({ label: formatExerciseOption(value), value }))];
 
   return (
     <div className="wk-modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="wk-modal">
         <div className="wk-modal-header">
-          <h3 className="wk-modal-title">Add Exercise</h3>
+          <h3 className="wk-modal-title">{t('workouts.search.addExercise')}</h3>
           <button className="wk-modal-close" onClick={onClose}>
             <span className="material-symbols-outlined" style={{ fontSize: 20 }}>close</span>
           </button>
@@ -403,7 +407,7 @@ function ExerciseSearchModal({ onClose, onSelect }) {
             <span className="material-symbols-outlined wk-search-icon">search</span>
             <input
               className="wk-search"
-              placeholder="Search exercises..."
+              placeholder={t('workouts.search.searchPlaceholder')}
               value={search}
               onChange={e => {
                 setSearch(e.target.value);
@@ -434,7 +438,7 @@ function ExerciseSearchModal({ onClose, onSelect }) {
             ) : exercises.length === 0 ? (
               <div className="wk-empty-state">
                 <span className="material-symbols-outlined">fitness_center</span>
-                <p>No exercises found</p>
+                <p>{t('workouts.search.noExercisesFound')}</p>
               </div>
             ) : (
               exercises.map((ex) => (
@@ -442,7 +446,7 @@ function ExerciseSearchModal({ onClose, onSelect }) {
                   <div className="wk-modal-ex-dot" style={{ background: getAccentForType(ex.type) }} />
                   <div className="wk-modal-ex-info">
                     <span className="wk-lib-name">{ex.name}</span>
-                    <span className="wk-lib-muscle">{getExercisePrimaryMuscle(ex) || 'Full body'} · {ex.equipment || 'Bodyweight'}</span>
+                    <span className="wk-lib-muscle">{getExercisePrimaryMuscle(ex) || t('workouts.search.fullBody')} · {ex.equipment || t('workouts.search.bodyweight')}</span>
                   </div>
                   <span className="material-symbols-outlined" style={{ fontSize: 20, color: '#38671a' }}>add_circle</span>
                 </button>
@@ -452,7 +456,7 @@ function ExerciseSearchModal({ onClose, onSelect }) {
           {!isLoading && (
             <div className="wk-lib-pagination">
               <span className="wk-lib-pagination-label">
-                Showing {showingFrom}-{showingTo} of {totalCount}
+                {t('workouts.search.showing', { from: showingFrom, to: showingTo, total: totalCount })}
               </span>
               <div className="wk-lib-pagination-actions">
                 <button
@@ -539,7 +543,7 @@ function CustomProgramBuilderModal({ onClose, onSave, isSaving = false }) {
       <div className="wk-modal-overlay" onClick={(event) => event.target === event.currentTarget && onClose()}>
         <div className="wk-modal">
           <div className="wk-modal-header">
-            <h3 className="wk-modal-title">Create Your Program</h3>
+            <h3 className="wk-modal-title">Create Your Session</h3>
             <button className="wk-modal-close" onClick={onClose}>
               <span className="material-symbols-outlined" style={{ fontSize: 20 }}>close</span>
             </button>
@@ -705,6 +709,7 @@ function ProgramsView({
   isStartingTemplate = false,
   isStartingProgram = false,
 }) {
+  const { t, locale } = useI18n();
   const {
     data: templatesData,
     isLoading: templatesLoading,
@@ -724,11 +729,11 @@ function ProgramsView({
     <div className="wk-view">
       <div className="wk-section-header">
         <div>
-          <span className="wk-eyebrow">Your Regimen</span>
-          <h2 className="wk-heading">My Programs</h2>
+          <span className="wk-eyebrow">{t('workouts.programs.eyebrow')}</span>
+          <h2 className="wk-heading">{t('workouts.programs.title')}</h2>
         </div>
         {!isLoading && !templatesLoading && (
-          <div className="wk-header-badge">{totalPrograms} total</div>
+          <div className="wk-header-badge">{t('workouts.programs.total', { count: totalPrograms })}</div>
         )}
       </div>
 
@@ -736,10 +741,10 @@ function ProgramsView({
         <div className="wk-programs-panel">
           <div className="wk-programs-panel-top">
             <div>
-              <span className="wk-eyebrow">Built By You</span>
-              <h3 className="wk-programs-panel-title">Custom Programs</h3>
+              <span className="wk-eyebrow">{t('workouts.programs.builtByYou')}</span>
+              <h3 className="wk-programs-panel-title">{t('workouts.programs.customSessions')}</h3>
             </div>
-            <button className="wk-btn-ghost" onClick={onTemplateCreate}>Create</button>
+            <button className="wk-btn-ghost" onClick={onTemplateCreate}>{t('workouts.programs.create')}</button>
           </div>
 
           {templatesLoading ? (
@@ -749,7 +754,7 @@ function ProgramsView({
           ) : templates.length === 0 ? (
             <div className="wk-empty-section wk-empty-section--compact">
               <span className="material-symbols-outlined wk-empty-icon" style={{ fontSize: 34, color: '#dad4c8' }}>library_add</span>
-              <p className="wk-empty-text">Build your own program once, then launch it whenever you train.</p>
+              <p className="wk-empty-text">{t('workouts.programs.emptyCustom')}</p>
             </div>
           ) : (
             <div className="wk-cards-list">
@@ -760,7 +765,7 @@ function ProgramsView({
                     <div className="wk-card-accent" style={{ background: accent }} />
                     <div className="wk-card-body" onClick={() => onTemplatePreview(template)} style={{ cursor: 'pointer' }}>
                       <div className="wk-card-top">
-                        <h3 className="wk-card-name">{template.name || 'Custom Program'}</h3>
+                        <h3 className="wk-card-name">{template.name || t('workouts.programs.defaultCustomProgram')}</h3>
                         <span className="wk-card-tag" style={{ background: '#e8e2d6', color: '#423f36' }}>
                           {String(template.type || 'custom').toUpperCase()}
                         </span>
@@ -768,12 +773,12 @@ function ProgramsView({
                       <div className="wk-card-meta">
                         <div className="wk-card-meta-item">
                           <span className="material-symbols-outlined" style={{ fontSize: 16 }}>person</span>
-                          <span>Made by you</span>
+                          <span>{t('workouts.programs.madeByYou')}</span>
                         </div>
                         {template.created_at && (
                           <div className="wk-card-meta-item">
                             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>schedule</span>
-                            <span>{new Date(template.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
+                            <span>{new Date(template.created_at).toLocaleDateString(locale, { day: '2-digit', month: 'short' })}</span>
                           </div>
                         )}
                       </div>
@@ -788,7 +793,7 @@ function ProgramsView({
                       style={{ background: accent, borderColor: accent, opacity: isStartingTemplate ? 0.65 : 1 }}
                       onClick={() => onTemplatePreview(template)}
                       disabled={isStartingTemplate}
-                      aria-label={`Open ${template.name || 'custom program'}`}
+                      aria-label={t('workouts.programs.openProgram', { name: template.name || t('workouts.programs.defaultCustomProgram') })}
                     >
                       <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
                         {isStartingTemplate ? 'hourglass_top' : 'play_arrow'}
@@ -804,18 +809,18 @@ function ProgramsView({
         <div className="wk-programs-panel">
           <div className="wk-programs-panel-top">
             <div>
-              <span className="wk-eyebrow">From Taha</span>
-              <h3 className="wk-programs-panel-title">Coach Programs</h3>
+              <span className="wk-eyebrow">{t('workouts.programs.fromCoach')}</span>
+              <h3 className="wk-programs-panel-title">{t('workouts.programs.coachPrograms')}</h3>
             </div>
             {!isLoading && (
-              <div className="wk-programs-count">{assignments.length} assigned</div>
+              <div className="wk-programs-count">{t('workouts.programs.assigned', { count: assignments.length })}</div>
             )}
           </div>
 
           {isError && errorMeta?.shouldFallback && (
             <div className="wk-semantic-active" style={{ marginBottom: 10 }}>
               <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#b02500' }}>warning</span>
-              <span>Coach programs could not sync right now.</span>
+              <span>{t('workouts.programs.syncIssue')}</span>
             </div>
           )}
 
@@ -826,7 +831,7 @@ function ProgramsView({
           ) : assignments.length === 0 ? (
             <div className="wk-empty-section wk-empty-section--compact">
               <span className="material-symbols-outlined wk-empty-icon" style={{ fontSize: 34, color: '#dad4c8' }}>fitness_center</span>
-              <p className="wk-empty-text">No program assigned by Taha yet. You can still train using your own custom programs.</p>
+              <p className="wk-empty-text">{t('workouts.programs.emptyCoach')}</p>
             </div>
           ) : (
             <div className="wk-cards-list">
@@ -843,25 +848,33 @@ function ProgramsView({
                     <div className="wk-card-accent" style={{ background: accent }} />
                     <div className="wk-card-body" onClick={() => onProgramPreview(assignment)} style={{ cursor: 'pointer' }}>
                       <div className="wk-card-top">
-                        <h3 className="wk-card-name">{program?.name || 'Workout Program'}</h3>
+                        <h3 className="wk-card-name">{program?.name || t('workouts.programs.defaultWorkoutProgram')}</h3>
                         {assignment.status && (
                           <span className="wk-card-tag" style={{
                             background: i % 2 === 0 ? '#c3fb9c' : '#b4a5ff',
                             color: i % 2 === 0 ? '#214f01' : '#180058',
                             transform: `rotate(${i % 2 === 0 ? 3 : -2}deg)`,
                           }}>
-                            {getStatusLabel(assignment.status).toUpperCase()}
+                            {getStatusLabel(assignment.status, t).toUpperCase()}
                           </span>
                         )}
                       </div>
                       <div className="wk-card-meta">
                         <div className="wk-card-meta-item">
                           <span className="material-symbols-outlined" style={{ fontSize: 16 }}>calendar_month</span>
-                          <span>{extractProgramWeeks(program).length} week{extractProgramWeeks(program).length !== 1 ? 's' : ''}</span>
+                          <span>
+                            {extractProgramWeeks(program).length === 1
+                              ? t('workouts.programs.weeks', { count: extractProgramWeeks(program).length })
+                              : t('workouts.programs.weeksPlural', { count: extractProgramWeeks(program).length })}
+                          </span>
                         </div>
                         <div className="wk-card-meta-item">
                           <span className="material-symbols-outlined" style={{ fontSize: 16 }}>format_list_bulleted</span>
-                          <span>{sessions.length} session{sessions.length !== 1 ? 's' : ''}</span>
+                          <span>
+                            {sessions.length === 1
+                              ? t('workouts.programs.sessions', { count: sessions.length })
+                              : t('workouts.programs.sessionsPlural', { count: sessions.length })}
+                          </span>
                         </div>
                       </div>
                       {program?.description && (
@@ -871,12 +884,12 @@ function ProgramsView({
                       )}
                       {nextSession && (
                         <p className="wk-card-last" style={{ marginTop: 6, fontSize: 12, color: accent }}>
-                          Next: Week {nextSession.week_number}, Day {nextSession.day_number}
+                          {t('workouts.programs.nextSession', { week: nextSession.week_number, day: nextSession.day_number })}
                         </p>
                       )}
                       {sessions.length > 0 && (
                         <p className="wk-card-last" style={{ marginTop: 6, fontSize: 12 }}>
-                          {completedCount}/{sessions.length} sessions tracked
+                          {t('workouts.programs.sessionsTracked', { completed: completedCount, total: sessions.length })}
                         </p>
                       )}
                     </div>
@@ -1311,13 +1324,13 @@ function ExerciseImageFallback({ exercise, className = '', fallbackLabel = '' })
 }
 
 const MUSCLE_CHIP_COLOR = {
-  chest:     { bg: '#c3fb9c', color: '#214f01' },
-  back:      { bg: '#c3fb9c', color: '#214f01' },
-  legs:      { bg: '#b4a5ff', color: '#180058' },
+  chest: { bg: '#c3fb9c', color: '#214f01' },
+  back: { bg: '#c3fb9c', color: '#214f01' },
+  legs: { bg: '#b4a5ff', color: '#180058' },
   shoulders: { bg: '#f8cc65', color: '#9d6a09' },
-  arms:      { bg: '#3bd3fd', color: '#0089ad' },
-  core:      { bg: '#f8cc65', color: '#9d6a09' },
-  cardio:    { bg: '#fce4d9', color: '#520c00' },
+  arms: { bg: '#3bd3fd', color: '#0089ad' },
+  core: { bg: '#f8cc65', color: '#9d6a09' },
+  cardio: { bg: '#fce4d9', color: '#520c00' },
 };
 
 // ── Library Filter Sheet ──────────────────────────────────────────────
@@ -1403,6 +1416,7 @@ function LibraryFilterSheet({ filters, onChange, onClose, meta }) {
 // ── Library View ──────────────────────────────────────────────────────
 
 function LibraryView({ sessionActive, onAddToWorkout }) {
+  const { t } = useI18n();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filters, setFilters] = useState({ level: '', equipment: '', muscle: '', category: '' });
@@ -1483,15 +1497,15 @@ function LibraryView({ sessionActive, onAddToWorkout }) {
     <div className="wk-view">
       <div className="wk-section-header">
         <div>
-          <span className="wk-eyebrow">Browse & Discover</span>
-          <h2 className="wk-heading">Exercise Library</h2>
+          <span className="wk-eyebrow">{t('workouts.library.eyebrow')}</span>
+          <h2 className="wk-heading">{t('workouts.library.title')}</h2>
         </div>
         <button
           className={`wk-filter-btn${activeFilterCount > 0 ? ' wk-filter-btn--active' : ''}`}
           onClick={() => setShowFilters(true)}
         >
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>tune</span>
-          {activeFilterCount > 0 ? `Filters (${activeFilterCount})` : 'Filters'}
+          {activeFilterCount > 0 ? t('workouts.library.filtersCount', { count: activeFilterCount }) : t('workouts.library.filters')}
         </button>
       </div>
 
@@ -1501,7 +1515,7 @@ function LibraryView({ sessionActive, onAddToWorkout }) {
         <input
           className="wk-search"
           type="text"
-          placeholder={semanticMode ? 'AI search active...' : 'Search exercises...'}
+          placeholder={semanticMode ? t('workouts.library.searchAiPlaceholder') : t('workouts.library.searchPlaceholder')}
           value={search}
           onChange={e => handleSearchChange(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSemanticSearch()}
@@ -1520,15 +1534,15 @@ function LibraryView({ sessionActive, onAddToWorkout }) {
           onClick={handleSemanticSearch}
         >
           <span className="material-symbols-outlined" style={{ fontSize: 14 }}>auto_awesome</span>
-          Try AI search: "{search}"
+          {t('workouts.library.tryAiSearch', { query: search })}
         </button>
       )}
       {semanticMode && (
         <div className="wk-semantic-active">
           <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#5d3fd3' }}>auto_awesome</span>
-          <span>AI search results for "{search}"</span>
+          <span>{t('workouts.library.aiResults', { query: search })}</span>
           <button onClick={() => { setSemanticMode(false); setPage(1); }} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#9f9b93' }}>
-            Clear
+            {t('workouts.library.clear')}
           </button>
         </div>
       )}
@@ -1536,7 +1550,7 @@ function LibraryView({ sessionActive, onAddToWorkout }) {
       {!semanticMode && normalError && normalErrorMeta?.shouldFallback && (
         <div className="wk-semantic-active" style={{ marginBottom: 8 }}>
           <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#b02500' }}>warning</span>
-          <span>Exercise service issue. Showing last known results.</span>
+          <span>{t('workouts.library.serviceIssue')}</span>
         </div>
       )}
 
@@ -1547,7 +1561,7 @@ function LibraryView({ sessionActive, onAddToWorkout }) {
       ) : exercises.length === 0 ? (
         <div className="wk-empty-section">
           <span className="material-symbols-outlined wk-empty-icon" style={{ fontSize: 48, color: '#dad4c8' }}>search_off</span>
-          <p className="wk-empty-text">No exercises match your search.</p>
+          <p className="wk-empty-text">{t('workouts.library.noMatch')}</p>
         </div>
       ) : (
         <div className="wk-lib-cards">
@@ -1735,6 +1749,7 @@ function buildHistorySplit(exercises) {
 }
 
 function HistoryView({ onStartWorkout }) {
+  const { t, locale } = useI18n();
   const [selectedWorkoutId, setSelectedWorkoutId] = useState(null);
   const [expandedEx, setExpandedEx] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -1821,7 +1836,7 @@ function HistoryView({ onStartWorkout }) {
   const today = new Date();
   const year = calendarCursor.getFullYear();
   const month = calendarCursor.getMonth();
-  const monthName = calendarCursor.toLocaleString('default', { month: 'long' });
+  const monthName = calendarCursor.toLocaleString(locale, { month: 'long' });
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfWeek = new Date(year, month, 1).getDay();
   const offset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
@@ -1835,7 +1850,7 @@ function HistoryView({ onStartWorkout }) {
   function fmtDate(iso) {
     if (!iso) return '';
     const date = new Date(iso);
-    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+    return date.toLocaleDateString(locale, { day: '2-digit', month: 'short' });
   }
 
   function fmtDuration(start, end, explicitDuration) {
@@ -1871,10 +1886,10 @@ function HistoryView({ onStartWorkout }) {
     <div className="wk-view wk-history-view">
       <section className="wk-history-hero">
         <div className="wk-history-hero-copy">
-          <span className="wk-eyebrow">The Routine</span>
-          <h2 className="wk-heading wk-history-title">Workout History</h2>
+          <span className="wk-eyebrow">{t('workouts.history.eyebrow')}</span>
+          <h2 className="wk-heading wk-history-title">{t('workouts.history.title')}</h2>
           <p className="wk-history-subtitle">
-            Your completed sessions, current training rhythm, and the details worth repeating.
+            {t('workouts.history.subtitle')}
           </p>
         </div>
         <div className="wk-history-hero-actions">
@@ -1883,11 +1898,11 @@ function HistoryView({ onStartWorkout }) {
             onClick={() => setShowFilters((state) => !state)}
           >
             <span className="material-symbols-outlined" style={{ fontSize: 18 }}>tune</span>
-            {activeFilterCount > 0 ? `Filters (${activeFilterCount})` : 'Filters'}
+            {activeFilterCount > 0 ? t('workouts.history.filtersCount', { count: activeFilterCount }) : t('workouts.history.filters')}
           </button>
           <button className="wk-start-btn" onClick={onStartWorkout}>
             <span className="material-symbols-outlined" style={{ fontSize: 16, fontVariationSettings: "'FILL' 1" }}>play_circle</span>
-            Log Workout
+            {t('workouts.history.logWorkout')}
           </button>
         </div>
       </section>
@@ -1895,7 +1910,7 @@ function HistoryView({ onStartWorkout }) {
       {showFilters && (
         <div className="wk-hist-filter-panel">
           <div className="wk-hist-filter-section">
-            <span className="wk-eyebrow" style={{ display: 'block', marginBottom: 6 }}>WORKOUT TYPE</span>
+            <span className="wk-eyebrow" style={{ display: 'block', marginBottom: 6 }}>{t('workouts.history.workoutType')}</span>
             <div className="wk-cat-chips">
               {WORKOUT_TYPES.map((type) => (
                 <button
@@ -1909,10 +1924,10 @@ function HistoryView({ onStartWorkout }) {
             </div>
           </div>
           <div className="wk-hist-filter-section">
-            <span className="wk-eyebrow" style={{ display: 'block', marginBottom: 6 }}>DATE RANGE</span>
+            <span className="wk-eyebrow" style={{ display: 'block', marginBottom: 6 }}>{t('workouts.history.dateRange')}</span>
             <div className="wk-hist-date-range">
               <div className="wk-hist-date-field">
-                <label className="wk-eyebrow" style={{ fontSize: 9 }}>FROM</label>
+                <label className="wk-eyebrow" style={{ fontSize: 9 }}>{t('workouts.history.from')}</label>
                 <input
                   type="date"
                   className="wk-date-input"
@@ -1922,7 +1937,7 @@ function HistoryView({ onStartWorkout }) {
               </div>
               <span style={{ color: '#9f9b93', alignSelf: 'flex-end', paddingBottom: 6 }}>—</span>
               <div className="wk-hist-date-field">
-                <label className="wk-eyebrow" style={{ fontSize: 9 }}>TO</label>
+                <label className="wk-eyebrow" style={{ fontSize: 9 }}>{t('workouts.history.to')}</label>
                 <input
                   type="date"
                   className="wk-date-input"
@@ -1938,7 +1953,7 @@ function HistoryView({ onStartWorkout }) {
               style={{ width: '100%', marginTop: 4 }}
               onClick={clearFilters}
             >
-              Clear Filters
+              {t('workouts.history.clearFilters')}
             </button>
           )}
         </div>
@@ -1947,16 +1962,16 @@ function HistoryView({ onStartWorkout }) {
       {activeFilterCount > 0 && (
         <div className="wk-history-active-filters">
           {filterType && (
-            <span className="wk-history-filter-pill">Type: {filterType}</span>
+            <span className="wk-history-filter-pill">{t('workouts.history.typeFilter', { value: filterType })}</span>
           )}
           {dateFrom && (
-            <span className="wk-history-filter-pill">From: {fmtDate(dateFrom)}</span>
+            <span className="wk-history-filter-pill">{t('workouts.history.fromFilter', { value: fmtDate(dateFrom) })}</span>
           )}
           {dateTo && (
-            <span className="wk-history-filter-pill">To: {fmtDate(dateTo)}</span>
+            <span className="wk-history-filter-pill">{t('workouts.history.toFilter', { value: fmtDate(dateTo) })}</span>
           )}
           {selectedCalendarDate && (
-            <span className="wk-history-filter-pill">Day: {fmtDate(selectedCalendarDate)}</span>
+            <span className="wk-history-filter-pill">{t('workouts.history.dayFilter', { value: fmtDate(selectedCalendarDate) })}</span>
           )}
         </div>
       )}
@@ -1964,7 +1979,7 @@ function HistoryView({ onStartWorkout }) {
       {isError && errorMeta?.shouldFallback && (
         <div className="wk-semantic-active" style={{ marginBottom: 10 }}>
           <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#b02500' }}>warning</span>
-          <span>Workout list sync issue. Showing last known history.</span>
+          <span>{t('workouts.history.syncIssue')}</span>
         </div>
       )}
 
@@ -1976,10 +1991,10 @@ function HistoryView({ onStartWorkout }) {
               <h3 className="wk-cal-title">{monthName}</h3>
             </div>
             <div className="wk-cal-nav">
-              <button className="wk-cal-nav-btn" onClick={() => shiftCalendar(-1)} aria-label="Previous month">
+              <button className="wk-cal-nav-btn" onClick={() => shiftCalendar(-1)} aria-label={t('workouts.history.previousMonth')}>
                 <span className="material-symbols-outlined" style={{ fontSize: 18 }}>west</span>
               </button>
-              <button className="wk-cal-nav-btn" onClick={() => shiftCalendar(1)} aria-label="Next month">
+              <button className="wk-cal-nav-btn" onClick={() => shiftCalendar(1)} aria-label={t('workouts.history.nextMonth')}>
                 <span className="material-symbols-outlined" style={{ fontSize: 18 }}>east</span>
               </button>
             </div>
@@ -2034,11 +2049,11 @@ function HistoryView({ onStartWorkout }) {
           <div className="wk-cal-legend">
             <div className="wk-cal-legend-item">
               <span className="wk-cal-legend-dot" style={{ background: '#38671a' }} />
-              Logged session
+              {t('workouts.history.loggedSession')}
             </div>
             <div className="wk-cal-legend-item">
               <span className="wk-cal-legend-dot" style={{ background: '#c3fb9c' }} />
-              Selected day
+              {t('workouts.history.selectedDay')}
             </div>
           </div>
         </section>
@@ -2064,40 +2079,40 @@ function HistoryView({ onStartWorkout }) {
                 </span>
               </div>
 
-              <div className="wk-history-glance">
-                <div className="wk-history-glance-card">
-                  <span className="wk-eyebrow">Duration</span>
+                <div className="wk-history-glance">
+                  <div className="wk-history-glance-card">
+                  <span className="wk-eyebrow">{t('workouts.history.duration')}</span>
                   <strong>{fmtDuration(selectedWorkoutDetail.started_at, selectedWorkoutDetail.completed_at, selectedWorkoutDetail.duration)}</strong>
                 </div>
                 <div className="wk-history-glance-card">
-                  <span className="wk-eyebrow">Volume</span>
+                  <span className="wk-eyebrow">{t('workouts.history.volume')}</span>
                   <strong>{selectedVolume > 0 ? `${selectedVolume.toLocaleString()} kg` : '—'}</strong>
                 </div>
                 <div className="wk-history-glance-card">
-                  <span className="wk-eyebrow">Sets</span>
+                  <span className="wk-eyebrow">{t('workouts.history.sets')}</span>
                   <strong>{selectedSetCount || '—'}</strong>
                 </div>
                 <div className="wk-history-glance-card">
-                  <span className="wk-eyebrow">Exercises</span>
+                  <span className="wk-eyebrow">{t('workouts.history.exercises')}</span>
                   <strong>{selectedExercises.length || '—'}</strong>
                 </div>
               </div>
 
               <div className="wk-hist-focus-grid">
                 <div className="wk-hist-focus-card">
-                  <p className="wk-eyebrow">Session Notes</p>
+                  <p className="wk-eyebrow">{t('workouts.history.sessionNotes')}</p>
                   {selectedWorkoutDetail.notes ? (
                     <p className="wk-history-note">{selectedWorkoutDetail.notes}</p>
                   ) : (
-                    <p className="wk-hist-focus-empty">No overall notes were saved for this session.</p>
+                    <p className="wk-hist-focus-empty">{t('workouts.history.noSessionNotes')}</p>
                   )}
                 </div>
 
                 <div className="wk-hist-focus-card">
-                  <p className="wk-eyebrow">Exercises Performed</p>
+                  <p className="wk-eyebrow">{t('workouts.history.exercisesPerformed')}</p>
                   <div className="wk-hist-focus-list">
                     {selectedExercises.length === 0 ? (
-                      <p className="wk-hist-focus-empty">No exercises logged for this workout.</p>
+                      <p className="wk-hist-focus-empty">{t('workouts.history.noExercisesLogged')}</p>
                     ) : (
                       selectedExercises.slice(0, 4).map((exercise, index) => {
                         const sets = extractExerciseSets(exercise);
@@ -2123,12 +2138,12 @@ function HistoryView({ onStartWorkout }) {
             <div className="wk-hist-empty-state">
               <span className="material-symbols-outlined wk-hist-empty-icon">history</span>
               <h3 className="wk-hist-empty-title">
-                {activeFilterCount > 0 ? 'No sessions match this view' : 'No workout archive yet'}
+                {activeFilterCount > 0 ? t('workouts.history.noSessionsMatch') : t('workouts.history.noArchiveYet')}
               </h3>
               <p className="wk-hist-empty-body">
                 {activeFilterCount > 0
-                  ? 'Try another date or clear your filters to bring sessions back into view.'
-                  : 'Log your first workout and this space will turn into your training archive.'}
+                  ? t('workouts.history.noSessionsMatchBody')
+                  : t('workouts.history.noArchiveBody')}
               </p>
             </div>
           )}
@@ -2140,16 +2155,16 @@ function HistoryView({ onStartWorkout }) {
           <div className="wk-history-insight-card">
             <div className="wk-history-insight-head">
               <div>
-                <span className="wk-eyebrow">Volume Trend</span>
-                <h3 className="wk-history-insight-title">Recent Rhythm</h3>
+                <span className="wk-eyebrow">{t('workouts.history.volumeTrend')}</span>
+                <h3 className="wk-history-insight-title">{t('workouts.history.recentRhythm')}</h3>
               </div>
               <p className="wk-history-insight-copy">
-                Last {trendData.length || 0} sessions, using logged duration when available.
+                {t('workouts.history.lastSessions', { count: trendData.length || 0 })}
               </p>
             </div>
             <div className="wk-history-trend">
               {trendData.length === 0 ? (
-                <p className="wk-hist-focus-empty">Complete more sessions to see the pattern.</p>
+                <p className="wk-hist-focus-empty">{t('workouts.history.noPattern')}</p>
               ) : (
                 trendData.map((item) => (
                   <div key={item.id} className="wk-history-trend-item">
@@ -2168,16 +2183,16 @@ function HistoryView({ onStartWorkout }) {
           <div className="wk-history-insight-card">
             <div className="wk-history-insight-head">
               <div>
-                <span className="wk-eyebrow">Split Focus</span>
-                <h3 className="wk-history-insight-title">Session Breakdown</h3>
+                <span className="wk-eyebrow">{t('workouts.history.splitFocus')}</span>
+                <h3 className="wk-history-insight-title">{t('workouts.history.sessionBreakdown')}</h3>
               </div>
               <p className="wk-history-insight-copy">
-                Main muscle groups captured in the selected workout.
+                {t('workouts.history.mainMuscleGroups')}
               </p>
             </div>
             <div className="wk-history-split">
               {splitData.length === 0 ? (
-                <p className="wk-hist-focus-empty">No exercise distribution available yet.</p>
+                <p className="wk-hist-focus-empty">{t('workouts.history.noDistribution')}</p>
               ) : (
                 splitData.map((item) => (
                   <div key={item.label} className="wk-history-split-row">
@@ -2205,22 +2220,22 @@ function HistoryView({ onStartWorkout }) {
         <div className="wk-hist-empty-state">
           <span className="material-symbols-outlined wk-hist-empty-icon">fitness_center</span>
           <h3 className="wk-hist-empty-title">
-            {activeFilterCount > 0 ? 'No workouts match your filters' : 'No workouts yet'}
+            {activeFilterCount > 0 ? t('workouts.history.noWorkoutsMatch') : t('workouts.history.noWorkoutsYet')}
           </h3>
           <p className="wk-hist-empty-body">
             {activeFilterCount > 0
-              ? 'Try clearing your filters to see all sessions.'
-              : 'Log your first workout and start building your history.'}
+              ? t('workouts.history.noWorkoutsMatchBody')
+              : t('workouts.history.noWorkoutsYetBody')}
           </p>
           {activeFilterCount > 0 ? (
             <button className="wk-create-btn" onClick={clearFilters}>
               <span className="material-symbols-outlined" style={{ fontSize: 16 }}>filter_alt_off</span>
-              Clear Filters
+              {t('workouts.history.clearFilters')}
             </button>
           ) : (
             <button className="wk-start-btn" style={{ marginTop: 8 }} onClick={onStartWorkout}>
               <span className="material-symbols-outlined" style={{ fontSize: 16, fontVariationSettings: "'FILL' 1" }}>play_circle</span>
-              Start First Workout
+              {t('workouts.history.startFirstWorkout')}
             </button>
           )}
         </div>
@@ -2228,21 +2243,21 @@ function HistoryView({ onStartWorkout }) {
         <>
           <section className="wk-history-archive-head">
             <div>
-              <span className="wk-eyebrow">Archive</span>
-              <h3 className="wk-history-archive-title">Session Library</h3>
+              <span className="wk-eyebrow">{t('workouts.history.archive')}</span>
+              <h3 className="wk-history-archive-title">{t('workouts.history.sessionLibrary')}</h3>
             </div>
             <div className="wk-history-archive-stats">
               <div className="wk-history-archive-stat">
-                <span>Sessions</span>
+                <span>{t('workouts.history.sessions')}</span>
                 <strong>{totalSessions}</strong>
               </div>
               <div className="wk-history-archive-stat">
-                <span>Volume</span>
+                <span>{t('workouts.history.volume')}</span>
                 <strong>{totalVolume > 0 ? `${Math.round(totalVolume).toLocaleString()} kg` : '—'}</strong>
               </div>
               <div className="wk-history-archive-stat">
-                <span>Focus Day</span>
-                <strong>{selectedWorkoutDate ? fmtDate(getDateKey(selectedWorkoutDate)) : 'Latest'}</strong>
+                <span>{t('workouts.history.focusDay')}</span>
+                <strong>{selectedWorkoutDate ? fmtDate(getDateKey(selectedWorkoutDate)) : t('workouts.history.latest')}</strong>
               </div>
             </div>
           </section>
@@ -2309,7 +2324,7 @@ function HistoryView({ onStartWorkout }) {
                     <button
                       className="wk-hist-delete-btn"
                       onClick={() => setDeleteTarget(workout)}
-                      aria-label="Delete workout"
+                      aria-label={t('workouts.history.deleteWorkoutAria')}
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
                     </button>
@@ -2324,7 +2339,7 @@ function HistoryView({ onStartWorkout }) {
                       {selectedWorkoutDetailError && selectedWorkoutDetailErrorMeta?.shouldFallback && (
                         <div className="wk-semantic-active" style={{ margin: '0 8px 8px' }}>
                           <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#b02500' }}>warning</span>
-                          <span>Workout detail unavailable. Showing list snapshot.</span>
+                          <span>{t('workouts.history.detailUnavailable')}</span>
                         </div>
                       )}
                       {exercises.map((exercise, index) => {
@@ -2359,9 +2374,9 @@ function HistoryView({ onStartWorkout }) {
                               </span>
                             </button>
                             {exerciseOpen && (
-                              <div style={{ paddingLeft: 16 }}>
+                                <div style={{ paddingLeft: 16 }}>
                                 <div className="wk-sets-header" style={{ marginBottom: 8 }}>
-                                  <span>Set</span><span>Weight</span><span>Reps</span><span></span>
+                                  <span>{t('workouts.history.set')}</span><span>{t('workouts.history.weight')}</span><span>{t('workouts.history.reps')}</span><span></span>
                                 </div>
                                 {sets.map((set, setIndex) => (
                                   <div key={`${exerciseKey}-${setIndex}`} className="wk-hist-set-row">
@@ -2385,7 +2400,7 @@ function HistoryView({ onStartWorkout }) {
                     </div>
                   )}
                   {isOpen && exercises.length === 0 && (
-                    <div style={{ padding: '8px 16px', color: '#9f9b93', fontSize: 13 }}>No exercises logged.</div>
+                    <div style={{ padding: '8px 16px', color: '#9f9b93', fontSize: 13 }}>{t('workouts.history.noExercisesLoggedShort')}</div>
                   )}
                 </div>
               );
@@ -2400,10 +2415,10 @@ function HistoryView({ onStartWorkout }) {
             <div className="wk-discard-icon">
               <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: 28, color: '#b02500' }}>delete_forever</span>
             </div>
-            <h3 className="wk-discard-title">Delete Workout?</h3>
-            <p className="wk-discard-body">"{getWorkoutDisplayName(deleteTarget)}" will be permanently removed.</p>
+            <h3 className="wk-discard-title">{t('workouts.history.deleteWorkoutTitle')}</h3>
+            <p className="wk-discard-body">{t('workouts.history.deleteWorkoutBody', { name: getWorkoutDisplayName(deleteTarget) })}</p>
             <div className="wk-discard-actions">
-              <button className="wk-discard-cancel" onClick={() => setDeleteTarget(null)}>Cancel</button>
+              <button className="wk-discard-cancel" onClick={() => setDeleteTarget(null)}>{t('workouts.history.cancel')}</button>
               <button
                 className="wk-discard-confirm"
                 onClick={() => {
@@ -2415,7 +2430,7 @@ function HistoryView({ onStartWorkout }) {
                 }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete_forever</span>
-                Delete
+                {t('workouts.history.delete')}
               </button>
             </div>
           </div>
@@ -2617,12 +2632,12 @@ export function ActiveSession({ workoutId, initialExercises = [], programName = 
       rest_time: Number(ex.rest_time) || 60,
       sets: (ex.sets && ex.sets.length > 0)
         ? ex.sets.map((set, idx) => ({
-            backendSetId: set.backendSetId || set.id || null,
-            setNumber: set.setNumber || set.set_number || idx + 1,
-            weight: String(set.weight ?? ''),
-            reps: String(set.reps ?? ''),
-            done: Boolean(set.done),
-          }))
+          backendSetId: set.backendSetId || set.id || null,
+          setNumber: set.setNumber || set.set_number || idx + 1,
+          weight: String(set.weight ?? ''),
+          reps: String(set.reps ?? ''),
+          done: Boolean(set.done),
+        }))
         : [{ weight: '', reps: '', done: false }],
     }))
   );
@@ -2786,11 +2801,13 @@ export function ActiveSession({ workoutId, initialExercises = [], programName = 
     if (workoutId) {
       addExerciseMutation.mutate(
         { workout_id: workoutId, exercise_id: ex.id, notes: '' },
-        { onSuccess: (data) => {
-          const createdWorkoutExerciseId = data?.id || data?.workout_exercise?.id;
-          if (!createdWorkoutExerciseId) return;
-          setLocalSets(prev => prev.map((e) => e.localId === localId ? { ...e, workoutExerciseId: createdWorkoutExerciseId } : e));
-        }}
+        {
+          onSuccess: (data) => {
+            const createdWorkoutExerciseId = data?.id || data?.workout_exercise?.id;
+            if (!createdWorkoutExerciseId) return;
+            setLocalSets(prev => prev.map((e) => e.localId === localId ? { ...e, workoutExerciseId: createdWorkoutExerciseId } : e));
+          }
+        }
       );
     }
     storeAddExercise(newEntry);
@@ -2885,11 +2902,11 @@ export function ActiveSession({ workoutId, initialExercises = [], programName = 
           <div className="wk-meta-field">
             <label className="wk-eyebrow" style={{ display: 'block', marginBottom: 6 }}>TYPE</label>
             <div className="wk-cat-chips">
-                {SESSION_TYPES.map(t => (
-                  <button
-                    key={t}
-                    className={`wk-cat-chip${sessionType === t ? ' wk-cat-chip--active' : ''}`}
-                    onClick={() => setSessionType(t)}
+              {SESSION_TYPES.map(t => (
+                <button
+                  key={t}
+                  className={`wk-cat-chip${sessionType === t ? ' wk-cat-chip--active' : ''}`}
+                  onClick={() => setSessionType(t)}
                 >
                   {t}
                 </button>
@@ -3282,9 +3299,9 @@ export default function Workouts() {
   const requestedTab = location.state?.tab;
   const initialTab =
     requestedTab === 'library'
-    || requestedTab === 'history'
-    || requestedTab === 'programs'
-    || requestedTab === 'progress'
+      || requestedTab === 'history'
+      || requestedTab === 'programs'
+      || requestedTab === 'progress'
       ? requestedTab
       : 'programs';
 

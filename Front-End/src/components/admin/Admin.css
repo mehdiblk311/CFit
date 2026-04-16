@@ -233,6 +233,40 @@
   width: 280px;
 }
 .adm-topbar-right { display: flex; align-items: center; gap: 12px; }
+.adm-lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 2px solid #dad4c8;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.adm-lang-btn {
+  border: none;
+  background: transparent;
+  color: #5b5c5a;
+  border-radius: 9999px;
+  padding: 7px 10px;
+  min-width: 42px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+.adm-lang-btn:hover {
+  color: #2e2f2e;
+  transform: translateY(-1px);
+}
+.adm-lang-btn--active {
+  background: #38671a;
+  color: #d6ffb7;
+  box-shadow: -2px 2px 0 #2e2f2e;
+}
 .adm-topbar-status {
   display: flex;
   align-items: center;
@@ -517,6 +551,64 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
+}
+
+html[dir='rtl'] .adm-shell {
+  direction: rtl;
+}
+
+html[dir='rtl'] .adm-sidenav {
+  left: auto;
+  right: 0;
+  border-right: none;
+  border-left: 2px solid #dad4c8;
+}
+
+html[dir='rtl'] .adm-main {
+  margin-left: 0;
+  margin-right: 72px;
+}
+
+html[dir='rtl'] .adm-sidenav-logo,
+html[dir='rtl'] .adm-sidenav-footer,
+html[dir='rtl'] .adm-topbar-left,
+html[dir='rtl'] .adm-topbar-right,
+html[dir='rtl'] .adm-page-actions {
+  flex-direction: row-reverse;
+}
+
+html[dir='rtl'] .adm-nav-btn {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+html[dir='rtl'] .adm-topbar-search-icon,
+html[dir='rtl'] .adm-search-icon {
+  left: auto;
+  right: 12px;
+}
+
+html[dir='rtl'] .adm-search-icon {
+  right: 14px;
+}
+
+html[dir='rtl'] .adm-topbar-search {
+  padding: 8px 38px 8px 16px;
+}
+
+html[dir='rtl'] .adm-search {
+  padding: 12px 42px 12px 20px;
+}
+
+html[dir='rtl'] .adm-metric-badge,
+html[dir='rtl'] .adm-modal-close {
+  right: auto;
+  left: 16px;
+}
+
+html[dir='rtl'] .adm-bar-chart {
+  border-left: none;
+  border-right: 2px dashed #dad4c8;
 }
 .adm-grid-3 {
   display: grid;

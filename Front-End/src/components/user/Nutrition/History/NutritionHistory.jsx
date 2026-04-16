@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { nutritionAPI } from '../../../../api/nutrition';
+import { useI18n } from '../../../../i18n/useI18n';
 import './NutritionHistory.css';
 
-const DAYS_OF_WEEK = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 const TIME_RANGES = ['1W', '1M', '3M'];
 const RANGE_CONFIG = {
   '1W': { days: 7, bucketSize: 1 },
@@ -12,9 +12,9 @@ const RANGE_CONFIG = {
   '3M': { days: 84, bucketSize: 7 },
 };
 const RANGE_THEME = {
-  '1W': { key: 'week', title: 'Daily Sprint', icon: 'local_fire_department' },
-  '1M': { key: 'month', title: 'Monthly Rhythm', icon: 'query_stats' },
-  '3M': { key: 'quarter', title: 'Quarter Arc', icon: 'timeline' },
+  '1W': { key: 'week', titleKey: 'nutritionHistory.dailySprint', icon: 'local_fire_department' },
+  '1M': { key: 'month', titleKey: 'nutritionHistory.monthlyRhythm', icon: 'query_stats' },
+  '3M': { key: 'quarter', titleKey: 'nutritionHistory.quarterArc', icon: 'timeline' },
 };
 const MEAL_ORDER = { breakfast: 0, lunch: 1, dinner: 2, snack: 3 };
 
@@ -47,19 +47,14 @@ function startOfMonth(date) {
   return new Date(date.getFullYear(), date.getMonth(), 1);
 }
 
-function formatMonthLabel(date) {
-  return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+function formatMonthLabel(date, locale) {
+  return date.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
 }
 
-function formatDateLabel(dateKey) {
+function formatDateLabel(dateKey, locale, fallbackLabel) {
   const parsed = fromDateKey(dateKey);
-  if (!parsed) return 'Unknown Date';
-  return parsed.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-}
-
-function formatMealType(value) {
-  const normalized = `${value || 'meal'}`.toLowerCase();
-  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+  if (!parsed) return fallbackLabel;
+  return parsed.toLocaleDateString(locale, { month: 'short', day: '2-digit', year: 'numeric' });
 }
 
 function getCalendarCells(visibleMonth, mealsByDate) {
@@ -112,7 +107,7 @@ function getCalendarCells(visibleMonth, mealsByDate) {
   return cells;
 }
 
-function buildTrendBuckets(mealsByDate, endDateKey, range) {
+function buildTrendBuckets(mealsByDate, endDateKey, range, locale) {
   const config = RANGE_CONFIG[range] || RANGE_CONFIG['1M'];
   const endDate = fromDateKey(endDateKey) || new Date();
   const startDate = addDays(endDate, -(config.days - 1));
@@ -130,10 +125,10 @@ function buildTrendBuckets(mealsByDate, endDateKey, range) {
     }
 
     const label = config.days <= 7
-      ? bucketEnd.toLocaleDateString('en-US', { weekday: 'short' })
+      ? bucketEnd.toLocaleDateString(locale, { weekday: 'short' })
       : config.bucketSize > 1
-        ? bucketEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-        : bucketEnd.toLocaleDateString('en-US', { day: 'numeric' });
+        ? bucketEnd.toLocaleDateString(locale, { month: 'short', day: 'numeric' })
+        : bucketEnd.toLocaleDateString(locale, { day: 'numeric' });
 
     buckets.push({
       label,
@@ -207,12 +202,17 @@ async function fetchAllMealsForHistory() {
 
 export default function NutritionHistory() {
   const navigate = useNavigate();
+  const { t, locale } = useI18n();
   const [activeRange, setActiveRange] = useState('1M');
   const [visibleMonth, setVisibleMonth] = useState(() => startOfMonth(new Date()));
   const [selectedDate, setSelectedDate] = useState(() => toDateKey(new Date()));
   const todayDateKey = toDateKey(new Date());
   const currentMonth = startOfMonth(new Date());
   const rangeTheme = RANGE_THEME[activeRange] || RANGE_THEME['1M'];
+  const dayLabels = useMemo(() => {
+    const monday = new Date(2024, 0, 1);
+    return Array.from({ length: 7 }, (_, index) => addDays(monday, index).toLocaleDateString(locale, { weekday: 'short' }));
+  }, [locale]);
 
   const {
     data: meals = [],
@@ -277,8 +277,8 @@ export default function NutritionHistory() {
   );
 
   const chartData = useMemo(
-    () => buildTrendBuckets(mealsByDate, selectedDate || todayDateKey, activeRange),
-    [mealsByDate, selectedDate, todayDateKey, activeRange],
+    () => buildTrendBuckets(mealsByDate, selectedDate || todayDateKey, activeRange, locale),
+    [mealsByDate, selectedDate, todayDateKey, activeRange, locale],
   );
 
   const maxChartValue = useMemo(
@@ -325,14 +325,14 @@ export default function NutritionHistory() {
             id="nh-back-btn"
             className="nh-back-btn"
             onClick={() => navigate('/nutrition')}
-            aria-label="Go back"
+            aria-label={t('nutritionHistory.goBack')}
           >
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
-          <h1 className="nh-title">Nutrition History</h1>
+          <h1 className="nh-title">{t('nutritionHistory.title')}</h1>
         </div>
         <div className="nh-header-right">
-          <span className="nh-logged-label">{isFetching ? 'Refreshing…' : 'Live Data'}</span>
+          <span className="nh-logged-label">{isFetching ? t('nutritionHistory.refreshing') : t('nutritionHistory.liveData')}</span>
           <div className="nh-avatar">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: 20, color: '#38671a' }}>person</span>
           </div>
@@ -343,30 +343,30 @@ export default function NutritionHistory() {
         {isLoading ? (
           <section className="nh-loading-state">
             <span className="material-symbols-outlined">progress_activity</span>
-            <p>Loading nutrition history…</p>
+            <p>{t('nutritionHistory.loading')}</p>
           </section>
         ) : isError ? (
           <section className="nh-error-card">
-            <p>Could not load nutrition history from backend.</p>
-            <button type="button" className="nh-view-journal-btn" onClick={() => refetch()}>Retry</button>
+            <p>{t('nutritionHistory.error')}</p>
+            <button type="button" className="nh-view-journal-btn" onClick={() => refetch()}>{t('nutritionHistory.retry')}</button>
           </section>
         ) : (
           <>
             <section className="nh-cal-section">
               <div className="nh-calendar-card">
                 <div className="nh-cal-header">
-                  <h2 className="nh-cal-month">{formatMonthLabel(visibleMonth)}</h2>
+                  <h2 className="nh-cal-month">{formatMonthLabel(visibleMonth, locale)}</h2>
                   <div className="nh-cal-nav">
                     <button
                       className="nh-cal-nav-btn"
-                      aria-label="Previous month"
+                      aria-label={t('nutritionHistory.previousMonth')}
                       onClick={() => handleMonthChange(-1)}
                     >
                       <span className="material-symbols-outlined">chevron_left</span>
                     </button>
                     <button
                       className="nh-cal-nav-btn"
-                      aria-label="Next month"
+                      aria-label={t('nutritionHistory.nextMonth')}
                       onClick={() => handleMonthChange(1)}
                       disabled={!canNavigateNextMonth}
                     >
@@ -376,7 +376,7 @@ export default function NutritionHistory() {
                 </div>
 
                 <div className="nh-cal-grid">
-                  {DAYS_OF_WEEK.map((day) => (
+                  {dayLabels.map((day) => (
                     <div key={day} className="nh-cal-day-label">{day}</div>
                   ))}
 
@@ -401,17 +401,17 @@ export default function NutritionHistory() {
               </div>
 
               <div className="nh-summary-card">
-                <span className="nh-summary-tag">Selected Date</span>
-                <h3 className="nh-summary-date">{formatDateLabel(selectedDate)}</h3>
+                <span className="nh-summary-tag">{t('nutritionHistory.selectedDate')}</span>
+                <h3 className="nh-summary-date">{formatDateLabel(selectedDate, locale, t('nutritionHistory.unknownDate'))}</h3>
 
                 <div className="nh-summary-body">
                   <div className="nh-summary-cal-row">
-                    <span className="nh-summary-cal-label">Calories</span>
-                    <span className="nh-summary-cal-val">{Math.round(selectedDay.totalCalories)} kcal</span>
+                    <span className="nh-summary-cal-label">{t('nutritionHistory.calories')}</span>
+                    <span className="nh-summary-cal-val">{Math.round(selectedDay.totalCalories)} {t('common.units.kcal')}</span>
                   </div>
 
                   <div className="nh-summary-cal-row">
-                    <span className="nh-summary-cal-label">Meals Logged</span>
+                    <span className="nh-summary-cal-label">{t('nutritionHistory.mealsLogged')}</span>
                     <span className="nh-summary-cal-val">{selectedMeals.length}</span>
                   </div>
 
@@ -420,16 +420,16 @@ export default function NutritionHistory() {
                   </div>
 
                   {selectedMeals.length === 0 ? (
-                    <p className="nh-day-log-empty">No meals logged on this date.</p>
+                    <p className="nh-day-log-empty">{t('nutritionHistory.noMeals')}</p>
                   ) : (
                     <div className="nh-day-log-list">
                       {selectedMeals.map((meal) => (
                         <div key={meal.id} className="nh-day-log-row">
                           <div>
-                            <p className="nh-day-log-type">{formatMealType(meal.meal_type)}</p>
-                            <p className="nh-day-log-meta">{meal.items?.length || 0} items</p>
+                            <p className="nh-day-log-type">{t(`nutrition.mealTypes.${meal.meal_type || 'meal'}`)}</p>
+                            <p className="nh-day-log-meta">{t('nutritionHistory.itemCount', { count: meal.items?.length || 0 })}</p>
                           </div>
-                          <span className="nh-day-log-kcal">{Math.round(meal.total_calories || 0)} kcal</span>
+                          <span className="nh-day-log-kcal">{Math.round(meal.total_calories || 0)} {t('common.units.kcal')}</span>
                         </div>
                       ))}
                     </div>
@@ -441,7 +441,7 @@ export default function NutritionHistory() {
                   className="nh-view-journal-btn"
                   onClick={() => navigate(`/nutrition?date=${selectedDate}&readonly=1`)}
                 >
-                  View Full Journal
+                  {t('nutritionHistory.viewFullJournal')}
                 </button>
               </div>
             </section>
@@ -464,7 +464,7 @@ export default function NutritionHistory() {
             <div className="nh-charts-grid">
               <div className={`nh-chart-card nh-chart-card--wide nh-chart-card--${rangeTheme.key}`}>
                 <div className="nh-chart-card-header">
-                  <h4 className="nh-chart-card-title">{rangeTheme.title}</h4>
+                  <h4 className="nh-chart-card-title">{t(rangeTheme.titleKey)}</h4>
                   <span className="material-symbols-outlined nh-chart-icon">{rangeTheme.icon}</span>
                 </div>
                 <div className="nh-bar-chart">
@@ -482,7 +482,7 @@ export default function NutritionHistory() {
                           className={`nh-bar-item${isLast ? ' nh-bar-item--accent' : ''}${item.calories <= 0 ? ' nh-bar-item--empty' : ''}`}
                           style={{ height: `${barHeight}%` }}
                         />
-                        {isLast && <span className="nh-bar-tooltip">{item.calories} kcal</span>}
+                        {isLast && <span className="nh-bar-tooltip">{item.calories} {t('common.units.kcal')}</span>}
                       </div>
                     );
                   })}

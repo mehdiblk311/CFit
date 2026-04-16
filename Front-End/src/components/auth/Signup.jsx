@@ -1,26 +1,28 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useI18n } from '../../i18n/useI18n';
 import './Signup.css';
 
 function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim()); }
 
-function getStrength(pw) {
+function getStrength(pw, t) {
   if (!pw) return { score: 0, label: '', cls: 'empty' };
   let score = 0;
   if (pw.length >= 8)          score++;
   if (/[A-Z]/.test(pw))        score++;
   if (/[^A-Za-z0-9]/.test(pw)) score++;
   if (pw.length >= 12)         score++;
-  if (score <= 1) return { score, label: 'WEAK',   cls: 'weak' };
-  if (score === 2) return { score, label: 'FAIR',   cls: 'fair' };
-  if (score === 3) return { score, label: 'GOOD',   cls: 'strong' };
-  return                        { score, label: 'STRONG', cls: 'strong' };
+  if (score <= 1) return { score, label: t('auth.signup.strength.weak'), cls: 'weak' };
+  if (score === 2) return { score, label: t('auth.signup.strength.fair'), cls: 'fair' };
+  if (score === 3) return { score, label: t('auth.signup.strength.good'), cls: 'strong' };
+  return { score, label: t('auth.signup.strength.strong'), cls: 'strong' };
 }
 
 export default function Signup() {
   const { signup } = useAuth();
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [name,    setName]    = useState('');
   const [email,   setEmail]   = useState('');
   const [pw,      setPw]      = useState('');
@@ -29,24 +31,24 @@ export default function Signup() {
   const [errors,  setErrors]  = useState({});
   const [loading, setLoading] = useState(false);
 
-  const strength = useMemo(() => getStrength(pw), [pw]);
+  const strength = useMemo(() => getStrength(pw, t), [pw, t]);
 
   const reqs = [
-    { label: 'At least 8 characters',  met: pw.length >= 8 },
-    { label: 'One capital letter',      met: /[A-Z]/.test(pw) },
-    { label: 'One special character',   met: /[^A-Za-z0-9]/.test(pw) },
+    { label: t('auth.signup.requirements.characters'), met: pw.length >= 8 },
+    { label: t('auth.signup.requirements.capital'), met: /[A-Z]/.test(pw) },
+    { label: t('auth.signup.requirements.special'), met: /[^A-Za-z0-9]/.test(pw) },
   ];
 
   function clearError(field) { setErrors(p => ({ ...p, [field]: undefined })); }
 
   function validate() {
     const e = {};
-    if (!name.trim())               e.name    = 'Full name is required.';
-    if (!email.trim())              e.email   = 'Email is required.';
-    else if (!isValidEmail(email))  e.email   = 'Not a valid email.';
-    if (!pw)                        e.pw      = 'Password is required.';
-    else if (pw.length < 8)         e.pw      = 'At least 8 characters.';
-    if (confirm !== pw)             e.confirm = 'Passwords don\'t match.';
+    if (!name.trim()) e.name = t('auth.signup.errors.nameRequired');
+    if (!email.trim()) e.email = t('auth.signup.errors.emailRequired');
+    else if (!isValidEmail(email)) e.email = t('auth.signup.errors.emailInvalid');
+    if (!pw) e.pw = t('auth.signup.errors.passwordRequired');
+    else if (pw.length < 8) e.pw = t('auth.signup.errors.passwordShort');
+    if (confirm !== pw) e.confirm = t('auth.signup.errors.passwordMismatch');
     return e;
   }
 
@@ -66,11 +68,11 @@ export default function Signup() {
     } catch (err) {
       const detail = err?.detail ?? err?.message ?? '';
       if (detail.toLowerCase().includes('duplicate') || detail.toLowerCase().includes('unique') || detail.toLowerCase().includes('already')) {
-        setErrors({ email: 'An account with this email already exists.' });
+        setErrors({ email: t('auth.signup.errors.accountExists') });
       } else if (err?.status === 400) {
-        setErrors({ email: detail || 'Invalid data. Please check your inputs.' });
+        setErrors({ email: detail || t('auth.signup.errors.invalidData') });
       } else {
-        setErrors({ email: 'Could not create account. Please try again.' });
+        setErrors({ email: t('auth.signup.errors.signupFailed') });
       }
     } finally {
       setLoading(false);
@@ -92,7 +94,7 @@ export default function Signup() {
 
       {/* Header */}
       <header className="su-header">
-        <button className="su-back-btn" onClick={() => navigate('/login')} aria-label="Go back">
+        <button className="su-back-btn" onClick={() => navigate('/login')} aria-label={t('common.actions.goBack')}>
           <svg viewBox="0 0 16 16" fill="none">
             <path d="M10 3L5 8L10 13" stroke="#2e2f2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -103,19 +105,19 @@ export default function Signup() {
       {/* Main */}
       <main className="su-main">
         <div className="su-heading-group">
-          <h1 className="su-title">Create Account</h1>
-          <p className="su-subtitle">Start your kinetic journey</p>
+          <h1 className="su-title">{t('auth.signup.title')}</h1>
+          <p className="su-subtitle">{t('auth.signup.subtitle')}</p>
         </div>
 
         <form className="su-form" onSubmit={handleSubmit} noValidate>
           {/* Full Name */}
           <div className="su-field">
-            <label className="su-label" htmlFor="su-name">Full Name</label>
+            <label className="su-label" htmlFor="su-name">{t('auth.signup.nameLabel')}</label>
             <input
               id="su-name"
               type="text"
               className={`su-input${errors.name ? ' su-input--error' : ''}`}
-              placeholder="Alex Rivera"
+              placeholder={t('auth.signup.namePlaceholder')}
               value={name}
               onChange={e => { setName(e.target.value); clearError('name'); }}
               autoFocus
@@ -125,12 +127,12 @@ export default function Signup() {
 
           {/* Email */}
           <div className="su-field">
-            <label className="su-label" htmlFor="su-email">Email Address</label>
+            <label className="su-label" htmlFor="su-email">{t('auth.signup.emailLabel')}</label>
             <input
               id="su-email"
               type="email"
               className={`su-input${errors.email ? ' su-input--error' : ''}`}
-              placeholder="alex@student.um6p.ma"
+              placeholder={t('auth.signup.emailPlaceholder')}
               value={email}
               onChange={e => { setEmail(e.target.value); clearError('email'); }}
               autoComplete="email"
@@ -141,12 +143,12 @@ export default function Signup() {
           {/* Password + Strength */}
           <div className="su-pw-group">
             <div className="su-field">
-              <label className="su-label" htmlFor="su-pw">Password</label>
+              <label className="su-label" htmlFor="su-pw">{t('auth.signup.passwordLabel')}</label>
               <input
                 id="su-pw"
                 type={showPw ? 'text' : 'password'}
                 className={`su-input${errors.pw ? ' su-input--error' : ''}`}
-                placeholder="••••••••••••"
+                placeholder={t('auth.signup.passwordPlaceholder')}
                 value={pw}
                 onChange={e => { setPw(e.target.value); clearError('pw'); }}
                 autoComplete="new-password"
@@ -155,7 +157,7 @@ export default function Signup() {
                 type="button"
                 className="su-input-icon"
                 onClick={() => setShowPw(v => !v)}
-                aria-label={showPw ? 'Hide' : 'Show'}
+                aria-label={showPw ? t('common.actions.hidePassword') : t('common.actions.showPassword')}
               >
                 {showPw ? (
                   <svg width="22" height="18" viewBox="0 0 22 18" fill="none">
@@ -202,12 +204,12 @@ export default function Signup() {
 
           {/* Confirm Password */}
           <div className="su-field">
-            <label className="su-label" htmlFor="su-confirm">Confirm Password</label>
+            <label className="su-label" htmlFor="su-confirm">{t('auth.signup.confirmLabel')}</label>
             <input
               id="su-confirm"
               type={showPw ? 'text' : 'password'}
               className={`su-input${errors.confirm ? ' su-input--error' : ''}`}
-              placeholder="••••••••••••"
+              placeholder={t('auth.signup.passwordPlaceholder')}
               value={confirm}
               onChange={e => { setConfirm(e.target.value); clearError('confirm'); }}
               autoComplete="new-password"
@@ -221,7 +223,7 @@ export default function Signup() {
               <div className="su-spinner" />
             ) : (
               <>
-                <span className="su-btn-label">Create Account</span>
+                <span className="su-btn-label">{t('common.actions.createAccount')}</span>
                 <span className="su-btn-arrow">
                   <svg width="16" height="14" viewBox="0 0 16 14" fill="none">
                     <path d="M1 7H15M9 1L15 7L9 13" stroke="#d6ffb7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -233,8 +235,8 @@ export default function Signup() {
         </form>
         {/* Login link */}
         <div className="su-footer-link">
-          <span>Already have an account?</span>
-          <button type="button" onClick={() => navigate('/login')}>Sign in</button>
+          <span>{t('auth.signup.footerPrompt')}</span>
+          <button type="button" onClick={() => navigate('/login')}>{t('auth.signup.footerAction')}</button>
         </div>
       </main>
     </div>

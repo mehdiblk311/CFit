@@ -11,7 +11,7 @@ import ExportManager from './ExportManager';
 import DeleteAccountManager from './DeleteAccountManager';
 import PrivacyPolicy from './PrivacyPolicy';
 import TermsOfService from './TermsOfService';
-import { translations } from './translations';
+import { LANGUAGE_OPTIONS, getLocaleForLanguage, useI18n } from '../../../i18n/useI18n';
 import './Settings.css';
 
 /* ── Constants ──────────────────────────────────────────────────── */
@@ -39,8 +39,7 @@ const GENDER_OPTIONS = [
 /* ── i18n Hook ───────────────────────────────────────────────────── */
 
 function useT() {
-  const language = uiStore((s) => s.language);
-  return (key) => translations[language]?.[key] ?? translations.en[key] ?? key;
+  return useI18n('settings').t;
 }
 
 /* ── Helpers ─────────────────────────────────────────────────────── */
@@ -55,7 +54,7 @@ function formatDate(value) {
   if (!value) return '';
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return '';
-  return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return parsed.toLocaleDateString(getLocaleForLanguage(uiStore.getState().language), { month: 'short', day: 'numeric' });
 }
 
 function formatNumber(value, suffix = '') {
@@ -139,7 +138,7 @@ function ProfileSection({ profile, onSave, saving }) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const name = String(fd.get('name') || '').trim();
-    if (!name) { uiStore.getState().addToast('Name is required', 'error'); return; }
+    if (!name) { uiStore.getState().addToast(t('nameRequired'), 'error'); return; }
     const patch = { name, gender: genderDraft };
     if (avatarPreview !== (profile?.avatar || '')) {
       patch.avatar = avatarPreview;
@@ -471,10 +470,7 @@ function TargetsSection({ profile, targets, isLoading, isError, onRefresh }) {
 export default function Settings() {
   const { user, logout, updateProfile } = useAuth();
   const navigate = useNavigate();
-  const t = useT();
-
-  const language = uiStore((s) => s.language);
-  const setLanguage = uiStore((s) => s.setLanguage);
+  const { t, language, setLanguage } = useI18n('settings');
   const darkMode = uiStore((s) => s.darkMode);
   const setDarkMode = uiStore((s) => s.setDarkMode);
   const workoutFrequency = uiStore((s) => s.workoutFrequency ?? 5);
@@ -527,8 +523,8 @@ export default function Settings() {
   async function saveProfilePatch(patch, type = 'profile') {
     if (!user?.id) return;
     const setSaving = { body: setBodySaving, goals: setGoalsSaving }[type] ?? setProfileSaving;
-    const msgMap = { body: 'Body metrics updated', goals: 'Goals updated' };
-    const msg = msgMap[type] ?? 'Profile updated';
+    const msgMap = { body: t('bodyMetricsUpdated'), goals: t('goalsUpdated') };
+    const msg = msgMap[type] ?? t('profileUpdated');
     setSaving(true);
     try {
       await updateProfile(user.id, patch);
@@ -545,7 +541,7 @@ export default function Settings() {
     setRecalculating(true);
     try {
       await nutritionTargetsQuery.refetch();
-      uiStore.getState().addToast('TDEE recalculated', 'success');
+      uiStore.getState().addToast(t('tdeeRecalculated'), 'success');
     } finally {
       setRecalculating(false);
     }
@@ -556,7 +552,7 @@ export default function Settings() {
       <div className="st-root">
         <header className="st-header">
           <div className="st-header-left">
-            <button className="st-back-btn" type="button" onClick={() => navigate(-1)}>
+            <button className="st-back-btn" type="button" onClick={() => navigate(-1)} aria-label={t('goBack')}>
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
             <h1 className="st-header-title">{t('settings')}</h1>
@@ -565,7 +561,7 @@ export default function Settings() {
         </header>
         <main className="st-main">
           <div className="st-loading-shell">
-            <p className="st-loading-copy">Loading your settings…</p>
+            <p className="st-loading-copy">{t('loadingSettings')}</p>
           </div>
         </main>
       </div>
@@ -579,7 +575,7 @@ export default function Settings() {
       {/* ── Header ── */}
       <header className="st-header">
         <div className="st-header-left">
-          <button className="st-back-btn" type="button" onClick={() => navigate(-1)}>
+          <button className="st-back-btn" type="button" onClick={() => navigate(-1)} aria-label={t('goBack')}>
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
           <h1 className="st-header-title">{t('settings')}</h1>
@@ -683,7 +679,7 @@ export default function Settings() {
               type="button"
               className={`st-toggle${darkMode ? ' st-toggle--on' : ''}`}
               onClick={() => setDarkMode(!darkMode)}
-              aria-label="Toggle dark mode"
+              aria-label={t('toggleDarkMode')}
             >
               <span className="st-toggle-thumb" />
             </button>
@@ -695,14 +691,15 @@ export default function Settings() {
               <span className="st-pref-label">{t('language')}</span>
             </div>
             <div className="st-lang-row">
-              {[['en', 'EN'], ['fr', 'FR'], ['ar', 'AR']].map(([val, lbl]) => (
+              {LANGUAGE_OPTIONS.map((option) => (
                 <button
-                  key={val}
+                  key={option.value}
                   type="button"
-                  className={`st-lang-btn${language === val ? ' st-lang-btn--active' : ''}`}
-                  onClick={() => setLanguage(val)}
+                  className={`st-lang-btn${language === option.value ? ' st-lang-btn--active' : ''}`}
+                  onClick={() => setLanguage(option.value)}
+                  title={option.shortLabel}
                 >
-                  {lbl}
+                  {option.shortLabel}
                 </button>
               ))}
             </div>
@@ -735,7 +732,7 @@ export default function Settings() {
             <span className="material-symbols-outlined">logout</span>
             {t('logout')}
           </button>
-          <p className="st-version">UM6P_FIT · Version 0.1.0 · Limited Draft Build</p>
+          <p className="st-version">{t('versionLabel')}</p>
         </footer>
       </main>
 

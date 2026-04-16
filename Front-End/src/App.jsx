@@ -33,12 +33,14 @@ import AdminUserManagement from './components/admin/AdminUserManagement';
 import AdminExerciseLibrary from './components/admin/AdminExerciseLibrary';
 import AdminUserPrograms from './components/admin/AdminUserPrograms';
 import AdminNutrition from './components/admin/Nutrition/AdminNutrition';
+import { useI18n } from './i18n/useI18n';
 
 function RouteErrorBoundary() {
   const error = useRouteError();
+  const { t } = useI18n();
 
-  let title = 'Something went wrong';
-  let message = 'Please refresh the page and try again.';
+  let title = t('routeError.title');
+  let message = t('routeError.message');
 
   if (isRouteErrorResponse(error)) {
     title = `${error.status} ${error.statusText}`;
@@ -59,14 +61,14 @@ function RouteErrorBoundary() {
             onClick={() => window.location.reload()}
             style={{ border: 0, borderRadius: 999, background: '#38671a', color: '#fff', padding: '12px 16px', cursor: 'pointer' }}
           >
-            Reload page
+            {t('common.actions.reloadPage')}
           </button>
           <button
             type="button"
             onClick={() => (window.location.href = '/dashboard')}
             style={{ borderRadius: 999, border: '1px solid #d7d0c5', background: '#fff', color: '#2b2c2a', padding: '12px 16px', cursor: 'pointer' }}
           >
-            Go to dashboard
+            {t('common.actions.goToDashboard')}
           </button>
         </div>
       </div>
