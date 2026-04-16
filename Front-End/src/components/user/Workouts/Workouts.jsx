@@ -171,13 +171,21 @@ function flattenProgramSessions(program) {
   });
 }
 
-function getStatusLabel(status, t = (value) => value) {
-  const map = {
-    assigned: t('workouts.status.assigned'),
-    in_progress: t('workouts.status.inProgress'),
-    completed: t('workouts.status.completed'),
-    cancelled: t('workouts.status.cancelled'),
-  };
+const STATUS_LABEL_FALLBACKS = {
+  assigned: 'Assigned',
+  in_progress: 'In Progress',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+};
+
+function getStatusLabel(status, t = null) {
+  const translate = typeof t === 'function' ? t : null;
+  const map = translate ? {
+    assigned: translate('workouts.status.assigned'),
+    in_progress: translate('workouts.status.inProgress'),
+    completed: translate('workouts.status.completed'),
+    cancelled: translate('workouts.status.cancelled'),
+  } : STATUS_LABEL_FALLBACKS;
   return map[status] || map.assigned;
 }
 
@@ -942,6 +950,7 @@ function ProgramPreview({
   startingSessionId = null,
   isStatusUpdating = false,
 }) {
+  const { t } = useI18n();
   const program = assignment?.program;
   const sessions = flattenProgramSessions(program);
   const accent = getStatusColor(assignment?.status);
@@ -966,7 +975,7 @@ function ProgramPreview({
           <div className="wk-preview-color-dot" style={{ background: accent }} />
           {assignment?.status && (
             <span className="wk-card-tag" style={{ background: '#c3fb9c', color: '#214f01' }}>
-              {getStatusLabel(assignment.status).toUpperCase()}
+              {getStatusLabel(assignment.status, t).toUpperCase()}
             </span>
           )}
         </div>
@@ -1669,8 +1678,6 @@ function LibraryView({ sessionActive, onAddToWorkout }) {
 // ── History View ──────────────────────────────────────────────────────
 
 const WORKOUT_TYPES = ['All', 'Strength', 'Hypertrophy', 'Cardio', 'Endurance', 'Custom'];
-const HISTORY_WEEK_DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-
 function getWorkoutTimestamp(workout) {
   return workout?.date || workout?.started_at || workout?.created_at || null;
 }
@@ -1698,7 +1705,7 @@ function getWorkoutSetCount(exercises) {
   return exercises.reduce((total, exercise) => total + extractExerciseSets(exercise).length, 0);
 }
 
-function buildHistoryTrend(workouts) {
+function buildHistoryTrend(workouts, locale) {
   const recentWorkouts = [...workouts]
     .filter(Boolean)
     .sort((a, b) => {
@@ -1720,7 +1727,7 @@ function buildHistoryTrend(workouts) {
 
   return recentWorkouts.map((workout, index) => ({
     id: workout?.id || index,
-    label: getWorkoutDate(workout)?.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) || '—',
+    label: getWorkoutDate(workout)?.toLocaleDateString(locale, { day: '2-digit', month: 'short' }) || '—',
     value: rawValues[index],
     ratio: Math.max(18, Math.round((rawValues[index] / peak) * 100)),
     type: getWorkoutTypeLabel(workout),
@@ -1823,8 +1830,9 @@ function HistoryView({ onStartWorkout }) {
   const selectedExercises = extractWorkoutExercises(selectedWorkoutDetail);
   const selectedVolume = calcVolume(selectedExercises);
   const selectedSetCount = getWorkoutSetCount(selectedExercises);
-  const trendData = buildHistoryTrend(baseFilteredWorkouts);
+  const trendData = buildHistoryTrend(baseFilteredWorkouts, locale);
   const splitData = buildHistorySplit(selectedExercises);
+  const numberFormatter = new Intl.NumberFormat(locale);
 
   const activeFilterCount = [
     filterType && filterType !== 'All',
@@ -1837,6 +1845,9 @@ function HistoryView({ onStartWorkout }) {
   const year = calendarCursor.getFullYear();
   const month = calendarCursor.getMonth();
   const monthName = calendarCursor.toLocaleString(locale, { month: 'long' });
+  const weekDays = Array.from({ length: 7 }, (_, index) => (
+    new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(new Date(2024, 0, 1 + index))
+  ));
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfWeek = new Date(year, month, 1).getDay();
   const offset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
@@ -1851,6 +1862,30 @@ function HistoryView({ onStartWorkout }) {
     if (!iso) return '';
     const date = new Date(iso);
     return date.toLocaleDateString(locale, { day: '2-digit', month: 'short' });
+  }
+
+  function fmtNumber(value) {
+    return numberFormatter.format(value);
+  }
+
+  function fmtWeight(value) {
+    return `${fmtNumber(value)} ${t('common.units.kg')}`;
+  }
+
+  function fmtSetCount(count) {
+    return t(count === 1 ? 'workouts.history.setCount' : 'workouts.history.setCountPlural', { count: fmtNumber(count) });
+  }
+
+  function fmtExerciseCount(count) {
+    return t(count === 1 ? 'workouts.history.exerciseCount' : 'workouts.history.exerciseCountPlural', { count: fmtNumber(count) });
+  }
+
+  function fmtReps(count) {
+    return t(count === 1 ? 'workouts.history.repCount' : 'workouts.history.repCountPlural', { count: fmtNumber(count) });
+  }
+
+  function fmtPeakWeight(value) {
+    return t('workouts.history.peakWeight', { value: fmtWeight(value) });
   }
 
   function fmtDuration(start, end, explicitDuration) {
@@ -2000,7 +2035,7 @@ function HistoryView({ onStartWorkout }) {
             </div>
           </div>
           <div className="wk-cal-grid">
-            {HISTORY_WEEK_DAYS.map((day) => (
+            {weekDays.map((day) => (
               <div key={day} className="wk-cal-day-hdr">{day}</div>
             ))}
             {Array.from({ length: offset }).map((_, index) => (
@@ -2086,7 +2121,7 @@ function HistoryView({ onStartWorkout }) {
                 </div>
                 <div className="wk-history-glance-card">
                   <span className="wk-eyebrow">{t('workouts.history.volume')}</span>
-                  <strong>{selectedVolume > 0 ? `${selectedVolume.toLocaleString()} kg` : '—'}</strong>
+                  <strong>{selectedVolume > 0 ? fmtWeight(selectedVolume) : '—'}</strong>
                 </div>
                 <div className="wk-history-glance-card">
                   <span className="wk-eyebrow">{t('workouts.history.sets')}</span>
@@ -2122,7 +2157,7 @@ function HistoryView({ onStartWorkout }) {
                             <div>
                               <p className="wk-hist-focus-name">{exercise.exercise?.name || exercise.name}</p>
                               <p className="wk-hist-focus-meta">
-                                {sets.length} sets{peak > 0 ? ` · ${peak}kg peak` : ''}
+                                {fmtSetCount(sets.length)}{peak > 0 ? ` · ${fmtPeakWeight(peak)}` : ''}
                               </p>
                             </div>
                             <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#38671a' }}>north_east</span>
@@ -2198,7 +2233,7 @@ function HistoryView({ onStartWorkout }) {
                   <div key={item.label} className="wk-history-split-row">
                     <div className="wk-history-split-copy">
                       <strong>{item.label}</strong>
-                      <span>{item.count} exercises</span>
+                      <span>{fmtExerciseCount(item.count)}</span>
                     </div>
                     <div className="wk-history-split-bar">
                       <span style={{ width: `${item.percent}%`, background: item.tone }} />
@@ -2253,7 +2288,7 @@ function HistoryView({ onStartWorkout }) {
               </div>
               <div className="wk-history-archive-stat">
                 <span>{t('workouts.history.volume')}</span>
-                <strong>{totalVolume > 0 ? `${Math.round(totalVolume).toLocaleString()} kg` : '—'}</strong>
+                <strong>{totalVolume > 0 ? fmtWeight(Math.round(totalVolume)) : '—'}</strong>
               </div>
               <div className="wk-history-archive-stat">
                 <span>{t('workouts.history.focusDay')}</span>
@@ -2303,9 +2338,9 @@ function HistoryView({ onStartWorkout }) {
                         </div>
                         <p className="wk-hist-ex-meta">
                           {fmtDuration(detailWorkout.started_at, detailWorkout.completed_at, detailWorkout.duration)}
-                          {volume > 0 ? ` · ${volume.toLocaleString()}kg` : ''}
-                          {setCount > 0 ? ` · ${setCount} sets` : ''}
-                          {exercises.length > 0 ? ` · ${exercises.length} ex` : ''}
+                          {volume > 0 ? ` · ${fmtWeight(volume)}` : ''}
+                          {setCount > 0 ? ` · ${fmtSetCount(setCount)}` : ''}
+                          {exercises.length > 0 ? ` · ${fmtExerciseCount(exercises.length)}` : ''}
                         </p>
                       </div>
                       <span
@@ -2358,7 +2393,7 @@ function HistoryView({ onStartWorkout }) {
                               <div>
                                 <p className="wk-hist-ex-name" style={{ fontSize: 14 }}>{exercise.exercise?.name || exercise.name}</p>
                                 <p className="wk-hist-ex-meta">
-                                  {sets.length} sets{peakWeight > 0 ? ` · ${peakWeight}kg peak` : ''}
+                                  {fmtSetCount(sets.length)}{peakWeight > 0 ? ` · ${fmtPeakWeight(peakWeight)}` : ''}
                                 </p>
                               </div>
                               <span
@@ -2381,8 +2416,8 @@ function HistoryView({ onStartWorkout }) {
                                 {sets.map((set, setIndex) => (
                                   <div key={`${exerciseKey}-${setIndex}`} className="wk-hist-set-row">
                                     <span className="wk-set-num" style={{ color: '#38671a' }}>{setIndex + 1}</span>
-                                    <span className="wk-hist-set-val">{setWeightValue(set) > 0 ? `${setWeightValue(set)}kg` : 'BW'}</span>
-                                    <span className="wk-hist-set-val">{set.reps} reps</span>
+                                    <span className="wk-hist-set-val">{setWeightValue(set) > 0 ? fmtWeight(setWeightValue(set)) : t('workouts.history.bodyweight')}</span>
+                                    <span className="wk-hist-set-val">{fmtReps(Number(set.reps) || 0)}</span>
                                     <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#38671a', fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                                   </div>
                                 ))}
@@ -3295,6 +3330,7 @@ function WorkoutSummary({ workoutId, sessionData, durationSeconds, programName, 
 export default function Workouts() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useI18n();
   const onClose = () => navigate('/dashboard');
   const requestedTab = location.state?.tab;
   const initialTab =
@@ -3590,7 +3626,7 @@ export default function Workouts() {
       if (status === 'completed') {
         markAssignmentFullyCompletedLocally(assignment);
       }
-      addToast(`Program marked as ${getStatusLabel(status).toLowerCase()}.`, 'success');
+      addToast(`Program marked as ${getStatusLabel(status, t).toLowerCase()}.`, 'success');
     } catch {
       addToast('Could not update program status. Please try again.', 'error');
     } finally {

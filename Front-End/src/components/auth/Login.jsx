@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../../i18n/useI18n';
+import AuthLanguageSwitch from './AuthLanguageSwitch';
 import './Login.css';
 
 function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim()); }
@@ -64,6 +65,7 @@ export default function Login() {
 
       <div className="login-container">
         <div className="login-wordmark">UM6P_FIT</div>
+        <AuthLanguageSwitch className="login-language-switch" />
 
         {/* Desktop hero — only visible on md+ */}
         <div className="login-desktop-hero">

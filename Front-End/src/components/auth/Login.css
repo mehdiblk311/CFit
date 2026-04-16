@@ -71,6 +71,11 @@
   animation: login-fade-up 0.4s ease both;
 }
 
+.login-language-switch {
+  margin-bottom: 18px;
+  animation: login-fade-up 0.4s 0.05s ease both;
+}
+
 /* ── Card ───────────────────────────────────────────────────────── */
 .login-card {
   background: #fff;
@@ -354,6 +359,13 @@ html[dir='rtl'] .login-footer-link {
     margin-bottom: 0;
   }
 
+  .login-language-switch {
+    position: absolute;
+    top: 26px;
+    right: 32px;
+    margin-bottom: 0;
+  }
+
   .login-card {
     max-width: 440px;
     width: 100%;
@@ -509,6 +521,11 @@ html[dir='rtl'] .login-footer-link {
   html[dir='rtl'] .login-wordmark {
     left: auto;
     right: 32px;
+  }
+
+  html[dir='rtl'] .login-language-switch {
+    right: auto;
+    left: 32px;
   }
 
   html[dir='rtl'] .login-blob-green {

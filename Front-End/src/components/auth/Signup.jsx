@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../../i18n/useI18n';
+import AuthLanguageSwitch from './AuthLanguageSwitch';
 import './Signup.css';
 
 function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim()); }
@@ -100,6 +101,7 @@ export default function Signup() {
           </svg>
         </button>
         <span className="su-logo">UM6P_FIT</span>
+        <AuthLanguageSwitch className="su-language-switch" />
       </header>
 
       {/* Main */}

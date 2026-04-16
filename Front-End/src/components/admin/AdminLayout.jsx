@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { LANGUAGE_OPTIONS, useI18n } from '../../i18n/useI18n';
+import { useI18n } from '../../i18n/useI18n';
 import './Admin.css';
 
 const NAV_ITEMS = [
@@ -28,7 +28,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout, user } = useAuth();
-  const { t, language, setLanguage } = useI18n();
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(false);
   const navItems = NAV_ITEMS.map((item) => ({ ...item, label: t(item.labelKey) }));
   const activeItem = navItems.find((item) => isActive(item, location.pathname));
@@ -107,20 +107,6 @@ export default function AdminLayout() {
             </div>
           </div>
           <div className="adm-topbar-right">
-            <div className="adm-lang-switch" aria-label={t('common.labels.language')}>
-              {LANGUAGE_OPTIONS.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={`adm-lang-btn${language === option.value ? ' adm-lang-btn--active' : ''}`}
-                  onClick={() => setLanguage(option.value)}
-                  title={t(option.titleKey)}
-                  aria-label={t(option.titleKey)}
-                >
-                  {option.shortLabel}
-                </button>
-              ))}
-            </div>
             <div className="adm-topbar-status">
               <span className="adm-topbar-status-dot" />
               <span className="adm-topbar-status-label">{t('common.labels.systemOnline')}</span>
