@@ -1,284 +1,766 @@
-import { useState } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../../hooks/useAuth';
+import { usersAPI } from '../../../api/users';
 import { authStore } from '../../../stores/authStore';
+import { uiStore } from '../../../stores/uiStore';
 import TwoFactorSetup from '../../auth/TwoFactorSetup';
 import SessionsManager from './SessionsManager';
 import ExportManager from './ExportManager';
 import DeleteAccountManager from './DeleteAccountManager';
+import PrivacyPolicy from './PrivacyPolicy';
+import TermsOfService from './TermsOfService';
+import { translations } from './translations';
 import './Settings.css';
 
-function Toggle({ checked, onChange }) {
+/* ── Constants ──────────────────────────────────────────────────── */
+
+const GOAL_OPTIONS = [
+  { value: 'lose_fat', labelKey: 'lose' },
+  { value: 'maintain', labelKey: 'maintain' },
+  { value: 'build_muscle', labelKey: 'gain' },
+];
+
+const ACTIVITY_OPTIONS = [
+  { value: 'sedentary', labelKey: 'sedentary' },
+  { value: 'lightly_active', labelKey: 'lightActivity' },
+  { value: 'moderately_active', labelKey: 'moderateActivity' },
+  { value: 'active', labelKey: 'activeActivity' },
+  { value: 'very_active', labelKey: 'veryActive' },
+];
+
+const GENDER_OPTIONS = [
+  { value: 'male', labelKey: 'male' },
+  { value: 'female', labelKey: 'female' },
+  { value: 'other', labelKey: 'other' },
+];
+
+/* ── i18n Hook ───────────────────────────────────────────────────── */
+
+function useT() {
+  const language = uiStore((s) => s.language);
+  return (key) => translations[language]?.[key] ?? translations.en[key] ?? key;
+}
+
+/* ── Helpers ─────────────────────────────────────────────────────── */
+
+function normalizeCollection(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  return [];
+}
+
+function formatDate(value) {
+  if (!value) return '';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return '';
+  return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function formatNumber(value, suffix = '') {
+  if (value === null || value === undefined || value === '') return '--';
+  return suffix ? `${value}${suffix}` : String(value);
+}
+
+function getInitials(name) {
+  const safeName = String(name || 'Athlete').trim();
+  const parts = safeName.split(/\s+/).slice(0, 2);
+  return parts.map((part) => part[0]?.toUpperCase() || '').join('') || 'A';
+}
+
+function calculateAge(dateOfBirth, fallbackAge = 0) {
+  if (!dateOfBirth) return fallbackAge || 0;
+  const birthDate = new Date(dateOfBirth);
+  if (Number.isNaN(birthDate.getTime())) return fallbackAge || 0;
+  const now = new Date();
+  let age = now.getFullYear() - birthDate.getFullYear();
+  const monthDiff = now.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birthDate.getDate())) age -= 1;
+  return Math.max(age, 0);
+}
+
+function normalizeGoal(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if (raw === 'lose') return 'lose_fat';
+  if (raw === 'gain') return 'build_muscle';
+  return raw || 'maintain';
+}
+
+function normalizeActivity(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if (raw === 'light') return 'lightly_active';
+  if (raw === 'moderate') return 'moderately_active';
+  if (raw === 'very') return 'very_active';
+  return raw || 'lightly_active';
+}
+
+/* ── AvatarArtwork ───────────────────────────────────────────────── */
+
+function AvatarArtwork({ avatar, name, className, fallbackClassName }) {
+  const [hasError, setHasError] = useState(false);
+  if (avatar && !hasError) {
+    return (
+      <img
+        key={avatar}
+        src={avatar}
+        alt={`${name || 'User'} avatar`}
+        className={className}
+        onError={() => setHasError(true)}
+      />
+    );
+  }
+  return <span className={fallbackClassName}>{getInitials(name)}</span>;
+}
+
+/* ── ProfileSection ──────────────────────────────────────────────── */
+
+function ProfileSection({ profile, onSave, saving }) {
+  const t = useT();
+  const fileRef = useRef(null);
+  const [genderDraft, setGenderDraft] = useState(profile?.gender || 'male');
+  const [avatarPreview, setAvatarPreview] = useState(profile?.avatar || '');
+  const [fileError, setFileError] = useState(null);
+
+  useEffect(() => {
+    setAvatarPreview(profile?.avatar || '');
+  }, [profile?.avatar]);
+
+  useEffect(() => {
+    setGenderDraft(profile?.gender || 'male');
+  }, [profile?.gender]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setFileError(t('imageTooLarge'));
+      return;
+    }
+    setFileError(null);
+    const reader = new FileReader();
+    reader.onload = (ev) => setAvatarPreview(ev.target.result);
+    reader.readAsDataURL(file);
+  };
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const name = String(fd.get('name') || '').trim();
+    if (!name) { uiStore.getState().addToast('Name is required', 'error'); return; }
+    const patch = { name, gender: genderDraft };
+    if (avatarPreview !== (profile?.avatar || '')) {
+      patch.avatar = avatarPreview;
+    }
+    await onSave(patch);
+  }
+
   return (
-    <button
-      role="switch"
-      aria-checked={checked}
-      className={`st-toggle${checked ? ' st-toggle--on' : ''}`}
-      onClick={() => onChange(!checked)}
-    >
-      <div className="st-toggle-thumb" />
-    </button>
+    <section className="st-profile-card">
+      <input
+        type="file"
+        ref={fileRef}
+        hidden
+        accept="image/*"
+        onChange={handleFileChange}
+      />
+
+      <button
+        className="st-avatar-center-btn"
+        type="button"
+        onClick={() => fileRef.current?.click()}
+        title={t('tapToChangePhoto')}
+      >
+        <div className="st-profile-avatar">
+          <AvatarArtwork
+            key={avatarPreview || 'p-fallback'}
+            avatar={avatarPreview}
+            name={profile?.name}
+            className="st-profile-avatar-image"
+            fallbackClassName="st-profile-avatar-fallback"
+          />
+          <div className="st-avatar-edit">
+            <span className="material-symbols-outlined" style={{ fontSize: 13 }}>photo_camera</span>
+          </div>
+        </div>
+      </button>
+
+      {fileError && (
+        <p style={{ color: '#b02500', fontSize: 13, margin: '0 0 4px', textAlign: 'center' }}>{fileError}</p>
+      )}
+
+      <form
+        key={`${profile?.id || 'prof'}-${profile?.updated_at || ''}-${profile?.name || ''}`}
+        className="st-profile-form"
+        onSubmit={handleSubmit}
+      >
+        <div className="st-input-group">
+          <label className="st-field-label" htmlFor="s-name">{t('fullName')}</label>
+          <input
+            id="s-name"
+            className="st-input"
+            type="text"
+            name="name"
+            defaultValue={profile?.name || ''}
+            placeholder={t('fullName')}
+          />
+        </div>
+
+        <div className="st-input-group">
+          <label className="st-field-label">{t('emailAddress')}</label>
+          <div className="st-input-static">{profile?.email || t('noEmail')}</div>
+        </div>
+
+        <div className="st-input-group">
+          <label className="st-field-label">{t('gender')}</label>
+          <div className="st-gender-pills">
+            {GENDER_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                className={`st-gender-pill${genderDraft === opt.value ? ' st-gender-pill--active' : ''}`}
+                onClick={() => setGenderDraft(opt.value)}
+              >
+                {t(opt.labelKey)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <button className="st-save-btn st-save-btn--full" type="submit" disabled={saving}>
+          {saving ? t('saving') : t('saveProfile')}
+        </button>
+      </form>
+    </section>
   );
 }
 
-export default function Settings() {
-  const { user, logout } = useAuth();
-  const [goal,       setGoal]       = useState('maintain');
-  const [frequency,  setFrequency]  = useState(5);
-  const [darkMode,   setDarkMode]   = useState(false);
-  const [language,   setLanguage]   = useState('EN');
-  const [show2FA,    setShow2FA]    = useState(false);
-  const [showSessions, setShowSessions] = useState(false);
-  const [showExport, setShowExport]     = useState(false);
-  const [showDelete, setShowDelete]     = useState(false);
-  const twoFactorEnabled = user?.two_factor_enabled ?? false;
+/* ── BodyMetricsSection ──────────────────────────────────────────── */
 
-  const name  = user?.name  ?? 'Athlete';
-  const email = user?.email ?? 'athlete@um6p.ma';
+function BodyMetricsSection({ profile, latestWeightEntry, onSave, saving }) {
+  const t = useT();
+  const age = calculateAge(profile?.date_of_birth, profile?.age);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const heightRaw = String(fd.get('height') || '').trim();
+    const weightRaw = String(fd.get('weight') || '').trim();
+
+    const payload = {};
+    if (heightRaw !== '') payload.height = Number(heightRaw);
+    if (weightRaw !== '') payload.weight = Number(weightRaw);
+
+    await onSave(payload);
+  }
+
+  return (
+    <div className="st-metrics-section">
+      <h2 className="st-raw-title">{t('bodyMetrics')}</h2>
+
+      <form
+        key={`bm-${profile?.id || ''}-${profile?.updated_at || ''}-${profile?.height || ''}`}
+        onSubmit={handleSubmit}
+      >
+        <div className="st-metrics-grid">
+          {/* Height */}
+          <div className="st-metric-card">
+            <label className="st-metric-card-label" htmlFor="s-height">{t('heightCm')}</label>
+            <input
+              id="s-height"
+              className="st-metric-card-input"
+              type="number"
+              name="height"
+              min="0"
+              step="0.1"
+              defaultValue={profile?.height || ''}
+              placeholder="175"
+            />
+          </div>
+
+          {/* Weight */}
+          <div className="st-metric-card">
+            <label className="st-metric-card-label" htmlFor="s-weight">{t('weightKg')}</label>
+            <input
+              id="s-weight"
+              className="st-metric-card-input"
+              type="number"
+              name="weight"
+              min="0"
+              step="0.1"
+              defaultValue={profile?.weight || ''}
+              placeholder="70"
+            />
+            {latestWeightEntry?.date && (
+              <span className="st-metric-note">{formatDate(latestWeightEntry.date)}</span>
+            )}
+          </div>
+
+          {/* Age — read-only */}
+          <div className="st-metric-card st-metric-card--readonly">
+            <label className="st-metric-card-label">{t('age')}</label>
+            <div className="st-metric-card-value">{age || '--'}</div>
+          </div>
+        </div>
+
+        <button
+          className="st-save-btn st-save-btn--full"
+          type="submit"
+          disabled={saving}
+          style={{ marginTop: 12 }}
+        >
+          {saving ? t('saving') : t('saveMetrics')}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+/* ── FitnessGoalsSection ─────────────────────────────────────────── */
+
+function FitnessGoalsSection({
+  profile, workoutFrequency, setWorkoutFrequency,
+  onSave, saving, onRecalculate, recalculating,
+}) {
+  const t = useT();
+  const [goal, setGoal] = useState(normalizeGoal(profile?.goal));
+  const [activityLevel, setActivityLevel] = useState(normalizeActivity(profile?.activity_level));
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const twRaw = String(fd.get('target_weight') || '').trim();
+    const payload = { goal, activity_level: activityLevel };
+    if (twRaw !== '') payload.target_weight = Number(twRaw);
+    await onSave(payload);
+  }
+
+  return (
+    <section className="st-goals-card">
+      <h2 className="st-goals-title">{t('fitnessGoals')}</h2>
+
+      <form
+        key={`fg-${profile?.id || ''}-${profile?.updated_at || ''}-${profile?.goal || ''}`}
+        className="st-goals-form"
+        onSubmit={handleSubmit}
+      >
+        {/* Primary Objective */}
+        <div className="st-input-group">
+          <label className="st-field-label">{t('primaryObjective')}</label>
+          <div className="st-obj-row">
+            {GOAL_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                className={`st-obj-btn${goal === opt.value ? ' st-obj-btn--active' : ''}`}
+                onClick={() => setGoal(opt.value)}
+              >
+                {t(opt.labelKey)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Target Weight */}
+        <div className="st-input-group">
+          <label className="st-field-label" htmlFor="s-tw">{t('targetWeightKg')}</label>
+          <input
+            id="s-tw"
+            className="st-input"
+            type="number"
+            name="target_weight"
+            min="0"
+            step="0.1"
+            defaultValue={profile?.target_weight || ''}
+            placeholder="75"
+          />
+        </div>
+
+        {/* Activity Level */}
+        <div className="st-input-group">
+          <label className="st-field-label" htmlFor="s-activity">{t('activityLevel')}</label>
+          <select
+            id="s-activity"
+            className="st-select"
+            value={activityLevel}
+            onChange={(e) => setActivityLevel(e.target.value)}
+          >
+            {ACTIVITY_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Workout Frequency */}
+        <div className="st-input-group">
+          <div className="st-freq-header">
+            <label className="st-field-label">{t('workoutFrequency')}</label>
+            <span className="st-freq-days">{workoutFrequency} {t('days')}</span>
+          </div>
+          <input
+            className="st-range"
+            type="range"
+            min="1"
+            max="7"
+            value={workoutFrequency}
+            onChange={(e) => setWorkoutFrequency(Number(e.target.value))}
+          />
+        </div>
+
+        <button className="st-save-btn st-save-btn--full" type="submit" disabled={saving}>
+          {saving ? t('saving') : t('saveGoals')}
+        </button>
+      </form>
+
+      <button
+        className="st-recalc-btn"
+        type="button"
+        onClick={onRecalculate}
+        disabled={recalculating}
+        style={{ marginTop: 16 }}
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: 17 }}>calculate</span>
+        {recalculating ? '…' : t('recalculateTdee')}
+      </button>
+    </section>
+  );
+}
+
+/* ── TargetsSection ──────────────────────────────────────────────── */
+
+function TargetsSection({ profile, targets, isLoading, isError, onRefresh }) {
+  const t = useT();
+  const resolved = {
+    calories: targets?.calories ?? profile?.tdee ?? null,
+    protein: targets?.protein ?? null,
+    carbs: targets?.carbs ?? null,
+    fat: targets?.fat ?? null,
+  };
+
+  return (
+    <section className="st-tdee-card">
+      <div className="st-tdee-top">
+        <div>
+          <span className="st-tdee-eyebrow">{t('dailyTdee')}</span>
+          <div className="st-tdee-number">
+            {isLoading ? '…' : formatNumber(resolved.calories)}
+            <span className="st-tdee-unit">{t('kcal')}</span>
+          </div>
+        </div>
+        <button className="st-reset-link" type="button" onClick={onRefresh}>
+          {t('resetToCalculated')}
+        </button>
+      </div>
+
+      <div className="st-macro-row">
+        {[
+          ['protein', resolved.protein, 'g'],
+          ['carbs', resolved.carbs, 'g'],
+          ['fat', resolved.fat, 'g'],
+        ].map(([key, value, unit]) => (
+          <div key={key} className="st-macro-pill">
+            <span className="st-macro-pill-label">{t(key)}</span>
+            <span className="st-macro-pill-value">
+              {isLoading ? '…' : formatNumber(value, unit)}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {isError && (
+        <p className="st-tdee-footnote">{t('tdeeRefreshFailed')}</p>
+      )}
+    </section>
+  );
+}
+
+/* ── Settings (main) ─────────────────────────────────────────────── */
+
+export default function Settings() {
+  const { user, logout, updateProfile } = useAuth();
+  const navigate = useNavigate();
+  const t = useT();
+
+  const language = uiStore((s) => s.language);
+  const setLanguage = uiStore((s) => s.setLanguage);
+  const darkMode = uiStore((s) => s.darkMode);
+  const setDarkMode = uiStore((s) => s.setDarkMode);
+  const workoutFrequency = uiStore((s) => s.workoutFrequency ?? 5);
+  const setWorkoutFrequency = uiStore((s) => s.setWorkoutFrequency);
+
+  const [show2FA, setShow2FA] = useState(false);
+  const [showSessions, setShowSessions] = useState(false);
+  const [showExport, setShowExport] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [bodySaving, setBodySaving] = useState(false);
+  const [goalsSaving, setGoalsSaving] = useState(false);
+  const [recalculating, setRecalculating] = useState(false);
+
+  const profileQuery = useQuery({
+    queryKey: ['settings', 'profile', user?.id],
+    queryFn: () => usersAPI.getProfile(user.id),
+    enabled: Boolean(user?.id),
+  });
+
+  const nutritionTargetsQuery = useQuery({
+    queryKey: ['settings', 'nutrition-targets', user?.id],
+    queryFn: () => usersAPI.getNutritionTargets(user.id),
+    enabled: Boolean(user?.id),
+  });
+
+  const weightEntriesQuery = useQuery({
+    queryKey: ['settings', 'weight-entries', user?.id],
+    queryFn: () => usersAPI.getWeightEntries(user.id, { page: 1, limit: 1 }),
+    enabled: Boolean(user?.id),
+  });
+
+  const profile = profileQuery.data ?? user;
+  const latestWeightEntry = useMemo(() => {
+    const entries = normalizeCollection(weightEntriesQuery.data);
+    return entries[0] ?? null;
+  }, [weightEntriesQuery.data]);
+
+  async function refreshQueries() {
+    await Promise.allSettled([
+      profileQuery.refetch(),
+      nutritionTargetsQuery.refetch(),
+      weightEntriesQuery.refetch(),
+    ]);
+  }
+
+  async function saveProfilePatch(patch, type = 'profile') {
+    if (!user?.id) return;
+    const setSaving = { body: setBodySaving, goals: setGoalsSaving }[type] ?? setProfileSaving;
+    const msgMap = { body: 'Body metrics updated', goals: 'Goals updated' };
+    const msg = msgMap[type] ?? 'Profile updated';
+    setSaving(true);
+    try {
+      await updateProfile(user.id, patch);
+      uiStore.getState().addToast(msg, 'success');
+      await refreshQueries();
+    } catch (err) {
+      console.error('Settings update failed', err);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleRecalculate() {
+    setRecalculating(true);
+    try {
+      await nutritionTargetsQuery.refetch();
+      uiStore.getState().addToast('TDEE recalculated', 'success');
+    } finally {
+      setRecalculating(false);
+    }
+  }
+
+  if (!profile && profileQuery.isLoading) {
+    return (
+      <div className="st-root">
+        <header className="st-header">
+          <div className="st-header-left">
+            <button className="st-back-btn" type="button" onClick={() => navigate(-1)}>
+              <span className="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h1 className="st-header-title">{t('settings')}</h1>
+          </div>
+          <span className="st-logo">UM6P_FIT</span>
+        </header>
+        <main className="st-main">
+          <div className="st-loading-shell">
+            <p className="st-loading-copy">Loading your settings…</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  const twoFactorEnabled = profile?.two_factor_enabled ?? false;
 
   return (
     <div className="st-root">
-      {/* Header */}
+      {/* ── Header ── */}
       <header className="st-header">
-        <h1 className="st-header-title">Settings</h1>
+        <div className="st-header-left">
+          <button className="st-back-btn" type="button" onClick={() => navigate(-1)}>
+            <span className="material-symbols-outlined">arrow_back</span>
+          </button>
+          <h1 className="st-header-title">{t('settings')}</h1>
+        </div>
         <span className="st-logo">UM6P_FIT</span>
       </header>
 
       <main className="st-main">
 
         {/* ── Profile ── */}
-        <section className="st-card st-card--shadow" id="profile">
-          <div className="st-profile-row">
-            <div className="st-profile-avatar">
-              <span>{name.charAt(0).toUpperCase()}</span>
-              <div className="st-avatar-edit">
-                <span className="material-symbols-outlined" style={{ fontSize: 12 }}>edit</span>
-              </div>
+        <ProfileSection
+          profile={profile}
+          onSave={(patch) => saveProfilePatch(patch, 'profile')}
+          saving={profileSaving}
+        />
+
+        {/* ── Body Metrics ── */}
+        <BodyMetricsSection
+          key={`bm-${profile?.id || ''}-${profile?.updated_at || ''}`}
+          profile={profile}
+          latestWeightEntry={latestWeightEntry}
+          onSave={(patch) => saveProfilePatch(patch, 'body')}
+          saving={bodySaving}
+        />
+
+        {/* ── Fitness Goals + Recalculate ── */}
+        <FitnessGoalsSection
+          key={`fg-${profile?.id || ''}-${profile?.updated_at || ''}-${profile?.goal || ''}`}
+          profile={profile}
+          workoutFrequency={workoutFrequency}
+          setWorkoutFrequency={setWorkoutFrequency}
+          onSave={(patch) => saveProfilePatch(patch, 'goals')}
+          saving={goalsSaving}
+          onRecalculate={handleRecalculate}
+          recalculating={recalculating}
+        />
+
+        {/* ── TDEE / Targets ── */}
+        <TargetsSection
+          profile={profile}
+          targets={nutritionTargetsQuery.data}
+          isLoading={nutritionTargetsQuery.isLoading}
+          isError={nutritionTargetsQuery.isError}
+          onRefresh={() => nutritionTargetsQuery.refetch()}
+        />
+
+        {/* ── Security ── */}
+        <section className="st-security-card" id="security">
+          <div className="st-section-head">
+            <div>
+              <h2 className="st-section-title">{t('security')}</h2>
+              <p className="st-section-copy">{t('securityDesc')}</p>
             </div>
-            <div className="st-profile-fields">
-              <div className="st-input-group">
-                <label className="st-field-label">Full Name</label>
-                <input className="st-input" type="text" defaultValue={name} />
+          </div>
+
+          <div className="st-security-rows">
+            <div className="st-security-row">
+              <div className="st-security-left">
+                <span className="material-symbols-outlined st-security-icon">
+                  {twoFactorEnabled ? 'lock' : 'shield'}
+                </span>
+                <div className="st-security-info">
+                  <span className="st-security-label">{t('twoFactorAuth')}</span>
+                  <span className={`st-2fa-status ${twoFactorEnabled ? 'st-2fa-status--on' : 'st-2fa-status--off'}`}>
+                    {twoFactorEnabled ? t('enabled') : t('disabled')}
+                  </span>
+                </div>
               </div>
-              <div className="st-input-group">
-                <label className="st-field-label">Email Address</label>
-                <div className="st-input-static">{email}</div>
+              <button
+                className={`st-security-btn ${twoFactorEnabled ? 'st-security-btn--manage' : 'st-security-btn--enable'}`}
+                onClick={() => setShow2FA(true)}
+              >
+                {twoFactorEnabled ? t('manage') : t('enable')}
+              </button>
+            </div>
+
+            <div className="st-security-row">
+              <div className="st-security-left">
+                <span className="material-symbols-outlined st-security-icon">devices</span>
+                <div className="st-security-info">
+                  <span className="st-security-label">{t('activeSessions')}</span>
+                  <span className="st-2fa-status st-2fa-status--neutral">{t('manageDevices')}</span>
+                </div>
               </div>
-              <button className="st-change-pw">
-                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>lock_reset</span>
-                Change Password
+              <button className="st-security-btn st-security-btn--manage" onClick={() => setShowSessions(true)}>
+                {t('viewAll')}
               </button>
             </div>
           </div>
         </section>
 
-        {/* ── Body Metrics ── */}
-        <section className="st-section" id="metrics">
-          <h2 className="st-section-title">Body Metrics</h2>
-          <div className="st-metrics-grid">
-            <div className="st-metric-box">
-              <label className="st-field-label">Height (cm)</label>
-              <input className="st-metric-input" type="number" defaultValue="182" />
-            </div>
-            <div className="st-metric-box">
-              <label className="st-field-label">Weight (kg)</label>
-              <div className="st-metric-val">78.5</div>
-              <span className="st-metric-sub">Last: Apr 4</span>
-            </div>
-            <div className="st-metric-box">
-              <label className="st-field-label">Age</label>
-              <input className="st-metric-input" type="number" defaultValue="24" />
-            </div>
-            <div className="st-metric-box">
-              <label className="st-field-label">Gender</label>
-              <div className="st-gender-toggle">
-                <button className="st-gender-btn st-gender-btn--on">Male</button>
-                <button className="st-gender-btn">Female</button>
-              </div>
-            </div>
-          </div>
-          <button className="st-recalc-btn">
-            <span className="material-symbols-outlined">calculate</span>
-            Recalculate TDEE
-          </button>
-        </section>
-
-        {/* ── Fitness Goals ── */}
-        <section className="st-card st-card--shadow" id="goals">
-          <h2 className="st-section-title">Fitness Goals</h2>
-          <div className="st-input-group">
-            <label className="st-field-label">Primary Objective</label>
-            <div className="st-goal-row">
-              {['lose', 'maintain', 'gain'].map(g => (
-                <button
-                  key={g}
-                  className={`st-goal-btn${goal === g ? ' st-goal-btn--active' : ''}`}
-                  onClick={() => setGoal(g)}
-                >
-                  {g.charAt(0).toUpperCase() + g.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="st-two-col">
-            <div className="st-input-group">
-              <label className="st-field-label">Target Weight (kg)</label>
-              <input className="st-input" type="number" defaultValue="75" />
-            </div>
-            <div className="st-input-group">
-              <label className="st-field-label">Activity Level</label>
-              <select className="st-select">
-                <option>Moderate (3-5 days/week)</option>
-                <option>Sedentary</option>
-                <option>Very Active</option>
-              </select>
-            </div>
-          </div>
-          <div className="st-input-group">
-            <div className="st-freq-row">
-              <label className="st-field-label">Workout Frequency</label>
-              <span className="st-freq-val">{frequency} days</span>
-            </div>
-            <input
-              type="range" min="1" max="7"
-              value={frequency}
-              onChange={e => setFrequency(Number(e.target.value))}
-              className="st-range"
-            />
-          </div>
-        </section>
-
-        {/* ── TDEE & Macros ── */}
-        <section className="st-tdee-card" id="macros">
-          <div className="st-tdee-top">
-            <div>
-              <span className="st-tdee-label">Daily TDEE Target</span>
-              <div className="st-tdee-val">2,300 <span className="st-tdee-unit">kcal</span></div>
-            </div>
-            <button className="st-reset-link">Reset to Calculated</button>
-          </div>
-          <div className="st-macro-grid">
-            {[['Protein','180g'],['Carbs','250g'],['Fats','65g']].map(([n, v]) => (
-              <div key={n} className="st-macro-box">
-                <label className="st-macro-label">{n}</label>
-                <input className="st-macro-input" type="text" defaultValue={v} />
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── Security / 2FA ── */}
-        <section className="st-card st-card--shadow" id="security">
-          <h2 className="st-section-title">Security</h2>
-          <div className="st-2fa-row" style={{marginBottom: '16px'}}>
-            <div className="st-2fa-left">
-              <div className="st-2fa-icon" aria-hidden="true">{twoFactorEnabled ? '🔐' : '🛡️'}</div>
-              <div className="st-2fa-info">
-                <span className="st-2fa-label">Two-Factor Authentication</span>
-                <span className={`st-2fa-status ${twoFactorEnabled ? 'st-2fa-status--on' : 'st-2fa-status--off'}`}>
-                  {twoFactorEnabled ? 'Enabled' : 'Disabled'}
-                </span>
-              </div>
-            </div>
-            <button
-              className={`st-2fa-btn ${twoFactorEnabled ? 'st-2fa-btn--manage' : 'st-2fa-btn--enable'}`}
-              onClick={() => setShow2FA(true)}
-            >
-              {twoFactorEnabled ? 'Manage' : 'Enable'}
-            </button>
-          </div>
-
-          <div className="st-2fa-row">
-            <div className="st-2fa-left">
-              <div className="st-2fa-icon" aria-hidden="true">💻</div>
-              <div className="st-2fa-info">
-                <span className="st-2fa-label">Active Sessions</span>
-                <span className="st-2fa-status" style={{background: '#f5f4f2', color: '#5b5c5a', border: '2px solid #dad4c8'}}>
-                  Manage Devices
-                </span>
-              </div>
-            </div>
-            <button
-              className="st-2fa-btn st-2fa-btn--manage"
-              onClick={() => setShowSessions(true)}
-            >
-              View All
-            </button>
-          </div>
-        </section>
-
         {/* ── Preferences ── */}
-        <section className="st-section" id="preferences">
+        <section className="st-prefs-card" id="preferences">
           <div className="st-pref-row">
             <div className="st-pref-left">
-              <span className="material-symbols-outlined" style={{ color: '#38671a' }}>dark_mode</span>
-              <span className="st-pref-label">Dark Mode</span>
+              <span className="material-symbols-outlined st-pref-icon">dark_mode</span>
+              <span className="st-pref-label">{t('darkMode')}</span>
             </div>
-            <Toggle checked={darkMode} onChange={setDarkMode} />
+            <button
+              type="button"
+              className={`st-toggle${darkMode ? ' st-toggle--on' : ''}`}
+              onClick={() => setDarkMode(!darkMode)}
+              aria-label="Toggle dark mode"
+            >
+              <span className="st-toggle-thumb" />
+            </button>
           </div>
+
           <div className="st-pref-row">
             <div className="st-pref-left">
-              <span className="material-symbols-outlined" style={{ color: '#38671a' }}>language</span>
-              <span className="st-pref-label">Language</span>
+              <span className="material-symbols-outlined st-pref-icon">language</span>
+              <span className="st-pref-label">{t('language')}</span>
             </div>
             <div className="st-lang-row">
-              {['EN','FR','AR'].map(l => (
+              {[['en', 'EN'], ['fr', 'FR'], ['ar', 'AR']].map(([val, lbl]) => (
                 <button
-                  key={l}
-                  className={`st-lang-btn${language === l ? ' st-lang-btn--active' : ''}`}
-                  onClick={() => setLanguage(l)}
+                  key={val}
+                  type="button"
+                  className={`st-lang-btn${language === val ? ' st-lang-btn--active' : ''}`}
+                  onClick={() => setLanguage(val)}
                 >
-                  {l}
+                  {lbl}
                 </button>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ── Legal ── */}
-        <section className="st-section" id="legal">
-          <div className="st-legal-row">
-            <span>Privacy Policy</span>
-            <span className="material-symbols-outlined" style={{ color: '#5b5c5a', fontSize: 20 }}>chevron_right</span>
-          </div>
-          <div className="st-legal-row">
-            <span>Terms of Service</span>
-            <span className="material-symbols-outlined" style={{ color: '#5b5c5a', fontSize: 20 }}>chevron_right</span>
-          </div>
-          <div className="st-legal-row" onClick={() => setShowExport(true)}>
-            <span>Export My Data</span>
-            <span className="material-symbols-outlined" style={{ color: '#5b5c5a', fontSize: 20 }}>download</span>
-          </div>
-          <div className="st-legal-row st-legal-row--danger" onClick={() => setShowDelete(true)}>
-            <span>Delete Account</span>
-            <span className="material-symbols-outlined" style={{ color: '#b02500', fontSize: 20 }}>delete_forever</span>
-          </div>
+        {/* ── Legal / Account ── */}
+        <section className="st-legal-card" id="legal">
+          <button className="st-legal-row" type="button" onClick={() => setShowPrivacy(true)}>
+            <span>{t('privacyPolicy')}</span>
+            <span className="material-symbols-outlined st-legal-chevron">chevron_right</span>
+          </button>
+          <button className="st-legal-row" type="button" onClick={() => setShowTerms(true)}>
+            <span>{t('termsOfService')}</span>
+            <span className="material-symbols-outlined st-legal-chevron">chevron_right</span>
+          </button>
+          <button className="st-legal-row" type="button" onClick={() => setShowExport(true)}>
+            <span>{t('exportData')}</span>
+            <span className="material-symbols-outlined st-legal-chevron">file_download</span>
+          </button>
+          <button className="st-legal-row st-legal-row--danger" type="button" onClick={() => setShowDelete(true)}>
+            <span>{t('deleteAccount')}</span>
+            <span className="material-symbols-outlined" style={{ color: '#b02500', fontSize: 20 }}>cancel</span>
+          </button>
         </section>
 
-        {/* ── Logout ── */}
+        {/* ── Footer ── */}
         <footer className="st-footer">
-          <button className="st-logout-btn" onClick={logout}>
+          <button className="st-logout-btn" type="button" onClick={logout}>
             <span className="material-symbols-outlined">logout</span>
-            Logout
+            {t('logout')}
           </button>
-          <p className="st-version">UM6P_FIT — Kinetic Craft Build v1.0</p>
+          <p className="st-version">UM6P_FIT · Version 0.1.0 · Limited Draft Build</p>
         </footer>
-
       </main>
 
+      {/* ── Modals ── */}
       {show2FA && (
         <TwoFactorSetup
           isEnabled={twoFactorEnabled}
           onClose={() => setShow2FA(false)}
           onSuccess={({ enabled }) => {
-            // Update user in store so badge reflects new state
             authStore.getState().updateProfile({ two_factor_enabled: enabled });
-            if (!enabled) setShow2FA(false);
           }}
         />
       )}
       {showSessions && <SessionsManager onClose={() => setShowSessions(false)} />}
       {showExport && <ExportManager onClose={() => setShowExport(false)} />}
       {showDelete && <DeleteAccountManager onClose={() => setShowDelete(false)} />}
+      {showPrivacy && <PrivacyPolicy onClose={() => setShowPrivacy(false)} />}
+      {showTerms && <TermsOfService onClose={() => setShowTerms(false)} />}
     </div>
   );
 }

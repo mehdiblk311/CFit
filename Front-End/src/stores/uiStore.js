@@ -7,11 +7,22 @@ export const uiStore = create(
     (set, get) => ({
       // UI State
       language: 'en', // 'en', 'fr', 'ar'
+      darkMode: false,
+      workoutFrequency: 5, // 1-7 days
       offline: false,
       toasts: [], // array of { id, message, type, duration }
       activeModal: null,
 
       // Actions
+      setDarkMode: (val) => {
+        set({ darkMode: val });
+        document.documentElement.classList.toggle('dark-mode', val);
+      },
+
+      setWorkoutFrequency: (days) => {
+        set({ workoutFrequency: Math.min(7, Math.max(1, days)) });
+      },
+
       setLanguage: (lang) => {
         set({ language: lang });
         // Apply RTL for Arabic
