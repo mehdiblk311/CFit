@@ -17,7 +17,10 @@
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(46, 47, 46, 0.45);
+  background:
+    radial-gradient(520px 320px at 10% 12%, rgba(195, 251, 156, 0.16), transparent 70%),
+    radial-gradient(520px 320px at 88% 84%, rgba(180, 165, 255, 0.2), transparent 70%),
+    rgba(46, 47, 46, 0.5);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -29,10 +32,10 @@
 /* ── Panel ────────────────────────────────────────────────────────── */
 .tfs-panel {
   position: relative;
-  background: #faf9f7;
+  background: linear-gradient(170deg, #fbfaf7 0%, #f5f3ee 100%);
   border: 2px solid #dad4c8;
   border-radius: 24px;
-  box-shadow: -8px 8px 0 #2e2f2e;
+  box-shadow: -8px 8px 0 #2e2f2e, 0 16px 30px rgba(0, 0, 0, 0.16);
   padding: 40px 32px 36px;
   width: 100%;
   max-width: 440px;
@@ -392,11 +395,23 @@
   margin: 0;
 }
 
+@media (max-width: 640px) {
+  .tfs-overlay {
+    align-items: flex-start;
+    padding: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom));
+  }
+
+  .tfs-panel {
+    max-height: calc(100dvh - 28px);
+  }
+}
+
 /* ── Mobile ───────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
   .tfs-panel {
     padding: 32px 20px 28px;
     border-radius: 20px;
+    max-height: calc(100dvh - 20px);
   }
   .tfs-code-input {
     font-size: 18px;
@@ -404,5 +419,13 @@
   }
   .tfs-recovery-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 360px) {
+  .tfs-code-input {
+    font-size: 16px;
+    letter-spacing: 4px;
+    padding-inline: 16px;
   }
 }

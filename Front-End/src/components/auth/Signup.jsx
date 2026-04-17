@@ -6,6 +6,8 @@ import AuthLanguageSwitch from './AuthLanguageSwitch';
 import './Signup.css';
 
 function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim()); }
+function hasCapitalLetter(value) { return /[A-Z]/.test(value); }
+function hasSpecialCharacter(value) { return /[^A-Za-z0-9]/.test(value); }
 
 function getStrength(pw, t) {
   if (!pw) return { score: 0, label: '', cls: 'empty' };
@@ -36,19 +38,26 @@ export default function Signup() {
 
   const reqs = [
     { label: t('auth.signup.requirements.characters'), met: pw.length >= 8 },
-    { label: t('auth.signup.requirements.capital'), met: /[A-Z]/.test(pw) },
-    { label: t('auth.signup.requirements.special'), met: /[^A-Za-z0-9]/.test(pw) },
+    { label: t('auth.signup.requirements.capital'), met: hasCapitalLetter(pw) },
+    { label: t('auth.signup.requirements.special'), met: hasSpecialCharacter(pw) },
   ];
 
   function clearError(field) { setErrors(p => ({ ...p, [field]: undefined })); }
 
   function validate() {
     const e = {};
-    if (!name.trim()) e.name = t('auth.signup.errors.nameRequired');
-    if (!email.trim()) e.email = t('auth.signup.errors.emailRequired');
-    else if (!isValidEmail(email)) e.email = t('auth.signup.errors.emailInvalid');
+    const normalizedName = name.trim();
+    const normalizedEmail = email.trim();
+
+    if (!normalizedName) e.name = t('auth.signup.errors.nameRequired');
+    if (!normalizedEmail) e.email = t('auth.signup.errors.emailRequired');
+    else if (!isValidEmail(normalizedEmail)) e.email = t('auth.signup.errors.emailInvalid');
+
     if (!pw) e.pw = t('auth.signup.errors.passwordRequired');
     else if (pw.length < 8) e.pw = t('auth.signup.errors.passwordShort');
+    else if (!hasCapitalLetter(pw)) e.pw = t('auth.signup.errors.passwordCapital');
+    else if (!hasSpecialCharacter(pw)) e.pw = t('auth.signup.errors.passwordSpecial');
+
     if (confirm !== pw) e.confirm = t('auth.signup.errors.passwordMismatch');
     return e;
   }
@@ -59,7 +68,7 @@ export default function Signup() {
     if (Object.keys(e).length) { setErrors(e); return; }
     setLoading(true);
     try {
-      const response = await signup(name, email, pw);
+      const response = await signup(name.trim(), email.trim(), pw);
       // Check if 2FA is required
       if (response.two_factor_required) {
         navigate('/2fa-challenge');

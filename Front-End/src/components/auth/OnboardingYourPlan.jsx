@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { uiStore } from '../../stores/uiStore';
@@ -31,9 +31,6 @@ export default function OnboardingYourPlan({ step = 3, totalSteps = 3, onBack, t
   const [targets, setTargets] = useState(null);
   const [loading, setLoading] = useState(false);
   const [completing, setCompleting] = useState(false);
-  const submitted = useRef(false);
-  // Tracks the in-flight TDEE save promise so handleComplete can await it
-  const tdeePromise = useRef(null);
 
   useEffect(() => {
     if (!tdeeData) {
@@ -48,25 +45,18 @@ export default function OnboardingYourPlan({ step = 3, totalSteps = 3, onBack, t
 
     // Use frontend-computed TDEE immediately (instant display)
     setTargets(tdeeData);
-
-    // Submit TDEE to backend once (persists computed value for returning-user fallback)
-    if (!submitted.current && user?.id) {
-      submitted.current = true;
-      tdeePromise.current = updateProfile(user.id, { tdee: tdeeData.calories })
-        .catch((error) => {
-          console.warn('Failed to persist TDEE to backend', error);
-        });
-    }
-  }, [tdeeData, updateProfile, user?.id]);
+  }, [tdeeData, user?.id]);
 
   const handleComplete = async () => {
     setCompleting(true);
     try {
-      // Wait for TDEE to be persisted before navigating
-      // Once TDEE is saved, isOnboarded() will return true (has weight + height + goal + tdee)
-      if (tdeePromise.current) {
-        await tdeePromise.current;
+      const nextTdee = Number(tdeeData?.calories ?? targets?.calories ?? user?.tdee);
+
+      // Persist TDEE only when the user confirms the final onboarding step.
+      if (user?.id && Number.isFinite(nextTdee) && nextTdee > 0) {
+        await updateProfile(user.id, { tdee: nextTdee }, { showErrorToast: false });
       }
+
       navigate('/dashboard');
     } catch {
       uiStore.getState().addToast('Failed to complete onboarding', 'error');

@@ -11,13 +11,14 @@
 
 .login-root {
   background: #f7f6f4;
-  height: 100dvh;
-  overflow: hidden;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px 24px;
+  padding: 24px 24px max(24px, env(safe-area-inset-bottom));
   position: relative;
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
@@ -338,8 +339,47 @@ html[dir='rtl'] .login-footer-link {
   flex-direction: row-reverse;
 }
 
+@media (max-width: 767px) {
+  .login-root {
+    justify-content: flex-start;
+    padding-top: max(18px, env(safe-area-inset-top));
+  }
+}
+
+/* ── Tablet (768px - 991px) ─────────────────────────────────────── */
+@media (min-width: 768px) and (max-width: 991px) {
+  .login-root {
+    padding: 24px;
+  }
+
+  .login-container {
+    max-width: 560px;
+    display: block;
+  }
+
+  .login-desktop-hero,
+  .login-desktop-signup {
+    display: none;
+  }
+
+  .login-wordmark {
+    position: static;
+    margin-bottom: 12px;
+  }
+
+  .login-language-switch {
+    position: static;
+    margin-bottom: 18px;
+  }
+
+  .login-card {
+    max-width: 560px;
+    width: 100%;
+  }
+}
+
 /* ── Desktop Layout ─────────────────────────────────────────────── */
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   .login-root {
     padding: 32px;
   }

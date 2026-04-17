@@ -99,8 +99,12 @@ export const authStore = create(
       isOnboarded: () => {
         const state = get();
         if (!state.user) return false;
-        // Backend has no explicit onboarded flag; profile completeness is the source of truth.
-        return !!(state.user.weight && state.user.height && state.user.goal);
+        // Backend has no explicit onboarded flag; the frontend treats onboarding
+        // as complete only after the final plan step persists the calculated TDEE.
+        const hasBodyMetrics = !!(state.user.weight && state.user.height);
+        const hasGoal = !!state.user.goal;
+        const hasTdee = Number(state.user.tdee) > 0;
+        return hasBodyMetrics && hasGoal && hasTdee;
       },
 
       isAdmin: () => {
