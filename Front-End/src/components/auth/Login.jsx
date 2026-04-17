@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../../i18n/useI18n';
 import AuthLanguageSwitch from './AuthLanguageSwitch';
@@ -184,6 +184,11 @@ export default function Login() {
         <div className="login-footer-link">
           <span>{t('auth.login.footerPrompt')}</span>
           <button type="button" onClick={() => navigate('/signup')}>{t('auth.login.footerAction')}</button>
+        </div>
+        <div className="login-legal-links">
+          <Link to="/privacy">{t('settings.privacyPolicy')}</Link>
+          <span aria-hidden="true">•</span>
+          <Link to="/terms">{t('settings.termsOfService')}</Link>
         </div>
       </div>
     </div>

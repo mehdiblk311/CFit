@@ -300,6 +300,29 @@
 }
 .login-footer-link button:hover { opacity: 0.7; }
 
+.login-legal-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 12px;
+  animation: login-fade-up 0.4s 0.4s ease both;
+}
+.login-legal-links a {
+  color: #38671a;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+}
+.login-legal-links a:hover {
+  opacity: 0.72;
+}
+.login-legal-links span {
+  color: #adadab;
+}
+
 /* ── Desktop hero — hidden on mobile ───────────────────────────── */
 .login-desktop-hero      { display: none; }
 .login-desktop-sticker   { display: none; }
@@ -311,6 +334,7 @@ html[dir='rtl'] .login-root {
 
 html[dir='rtl'] .login-heading,
 html[dir='rtl'] .login-footer-link,
+html[dir='rtl'] .login-legal-links,
 html[dir='rtl'] .login-desktop-hero {
   text-align: right;
 }
@@ -336,6 +360,10 @@ html[dir='rtl'] .login-error-msg {
 }
 
 html[dir='rtl'] .login-footer-link {
+  flex-direction: row-reverse;
+}
+
+html[dir='rtl'] .login-legal-links {
   flex-direction: row-reverse;
 }
 
