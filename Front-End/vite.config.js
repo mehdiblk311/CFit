@@ -9,14 +9,16 @@ export default defineConfig({
     host: '0.0.0.0',
     proxy: {
       '/v1': {
-        target: 'http://localhost:8080',
+        target: 'https://localhost:8080',
         changeOrigin: true,
         ws: true,
+        secure: false,
       },
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'https://localhost:8080',
         changeOrigin: true,
         ws: true,
+        secure: false,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },

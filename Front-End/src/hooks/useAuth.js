@@ -92,9 +92,11 @@ export function useAuth() {
       return response;
     } catch (error) {
       const detail = error?.response?.data?.detail ?? error?.response?.data?.error ?? null;
+      const fieldErrors = error?.response?.data?.errors ?? null;
       const enriched = new Error(detail || 'Login failed');
       enriched.status = error?.response?.status;
       enriched.detail = detail;
+      enriched.fieldErrors = fieldErrors;
       throw enriched;
     }
   };

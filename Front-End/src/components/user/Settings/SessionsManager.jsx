@@ -19,44 +19,56 @@ export default function SessionsManager({ onClose }) {
   };
 
   useEffect(() => {
-    loadSessions();
-  }, []);
+    let active = true;
 
-  const loadSessions = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    async function loadSessions() {
+      try {
+        if (active) {
+          setLoading(true);
+          setError(null);
+        }
 
-      let page = 1;
-      let hasNext = true;
-      const allSessions = [];
+        let page = 1;
+        let hasNext = true;
+        const allSessions = [];
 
-      while (hasNext) {
-        const response = await authAPI.getSessions({ page, limit: SESSION_PAGE_SIZE });
-        const pageSessions = Array.isArray(response?.data)
-          ? response.data
-          : Array.isArray(response)
-            ? response
-            : [];
+        while (hasNext) {
+          const response = await authAPI.getSessions({ page, limit: SESSION_PAGE_SIZE });
+          const pageSessions = Array.isArray(response?.data)
+            ? response.data
+            : Array.isArray(response)
+              ? response
+              : [];
 
-        allSessions.push(...pageSessions);
+          allSessions.push(...pageSessions);
 
-        if (!Array.isArray(response?.data)) { hasNext = false; continue; }
-        const nextFromMetadata = Boolean(response?.metadata?.has_next);
-        hasNext = nextFromMetadata && pageSessions.length > 0;
-        page += 1;
+          if (!Array.isArray(response?.data)) { hasNext = false; continue; }
+          const nextFromMetadata = Boolean(response?.metadata?.has_next);
+          hasNext = nextFromMetadata && pageSessions.length > 0;
+          page += 1;
+        }
+
+        if (!active) return;
+
+        const deduped = Array.from(
+          new Map(allSessions.map((s) => [s.id, s])).values()
+        );
+        setSessions(deduped);
+      } catch (err) {
+        if (!active) return;
+        setError(err.message || t('sessionsLoadFailed'));
+      } finally {
+        if (active) setLoading(false);
       }
-
-      const deduped = Array.from(
-        new Map(allSessions.map((s) => [s.id, s])).values()
-      );
-      setSessions(deduped);
-    } catch (err) {
-      setError(err.message || t('sessionsLoadFailed'));
-    } finally {
-      setLoading(false);
     }
-  };
+
+    loadSessions();
+
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load once per modal mount; t changes identity on every render
+  }, []);
 
   const handleRevoke = async (id) => {
     try {

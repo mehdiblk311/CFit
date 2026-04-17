@@ -30,17 +30,22 @@ export default function AdminLayout() {
   const { logout, user } = useAuth();
   const { t, language, setLanguage } = useI18n();
   const [expanded, setExpanded] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileOpenPath, setMobileOpenPath] = useState(null);
+  const [prevPathname, setPrevPathname] = useState(location.pathname);
 
-  // Lock body scroll + close drawer on route change
+  if (location.pathname !== prevPathname) {
+    setPrevPathname(location.pathname);
+    setMobileOpenPath(null);
+  }
+
+  const mobileOpen = mobileOpenPath === location.pathname;
+
+  // Lock body scroll while the drawer is open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
 
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [location.pathname]);
   const navItems = NAV_ITEMS.map((item) => ({ ...item, label: t(item.labelKey) }));
   const activeItem = navItems.find((item) => isActive(item, location.pathname));
   const adminIdentity = user?.name || user?.email || t('common.labels.rootAdmin');
@@ -56,7 +61,7 @@ export default function AdminLayout() {
       {mobileOpen && (
         <div
           className="adm-mobile-overlay adm-mobile-overlay--active"
-          onClick={() => setMobileOpen(false)}
+          onClick={() => setMobileOpenPath(null)}
           aria-label={t('common.labels.closeMenu')}
           role="presentation"
         />
@@ -86,7 +91,7 @@ export default function AdminLayout() {
               <button
                 key={item.id}
                 className={`adm-nav-btn${active ? ' adm-nav-btn--active' : ''}`}
-                onClick={() => { navigate(item.path); setMobileOpen(false); }}
+                onClick={() => { navigate(item.path); setMobileOpenPath(null); }}
                 title={item.label}
               >
                 <span
@@ -118,7 +123,7 @@ export default function AdminLayout() {
             <button
               className="adm-hamburger"
               type="button"
-              onClick={() => setMobileOpen(true)}
+              onClick={() => setMobileOpenPath(location.pathname)}
               aria-label={t('common.labels.openMenu')}
               aria-expanded={mobileOpen}
               aria-controls="adm-sidenav"

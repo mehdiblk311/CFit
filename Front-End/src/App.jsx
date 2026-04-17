@@ -34,9 +34,10 @@ const AdminUserPrograms = lazy(() => import('./components/admin/AdminUserProgram
 const AdminNutrition = lazy(() => import('./components/admin/Nutrition/AdminNutrition'));
 
 function lazyElement(Component) {
+  const Screen = Component;
   return (
     <Suspense fallback={null}>
-      <Component />
+      <Screen />
     </Suspense>
   );
 }

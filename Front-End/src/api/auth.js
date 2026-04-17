@@ -12,14 +12,24 @@ export const authAPI = {
     if (totpCode) body.totp_code = totpCode;
     if (recoveryCode) body.recovery_code = recoveryCode;
 
-    const response = await client.post('/v1/auth/login', body);
+    const response = await client.post('/v1/auth/login', body, { validateStatus: () => true });
+    if (response.status >= 400) {
+      const error = new Error('Request failed with status code ' + response.status);
+      error.response = response;
+      throw error;
+    }
     return response.data;
   },
 
   // Register new user
   // Same response structure as login
   register: async (name, email, password) => {
-    const response = await client.post('/v1/auth/register', { name, email, password });
+    const response = await client.post('/v1/auth/register', { name, email, password }, { validateStatus: () => true });
+    if (response.status >= 400) {
+      const error = new Error('Request failed with status code ' + response.status);
+      error.response = response;
+      throw error;
+    }
     return response.data;
   },
 
