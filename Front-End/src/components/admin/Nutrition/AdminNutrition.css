@@ -354,6 +354,13 @@
     padding-right: 16px;
   }
 
+  /* Toolbar: stack controls vertically */
+  .adm-nut-table-toolbar {
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 16px;
+  }
+
   .adm-nut-category-input,
   .adm-nut-toolbar-search {
     width: 100%;
@@ -362,5 +369,65 @@
 
   .adm-nut-macro-grid {
     grid-template-columns: 1fr;
+  }
+
+  /* Table header: stack title and count badge */
+  .adm-nut-table-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  /* Pagination: center on mobile */
+  .adm-nut-pagination {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+/* ── Table scroll on mobile ────────────────────────────────────── */
+@media (max-width: 767px) {
+  .adm-nut-table-shell {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hero: tighten padding on mobile */
+  .adm-nut-hero {
+    padding: 18px;
+    gap: 16px;
+  }
+
+  /* Hero text: compress */
+  .adm-nut-hero-title {
+    font-size: clamp(22px, 6vw, 32px);
+    letter-spacing: -1.2px;
+  }
+
+  /* Analytic cards: less padding */
+  .adm-nut-analytic-card {
+    padding: 18px;
+    gap: 14px;
+  }
+
+  /* Section title: scale down */
+  .adm-nut-section-title {
+    font-size: 20px;
+    letter-spacing: -0.6px;
+  }
+}
+
+/* ── Small phone: hero fully stacked ──────────────────────────── */
+@media (max-width: 479px) {
+  .adm-nut-hero {
+    padding: 14px;
+  }
+
+  .adm-nut-hero-body {
+    font-size: 14px;
+  }
+
+  .adm-nut-metric-text {
+    font-size: 22px;
   }
 }

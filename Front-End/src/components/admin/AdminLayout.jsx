@@ -32,11 +32,15 @@ export default function AdminLayout() {
   const [expanded, setExpanded] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Lock body scroll when mobile drawer is open
+  // Lock body scroll + close drawer on route change
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
   const navItems = NAV_ITEMS.map((item) => ({ ...item, label: t(item.labelKey) }));
   const activeItem = navItems.find((item) => isActive(item, location.pathname));
   const adminIdentity = user?.name || user?.email || t('common.labels.rootAdmin');
@@ -59,9 +63,11 @@ export default function AdminLayout() {
       )}
 
       <aside
+        id="adm-sidenav"
         className={`adm-sidenav${expanded ? ' adm-sidenav--open' : ''}${mobileOpen ? ' adm-sidenav--mobile-open' : ''}`}
         onMouseEnter={() => setExpanded(true)}
         onMouseLeave={() => setExpanded(false)}
+        aria-label="Admin navigation"
       >
         <div className="adm-sidenav-logo">
           <div className="adm-sidenav-logo-icon">
@@ -114,6 +120,8 @@ export default function AdminLayout() {
               type="button"
               onClick={() => setMobileOpen(true)}
               aria-label={t('common.labels.openMenu') || 'Open menu'}
+              aria-expanded={mobileOpen}
+              aria-controls="adm-sidenav"
             >
               <span className="material-symbols-outlined">menu</span>
             </button>

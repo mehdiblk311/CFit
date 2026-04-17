@@ -55,8 +55,6 @@ export const translations = {
     activeSessions: 'Active Sessions',
     manageDevices: 'Manage devices',
     viewAll: 'View All',
-    // preferences
-    darkMode: 'Dark Mode',
     language: 'Language',
     // legal
     privacyPolicy: 'Privacy Policy',
@@ -123,8 +121,6 @@ export const translations = {
     activeSessions: 'Sessions actives',
     manageDevices: 'Gérer les appareils',
     viewAll: 'Voir tout',
-    // preferences
-    darkMode: 'Mode sombre',
     language: 'Langue',
     // legal
     privacyPolicy: 'Confidentialité',
@@ -191,8 +187,6 @@ export const translations = {
     activeSessions: 'الجلسات النشطة',
     manageDevices: 'إدارة الأجهزة',
     viewAll: 'عرض الكل',
-    // preferences
-    darkMode: 'الوضع الداكن',
     language: 'اللغة',
     // legal
     privacyPolicy: 'سياسة الخصوصية',

@@ -11,6 +11,11 @@ import { uiStore } from '../stores/uiStore';
 // /login on every refresh.
 let _initPromise = null;
 
+function isTerminalRefreshError(error) {
+  const status = error?.response?.status;
+  return status === 400 || status === 401 || status === 403;
+}
+
 export function initAuth() {
   if (_initPromise) return _initPromise;
 
@@ -42,13 +47,19 @@ export function initAuth() {
     // We have a refresh token but no access token → try to refresh
     try {
       const response = await authAPI.refresh(refresh_token);
-      store.setTokens(response.access_token, response.refresh_token);
+      store.setTokens(response.access_token, response.refresh_token || refresh_token);
       store.setAuthBootstrapped(true);
       return true;
-    } catch {
-      // Refresh failed (token revoked / expired) → clean state
-      store.logout();
-      return false;
+    } catch (error) {
+      // Token is invalid/revoked -> clean state. Transient failures should not
+      // force a logout.
+      if (isTerminalRefreshError(error)) {
+        store.logout();
+        return false;
+      }
+
+      store.setAuthBootstrapped(true);
+      return !!(store.user && store.refresh_token);
     }
   })();
 
@@ -144,13 +155,16 @@ export function useAuth() {
     }
   };
 
-  const updateProfileData = async (userId, data) => {
+  const updateProfileData = async (userId, data, options = {}) => {
+    const { showErrorToast = true } = options;
     try {
       const response = await usersAPI.updateProfile(userId, data);
       authStore.getState().updateProfile(response);
       return response;
     } catch (error) {
-      uiStore.getState().addToast('Profile update failed', 'error');
+      if (showErrorToast) {
+        uiStore.getState().addToast('Profile update failed', 'error');
+      }
       throw error;
     }
   };

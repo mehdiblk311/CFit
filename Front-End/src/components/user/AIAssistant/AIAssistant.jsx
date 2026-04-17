@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   useChatConversations,
   useConversationMessages,
-  useCoachSummary,
   useSendChatMessage,
   useSubmitChatFeedback,
 } from '../../../hooks/queries/useChat';
@@ -44,27 +43,6 @@ const CONTEXT_LINKS = [
 
 function toArray(value) {
   return Array.isArray(value) ? value : [];
-}
-
-function clampPercent(value) {
-  if (!Number.isFinite(value)) return 0;
-  if (value <= 0) return 0;
-  if (value >= 100) return 100;
-  return value;
-}
-
-function formatWholeNumber(value) {
-  if (!Number.isFinite(value)) return '0';
-  return Math.round(value).toLocaleString('en-US');
-}
-
-function formatMetricLabel(value, unit = '') {
-  return `${formatWholeNumber(value)}${unit}`;
-}
-
-function formatMetricTarget(value, unit = '') {
-  if (!Number.isFinite(value) || value <= 0) return '—';
-  return `${formatWholeNumber(value)}${unit}`;
 }
 
 function formatClock(value) {
@@ -118,35 +96,6 @@ function sortMessagesChronologically(messages) {
       return a.index - b.index;
     })
     .map((entry) => entry.message);
-}
-
-function summarizeCoachContext(rawSummary) {
-  const daily = rawSummary?.daily_summary || {};
-  const streaks = rawSummary?.streaks?.streaks || {};
-  const adherence = rawSummary?.streaks?.adherence_summary || {};
-  const recommendations = toArray(rawSummary?.recommendations?.rules).filter(
-    (rule) => rule?.applies !== false
-  );
-  const records = toArray(rawSummary?.records);
-
-  const caloriesTotal = Number(daily.total_calories || 0);
-  const caloriesTarget = Number(daily.target_calories || 0);
-  const proteinTotal = Number(daily.total_protein || 0);
-  const proteinTarget = Number(daily.target_protein || 0);
-
-  return {
-    caloriesTotal,
-    caloriesTarget,
-    caloriesProgress: caloriesTarget > 0 ? clampPercent((caloriesTotal / caloriesTarget) * 100) : 0,
-    proteinTotal,
-    proteinTarget,
-    proteinProgress: proteinTarget > 0 ? clampPercent((proteinTotal / proteinTarget) * 100) : 0,
-    workoutStreak: Number(streaks.workout_streak || 0),
-    mealStreak: Number(streaks.meal_streak || 0),
-    adherence7: Number(adherence.days_7 || 0),
-    recommendations,
-    recordsCount: records.length,
-  };
 }
 
 /* ── Message Bubble ────────────────────────────────────────────── */
@@ -218,113 +167,6 @@ function MessageBubble({ message, onFeedback, feedbackPending, onNavigate }) {
   );
 }
 
-/* ── Context Panel ─────────────────────────────────────────────── */
-
-function ContextPanel({ context, loading }) {
-  if (loading) {
-    return (
-      <div className="coach-ctx coach-ctx--loading">
-        <div className="coach-ctx__shimmer" />
-        <div className="coach-ctx__shimmer coach-ctx__shimmer--short" />
-        <div className="coach-ctx__shimmer coach-ctx__shimmer--narrow" />
-      </div>
-    );
-  }
-
-  const hasAnyData =
-    context.caloriesTarget > 0 ||
-    context.proteinTarget > 0 ||
-    context.workoutStreak > 0 ||
-    context.mealStreak > 0 ||
-    context.adherence7 > 0 ||
-    context.recordsCount > 0;
-
-  return (
-    <aside className="coach-ctx">
-      <div className="coach-ctx__head">
-        <h2>Today&apos;s Context</h2>
-        <span className="coach-ctx__label">{hasAnyData ? 'Grounded in your data' : 'Getting started'}</span>
-      </div>
-
-      {!hasAnyData ? (
-        <div className="coach-ctx__onboard">
-          <span className="material-symbols-outlined coach-ctx__onboard-icon">rocket_launch</span>
-          <div className="coach-ctx__onboard-body">
-            <p className="coach-ctx__onboard-title">Track to unlock insights</p>
-            <p className="coach-ctx__onboard-desc">
-              Log a workout or meal and your stats will appear here. Your coach gets smarter with every entry.
-            </p>
-          </div>
-        </div>
-      ) : (
-        <>
-          <div className="coach-ctx__meters">
-            <div className="coach-meter">
-              <div className="coach-meter__row">
-                <span>Calories</span>
-                <strong>
-                  {formatMetricLabel(context.caloriesTotal)} / {formatMetricTarget(context.caloriesTarget)}
-                </strong>
-              </div>
-              <div className="coach-meter__track">
-                <div
-                  className="coach-meter__fill"
-                  style={{ width: `${context.caloriesProgress}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="coach-meter">
-              <div className="coach-meter__row">
-                <span>Protein</span>
-                <strong>
-                  {formatMetricLabel(context.proteinTotal, 'g')} / {formatMetricTarget(context.proteinTarget, 'g')}
-                </strong>
-              </div>
-              <div className="coach-meter__track">
-                <div
-                  className="coach-meter__fill coach-meter__fill--ube"
-                  style={{ width: `${context.proteinProgress}%` }}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="coach-ctx__kpis">
-            <div className="coach-kpi">
-              <span className="coach-kpi__label">Workout streak</span>
-              <strong className="coach-kpi__value">{context.workoutStreak}<small>wk</small></strong>
-            </div>
-            <div className="coach-kpi">
-              <span className="coach-kpi__label">Meal streak</span>
-              <strong className="coach-kpi__value">{context.mealStreak}<small>d</small></strong>
-            </div>
-            <div className="coach-kpi">
-              <span className="coach-kpi__label">7-day adherence</span>
-              <strong className="coach-kpi__value">{Math.round(context.adherence7)}<small>%</small></strong>
-            </div>
-            <div className="coach-kpi">
-              <span className="coach-kpi__label">Tracked records</span>
-              <strong className="coach-kpi__value">{context.recordsCount}</strong>
-            </div>
-          </div>
-        </>
-      )}
-
-      {context.recommendations.length > 0 && (
-        <div className="coach-ctx__recs">
-          {context.recommendations.slice(0, 2).map((rule) => (
-            <div key={rule.id || rule.name} className="coach-rec">
-              <span className="material-symbols-outlined">assistant</span>
-              <span>{rule.name || 'Recommendation'}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </aside>
-  );
-}
-
 /* ── Main Component ─────────────────────────────────────────────── */
 
 export default function AIAssistant() {
@@ -335,19 +177,6 @@ export default function AIAssistant() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [pendingMessage, setPendingMessage] = useState(null);
   const [pendingFeedbackKey, setPendingFeedbackKey] = useState('');
-  const [summaryCollapsed, setSummaryCollapsed] = useState(() => 
-    typeof window !== 'undefined' && window.innerWidth < 680
-  );
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 680) {
-        setSummaryCollapsed(false);
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const threadEndRef = useRef(null);
   const composerRef = useRef(null);
@@ -360,7 +189,6 @@ export default function AIAssistant() {
     useChatConversations(historyParams);
   const { data: conversationData, isLoading: conversationLoading } =
     useConversationMessages(activeConversationId);
-  const { data: coachSummaryData, isLoading: coachSummaryLoading } = useCoachSummary();
 
   const sendMessage = useSendChatMessage();
   const submitFeedback = useSubmitChatFeedback();
@@ -370,11 +198,6 @@ export default function AIAssistant() {
     if (Array.isArray(conversationsData)) return conversationsData;
     return [];
   }, [conversationsData]);
-
-  const context = useMemo(
-    () => summarizeCoachContext(coachSummaryData),
-    [coachSummaryData]
-  );
 
   const renderedMessages = useMemo(() => {
     const serverMessages = sortMessagesChronologically(conversationData?.messages).filter((m) => {
@@ -560,21 +383,6 @@ export default function AIAssistant() {
 
         {/* ── Main Panel ──────────────────────────────────── */}
         <section className="coach-panel">
-          {/* Context summary – collapsible */}
-          <div className={`coach-ctx-wrapper${summaryCollapsed ? ' coach-ctx-wrapper--collapsed' : ''}`}>
-            <ContextPanel context={context} loading={coachSummaryLoading} />
-            <button
-              type="button"
-              className="coach-ctx-toggle"
-              onClick={() => setSummaryCollapsed((v) => !v)}
-              aria-label={summaryCollapsed ? 'Expand context' : 'Collapse context'}
-            >
-              <span className="material-symbols-outlined">
-                {summaryCollapsed ? 'expand_more' : 'expand_less'}
-              </span>
-            </button>
-          </div>
-
           {/* Thread */}
           <section className="coach-thread" aria-live="polite">
             {activeConversationId && conversationLoading ? (

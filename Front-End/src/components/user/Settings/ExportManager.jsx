@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { accountAPI } from '../../../api/account';
+import { useI18n } from '../../../i18n/useI18n';
 
 export default function ExportManager({ onClose }) {
+  const { t } = useI18n('settings');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
@@ -15,7 +17,7 @@ export default function ExportManager({ onClose }) {
       setSuccess(true);
       if (data?.id) setExportId(data.id);
     } catch (err) {
-      setError(err.message || 'Failed to request export. Please try again.');
+      setError(err.message || t('exportRequestFailed'));
     } finally {
       setLoading(false);
     }
@@ -24,18 +26,15 @@ export default function ExportManager({ onClose }) {
   return (
     <div className="st-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="st-modal-panel">
-        <button className="st-modal-close" onClick={onClose}>
+        <button type="button" className="st-modal-close" onClick={onClose}>
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
         </button>
 
-        <h3 className="st-modal-title">Export My Data</h3>
+        <h3 className="st-modal-title">{t('exportTitle')}</h3>
 
         {!success ? (
           <>
-            <p className="st-modal-desc">
-              Request a complete export of your personal data — body metrics, workout history,
-              and nutrition logs. We will prepare a JSON file for you to download.
-            </p>
+            <p className="st-modal-desc">{t('exportDesc')}</p>
 
             {error && (
               <p style={{ color: '#b02500', marginBottom: 16, fontSize: 14, lineHeight: 1.5 }}>
@@ -45,32 +44,34 @@ export default function ExportManager({ onClose }) {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <button
+                type="button"
                 className="st-modal-btn st-modal-btn--primary"
                 onClick={handleExport}
                 disabled={loading}
               >
-                {loading ? 'Requesting…' : 'Request Data Export'}
+                {loading ? t('requesting') : t('requestDataExport')}
               </button>
               <button
+                type="button"
                 className="st-modal-btn st-modal-btn--outline"
                 onClick={onClose}
                 disabled={loading}
               >
-                Cancel
+                {t('cancel')}
               </button>
             </div>
           </>
         ) : (
           <>
             <p className="st-modal-desc" style={{ color: '#38671a', fontWeight: 700 }}>
-              Export request received.
+              {t('exportRequestReceived')}
             </p>
             <p className="st-modal-desc">
-              {exportId ? `Export ID: ${exportId}. ` : ''}
-              You will receive an email when the data is ready to download.
+              {exportId ? `${t('exportIdLabel')}: ${exportId}. ` : ''}
+              {t('exportReadyEmail')}
             </p>
-            <button className="st-modal-btn st-modal-btn--primary" onClick={onClose}>
-              Done
+            <button type="button" className="st-modal-btn st-modal-btn--primary" onClick={onClose}>
+              {t('done')}
             </button>
           </>
         )}

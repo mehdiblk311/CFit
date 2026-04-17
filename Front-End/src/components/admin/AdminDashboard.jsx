@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { useAdminDashboard, useAdminLogs, useAdminMetrics } from '../../hooks/queries/useAdmin';
+import { useAdminRealtime } from '../../hooks/queries/useAdminRealtime';
 
 const ROLE_COLOR = { admin: 'adm-chip--green', coach: 'adm-chip--purple', user: 'adm-chip--oat' };
 
@@ -18,6 +20,25 @@ function firstNumber(...values) {
     if (Number.isFinite(parsed)) return parsed;
   }
   return 0;
+}
+
+function resolveRealtimeNumber(realtimeValue, fallbackValue) {
+  const parsed = Number(realtimeValue);
+  return Number.isFinite(parsed) ? parsed : fallbackValue;
+}
+
+function realtimeStatusMeta(status) {
+  switch (status) {
+    case 'live':
+      return { label: '🟢 Live', className: 'adm-chip adm-chip--green' };
+    case 'reconnecting':
+    case 'connecting':
+      return { label: '🟡 Reconnecting', className: 'adm-chip adm-chip--oat' };
+    case 'disabled':
+      return { label: '🟡 Polling Fallback', className: 'adm-chip adm-chip--oat' };
+    default:
+      return { label: '🔴 Disconnected', className: 'adm-chip adm-chip--red' };
+  }
 }
 
 function safePercent(value, total) {
@@ -165,6 +186,16 @@ export default function AdminDashboard() {
   const dashboardQuery = useAdminDashboard();
   const metricsQuery = useAdminMetrics();
   const logsQuery = useAdminLogs({ page: 1, limit: 6 });
+  const realtime = useAdminRealtime();
+
+  useEffect(() => {
+    if (realtime.isLive) return undefined;
+    const timerId = window.setInterval(() => {
+      dashboardQuery.refetch();
+      metricsQuery.refetch();
+    }, 5000);
+    return () => window.clearInterval(timerId);
+  }, [realtime.isLive, dashboardQuery, metricsQuery]);
 
   const dashboard = dashboardQuery.data?.item || {};
   const summary = dashboard.summary || {};
@@ -177,12 +208,21 @@ export default function AdminDashboard() {
   const logs = asArray(logsPayload.data || logsPayload.items || logsPayload.logs || logsPayload);
 
   const totalUsers = firstNumber(userStats.total_users, summary.total_users);
-  const activeToday = firstNumber(summary.dau);
+  const activeToday = resolveRealtimeNumber(realtime.metrics?.activeUsers, firstNumber(summary.dau));
   const active7d = firstNumber(userStats.active_users_7d);
   const mau = firstNumber(summary.mau, userStats.mau);
   const newUsers7d = firstNumber(summary.new_users_7d);
   const totalWorkouts = firstNumber(workoutStats.total_workouts);
-  const workoutsToday = firstNumber(summary.workouts_today, workoutStats.workouts_today);
+  const workoutsToday = resolveRealtimeNumber(
+    realtime.metrics?.workoutsToday,
+    firstNumber(summary.workouts_today, workoutStats.workouts_today)
+  );
+  const mealsToday = resolveRealtimeNumber(
+    realtime.metrics?.mealsToday,
+    firstNumber(nutritionStats.meals_today)
+  );
+  const lastSyncAt = realtime.metrics?.timestamp || summary.updated_at;
+  const realtimeStatus = realtimeStatusMeta(realtime.connectionStatus);
 
   const cards = [
     {
@@ -210,9 +250,9 @@ export default function AdminDashboard() {
     },
     {
       label: 'Workouts Logged',
-      value: formatCompact(totalWorkouts),
-      badge: `${formatNumber(workoutsToday)} today`,
-      bar: safePercent(workoutsToday, totalWorkouts),
+      value: formatNumber(workoutsToday),
+      badge: `${formatCompact(totalWorkouts)} total`,
+      bar: safePercent(workoutsToday, Math.max(totalWorkouts, workoutsToday, 1)),
       background: '#b4a5ff',
       valueColor: '#180058',
       labelColor: 'rgba(24,0,88,0.65)',
@@ -278,8 +318,9 @@ export default function AdminDashboard() {
             <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
               {hasErrors ? 'warning' : 'bolt'}
             </span>
-            Last sync: {formatTimestamp(summary.updated_at)}
+            Last sync: {formatTimestamp(lastSyncAt)}
           </div>
+          <span className={realtimeStatus.className}>{realtimeStatus.label}</span>
           {hasErrors ? (
             <span className="adm-chip adm-chip--oat">Some panels are using partial data</span>
           ) : null}
@@ -362,7 +403,7 @@ export default function AdminDashboard() {
             </div>
             <p className="adm-metric-label">Nutrition & Ops</p>
             <p className="adm-metric-value">
-              {formatNumber(firstNumber(nutritionStats.meals_today))}
+              {formatNumber(mealsToday)}
               <span style={{ fontSize: 20 }}> meals today</span>
             </p>
             <div style={{ display: 'flex', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>

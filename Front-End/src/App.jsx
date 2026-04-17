@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import {
   createBrowserRouter,
   isRouteErrorResponse,
@@ -8,31 +8,39 @@ import {
 } from 'react-router-dom';
 import { PublicRoute, ProtectedRoute, OnboardingRoute, AdminRoute } from './router/guards';
 import { initAuth } from './hooks/useAuth';
-
-import Login from './components/auth/Login';
-import Signup from './components/auth/Signup';
-import TwoFactorChallenge from './components/auth/TwoFactorChallenge';
-import OnboardingFlow from './components/auth/OnboardingFlow';
-import Dashboard from './components/user/Dashboard/Dashboard';
-import Workouts from './components/user/Workouts/Workouts';
-import NutritionLayout from './components/user/Nutrition/Layout/NutritionLayout';
-import NutritionDashboard from './components/user/Nutrition/Dashboard/Nutrition';
-import NutritionHistory from './components/user/Nutrition/History/NutritionHistory';
-import FoodSearch from './components/user/Nutrition/FoodSearch/FoodSearch';
-import AddQuantity from './components/user/Nutrition/AddQuantity/AddQuantity';
-import CreateRecipe from './components/user/Nutrition/CreateRecipe/CreateRecipe';
-import CustomFood from './components/user/Nutrition/CustomFood/CustomFood';
-import AIAssistant from './components/user/AIAssistant/AIAssistant';
-import Settings from './components/user/Settings/Settings';
-import WeightTracker from './components/user/WeightTracker/WeightTracker';
-import NotificationsCenter from './components/user/Notifications/NotificationsCenter';
-import AdminLayout from './components/admin/AdminLayout';
-import AdminDashboard from './components/admin/AdminDashboard';
-import AdminUserManagement from './components/admin/AdminUserManagement';
-import AdminExerciseLibrary from './components/admin/AdminExerciseLibrary';
-import AdminUserPrograms from './components/admin/AdminUserPrograms';
-import AdminNutrition from './components/admin/Nutrition/AdminNutrition';
 import { useI18n } from './i18n/useI18n';
+
+const Login = lazy(() => import('./components/auth/Login'));
+const Signup = lazy(() => import('./components/auth/Signup'));
+const TwoFactorChallenge = lazy(() => import('./components/auth/TwoFactorChallenge'));
+const OnboardingFlow = lazy(() => import('./components/auth/OnboardingFlow'));
+const Dashboard = lazy(() => import('./components/user/Dashboard/Dashboard'));
+const Workouts = lazy(() => import('./components/user/Workouts/Workouts'));
+const NutritionLayout = lazy(() => import('./components/user/Nutrition/Layout/NutritionLayout'));
+const NutritionDashboard = lazy(() => import('./components/user/Nutrition/Dashboard/Nutrition'));
+const NutritionHistory = lazy(() => import('./components/user/Nutrition/History/NutritionHistory'));
+const FoodSearch = lazy(() => import('./components/user/Nutrition/FoodSearch/FoodSearch'));
+const AddQuantity = lazy(() => import('./components/user/Nutrition/AddQuantity/AddQuantity'));
+const CreateRecipe = lazy(() => import('./components/user/Nutrition/CreateRecipe/CreateRecipe'));
+const CustomFood = lazy(() => import('./components/user/Nutrition/CustomFood/CustomFood'));
+const AIAssistant = lazy(() => import('./components/user/AIAssistant/AIAssistant'));
+const Settings = lazy(() => import('./components/user/Settings/Settings'));
+const WeightTracker = lazy(() => import('./components/user/WeightTracker/WeightTracker'));
+const NotificationsCenter = lazy(() => import('./components/user/Notifications/NotificationsCenter'));
+const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
+const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
+const AdminUserManagement = lazy(() => import('./components/admin/AdminUserManagement'));
+const AdminExerciseLibrary = lazy(() => import('./components/admin/AdminExerciseLibrary'));
+const AdminUserPrograms = lazy(() => import('./components/admin/AdminUserPrograms'));
+const AdminNutrition = lazy(() => import('./components/admin/Nutrition/AdminNutrition'));
+
+function lazyElement(Component) {
+  return (
+    <Suspense fallback={null}>
+      <Component />
+    </Suspense>
+  );
+}
 
 function RouteErrorBoundary() {
   const error = useRouteError();
@@ -84,43 +92,43 @@ const router = createBrowserRouter([
       {
         element: <PublicRoute />,
         children: [
-          { path: '/login', element: <Login /> },
-          { path: '/signup', element: <Signup /> },
-          { path: '/2fa-challenge', element: <TwoFactorChallenge /> },
+          { path: '/login', element: lazyElement(Login) },
+          { path: '/signup', element: lazyElement(Signup) },
+          { path: '/2fa-challenge', element: lazyElement(TwoFactorChallenge) },
         ],
       },
 
       {
         element: <OnboardingRoute />,
         children: [
-          { path: '/onboarding', element: <OnboardingFlow /> },
+          { path: '/onboarding', element: lazyElement(OnboardingFlow) },
         ],
       },
 
       {
         element: <ProtectedRoute />,
         children: [
-          { path: '/dashboard', element: <Dashboard /> },
-          { path: '/workouts', element: <Workouts /> },
-          { path: '/workouts/library', element: <Workouts /> },
-          { path: '/workouts/history', element: <Workouts /> },
-          { path: '/weight', element: <WeightTracker /> },
+          { path: '/dashboard', element: lazyElement(Dashboard) },
+          { path: '/workouts', element: lazyElement(Workouts) },
+          { path: '/workouts/library', element: lazyElement(Workouts) },
+          { path: '/workouts/history', element: lazyElement(Workouts) },
+          { path: '/weight', element: lazyElement(WeightTracker) },
           { path: '/leaderboard', element: <Navigate to="/dashboard" replace /> },
-          { path: '/notifications', element: <NotificationsCenter /> },
+          { path: '/notifications', element: lazyElement(NotificationsCenter) },
           {
             path: '/nutrition',
-            element: <NutritionLayout />,
+            element: lazyElement(NutritionLayout),
             children: [
-              { index: true, element: <NutritionDashboard /> },
-              { path: 'history', element: <NutritionHistory /> },
-              { path: 'food-search', element: <FoodSearch /> },
-              { path: 'add-quantity', element: <AddQuantity /> },
-              { path: 'recipe', element: <CreateRecipe /> },
-              { path: 'custom-food', element: <CustomFood /> },
+              { index: true, element: lazyElement(NutritionDashboard) },
+              { path: 'history', element: lazyElement(NutritionHistory) },
+              { path: 'food-search', element: lazyElement(FoodSearch) },
+              { path: 'add-quantity', element: lazyElement(AddQuantity) },
+              { path: 'recipe', element: lazyElement(CreateRecipe) },
+              { path: 'custom-food', element: lazyElement(CustomFood) },
             ],
           },
-          { path: '/ai', element: <AIAssistant /> },
-          { path: '/settings', element: <Settings /> },
+          { path: '/ai', element: lazyElement(AIAssistant) },
+          { path: '/settings', element: lazyElement(Settings) },
         ],
       },
 
@@ -129,13 +137,13 @@ const router = createBrowserRouter([
         children: [
           {
             path: '/admin',
-            element: <AdminLayout />,
+            element: lazyElement(AdminLayout),
             children: [
-              { index: true, element: <AdminDashboard /> },
-              { path: 'users', element: <AdminUserManagement /> },
-              { path: 'exercises', element: <AdminExerciseLibrary /> },
-              { path: 'programs', element: <AdminUserPrograms /> },
-              { path: 'nutrition', element: <AdminNutrition /> },
+              { index: true, element: lazyElement(AdminDashboard) },
+              { path: 'users', element: lazyElement(AdminUserManagement) },
+              { path: 'exercises', element: lazyElement(AdminExerciseLibrary) },
+              { path: 'programs', element: lazyElement(AdminUserPrograms) },
+              { path: 'nutrition', element: lazyElement(AdminNutrition) },
             ],
           },
         ],

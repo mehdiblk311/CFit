@@ -1,19 +1,21 @@
 import { useState, useEffect } from 'react';
 import { authAPI } from '../../../api/auth';
+import { useI18n } from '../../../i18n/useI18n';
 
 const SESSION_PAGE_SIZE = 100;
 
 export default function SessionsManager({ onClose }) {
+  const { t, locale } = useI18n('settings');
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const formatDate = (value) => {
-    if (!value) return 'Unknown';
+    if (!value) return t('unknownValue');
     const parsed = new Date(value);
     return Number.isNaN(parsed.getTime())
-      ? 'Unknown'
-      : parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      ? t('unknownValue')
+      : parsed.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   useEffect(() => {
@@ -50,7 +52,7 @@ export default function SessionsManager({ onClose }) {
       );
       setSessions(deduped);
     } catch (err) {
-      setError(err.message || 'Failed to load sessions');
+      setError(err.message || t('sessionsLoadFailed'));
     } finally {
       setLoading(false);
     }
@@ -61,58 +63,55 @@ export default function SessionsManager({ onClose }) {
       await authAPI.revokeSession(id);
       setSessions((prev) => prev.filter((s) => s.id !== id));
     } catch (err) {
-      alert(err.message || 'Failed to revoke session');
+      setError(err.message || t('sessionRevokeFailed'));
     }
   };
 
   const handleRevokeAll = async () => {
-    const confirmed = window.confirm(
-      'This will log you out on this device and every other device. Continue?'
-    );
+    const confirmed = window.confirm(t('revokeAllConfirm'));
     if (!confirmed) return;
     try {
       await authAPI.logout(true);
       window.location.href = '/login';
     } catch (err) {
-      alert(err.message || 'Failed to revoke sessions');
+      setError(err.message || t('sessionsRevokeAllFailed'));
     }
   };
 
   return (
     <div className="st-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="st-modal-panel">
-        <button className="st-modal-close" onClick={onClose}>
+        <button type="button" className="st-modal-close" onClick={onClose}>
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
         </button>
 
-        <h3 className="st-modal-title">Active Sessions</h3>
-        <p className="st-modal-desc">
-          Manage the devices currently logged into your account.
-        </p>
+        <h3 className="st-modal-title">{t('activeSessionsTitle')}</h3>
+        <p className="st-modal-desc">{t('activeSessionsDesc')}</p>
 
         {loading ? (
-          <p style={{ textAlign: 'center', color: '#5b5c5a', marginBottom: 24 }}>Loading…</p>
+          <p style={{ textAlign: 'center', color: '#5b5c5a', marginBottom: 24 }}>{t('loading')}</p>
         ) : error ? (
           <p style={{ color: '#b02500', marginBottom: 24, fontSize: 14 }}>{error}</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
             {sessions.length === 0 && (
-              <p style={{ color: '#5b5c5a', fontSize: 14 }}>No active sessions found.</p>
+              <p style={{ color: '#5b5c5a', fontSize: 14 }}>{t('noActiveSessions')}</p>
             )}
             {sessions.map((session) => (
               <div key={session.id} className="st-session-item">
                 <div className="st-session-info">
                   <div className="st-session-device">
-                    {session.user_agent || 'Unknown Device'}
+                    {session.user_agent || t('unknownDevice')}
                   </div>
                   <div className="st-session-meta">
-                    IP: {session.last_ip || '—'} · Expires: {formatDate(session.expires_at)}
+                    {t('sessionIpLabel')}: {session.last_ip || t('unknownValue')} · {t('sessionExpiresLabel')}: {formatDate(session.expires_at)}
                   </div>
                 </div>
                 <button
+                  type="button"
                   className="st-session-revoke"
                   onClick={() => handleRevoke(session.id)}
-                  title="Revoke session"
+                  title={t('revokeSession')}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: 20 }}>delete</span>
                 </button>
@@ -122,11 +121,11 @@ export default function SessionsManager({ onClose }) {
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <button className="st-modal-btn st-modal-btn--outline" onClick={handleRevokeAll}>
-            Log Out of All Devices
+          <button type="button" className="st-modal-btn st-modal-btn--outline" onClick={handleRevokeAll}>
+            {t('logoutAllDevices')}
           </button>
-          <button className="st-modal-btn st-modal-btn--primary" onClick={onClose}>
-            Done
+          <button type="button" className="st-modal-btn st-modal-btn--primary" onClick={onClose}>
+            {t('done')}
           </button>
         </div>
       </div>

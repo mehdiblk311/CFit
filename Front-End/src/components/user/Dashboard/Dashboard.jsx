@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import { uiStore } from '../../../stores/uiStore';
@@ -251,8 +251,20 @@ function DashboardSkeleton() {
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const workoutFrequency = uiStore((s) => s.workoutFrequency ?? 4);
+  const workoutFrequencyByUser = uiStore((s) => s.workoutFrequencyByUser);
+  const getWorkoutFrequencyForUser = uiStore((s) => s.getWorkoutFrequencyForUser);
+  const migrateLegacyWorkoutFrequencyForUser = uiStore((s) => s.migrateLegacyWorkoutFrequencyForUser);
   const { t, locale } = useI18n();
+
+  const workoutFrequency = useMemo(() => {
+    if (!user?.id) return 4;
+    return getWorkoutFrequencyForUser(user.id);
+  }, [user?.id, workoutFrequencyByUser, getWorkoutFrequencyForUser]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    migrateLegacyWorkoutFrequencyForUser(user.id);
+  }, [user?.id, migrateLegacyWorkoutFrequencyForUser]);
 
   const summaryQuery = useDashboardSummary();
   const weeklyQuery = useDashboardWeeklySummary();

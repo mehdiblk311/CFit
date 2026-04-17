@@ -27,20 +27,56 @@ export const uiStore = create(
     (set, get) => ({
       // UI State
       language: 'en', // 'en', 'fr', 'ar'
-      darkMode: false,
-      workoutFrequency: 5, // 1-7 days
+      workoutFrequencyByUser: {}, // { [userId]: 1-7 days }
       offline: false,
       toasts: [], // array of { id, message, type, duration }
       activeModal: null,
 
       // Actions
-      setDarkMode: (val) => {
-        set({ darkMode: val });
-        document.documentElement.classList.toggle('dark-mode', val);
+      getWorkoutFrequencyForUser: (userId) => {
+        const safeUserId = String(userId || '').trim();
+        if (!safeUserId) return 5;
+        const value = get().workoutFrequencyByUser?.[safeUserId];
+        const parsed = Number(value);
+        if (!Number.isFinite(parsed)) return 5;
+        return Math.min(7, Math.max(1, Math.round(parsed)));
       },
 
+      migrateLegacyWorkoutFrequencyForUser: (userId) => {
+        const safeUserId = String(userId || '').trim();
+        if (!safeUserId) return;
+        const state = get();
+        const existingValue = state.workoutFrequencyByUser?.[safeUserId];
+        if (Number.isFinite(Number(existingValue))) return;
+
+        const legacy = Number(state.workoutFrequency);
+        if (!Number.isFinite(legacy)) return;
+
+        const normalized = Math.min(7, Math.max(1, Math.round(legacy)));
+        set((current) => ({
+          workoutFrequencyByUser: {
+            ...(current.workoutFrequencyByUser || {}),
+            [safeUserId]: normalized,
+          },
+        }));
+      },
+
+      setWorkoutFrequencyForUser: (userId, days) => {
+        const safeUserId = String(userId || '').trim();
+        if (!safeUserId) return;
+        const normalized = Math.min(7, Math.max(1, Math.round(Number(days) || 1)));
+        set((state) => ({
+          workoutFrequencyByUser: {
+            ...(state.workoutFrequencyByUser || {}),
+            [safeUserId]: normalized,
+          },
+        }));
+      },
+
+      // Backward-compatible setter for older callers.
       setWorkoutFrequency: (days) => {
-        set({ workoutFrequency: Math.min(7, Math.max(1, days)) });
+        const normalized = Math.min(7, Math.max(1, Math.round(Number(days) || 1)));
+        set({ workoutFrequency: normalized });
       },
 
       setLanguage: (lang) => {

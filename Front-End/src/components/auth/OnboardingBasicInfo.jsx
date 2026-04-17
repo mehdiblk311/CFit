@@ -33,11 +33,15 @@ export default function OnboardingBasicInfo({ onNext, onBack, step = 1, totalSte
 
     setLoading(true);
     try {
-      await updateProfile(user.id, {
-        age: parseInt(age),
-        height: parseInt(height),
-        weight: parseFloat(weight)
-      });
+      await updateProfile(
+        user.id,
+        {
+          age: parseInt(age),
+          height: parseInt(height),
+          weight: parseFloat(weight),
+        },
+        { showErrorToast: false }
+      );
       // Pass data up so OnboardingFlow can compute TDEE
       onNext?.({
         age:    parseInt(age),
@@ -127,7 +131,6 @@ export default function OnboardingBasicInfo({ onNext, onBack, step = 1, totalSte
               <input
                 type="number"
                 className="ob1-input"
-                placeholder="25"
                 min="10"
                 max="100"
                 value={age}
@@ -145,7 +148,6 @@ export default function OnboardingBasicInfo({ onNext, onBack, step = 1, totalSte
               <input
                 type="number"
                 className="ob1-input"
-                placeholder="175"
                 min="100"
                 max="250"
                 value={height}
@@ -163,7 +165,6 @@ export default function OnboardingBasicInfo({ onNext, onBack, step = 1, totalSte
               <input
                 type="number"
                 className="ob1-input"
-                placeholder="70"
                 min="30"
                 max="300"
                 step="0.1"

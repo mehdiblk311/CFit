@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { authStore } from '../stores/authStore';
 
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 const client = axios.create({
   baseURL: API_BASE_URL,
@@ -13,6 +13,11 @@ const client = axios.create({
 
 // Track if a refresh is in progress to prevent multiple simultaneous refresh requests
 let refreshPromise = null;
+
+function isTerminalRefreshError(error) {
+  const status = error?.response?.status;
+  return status === 400 || status === 401 || status === 403;
+}
 
 // Request interceptor: attach JWT token
 client.interceptors.request.use(
@@ -56,9 +61,8 @@ client.interceptors.response.use(
             const refresh_token = state.refresh_token;
 
             if (!refresh_token) {
-              // No refresh token, log out
+              // No refresh token -> session cannot be recovered
               authStore.getState().logout();
-              window.location.href = '/login';
               throw new Error('No refresh token available');
             }
 
@@ -66,19 +70,22 @@ client.interceptors.response.use(
               const response = await axios.post(
                 `${API_BASE_URL}/v1/auth/refresh`,
                 { refresh_token },
-                { timeout: 5000 }
+                { timeout: 10000 }
               );
 
               const { access_token, refresh_token: new_refresh_token } = response.data;
+              const nextRefreshToken = new_refresh_token || refresh_token;
 
               // Update tokens in store
-              authStore.getState().setTokens(access_token, new_refresh_token);
+              authStore.getState().setTokens(access_token, nextRefreshToken);
 
               return access_token;
             } catch (refreshError) {
-              // Refresh failed, log out
-              authStore.getState().logout();
-              window.location.href = '/login';
+              // Only clear session for terminal auth errors. Network/timeout/server
+              // failures should not force a logout.
+              if (isTerminalRefreshError(refreshError)) {
+                authStore.getState().logout();
+              }
               throw refreshError;
             }
           })();

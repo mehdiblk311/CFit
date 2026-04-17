@@ -764,7 +764,7 @@ export default function AdminExerciseLibrary() {
       </div>
 
       {/* ── Bento filters + stats ─────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 16, marginBottom: 28, alignItems: 'stretch' }}>
+      <div className="adm-bento-grid">
         {/* Filters box */}
         <div style={{
           background: '#f1f1ef',
@@ -804,15 +804,9 @@ export default function AdminExerciseLibrary() {
         </div>
 
         {/* Stat: Total */}
-        <div style={{
+        <div className="adm-bento-stat" style={{
           background: '#c3fb9c',
           border: '2px solid #dad4c8',
-          borderRadius: 16,
-          padding: '16px 24px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          minWidth: 130,
           boxShadow: '-4px 4px 0 #2e2f2e',
         }}>
           <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '1px', textTransform: 'uppercase', color: '#214f01' }}>
@@ -824,15 +818,9 @@ export default function AdminExerciseLibrary() {
         </div>
 
         {/* Stat: Compound */}
-        <div style={{
+        <div className="adm-bento-stat" style={{
           background: '#b4a5ff',
           border: '2px solid #dad4c8',
-          borderRadius: 16,
-          padding: '16px 24px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          minWidth: 130,
           boxShadow: '-4px 4px 0 #2e2f2e',
         }}>
           <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '1px', textTransform: 'uppercase', color: '#180058' }}>

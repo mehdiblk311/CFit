@@ -41,11 +41,15 @@ export default function OnboardingGoalsActivity({ step = 2, totalSteps = 3, onNe
   async function handleNext() {
     setLoading(true);
     try {
-      await updateProfile(user.id, {
-        goal,
-        activity_level: activity
-        // Note: workoutFrequency not stored in backend (UI-only)
-      });
+      await updateProfile(
+        user.id,
+        {
+          goal,
+          activity_level: activity
+          // Note: workoutFrequency not stored in backend (UI-only)
+        },
+        { showErrorToast: false }
+      );
       // Pass data up so OnboardingFlow can compute TDEE
       onNext?.({ goal, activityLevel: activity });
     } catch {

@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../../hooks/useAuth';
@@ -28,12 +28,6 @@ const ACTIVITY_OPTIONS = [
   { value: 'moderately_active', labelKey: 'moderateActivity' },
   { value: 'active', labelKey: 'activeActivity' },
   { value: 'very_active', labelKey: 'veryActive' },
-];
-
-const GENDER_OPTIONS = [
-  { value: 'male', labelKey: 'male' },
-  { value: 'female', labelKey: 'female' },
-  { value: 'other', labelKey: 'other' },
 ];
 
 /* ── i18n Hook ───────────────────────────────────────────────────── */
@@ -117,7 +111,6 @@ function AvatarArtwork({ avatar, name, className, fallbackClassName }) {
 function ProfileSection({ profile, onSave, saving }) {
   const t = useT();
   const fileRef = useRef(null);
-  const [genderDraft, setGenderDraft] = useState(profile?.gender || 'male');
   const [avatarPreview, setAvatarPreview] = useState(profile?.avatar || '');
   const [fileError, setFileError] = useState(null);
 
@@ -139,8 +132,18 @@ function ProfileSection({ profile, onSave, saving }) {
     const fd = new FormData(e.currentTarget);
     const name = String(fd.get('name') || '').trim();
     if (!name) { uiStore.getState().addToast(t('nameRequired'), 'error'); return; }
-    const patch = { name, gender: genderDraft };
-    if (avatarPreview !== (profile?.avatar || '')) {
+    const normalizedName = String(profile?.name || '').trim();
+    const isNameChanged = name !== normalizedName;
+    const isAvatarChanged = avatarPreview !== (profile?.avatar || '');
+
+    if (!isNameChanged && !isAvatarChanged) {
+      uiStore.getState().addToast(t('noProfileChanges'), 'info');
+      return;
+    }
+
+    const patch = {};
+    if (isNameChanged) patch.name = name;
+    if (isAvatarChanged) {
       patch.avatar = avatarPreview;
     }
     await onSave(patch);
@@ -200,22 +203,6 @@ function ProfileSection({ profile, onSave, saving }) {
         <div className="st-input-group">
           <label className="st-field-label">{t('emailAddress')}</label>
           <div className="st-input-static">{profile?.email || t('noEmail')}</div>
-        </div>
-
-        <div className="st-input-group">
-          <label className="st-field-label">{t('gender')}</label>
-          <div className="st-gender-pills">
-            {GENDER_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                className={`st-gender-pill${genderDraft === opt.value ? ' st-gender-pill--active' : ''}`}
-                onClick={() => setGenderDraft(opt.value)}
-              >
-                {t(opt.labelKey)}
-              </button>
-            ))}
-          </div>
         </div>
 
         <button className="st-save-btn st-save-btn--full" type="submit" disabled={saving}>
@@ -310,12 +297,17 @@ function BodyMetricsSection({ profile, latestWeightEntry, onSave, saving }) {
 /* ── FitnessGoalsSection ─────────────────────────────────────────── */
 
 function FitnessGoalsSection({
-  profile, workoutFrequency, setWorkoutFrequency,
+  profile, initialWorkoutFrequency = 5,
   onSave, saving, onRecalculate, recalculating,
 }) {
   const t = useT();
   const [goal, setGoal] = useState(normalizeGoal(profile?.goal));
   const [activityLevel, setActivityLevel] = useState(normalizeActivity(profile?.activity_level));
+  const [workoutFrequency, setWorkoutFrequency] = useState(initialWorkoutFrequency);
+
+  useEffect(() => {
+    setWorkoutFrequency(Math.min(7, Math.max(1, Number(initialWorkoutFrequency) || 5)));
+  }, [initialWorkoutFrequency]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -323,7 +315,7 @@ function FitnessGoalsSection({
     const twRaw = String(fd.get('target_weight') || '').trim();
     const payload = { goal, activity_level: activityLevel };
     if (twRaw !== '') payload.target_weight = Number(twRaw);
-    await onSave(payload);
+    await onSave(payload, { workoutFrequency });
   }
 
   return (
@@ -471,10 +463,10 @@ export default function Settings() {
   const { user, logout, updateProfile } = useAuth();
   const navigate = useNavigate();
   const { t, language, setLanguage } = useI18n('settings');
-  const darkMode = uiStore((s) => s.darkMode);
-  const setDarkMode = uiStore((s) => s.setDarkMode);
-  const workoutFrequency = uiStore((s) => s.workoutFrequency ?? 5);
-  const setWorkoutFrequency = uiStore((s) => s.setWorkoutFrequency);
+  const workoutFrequencyByUser = uiStore((s) => s.workoutFrequencyByUser);
+  const getWorkoutFrequencyForUser = uiStore((s) => s.getWorkoutFrequencyForUser);
+  const setWorkoutFrequencyForUser = uiStore((s) => s.setWorkoutFrequencyForUser);
+  const migrateLegacyWorkoutFrequencyForUser = uiStore((s) => s.migrateLegacyWorkoutFrequencyForUser);
 
   const [show2FA, setShow2FA] = useState(false);
   const [showSessions, setShowSessions] = useState(false);
@@ -487,6 +479,16 @@ export default function Settings() {
   const [bodySaving, setBodySaving] = useState(false);
   const [goalsSaving, setGoalsSaving] = useState(false);
   const [recalculating, setRecalculating] = useState(false);
+
+  const workoutFrequency = useMemo(() => {
+    if (!user?.id) return 5;
+    return getWorkoutFrequencyForUser(user.id);
+  }, [user?.id, workoutFrequencyByUser, getWorkoutFrequencyForUser]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    migrateLegacyWorkoutFrequencyForUser(user.id);
+  }, [user?.id, migrateLegacyWorkoutFrequencyForUser]);
 
   const profileQuery = useQuery({
     queryKey: ['settings', 'profile', user?.id],
@@ -520,18 +522,27 @@ export default function Settings() {
     ]);
   }
 
-  async function saveProfilePatch(patch, type = 'profile') {
+  async function saveProfilePatch(patch, type = 'profile', options = {}) {
     if (!user?.id) return;
     const setSaving = { body: setBodySaving, goals: setGoalsSaving }[type] ?? setProfileSaving;
     const msgMap = { body: t('bodyMetricsUpdated'), goals: t('goalsUpdated') };
     const msg = msgMap[type] ?? t('profileUpdated');
+    const errorMap = {
+      profile: t('profileUpdateFailed'),
+      body: t('bodyMetricsUpdateFailed'),
+      goals: t('goalsUpdateFailed'),
+    };
     setSaving(true);
     try {
-      await updateProfile(user.id, patch);
+      await updateProfile(user.id, patch, { showErrorToast: false });
+      if (type === 'goals' && options?.workoutFrequency !== undefined) {
+        setWorkoutFrequencyForUser(user.id, options.workoutFrequency);
+      }
       uiStore.getState().addToast(msg, 'success');
       await refreshQueries();
     } catch (err) {
       console.error('Settings update failed', err);
+      uiStore.getState().addToast(errorMap[type] || errorMap.profile, 'error');
     } finally {
       setSaving(false);
     }
@@ -587,7 +598,7 @@ export default function Settings() {
 
         {/* ── Profile ── */}
         <ProfileSection
-          key={`ps-${profile?.id || ''}-${profile?.updated_at || ''}-${profile?.avatar || ''}-${profile?.gender || ''}`}
+          key={`ps-${profile?.id || ''}-${profile?.updated_at || ''}-${profile?.avatar || ''}`}
           profile={profile}
           onSave={(patch) => saveProfilePatch(patch, 'profile')}
           saving={profileSaving}
@@ -606,9 +617,8 @@ export default function Settings() {
         <FitnessGoalsSection
           key={`fg-${profile?.id || ''}-${profile?.updated_at || ''}-${profile?.goal || ''}`}
           profile={profile}
-          workoutFrequency={workoutFrequency}
-          setWorkoutFrequency={setWorkoutFrequency}
-          onSave={(patch) => saveProfilePatch(patch, 'goals')}
+          initialWorkoutFrequency={workoutFrequency}
+          onSave={(patch, options) => saveProfilePatch(patch, 'goals', options)}
           saving={goalsSaving}
           onRecalculate={handleRecalculate}
           recalculating={recalculating}
@@ -672,21 +682,6 @@ export default function Settings() {
         <section className="st-prefs-card" id="preferences">
           <div className="st-pref-row">
             <div className="st-pref-left">
-              <span className="material-symbols-outlined st-pref-icon">dark_mode</span>
-              <span className="st-pref-label">{t('darkMode')}</span>
-            </div>
-            <button
-              type="button"
-              className={`st-toggle${darkMode ? ' st-toggle--on' : ''}`}
-              onClick={() => setDarkMode(!darkMode)}
-              aria-label={t('toggleDarkMode')}
-            >
-              <span className="st-toggle-thumb" />
-            </button>
-          </div>
-
-          <div className="st-pref-row">
-            <div className="st-pref-left">
               <span className="material-symbols-outlined st-pref-icon">language</span>
               <span className="st-pref-label">{t('language')}</span>
             </div>
@@ -698,6 +693,7 @@ export default function Settings() {
                   className={`st-lang-btn${language === option.value ? ' st-lang-btn--active' : ''}`}
                   onClick={() => setLanguage(option.value)}
                   title={option.shortLabel}
+                  aria-pressed={language === option.value}
                 >
                   {option.shortLabel}
                 </button>

@@ -2,6 +2,11 @@ import { useEffect } from 'react';
 import { authAPI } from '../../api/auth';
 import { authStore } from '../../stores/authStore';
 
+function isTerminalRefreshError(error) {
+  const status = error?.response?.status;
+  return status === 400 || status === 401 || status === 403;
+}
+
 export default function AuthBootstrap({ children }) {
   const user = authStore((state) => state.user);
   const access_token = authStore((state) => state.access_token);
@@ -32,8 +37,8 @@ export default function AuthBootstrap({ children }) {
         const response = await authAPI.refresh(refresh_token);
         if (cancelled) return;
         setTokens(response.access_token, response.refresh_token || refresh_token);
-      } catch {
-        if (!cancelled) logout();
+      } catch (error) {
+        if (!cancelled && isTerminalRefreshError(error)) logout();
       } finally {
         if (!cancelled) setAuthBootstrapped(true);
       }
