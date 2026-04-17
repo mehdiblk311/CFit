@@ -380,7 +380,7 @@ export default function Progress({ embedded = false }) {
           <p className="prog-subtitle">Your effort, visualized</p>
         </div>
         <div className="prog-header-actions">
-          <button className="prog-motivate-btn" onClick={() => navigate('/leaderboard')}>
+          <button className="prog-motivate-btn" onClick={() => navigate('/dashboard#dashboard-leaderboard')}>
             <span className="material-symbols-outlined">emoji_events</span>
             <span>Motivation</span>
           </button>

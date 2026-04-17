@@ -37,7 +37,6 @@ import {
 import { mapApiError } from '../../../utils/apiErrors';
 import { resolveExerciseImageUrl } from '../../../utils/exerciseImages';
 import { useI18n } from '../../../i18n/useI18n';
-import Progress from '../Progress/Progress';
 import './Workouts.css';
 
 // ── Helpers ────────────────────────────────────────────────────────────
@@ -335,8 +334,19 @@ const CTX_NAV = [
   { id: 'programs', icon: 'grid_view', labelKey: 'workouts.nav.programs' },
   { id: 'library', icon: 'book', labelKey: 'workouts.nav.library' },
   { id: 'history', icon: 'history', labelKey: 'workouts.nav.history' },
-  { id: 'progress', icon: 'trending_up', labelKey: 'workouts.nav.progress' },
 ];
+
+const WORKOUT_TAB_PATHS = {
+  programs: '/workouts',
+  library: '/workouts/library',
+  history: '/workouts/history',
+};
+
+function resolveWorkoutTabFromPath(pathname = '') {
+  if (pathname.startsWith('/workouts/library')) return 'library';
+  if (pathname.startsWith('/workouts/history')) return 'history';
+  return 'programs';
+}
 
 function WorkoutContextNav({ active, onChange, onClose, visible }) {
   const { t } = useI18n();
@@ -1677,7 +1687,6 @@ function LibraryView({ sessionActive, onAddToWorkout }) {
 
 // ── History View ──────────────────────────────────────────────────────
 
-const WORKOUT_TYPES = ['All', 'Strength', 'Hypertrophy', 'Cardio', 'Endurance', 'Custom'];
 function getWorkoutTimestamp(workout) {
   return workout?.date || workout?.started_at || workout?.created_at || null;
 }
@@ -1705,75 +1714,18 @@ function getWorkoutSetCount(exercises) {
   return exercises.reduce((total, exercise) => total + extractExerciseSets(exercise).length, 0);
 }
 
-function buildHistoryTrend(workouts, locale) {
-  const recentWorkouts = [...workouts]
-    .filter(Boolean)
-    .sort((a, b) => {
-      const aTime = getWorkoutDate(a)?.getTime() || 0;
-      const bTime = getWorkoutDate(b)?.getTime() || 0;
-      return aTime - bTime;
-    })
-    .slice(-6);
-
-  const rawValues = recentWorkouts.map((workout) => {
-    const duration = Number(workout?.duration) || 0;
-    if (duration > 0) return duration;
-    const exercises = extractWorkoutExercises(workout);
-    const setCount = getWorkoutSetCount(exercises);
-    return setCount > 0 ? setCount * 5 : 12;
-  });
-
-  const peak = rawValues.reduce((max, value) => Math.max(max, value), 1);
-
-  return recentWorkouts.map((workout, index) => ({
-    id: workout?.id || index,
-    label: getWorkoutDate(workout)?.toLocaleDateString(locale, { day: '2-digit', month: 'short' }) || '—',
-    value: rawValues[index],
-    ratio: Math.max(18, Math.round((rawValues[index] / peak) * 100)),
-    type: getWorkoutTypeLabel(workout),
-  }));
-}
-
-function buildHistorySplit(exercises) {
-  const tally = exercises.reduce((acc, exercise) => {
-    const muscle = getExercisePrimaryMuscle(exercise.exercise || exercise) || 'Other';
-    acc[muscle] = (acc[muscle] || 0) + 1;
-    return acc;
-  }, {});
-
-  const entries = Object.entries(tally)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 4);
-
-  const total = entries.reduce((sum, [, count]) => sum + count, 0);
-
-  return entries.map(([label, count], index) => ({
-    label,
-    count,
-    percent: total > 0 ? Math.round((count / total) * 100) : 0,
-    tone: ['#38671a', '#7b61ff', '#ef8f5a', '#5f5b52'][index] || '#38671a',
-  }));
-}
-
 function HistoryView({ onStartWorkout }) {
   const { t, locale } = useI18n();
-  const [selectedWorkoutId, setSelectedWorkoutId] = useState(null);
+  const today = new Date();
   const [expandedEx, setExpandedEx] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [filterType, setFilterType] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedCalendarDate, setSelectedCalendarDate] = useState('');
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState(() => getDateKey(today));
   const [calendarCursor, setCalendarCursor] = useState(() => {
-    const today = new Date();
     return new Date(today.getFullYear(), today.getMonth(), 1);
   });
 
   const deleteWorkoutMutation = useDeleteWorkout();
-
   const params = { limit: 100 };
-  if (filterType && filterType !== 'All') params.type = filterType.toLowerCase();
 
   const {
     data: workoutsData,
@@ -1791,59 +1743,34 @@ function HistoryView({ onStartWorkout }) {
   });
   const calendarDots = calendarData?.dates || {};
 
-  const baseFilteredWorkouts = workouts.filter((workout) => {
+  const dayWorkouts = workouts.filter((workout) => {
     const workoutDate = getWorkoutDate(workout);
     if (!workoutDate) return false;
-    if (dateFrom) {
-      const fromDate = new Date(`${dateFrom}T00:00:00`);
-      if (workoutDate < fromDate) return false;
-    }
-    if (dateTo) {
-      const toDate = new Date(`${dateTo}T23:59:59`);
-      if (workoutDate > toDate) return false;
-    }
-    return true;
+    return getDateKey(workoutDate) === selectedCalendarDate;
   });
 
-  const visibleWorkouts = selectedCalendarDate
-    ? baseFilteredWorkouts.filter((workout) => {
-      const workoutDate = getWorkoutDate(workout);
-      if (!workoutDate) return false;
-      const dateStr = getDateKey(workoutDate);
-      return dateStr === selectedCalendarDate;
-    })
-    : baseFilteredWorkouts;
-
-  const activeWorkoutId = visibleWorkouts.some((workout) => workout.id === selectedWorkoutId)
-    ? selectedWorkoutId
-    : (visibleWorkouts[0]?.id || null);
+  const latestWorkoutSummary = dayWorkouts[0] || null;
+  const activeWorkoutId = latestWorkoutSummary?.id || null;
   const {
     data: selectedWorkoutDetailData,
     isLoading: selectedWorkoutDetailLoading,
     isError: selectedWorkoutDetailError,
     errorMeta: selectedWorkoutDetailErrorMeta,
   } = useWorkout(activeWorkoutId);
-  const selectedWorkoutSummary = visibleWorkouts.find((workout) => workout.id === activeWorkoutId) || null;
-  const selectedWorkoutDetail = selectedWorkoutSummary
-    ? (selectedWorkoutDetailData?.workout || selectedWorkoutDetailData?.data || selectedWorkoutSummary)
+  const selectedWorkoutDetail = latestWorkoutSummary
+    ? (selectedWorkoutDetailData?.workout || selectedWorkoutDetailData?.data || latestWorkoutSummary)
     : null;
   const selectedExercises = extractWorkoutExercises(selectedWorkoutDetail);
   const selectedVolume = calcVolume(selectedExercises);
   const selectedSetCount = getWorkoutSetCount(selectedExercises);
-  const trendData = buildHistoryTrend(baseFilteredWorkouts, locale);
-  const splitData = buildHistorySplit(selectedExercises);
   const numberFormatter = new Intl.NumberFormat(locale);
 
-  const activeFilterCount = [
-    filterType && filterType !== 'All',
-    dateFrom,
-    dateTo,
-    selectedCalendarDate,
-  ].filter(Boolean).length;
-
-  const today = new Date();
   const year = calendarCursor.getFullYear();
   const month = calendarCursor.getMonth();
+  const canMoveToNextMonth = (
+    year < today.getFullYear()
+    || (year === today.getFullYear() && month < today.getMonth())
+  );
   const monthName = calendarCursor.toLocaleString(locale, { month: 'long' });
   const weekDays = Array.from({ length: 7 }, (_, index) => (
     new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(new Date(2024, 0, 1 + index))
@@ -1851,19 +1778,6 @@ function HistoryView({ onStartWorkout }) {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfWeek = new Date(year, month, 1).getDay();
   const offset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
-  const selectedWorkoutDate = getWorkoutDate(selectedWorkoutDetail);
-  const totalSessions = baseFilteredWorkouts.length;
-  const totalVolume = baseFilteredWorkouts.reduce(
-    (sum, workout) => sum + calcVolume(extractWorkoutExercises(workout)),
-    0,
-  );
-
-  function fmtDate(iso) {
-    if (!iso) return '';
-    const date = new Date(iso);
-    return date.toLocaleDateString(locale, { day: '2-digit', month: 'short' });
-  }
-
   function fmtNumber(value) {
     return numberFormatter.format(value);
   }
@@ -1874,10 +1788,6 @@ function HistoryView({ onStartWorkout }) {
 
   function fmtSetCount(count) {
     return t(count === 1 ? 'workouts.history.setCount' : 'workouts.history.setCountPlural', { count: fmtNumber(count) });
-  }
-
-  function fmtExerciseCount(count) {
-    return t(count === 1 ? 'workouts.history.exerciseCount' : 'workouts.history.exerciseCountPlural', { count: fmtNumber(count) });
   }
 
   function fmtReps(count) {
@@ -1895,30 +1805,19 @@ function HistoryView({ onStartWorkout }) {
     return minutes > 0 ? `${minutes}m` : '—';
   }
 
-  function clearFilters() {
-    setFilterType('');
-    setDateFrom('');
-    setDateTo('');
-    setSelectedCalendarDate('');
-    setShowFilters(false);
-  }
-
-  function selectWorkout(workout) {
-    setSelectedWorkoutId(workout?.id || null);
-    setExpandedEx(null);
-    const workoutDate = getWorkoutDate(workout);
-    if (workoutDate) {
-      setCalendarCursor(new Date(workoutDate.getFullYear(), workoutDate.getMonth(), 1));
-      setSelectedCalendarDate(getDateKey(workoutDate));
-    }
-  }
-
   function shiftCalendar(monthOffset) {
     setCalendarCursor((current) => new Date(current.getFullYear(), current.getMonth() + monthOffset, 1));
   }
 
+  function fmtDayLabel(dayKey) {
+    if (!dayKey) return '';
+    const date = new Date(`${dayKey}T00:00:00`);
+    if (Number.isNaN(date.getTime())) return '';
+    return date.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
   return (
-    <div className="wk-view wk-history-view">
+    <div className="wk-view wk-view--wide wk-history-view">
       <section className="wk-history-hero">
         <div className="wk-history-hero-copy">
           <span className="wk-eyebrow">{t('workouts.history.eyebrow')}</span>
@@ -1928,88 +1827,12 @@ function HistoryView({ onStartWorkout }) {
           </p>
         </div>
         <div className="wk-history-hero-actions">
-          <button
-            className={`wk-filter-btn${activeFilterCount > 0 ? ' wk-filter-btn--active' : ''}`}
-            onClick={() => setShowFilters((state) => !state)}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>tune</span>
-            {activeFilterCount > 0 ? t('workouts.history.filtersCount', { count: activeFilterCount }) : t('workouts.history.filters')}
-          </button>
           <button className="wk-start-btn" onClick={onStartWorkout}>
             <span className="material-symbols-outlined" style={{ fontSize: 16, fontVariationSettings: "'FILL' 1" }}>play_circle</span>
             {t('workouts.history.logWorkout')}
           </button>
         </div>
       </section>
-
-      {showFilters && (
-        <div className="wk-hist-filter-panel">
-          <div className="wk-hist-filter-section">
-            <span className="wk-eyebrow" style={{ display: 'block', marginBottom: 6 }}>{t('workouts.history.workoutType')}</span>
-            <div className="wk-cat-chips">
-              {WORKOUT_TYPES.map((type) => (
-                <button
-                  key={type}
-                  className={`wk-cat-chip${(type === 'All' ? !filterType || filterType === 'All' : filterType === type) ? ' wk-cat-chip--active' : ''}`}
-                  onClick={() => setFilterType(type === 'All' ? '' : type)}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="wk-hist-filter-section">
-            <span className="wk-eyebrow" style={{ display: 'block', marginBottom: 6 }}>{t('workouts.history.dateRange')}</span>
-            <div className="wk-hist-date-range">
-              <div className="wk-hist-date-field">
-                <label className="wk-eyebrow" style={{ fontSize: 9 }}>{t('workouts.history.from')}</label>
-                <input
-                  type="date"
-                  className="wk-date-input"
-                  value={dateFrom}
-                  onChange={(event) => setDateFrom(event.target.value)}
-                />
-              </div>
-              <span style={{ color: '#9f9b93', alignSelf: 'flex-end', paddingBottom: 6 }}>—</span>
-              <div className="wk-hist-date-field">
-                <label className="wk-eyebrow" style={{ fontSize: 9 }}>{t('workouts.history.to')}</label>
-                <input
-                  type="date"
-                  className="wk-date-input"
-                  value={dateTo}
-                  onChange={(event) => setDateTo(event.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-          {activeFilterCount > 0 && (
-            <button
-              className="wk-discard-cancel"
-              style={{ width: '100%', marginTop: 4 }}
-              onClick={clearFilters}
-            >
-              {t('workouts.history.clearFilters')}
-            </button>
-          )}
-        </div>
-      )}
-
-      {activeFilterCount > 0 && (
-        <div className="wk-history-active-filters">
-          {filterType && (
-            <span className="wk-history-filter-pill">{t('workouts.history.typeFilter', { value: filterType })}</span>
-          )}
-          {dateFrom && (
-            <span className="wk-history-filter-pill">{t('workouts.history.fromFilter', { value: fmtDate(dateFrom) })}</span>
-          )}
-          {dateTo && (
-            <span className="wk-history-filter-pill">{t('workouts.history.toFilter', { value: fmtDate(dateTo) })}</span>
-          )}
-          {selectedCalendarDate && (
-            <span className="wk-history-filter-pill">{t('workouts.history.dayFilter', { value: fmtDate(selectedCalendarDate) })}</span>
-          )}
-        </div>
-      )}
 
       {isError && errorMeta?.shouldFallback && (
         <div className="wk-semantic-active" style={{ marginBottom: 10 }}>
@@ -2029,7 +1852,12 @@ function HistoryView({ onStartWorkout }) {
               <button className="wk-cal-nav-btn" onClick={() => shiftCalendar(-1)} aria-label={t('workouts.history.previousMonth')}>
                 <span className="material-symbols-outlined" style={{ fontSize: 18 }}>west</span>
               </button>
-              <button className="wk-cal-nav-btn" onClick={() => shiftCalendar(1)} aria-label={t('workouts.history.nextMonth')}>
+              <button
+                className="wk-cal-nav-btn"
+                onClick={() => shiftCalendar(1)}
+                aria-label={t('workouts.history.nextMonth')}
+                disabled={!canMoveToNextMonth}
+              >
                 <span className="material-symbols-outlined" style={{ fontSize: 18 }}>east</span>
               </button>
             </div>
@@ -2044,34 +1872,31 @@ function HistoryView({ onStartWorkout }) {
             {Array.from({ length: daysInMonth }).map((_, index) => {
               const day = index + 1;
               const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-              const matchingWorkouts = baseFilteredWorkouts.filter((workout) => {
+              const matchingWorkouts = workouts.filter((workout) => {
                 const workoutDate = getWorkoutDate(workout);
                 return workoutDate ? getDateKey(workoutDate) === dateStr : false;
               });
               const hasActivity = calendarDots[dateStr] || matchingWorkouts.length > 0;
+              const cellDate = new Date(year, month, day);
               const isToday = (
                 day === today.getDate()
                 && month === today.getMonth()
                 && year === today.getFullYear()
               );
               const isSelected = selectedCalendarDate === dateStr;
+              const isFuture = cellDate > new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
               return (
                 <button
                   key={day}
                   type="button"
-                  className={`wk-cal-day${isToday ? ' wk-cal-day--active' : ''}${hasActivity ? ' wk-cal-day--has-dot' : ''}${isSelected ? ' wk-cal-day--selected' : ''}`}
+                  className={`wk-cal-day${isToday ? ' wk-cal-day--active' : ''}${hasActivity ? ' wk-cal-day--has-dot' : ''}${isSelected ? ' wk-cal-day--selected' : ''}${isFuture ? ' wk-cal-day--muted' : ''}`}
                   onClick={() => {
-                    if (selectedCalendarDate === dateStr) {
-                      setSelectedCalendarDate('');
-                      return;
-                    }
+                    if (isFuture) return;
+                    setExpandedEx(null);
                     setSelectedCalendarDate(dateStr);
-                    if (matchingWorkouts[0]) {
-                      setSelectedWorkoutId(matchingWorkouts[0].id);
-                      setExpandedEx(null);
-                    }
                   }}
+                  disabled={isFuture}
                 >
                   {day}
                   {hasActivity && !isToday && (
@@ -2093,356 +1918,157 @@ function HistoryView({ onStartWorkout }) {
           </div>
         </section>
 
-        <section className="wk-hist-focus wk-history-feature">
-          {selectedWorkoutDetail ? (
+        <section className="wk-workout-exercise-list-card wk-history-feature">
+          {isLoading ? (
+            <div style={{ padding: '16px 0' }}>
+              {[1, 2, 3].map((item) => <div key={item} className="wk-skeleton-row-large" style={{ marginBottom: 8 }} />)}
+            </div>
+          ) : selectedWorkoutDetail ? (
             <>
-              <div className="wk-hist-focus-head">
+              <div className="wk-workout-exercise-list-head">
                 <div>
-                  <span className="wk-eyebrow">
-                    {fmtDate(getWorkoutTimestamp(selectedWorkoutDetail))}
-                  </span>
-                  <h3 className="wk-hist-focus-title">{getWorkoutDisplayName(selectedWorkoutDetail)}</h3>
+                  <span className="wk-eyebrow">{fmtDayLabel(selectedCalendarDate)}</span>
+                  <h3 className="wk-workout-exercise-list-title">{getWorkoutDisplayName(selectedWorkoutDetail)}</h3>
                 </div>
-                <span
-                  className="wk-hist-type-badge"
-                  style={{
-                    background: `${getAccentForType(getWorkoutTypeLabel(selectedWorkoutDetail))}22`,
-                    color: getAccentForType(getWorkoutTypeLabel(selectedWorkoutDetail)),
-                  }}
-                >
-                  {getWorkoutTypeLabel(selectedWorkoutDetail).toLowerCase()}
-                </span>
+                <div className="wk-workout-exercise-list-head-actions">
+                  <span
+                    className="wk-hist-type-badge"
+                    style={{
+                      background: `${getAccentForType(getWorkoutTypeLabel(selectedWorkoutDetail))}22`,
+                      color: getAccentForType(getWorkoutTypeLabel(selectedWorkoutDetail)),
+                    }}
+                  >
+                    {getWorkoutTypeLabel(selectedWorkoutDetail).toLowerCase()}
+                  </span>
+                  <button
+                    className="wk-hist-delete-btn"
+                    onClick={() => setDeleteTarget(selectedWorkoutDetail)}
+                    aria-label={t('workouts.history.deleteWorkoutAria')}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
+                  </button>
+                </div>
               </div>
 
-                <div className="wk-history-glance">
-                  <div className="wk-history-glance-card">
-                  <span className="wk-eyebrow">{t('workouts.history.duration')}</span>
+              <div className="wk-workout-exercise-list-stats">
+                <div className="wk-workout-exercise-list-stat">
+                  <span>{t('workouts.history.duration')}</span>
                   <strong>{fmtDuration(selectedWorkoutDetail.started_at, selectedWorkoutDetail.completed_at, selectedWorkoutDetail.duration)}</strong>
                 </div>
-                <div className="wk-history-glance-card">
-                  <span className="wk-eyebrow">{t('workouts.history.volume')}</span>
+                <div className="wk-workout-exercise-list-stat">
+                  <span>{t('workouts.history.volume')}</span>
                   <strong>{selectedVolume > 0 ? fmtWeight(selectedVolume) : '—'}</strong>
                 </div>
-                <div className="wk-history-glance-card">
-                  <span className="wk-eyebrow">{t('workouts.history.sets')}</span>
+                <div className="wk-workout-exercise-list-stat">
+                  <span>{t('workouts.history.sets')}</span>
                   <strong>{selectedSetCount || '—'}</strong>
                 </div>
-                <div className="wk-history-glance-card">
-                  <span className="wk-eyebrow">{t('workouts.history.exercises')}</span>
+                <div className="wk-workout-exercise-list-stat">
+                  <span>{t('workouts.history.exercises')}</span>
                   <strong>{selectedExercises.length || '—'}</strong>
                 </div>
               </div>
 
-              <div className="wk-hist-focus-grid">
-                <div className="wk-hist-focus-card">
-                  <p className="wk-eyebrow">{t('workouts.history.sessionNotes')}</p>
-                  {selectedWorkoutDetail.notes ? (
-                    <p className="wk-history-note">{selectedWorkoutDetail.notes}</p>
-                  ) : (
-                    <p className="wk-hist-focus-empty">{t('workouts.history.noSessionNotes')}</p>
-                  )}
-                </div>
+              <div className="wk-workout-exercise-list-body">
+                <p className="wk-eyebrow">{t('workouts.history.sessionNotes')}</p>
+                {selectedWorkoutDetail?.notes ? (
+                  <div className="wk-workout-session-note">
+                    <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#767775' }}>sticky_note_2</span>
+                    <p>{selectedWorkoutDetail.notes}</p>
+                  </div>
+                ) : (
+                  <p className="wk-hist-focus-empty">{t('workouts.history.noSessionNotes')}</p>
+                )}
 
-                <div className="wk-hist-focus-card">
-                  <p className="wk-eyebrow">{t('workouts.history.exercisesPerformed')}</p>
-                  <div className="wk-hist-focus-list">
-                    {selectedExercises.length === 0 ? (
-                      <p className="wk-hist-focus-empty">{t('workouts.history.noExercisesLogged')}</p>
-                    ) : (
-                      selectedExercises.slice(0, 4).map((exercise, index) => {
-                        const sets = extractExerciseSets(exercise);
-                        const peak = sets.reduce((max, set) => Math.max(max, setWeightValue(set)), 0);
-                        return (
-                          <div key={exercise.id || `${exercise.exercise_id}-${index}`} className="wk-hist-focus-row">
+                <p className="wk-eyebrow" style={{ marginTop: 12 }}>{t('workouts.history.exercisesPerformed')}</p>
+                {selectedWorkoutDetailLoading && (
+                  <div style={{ padding: '8px 0' }}>
+                    <div className="wk-skeleton-row" />
+                  </div>
+                )}
+                {selectedWorkoutDetailError && selectedWorkoutDetailErrorMeta?.shouldFallback && (
+                  <div className="wk-semantic-active" style={{ marginBottom: 8 }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#b02500' }}>warning</span>
+                    <span>{t('workouts.history.detailUnavailable')}</span>
+                  </div>
+                )}
+                {selectedExercises.length === 0 ? (
+                  <p className="wk-hist-focus-empty">{t('workouts.history.noExercisesLogged')}</p>
+                ) : (
+                  <div className="wk-workout-exercise-list">
+                    {selectedExercises.map((exercise, index) => {
+                      const exerciseKey = `${activeWorkoutId}-${exercise.id || exercise.exercise_id || index}`;
+                      const isOpen = expandedEx === exerciseKey;
+                      const sets = extractExerciseSets(exercise);
+                      const peakWeight = sets.reduce((max, set) => Math.max(max, setWeightValue(set)), 0);
+                      return (
+                        <div key={exerciseKey} className={`wk-exercise-row${isOpen ? ' wk-exercise-row--open' : ''}`}>
+                          <button
+                            type="button"
+                            className="wk-exercise-row-toggle"
+                            onClick={() => setExpandedEx(isOpen ? null : exerciseKey)}
+                          >
                             <div>
-                              <p className="wk-hist-focus-name">{exercise.exercise?.name || exercise.name}</p>
-                              <p className="wk-hist-focus-meta">
-                                {fmtSetCount(sets.length)}{peak > 0 ? ` · ${fmtPeakWeight(peak)}` : ''}
+                              <p className="wk-exercise-row-title">{exercise.exercise?.name || exercise.name}</p>
+                              <p className="wk-exercise-row-meta">
+                                {fmtSetCount(sets.length)}{peakWeight > 0 ? ` · ${fmtPeakWeight(peakWeight)}` : ''}
                               </p>
                             </div>
-                            <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#38671a' }}>north_east</span>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="wk-hist-empty-state">
-              <span className="material-symbols-outlined wk-hist-empty-icon">history</span>
-              <h3 className="wk-hist-empty-title">
-                {activeFilterCount > 0 ? t('workouts.history.noSessionsMatch') : t('workouts.history.noArchiveYet')}
-              </h3>
-              <p className="wk-hist-empty-body">
-                {activeFilterCount > 0
-                  ? t('workouts.history.noSessionsMatchBody')
-                  : t('workouts.history.noArchiveBody')}
-              </p>
-            </div>
-          )}
-        </section>
-      </div>
-
-      {selectedWorkoutDetail && (
-        <section className="wk-history-insights">
-          <div className="wk-history-insight-card">
-            <div className="wk-history-insight-head">
-              <div>
-                <span className="wk-eyebrow">{t('workouts.history.volumeTrend')}</span>
-                <h3 className="wk-history-insight-title">{t('workouts.history.recentRhythm')}</h3>
-              </div>
-              <p className="wk-history-insight-copy">
-                {t('workouts.history.lastSessions', { count: trendData.length || 0 })}
-              </p>
-            </div>
-            <div className="wk-history-trend">
-              {trendData.length === 0 ? (
-                <p className="wk-hist-focus-empty">{t('workouts.history.noPattern')}</p>
-              ) : (
-                trendData.map((item) => (
-                  <div key={item.id} className="wk-history-trend-item">
-                    <div
-                      className="wk-history-trend-bar"
-                      style={{ height: `${item.ratio}%` }}
-                      title={`${item.label} · ${item.value}`}
-                    />
-                    <span>{item.label}</span>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          <div className="wk-history-insight-card">
-            <div className="wk-history-insight-head">
-              <div>
-                <span className="wk-eyebrow">{t('workouts.history.splitFocus')}</span>
-                <h3 className="wk-history-insight-title">{t('workouts.history.sessionBreakdown')}</h3>
-              </div>
-              <p className="wk-history-insight-copy">
-                {t('workouts.history.mainMuscleGroups')}
-              </p>
-            </div>
-            <div className="wk-history-split">
-              {splitData.length === 0 ? (
-                <p className="wk-hist-focus-empty">{t('workouts.history.noDistribution')}</p>
-              ) : (
-                splitData.map((item) => (
-                  <div key={item.label} className="wk-history-split-row">
-                    <div className="wk-history-split-copy">
-                      <strong>{item.label}</strong>
-                      <span>{fmtExerciseCount(item.count)}</span>
-                    </div>
-                    <div className="wk-history-split-bar">
-                      <span style={{ width: `${item.percent}%`, background: item.tone }} />
-                    </div>
-                    <em>{item.percent}%</em>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {isLoading ? (
-        <div style={{ padding: '16px 0' }}>
-          {[1, 2, 3].map((item) => <div key={item} className="wk-skeleton-row-large" style={{ marginBottom: 8 }} />)}
-        </div>
-      ) : visibleWorkouts.length === 0 ? (
-        <div className="wk-hist-empty-state">
-          <span className="material-symbols-outlined wk-hist-empty-icon">fitness_center</span>
-          <h3 className="wk-hist-empty-title">
-            {activeFilterCount > 0 ? t('workouts.history.noWorkoutsMatch') : t('workouts.history.noWorkoutsYet')}
-          </h3>
-          <p className="wk-hist-empty-body">
-            {activeFilterCount > 0
-              ? t('workouts.history.noWorkoutsMatchBody')
-              : t('workouts.history.noWorkoutsYetBody')}
-          </p>
-          {activeFilterCount > 0 ? (
-            <button className="wk-create-btn" onClick={clearFilters}>
-              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>filter_alt_off</span>
-              {t('workouts.history.clearFilters')}
-            </button>
-          ) : (
-            <button className="wk-start-btn" style={{ marginTop: 8 }} onClick={onStartWorkout}>
-              <span className="material-symbols-outlined" style={{ fontSize: 16, fontVariationSettings: "'FILL' 1" }}>play_circle</span>
-              {t('workouts.history.startFirstWorkout')}
-            </button>
-          )}
-        </div>
-      ) : (
-        <>
-          <section className="wk-history-archive-head">
-            <div>
-              <span className="wk-eyebrow">{t('workouts.history.archive')}</span>
-              <h3 className="wk-history-archive-title">{t('workouts.history.sessionLibrary')}</h3>
-            </div>
-            <div className="wk-history-archive-stats">
-              <div className="wk-history-archive-stat">
-                <span>{t('workouts.history.sessions')}</span>
-                <strong>{totalSessions}</strong>
-              </div>
-              <div className="wk-history-archive-stat">
-                <span>{t('workouts.history.volume')}</span>
-                <strong>{totalVolume > 0 ? fmtWeight(Math.round(totalVolume)) : '—'}</strong>
-              </div>
-              <div className="wk-history-archive-stat">
-                <span>{t('workouts.history.focusDay')}</span>
-                <strong>{selectedWorkoutDate ? fmtDate(getDateKey(selectedWorkoutDate)) : t('workouts.history.latest')}</strong>
-              </div>
-            </div>
-          </section>
-
-          <div className="wk-hist-list">
-            {visibleWorkouts.map((workout) => {
-              const isOpen = activeWorkoutId === workout.id;
-              const detailWorkout = isOpen
-                ? (selectedWorkoutDetailData?.workout || selectedWorkoutDetailData?.data || workout)
-                : workout;
-              const exercises = extractWorkoutExercises(detailWorkout);
-              const volume = calcVolume(exercises);
-              const setCount = getWorkoutSetCount(exercises);
-              const accent = getAccentForType(getWorkoutTypeLabel(detailWorkout));
-
-              return (
-                <div
-                  key={workout.id}
-                  className={`wk-hist-ex-item${isOpen ? ' wk-hist-ex-item--active' : ''}`}
-                >
-                  <div className="wk-hist-ex-header-wrap">
-                    <button
-                      className="wk-hist-ex-header wk-history-card-btn"
-                      style={{ flex: 1 }}
-                      onClick={() => {
-                        if (isOpen) {
-                          setExpandedEx(null);
-                          return;
-                        }
-                        selectWorkout(workout);
-                      }}
-                    >
-                      <div className="wk-history-card-date">
-                        <strong>{fmtDate(getWorkoutTimestamp(detailWorkout)) || '—'}</strong>
-                        <span>{getWorkoutTypeLabel(detailWorkout).toUpperCase()}</span>
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
-                          <p className="wk-hist-ex-name">{getWorkoutDisplayName(detailWorkout)}</p>
-                          <span className="wk-hist-type-badge" style={{ background: `${accent}22`, color: accent }}>
-                            {getWorkoutTypeLabel(detailWorkout).toLowerCase()}
-                          </span>
-                        </div>
-                        <p className="wk-hist-ex-meta">
-                          {fmtDuration(detailWorkout.started_at, detailWorkout.completed_at, detailWorkout.duration)}
-                          {volume > 0 ? ` · ${fmtWeight(volume)}` : ''}
-                          {setCount > 0 ? ` · ${fmtSetCount(setCount)}` : ''}
-                          {exercises.length > 0 ? ` · ${fmtExerciseCount(exercises.length)}` : ''}
-                        </p>
-                      </div>
-                      <span
-                        className="material-symbols-outlined"
-                        style={{
-                          fontSize: 20,
-                          color: '#5b5c5a',
-                          transition: 'transform 0.2s',
-                          transform: isOpen ? 'rotate(180deg)' : 'rotate(0)',
-                          flexShrink: 0,
-                        }}
-                      >
-                        expand_more
-                      </span>
-                    </button>
-                    <button
-                      className="wk-hist-delete-btn"
-                      onClick={() => setDeleteTarget(workout)}
-                      aria-label={t('workouts.history.deleteWorkoutAria')}
-                    >
-                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
-                    </button>
-                  </div>
-                  {isOpen && exercises.length > 0 && (
-                    <div className="wk-hist-ex-detail">
-                      {selectedWorkoutDetailLoading && (
-                        <div style={{ padding: '8px 0' }}>
-                          <div className="wk-skeleton-row" />
-                        </div>
-                      )}
-                      {selectedWorkoutDetailError && selectedWorkoutDetailErrorMeta?.shouldFallback && (
-                        <div className="wk-semantic-active" style={{ margin: '0 8px 8px' }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#b02500' }}>warning</span>
-                          <span>{t('workouts.history.detailUnavailable')}</span>
-                        </div>
-                      )}
-                      {exercises.map((exercise, index) => {
-                        const exerciseKey = `${workout.id}-${index}`;
-                        const exerciseOpen = expandedEx === exerciseKey;
-                        const sets = extractExerciseSets(exercise);
-                        const peakWeight = sets.reduce((max, set) => Math.max(max, setWeightValue(set)), 0);
-
-                        return (
-                          <div key={exerciseKey}>
-                            <button
-                              className="wk-hist-ex-header"
-                              style={{ paddingLeft: 8, background: 'transparent' }}
-                              onClick={() => setExpandedEx(exerciseOpen ? null : exerciseKey)}
+                            <span
+                              className="material-symbols-outlined wk-exercise-row-expand"
+                              style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
                             >
-                              <div>
-                                <p className="wk-hist-ex-name" style={{ fontSize: 14 }}>{exercise.exercise?.name || exercise.name}</p>
-                                <p className="wk-hist-ex-meta">
-                                  {fmtSetCount(sets.length)}{peakWeight > 0 ? ` · ${fmtPeakWeight(peakWeight)}` : ''}
-                                </p>
+                              expand_more
+                            </span>
+                          </button>
+                          {isOpen && (
+                            <div className="wk-exercise-row-detail">
+                              <div className="wk-sets-header" style={{ marginBottom: 8 }}>
+                                <span>{t('workouts.history.set')}</span>
+                                <span>{t('workouts.history.weight')}</span>
+                                <span>{t('workouts.history.reps')}</span>
+                                <span></span>
                               </div>
-                              <span
-                                className="material-symbols-outlined"
-                                style={{
-                                  fontSize: 16,
-                                  color: '#5b5c5a',
-                                  transition: 'transform 0.2s',
-                                  transform: exerciseOpen ? 'rotate(180deg)' : 'rotate(0)',
-                                }}
-                              >
-                                expand_more
-                              </span>
-                            </button>
-                            {exerciseOpen && (
-                                <div style={{ paddingLeft: 16 }}>
-                                <div className="wk-sets-header" style={{ marginBottom: 8 }}>
-                                  <span>{t('workouts.history.set')}</span><span>{t('workouts.history.weight')}</span><span>{t('workouts.history.reps')}</span><span></span>
-                                </div>
-                                {sets.map((set, setIndex) => (
+                              {sets.length === 0 ? (
+                                <p className="wk-hist-focus-empty" style={{ marginTop: 4 }}>{t('workouts.history.noExercisesLoggedShort')}</p>
+                              ) : (
+                                sets.map((set, setIndex) => (
                                   <div key={`${exerciseKey}-${setIndex}`} className="wk-hist-set-row">
                                     <span className="wk-set-num" style={{ color: '#38671a' }}>{setIndex + 1}</span>
                                     <span className="wk-hist-set-val">{setWeightValue(set) > 0 ? fmtWeight(setWeightValue(set)) : t('workouts.history.bodyweight')}</span>
                                     <span className="wk-hist-set-val">{fmtReps(Number(set.reps) || 0)}</span>
                                     <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#38671a', fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                                   </div>
-                                ))}
-                                {exercise.notes && (
-                                  <div className="wk-hist-ex-note">
-                                    <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#767775' }}>notes</span>
-                                    <p>{exercise.notes}</p>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {isOpen && exercises.length === 0 && (
-                    <div style={{ padding: '8px 16px', color: '#9f9b93', fontSize: 13 }}>{t('workouts.history.noExercisesLoggedShort')}</div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
+                                ))
+                              )}
+                              {(exercise.notes || exercise.note) && (
+                                <div className="wk-hist-ex-note">
+                                  <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#767775' }}>notes</span>
+                                  <p>{exercise.notes || exercise.note}</p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="wk-hist-empty-state">
+              <span className="material-symbols-outlined wk-hist-empty-icon">event_busy</span>
+              <h3 className="wk-hist-empty-title">{t('workouts.history.noArchiveYet')}</h3>
+              <p className="wk-hist-empty-body">{fmtDayLabel(selectedCalendarDate)}</p>
+              <button className="wk-start-btn" style={{ marginTop: 8 }} onClick={onStartWorkout}>
+                <span className="material-symbols-outlined" style={{ fontSize: 16, fontVariationSettings: "'FILL' 1" }}>play_circle</span>
+                {t('workouts.history.logWorkout')}
+              </button>
+            </div>
+          )}
+        </section>
+      </div>
 
       {deleteTarget && (
         <div className="wk-discard-overlay" onClick={(event) => event.target === event.currentTarget && setDeleteTarget(null)}>
@@ -2458,9 +2084,7 @@ function HistoryView({ onStartWorkout }) {
                 className="wk-discard-confirm"
                 onClick={() => {
                   deleteWorkoutMutation.mutate({ workout_id: deleteTarget.id });
-                  if (activeWorkoutId === deleteTarget.id) {
-                    setSelectedWorkoutId(null);
-                  }
+                  setExpandedEx(null);
                   setDeleteTarget(null);
                 }}
               >
@@ -3333,13 +2957,17 @@ export default function Workouts() {
   const { t } = useI18n();
   const onClose = () => navigate('/dashboard');
   const requestedTab = location.state?.tab;
+  const routeTab = resolveWorkoutTabFromPath(location.pathname);
   const initialTab =
-    requestedTab === 'library'
+    routeTab === 'library'
+    || routeTab === 'history'
+    || routeTab === 'programs'
+      ? routeTab
+      : requestedTab === 'library'
       || requestedTab === 'history'
       || requestedTab === 'programs'
-      || requestedTab === 'progress'
-      ? requestedTab
-      : 'programs';
+        ? requestedTab
+        : 'programs';
 
   const [navVisible, setNavVisible] = useState(false);
   const [wkTab, setWkTab] = useState(initialTab);
@@ -3382,7 +3010,6 @@ export default function Workouts() {
       requestedTab !== 'library'
       && requestedTab !== 'history'
       && requestedTab !== 'programs'
-      && requestedTab !== 'progress'
     ) {
       return;
     }
@@ -3391,9 +3018,22 @@ export default function Workouts() {
     setPreviewTemplate(null);
     setShowTemplateBuilder(false);
     setWkTab(requestedTab);
-
+    const targetPath = WORKOUT_TAB_PATHS[requestedTab] || WORKOUT_TAB_PATHS.programs;
+    if (location.pathname !== targetPath) {
+      navigate(targetPath, { replace: true, state: null });
+      return;
+    }
     navigate(location.pathname, { replace: true, state: null });
   }, [location.pathname, navigate, requestedTab]);
+
+  useEffect(() => {
+    if (routeTab !== wkTab) {
+      setPreviewProgramAssignment(null);
+      setPreviewTemplate(null);
+      setShowTemplateBuilder(false);
+      setWkTab(routeTab);
+    }
+  }, [routeTab, wkTab]);
 
   useEffect(() => {
     if (typeof navigator === 'undefined') return;
@@ -3665,6 +3305,7 @@ export default function Workouts() {
     setActiveProgramSessionId(null);
     setSessionData(null);
     setWkTab('history');
+    navigate('/workouts/history');
   }
 
   if (sessionPhase === 'active') {
@@ -3747,16 +3388,19 @@ export default function Workouts() {
                 onStartWorkout={() => handleQuickStart(null)}
               />
             )}
-            {wkTab === 'progress' && (
-              <Progress embedded />
-            )}
           </>
         )}
       </div>
 
       <WorkoutContextNav
         active={wkTab}
-        onChange={tab => { setPreviewProgramAssignment(null); setPreviewTemplate(null); setWkTab(tab); }}
+        onChange={tab => {
+          setPreviewProgramAssignment(null);
+          setPreviewTemplate(null);
+          setWkTab(tab);
+          const targetPath = WORKOUT_TAB_PATHS[tab] || WORKOUT_TAB_PATHS.programs;
+          navigate(targetPath, { replace: false });
+        }}
         onClose={onClose}
         visible={navVisible}
       />

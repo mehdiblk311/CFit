@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../../i18n/useI18n';
@@ -30,6 +30,13 @@ export default function AdminLayout() {
   const { logout, user } = useAuth();
   const { t } = useI18n();
   const [expanded, setExpanded] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Lock body scroll when mobile drawer is open
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
   const navItems = NAV_ITEMS.map((item) => ({ ...item, label: t(item.labelKey) }));
   const activeItem = navItems.find((item) => isActive(item, location.pathname));
   const adminIdentity = user?.name || user?.email || t('common.labels.rootAdmin');
@@ -42,8 +49,17 @@ export default function AdminLayout() {
   return (
     <div className="adm-shell">
       {/* ── Side Nav ─────────────────────────────────────────── */}
+      {mobileOpen && (
+        <div
+          className="adm-mobile-overlay adm-mobile-overlay--active"
+          onClick={() => setMobileOpen(false)}
+          aria-label="Close menu"
+          role="presentation"
+        />
+      )}
+
       <aside
-        className={`adm-sidenav${expanded ? ' adm-sidenav--open' : ''}`}
+        className={`adm-sidenav${expanded ? ' adm-sidenav--open' : ''}${mobileOpen ? ' adm-sidenav--mobile-open' : ''}`}
         onMouseEnter={() => setExpanded(true)}
         onMouseLeave={() => setExpanded(false)}
       >
@@ -64,7 +80,7 @@ export default function AdminLayout() {
               <button
                 key={item.id}
                 className={`adm-nav-btn${active ? ' adm-nav-btn--active' : ''}`}
-                onClick={() => navigate(item.path)}
+                onClick={() => { navigate(item.path); setMobileOpen(false); }}
                 title={item.label}
               >
                 <span
@@ -93,6 +109,14 @@ export default function AdminLayout() {
         {/* Top Bar */}
         <header className="adm-topbar">
           <div className="adm-topbar-left">
+            <button
+              className="adm-hamburger"
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              aria-label={t('common.labels.openMenu') || 'Open menu'}
+            >
+              <span className="material-symbols-outlined">menu</span>
+            </button>
             <span className="adm-topbar-title">
               {activeItem?.label ?? t('admin.shell.title')}
             </span>

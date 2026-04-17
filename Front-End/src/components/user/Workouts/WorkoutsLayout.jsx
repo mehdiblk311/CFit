@@ -8,7 +8,6 @@ const CTX_NAV = [
   { id: 'programs', path: '/workouts',          icon: 'grid_view',   labelKey: 'workouts.nav.programs' },
   { id: 'library',  path: '/workouts/library',  icon: 'book',        labelKey: 'workouts.nav.library' },
   { id: 'history',  path: '/workouts/history',  icon: 'history',     labelKey: 'workouts.nav.history' },
-  { id: 'progress', path: '/workouts/progress', icon: 'trending_up', labelKey: 'workouts.nav.progress' },
 ];
 
 export default function WorkoutsLayout() {

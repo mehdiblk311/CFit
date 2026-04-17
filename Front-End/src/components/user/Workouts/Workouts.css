@@ -13,8 +13,8 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  /* Extra bottom padding — contextual nav + main app nav stacked */
-  padding-bottom: 120px;
+  /* Extra bottom padding — contextual nav + main app nav stacked + safe area */
+  padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px));
 }
 
 /* ── Contextual Bottom Nav ─────────────────────────────────────────── */
@@ -29,7 +29,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 4px;
-  padding: 12px 8px 28px;
+  padding: 12px 8px calc(12px + env(safe-area-inset-bottom, 16px));
   background: #faf9f7;
   border-top: 2px solid #dad4c8;
   border-radius: 24px 24px 0 0;
@@ -107,6 +107,10 @@
   flex-direction: column;
   animation: wk-view-enter 0.3s ease both;
   gap: 20px;
+}
+
+.wk-view--wide {
+  max-width: 1024px;
 }
 
 .wk-view--center {
@@ -242,6 +246,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .wk-card-name {
@@ -251,6 +256,7 @@
   color: #2e2f2e;
   line-height: 1;
   font-feature-settings: 'ss01' 1, 'ss03' 1;
+  word-break: break-word;
 }
 
 .wk-card-tag {
@@ -264,11 +270,13 @@
   border: 2px solid rgba(0, 0, 0, 0.1);
   white-space: nowrap;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .wk-card-meta {
   display: flex;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .wk-card-meta-item {
@@ -400,7 +408,7 @@
 /* FAB */
 .wk-fab {
   position: fixed;
-  bottom: 120px;
+  bottom: calc(100px + env(safe-area-inset-bottom, 20px));
   right: 20px;
   width: 56px;
   height: 56px;
@@ -857,41 +865,44 @@
 /* ── History View ──────────────────────────────────────────────────── */
 
 .wk-history-view {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+  width: 100%;
 }
 
 .wk-history-hero {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 18px;
-  padding: 12px 2px 0;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .wk-history-hero-copy {
-  max-width: 540px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .wk-history-title {
-  margin-bottom: 8px;
+  font-size: clamp(32px, 8vw, 48px);
+  font-weight: 800;
+  letter-spacing: -2px;
+  color: #2e2f2e;
+  line-height: 1.1;
+  font-feature-settings: 'ss01' 1;
 }
 
 .wk-history-subtitle {
-  margin: 0;
-  max-width: 460px;
-  font-size: 14px;
-  line-height: 1.6;
-  color: #5f5b52;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #767775;
 }
 
 .wk-history-hero-actions {
   display: flex;
-  align-items: center;
-  gap: 10px;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
 }
 
 .wk-history-active-filters {
@@ -916,10 +927,18 @@
 }
 
 .wk-history-layout {
-  display: grid;
-  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
-  gap: 18px;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (min-width: 760px) {
+  .wk-history-layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+    gap: 32px;
+    align-items: start;
+  }
 }
 
 .wk-cal-card {
@@ -968,6 +987,12 @@
 }
 
 .wk-cal-nav-btn:hover { transform: translateY(-2px); }
+
+.wk-cal-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
 
 /* Calendar Grid */
 .wk-cal-grid {
@@ -1037,6 +1062,17 @@
   color: #f4ffe9;
 }
 
+.wk-cal-day--muted {
+  background: rgba(255, 255, 255, 0.38);
+  color: #c1bcb2;
+  border-style: dashed;
+  cursor: not-allowed;
+}
+
+.wk-cal-day--muted:hover {
+  transform: none;
+}
+
 .wk-cal-dot {
   position: absolute;
   bottom: 3px;
@@ -1078,6 +1114,161 @@
   top: 96px;
 }
 
+.wk-workout-exercise-list-card {
+  padding: 18px;
+  border: 2px solid #dad4c8;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(195, 251, 156, 0.2), transparent 30%),
+    #f6f4ef;
+  box-shadow: -6px 6px 0 rgba(46, 47, 46, 0.08);
+}
+
+.wk-workout-exercise-list-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.wk-workout-exercise-list-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wk-workout-exercise-list-title {
+  margin: 4px 0 0;
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -1.4px;
+  color: #2e2f2e;
+}
+
+.wk-workout-exercise-list-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.wk-workout-exercise-list-stat {
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 2px solid #dad4c8;
+  background: #fffdf9;
+}
+
+.wk-workout-exercise-list-stat span {
+  display: block;
+  margin-bottom: 6px;
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #767775;
+}
+
+.wk-workout-exercise-list-stat strong {
+  display: block;
+  font-size: 18px;
+  line-height: 1.08;
+  color: #2e2f2e;
+}
+
+.wk-workout-exercise-list-body {
+  border: 2px solid #dad4c8;
+  border-radius: 20px;
+  background: #fffdf9;
+  padding: 14px;
+}
+
+.wk-workout-session-note {
+  margin-top: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #f9f2e5;
+  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1px dashed #dad4c8;
+}
+
+.wk-workout-session-note p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #2e2f2e;
+}
+
+.wk-workout-exercise-list {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.wk-exercise-row {
+  border: 2px solid #dad4c8;
+  border-radius: 16px;
+  background: #fff;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.wk-exercise-row:hover {
+  transform: translateY(-1px);
+  box-shadow: -4px 4px 0 rgba(46, 47, 46, 0.1);
+}
+
+.wk-exercise-row--open {
+  border-color: #38671a;
+  box-shadow: -5px 5px 0 rgba(46, 47, 46, 0.16);
+}
+
+.wk-exercise-row-toggle {
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  padding: 12px 14px;
+}
+
+.wk-exercise-row-title {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #2e2f2e;
+}
+
+.wk-exercise-row-meta {
+  margin: 0;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #767775;
+}
+
+.wk-exercise-row-expand {
+  font-size: 20px;
+  color: #38671a;
+  transition: transform 0.18s ease;
+}
+
+.wk-exercise-row-detail {
+  border-top: 1px dashed #dad4c8;
+  padding: 10px 12px 12px;
+}
+
 /* Session Section */
 .wk-sess-section {
   display: flex;
@@ -1088,17 +1279,15 @@
 .wk-sess-title-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .wk-sess-date {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
-  letter-spacing: -1px;
   color: #2e2f2e;
-  text-transform: uppercase;
-  font-feature-settings: 'ss01' 1;
+  letter-spacing: -0.8px;
 }
 
 .wk-sess-badge {
@@ -2338,7 +2527,7 @@
 .wk-session-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 84px 20px 40px;
+  padding:  84px 20px 40px;
   max-width: 480px;
   margin: 0 auto;
   width: 100%;
@@ -4300,20 +4489,31 @@
 }
 
 .wk-history-card-btn {
+  display: flex;
   align-items: center;
-  gap: 14px;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  width: 100%;
+  border: 2px solid #dad4c8;
+  border-radius: 16px;
+  background: #fff;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+  flex-wrap: wrap;
+}
+
+.wk-history-card-btn:hover {
+  transform: translateY(-2px);
+  background: #fdfdfc;
 }
 
 .wk-history-card-date {
-  width: 96px;
-  min-width: 96px;
-  padding: 12px 10px;
-  border-radius: 16px;
-  border: 2px solid #dad4c8;
-  background: #f6f1e8;
-  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
-
 .wk-history-card-date strong {
   display: block;
   margin-bottom: 4px;
@@ -4355,6 +4555,20 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .wk-workout-exercise-list-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .wk-workout-exercise-list-head-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .wk-workout-exercise-list-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .wk-hist-focus-stats {
     grid-template-columns: 1fr 1fr 1fr;
   }
@@ -4376,6 +4590,10 @@
 @media (max-width: 640px) {
   .wk-history-calendar {
     position: static;
+  }
+
+  .wk-workout-exercise-list-title {
+    font-size: 22px;
   }
 
   .wk-history-glance {

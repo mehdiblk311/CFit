@@ -273,7 +273,7 @@ export default function AdminDashboard() {
           <p className="adm-page-eyebrow">// OVERVIEW_TERMINAL_V1</p>
           <h1 className="adm-page-title">The Kinetic<br />Dashboard</h1>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
           <div className="adm-sticker adm-sticker--rotate-r" style={{ background: hasErrors ? '#f8cc65' : '#c3fb9c' }}>
             <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
               {hasErrors ? 'warning' : 'bolt'}

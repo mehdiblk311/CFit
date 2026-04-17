@@ -4,7 +4,7 @@ import './AppLayout.css';
 
 const NAV_ITEMS = [
   { id: 'dashboard', path: '/dashboard', icon: 'dashboard', labelKey: 'common.nav.home' },
-  { id: 'workouts', path: '/workouts', icon: 'fitness_center', labelKey: 'common.nav.workout', match: ['/workouts', '/leaderboard', '/progress'] },
+  { id: 'workouts', path: '/workouts', icon: 'fitness_center', labelKey: 'common.nav.workout', match: ['/workouts'] },
   { id: 'nutrition', path: '/nutrition', icon: 'restaurant', labelKey: 'common.nav.nutrition' },
   { id: 'ai', path: '/ai', icon: 'smart_toy', labelKey: 'common.nav.coach' },
   { id: 'settings', path: '/settings', icon: 'settings', labelKey: 'common.nav.settings' },

@@ -2,6 +2,11 @@
    All classes prefixed with .adm- to avoid global collisions
 ──────────────────────────────────────────────────────────────────── */
 
+/* Global box-sizing reset scoped to admin shell */
+.adm-shell *, .adm-shell *::before, .adm-shell *::after {
+  box-sizing: border-box;
+}
+
 /* ══ Shell / Layout ══════════════════════════════════════════════ */
 .adm-shell {
   display: flex;
@@ -9,6 +14,9 @@
   background: #faf9f7;
   font-family: 'Plus Jakarta Sans', sans-serif;
   color: #2e2f2e;
+  overflow-x: hidden;
+  max-width: 100vw;
+  position: relative;
 }
 
 /* ══ Side Nav ════════════════════════════════════════════════════ */
@@ -177,6 +185,8 @@
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
+  min-width: 0; /* prevent flex overflow */
+  overflow-x: hidden;
 }
 
 /* ══ Top Bar ═════════════════════════════════════════════════════ */
@@ -194,13 +204,15 @@
   height: 64px;
   flex-shrink: 0;
 }
-.adm-topbar-left { display: flex; align-items: center; gap: 20px; }
+.adm-topbar-left { display: flex; align-items: center; gap: 20px; min-width: 0; overflow: hidden; }
 .adm-topbar-title {
   font-weight: 800;
   font-size: 20px;
   letter-spacing: -0.6px;
   color: #2e2f2e;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .adm-topbar-search-wrap {
   position: relative;
@@ -224,13 +236,13 @@
   letter-spacing: 1px;
   text-transform: uppercase;
   color: #2e2f2e;
-  width: 220px;
+  width: min(220px, 100%);
   outline: none;
   transition: border-color 0.2s, width 0.2s;
 }
 .adm-topbar-search:focus {
   border-color: #38671a;
-  width: 280px;
+  width: min(280px, 100%);
 }
 .adm-topbar-right { display: flex; align-items: center; gap: 12px; }
 .adm-lang-switch {
@@ -493,7 +505,8 @@
   letter-spacing: 0.8px;
   text-transform: uppercase;
   color: #2e2f2e;
-  width: 280px;
+  width: min(280px, 100%);
+  max-width: 100%;
   outline: none;
   transition: border-color 0.2s;
 }
@@ -615,12 +628,52 @@ html[dir='rtl'] .adm-bar-chart {
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
+/* ── Responsive breakpoints ───────────────────────────────────── */
 @media (max-width: 1200px) { .adm-grid-4 { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 900px)  { .adm-grid-3 { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 700px)  {
-  .adm-grid-4, .adm-grid-2, .adm-grid-3 { grid-template-columns: 1fr; }
-  .adm-topbar-search-wrap { display: none; }
+
+/* ══ Mobile hamburger button ═════════════════════════════════════ */
+.adm-hamburger {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #dad4c8;
+  background: #fff;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #2e2f2e;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.18s cubic-bezier(0.34, 1.3, 0.64, 1);
+  box-shadow: -2px 2px 0 #2e2f2e;
 }
+.adm-hamburger:hover {
+  background: #e8e2d6;
+  transform: rotate(-8deg) translateY(-1px);
+}
+
+/* ══ Mobile drawer overlay ═══════════════════════════════════════ */
+.adm-mobile-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(46, 47, 46, 0.48);
+  z-index: 190;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  animation: adm-overlay-in 0.2s ease;
+}
+.adm-mobile-overlay--active { display: block; }
+@keyframes adm-overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Mobile media queries live at the end of this file ──────────
+   so they win the cascade over all base styles above.
+   See: "RESPONSIVE SYSTEM" section at the bottom.
+─────────────────────────────────────────────────────────────── */
 
 /* ══ Data Table ══════════════════════════════════════════════════ */
 .adm-table-wrap {
@@ -881,4 +934,157 @@ html[dir='rtl'] .adm-bar-chart {
   color: #5b5c5a;
   max-width: 360px;
   line-height: 1.6;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   RESPONSIVE SYSTEM
+   All mobile overrides live here — AFTER every base style — so
+   the cascade works correctly. Never move these above base rules.
+══════════════════════════════════════════════════════════════════ */
+
+/* ── Narrow desktop / large tablet (< 1024px) ────────────────── */
+@media (max-width: 1023px) {
+  .adm-topbar-search { width: min(160px, 100%); }
+  .adm-topbar-search:focus { width: min(200px, 100%); }
+}
+
+/* ── Tablet (< 900px) ────────────────────────────────────────── */
+@media (max-width: 899px) {
+  .adm-grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── Tablet/large phone (< 768px) ───────────────────────────── */
+@media (max-width: 767px) {
+  /* ─ Hamburger: become visible ─ */
+  .adm-hamburger { display: flex; }
+
+  /* ─ Sidebar: slide off-screen by default ─ */
+  .adm-sidenav {
+    transform: translateX(-100%);
+    width: 260px !important;
+    /* override the width-only transition → animate the transform */
+    transition: transform 0.3s cubic-bezier(0.34, 1.05, 0.64, 1),
+                box-shadow 0.3s ease;
+    /* hover-expand disabled: width is fixed on mobile */
+  }
+  .adm-sidenav--mobile-open {
+    transform: translateX(0);
+    box-shadow: 12px 0 48px rgba(0, 0, 0, 0.16);
+  }
+  /* Labels & user info always visible inside open drawer */
+  .adm-sidenav--mobile-open .adm-nav-btn-label { width: auto !important; opacity: 1 !important; }
+  .adm-sidenav--mobile-open .adm-sidenav-user-info { opacity: 1 !important; }
+
+  /* ─ Main content: full viewport width ─ */
+  .adm-main {
+    margin-left: 0 !important;
+    max-width: 100vw;
+  }
+
+  /* ─ Topbar ─ */
+  .adm-topbar {
+    padding: 0 14px;
+    height: 56px;
+  }
+  .adm-topbar-left { gap: 10px; }
+  .adm-topbar-search-wrap { display: none; }  /* hidden → use in-page search */
+  .adm-topbar-status { display: none; }
+  .adm-topbar-title { font-size: 15px; letter-spacing: -0.2px; }
+  .adm-topbar-right { gap: 4px; flex-shrink: 0; }
+  .adm-topbar-notif,
+  .adm-topbar-logout { width: 36px; height: 36px; }
+
+  /* ─ Content area ─ */
+  .adm-content { padding: 18px 14px 56px; }
+
+  /* ─ Page header ─ */
+  .adm-page-header {
+    margin-bottom: 18px;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .adm-page-title { letter-spacing: -1.2px; }
+  .adm-page-actions { width: 100%; }
+
+  /* ─ All grids: single column ─ */
+  .adm-grid-4,
+  .adm-grid-3,
+  .adm-grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+
+  /* ─ Metric cards ─ */
+  .adm-metric-card { padding: 20px; }
+  .adm-metric-value { font-size: 36px; letter-spacing: -1.4px; }
+
+  /* ─ Buttons: touch-friendly ─ */
+  .adm-btn-primary { padding: 12px 20px; }
+  .adm-btn-ghost { padding: 10px 16px; }
+  .adm-page-actions .adm-btn-primary,
+  .adm-page-actions .adm-btn-ghost { flex: 1; justify-content: center; }
+
+  /* ─ Search bar (in-page, not topbar) ─ */
+  .adm-search { width: 100%; max-width: 100%; }
+  .adm-search-wrap { width: 100%; max-width: 100%; }
+
+  /* ─ Data table: horizontal scroll (MUST be after base .adm-table-wrap rule) ─ */
+  .adm-table-wrap {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  .adm-table { min-width: 500px; }
+  .adm-table th,
+  .adm-table td { padding: 12px 14px; }
+
+  /* ─ Modal ─ */
+  .adm-modal-overlay { padding: 12px; align-items: flex-end; }
+  .adm-modal {
+    padding: 20px;
+    border-radius: 20px 20px 16px 16px;
+    max-width: 100%;
+    box-shadow: 0 -4px 0 #2e2f2e;
+  }
+  .adm-form-actions {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+  .adm-form-actions .adm-btn-primary,
+  .adm-form-actions .adm-btn-ghost { width: 100%; justify-content: center; }
+
+  /* ─ Sticker ─ */
+  .adm-sticker { font-size: 8px; padding: 4px 10px; letter-spacing: 0.8px; }
+
+  /* ─ Empty state ─ */
+  .adm-empty { padding: 40px 16px; }
+
+  /* ─ Coming soon ─ */
+  .adm-cs-title { font-size: 32px; }
+  .adm-cs-icon { font-size: 52px; }
+}
+
+/* ── Small mobile (< 480px) ─────────────────────────────────── */
+@media (max-width: 479px) {
+  .adm-content { padding: 14px 12px 56px; }
+  .adm-topbar { padding: 0 12px; }
+  .adm-metric-value { font-size: 30px; }
+  .adm-page-title { font-size: clamp(26px, 8vw, 36px); }
+  /* Chip wrapping in topbar row */
+  .adm-chip { font-size: 8px; padding: 3px 8px; }
+}
+
+/* ── RTL + mobile ─────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  html[dir='rtl'] .adm-sidenav {
+    left: auto;
+    right: 0;
+    transform: translateX(100%);  /* slide from right edge */
+  }
+  html[dir='rtl'] .adm-sidenav--mobile-open {
+    transform: translateX(0);
+    box-shadow: -12px 0 48px rgba(0, 0, 0, 0.16);
+  }
+  html[dir='rtl'] .adm-main { margin-right: 0 !important; }
+  html[dir='rtl'] .adm-hamburger { order: -1; }
 }

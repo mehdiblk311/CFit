@@ -5,12 +5,12 @@ import { uiStore } from '../../../stores/uiStore';
 import { useI18n } from '../../../i18n/useI18n';
 import {
   useDashboardCoachSummary,
-  useDashboardRecommendations,
   useDashboardStreaks,
   useDashboardSummary,
   useDashboardWeeklySummary,
   useUnreadCount,
 } from '../../../hooks/queries/useDashboard';
+import Leaderboard from '../Leaderboard/Leaderboard';
 import './Dashboard.css';
 
 /* ── Helpers ─────────────────────────────────────────────────────── */
@@ -120,20 +120,6 @@ function normalizeStreaks(streaks, coachSummary) {
   };
 }
 
-function normalizeRecommendations(recommendations, coachSummary) {
-  const primaryRules = toArray(recommendations?.rules || recommendations);
-  const source =
-    primaryRules.length > 0 ? recommendations || {} : coachSummary?.recommendations || {};
-  const rules = toArray(source?.rules || source);
-  return rules
-    .filter((rule) => rule && rule.applies !== false)
-    .map((rule, index) => ({
-      id: rule.id || `rec-${index}`,
-      name: rule.name || '',
-      description: rule.description || '',
-      adjustment: rule.adjustment || '',
-    }));
-}
 
 /* Builds Mon–Sun for the current week, marking done days via streak count */
 function buildWeekCalendar(workoutStreak, locale) {
@@ -271,7 +257,6 @@ export default function Dashboard() {
   const summaryQuery = useDashboardSummary();
   const weeklyQuery = useDashboardWeeklySummary();
   const streaksQuery = useDashboardStreaks();
-  const recommendationsQuery = useDashboardRecommendations();
   const coachSummaryQuery = useDashboardCoachSummary();
   const unreadCountQuery = useUnreadCount();
 
@@ -288,10 +273,6 @@ export default function Dashboard() {
   const summary = normalizeSummary(summaryQuery.data, coachSummaryQuery.data);
   const weekly = normalizeWeeklySummary(weeklyQuery.data);
   const streaks = normalizeStreaks(streaksQuery.data, coachSummaryQuery.data);
-  const recommendations = normalizeRecommendations(
-    recommendationsQuery.data,
-    coachSummaryQuery.data
-  );
 
   const weekDays = useMemo(
     () => buildWeekCalendar(streaks.workoutStreak, locale),
@@ -330,7 +311,7 @@ export default function Dashboard() {
   const showFallbackBanner =
     !showInitialLoading &&
     !hasAnyDashboardData &&
-    (summaryQuery.isError || weeklyQuery.isError || recommendationsQuery.isError);
+    (summaryQuery.isError || weeklyQuery.isError);
 
   return (
     <div className="dash-root">
@@ -568,27 +549,10 @@ export default function Dashboard() {
               </div>
             </section>
 
-            {/* ── Recommendations ── */}
-            {recommendations.length > 0 && (
-              <section className="dash-card dash-card--recs">
-                <span className="dash-section-label" style={{ color: '#b36200' }}>
-                  {t('dashboard.recommendations')}
-                </span>
-                <ul className="dash-recs-list">
-                  {recommendations.slice(0, 3).map((rec) => (
-                    <li key={rec.id} className="dash-rec-item">
-                      <span className="material-symbols-outlined dash-rec-icon">
-                        tips_and_updates
-                      </span>
-                      <div>
-                        <p className="dash-rec-name">{rec.name || t('dashboard.todayRecommendation')}</p>
-                        <p className="dash-rec-adj">{rec.adjustment || rec.description}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
+            <section className="dash-card dash-card--leaderboard" id="dashboard-leaderboard">
+              <Leaderboard embedded />
+            </section>
+
           </>
         )}
       </main>
