@@ -25,7 +25,6 @@ const CreateRecipe = lazy(() => import('./components/user/Nutrition/CreateRecipe
 const CustomFood = lazy(() => import('./components/user/Nutrition/CustomFood/CustomFood'));
 const AIAssistant = lazy(() => import('./components/user/AIAssistant/AIAssistant'));
 const Settings = lazy(() => import('./components/user/Settings/Settings'));
-const WeightTracker = lazy(() => import('./components/user/WeightTracker/WeightTracker'));
 const NotificationsCenter = lazy(() => import('./components/user/Notifications/NotificationsCenter'));
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
@@ -112,8 +111,7 @@ const router = createBrowserRouter([
           { path: '/workouts', element: lazyElement(Workouts) },
           { path: '/workouts/library', element: lazyElement(Workouts) },
           { path: '/workouts/history', element: lazyElement(Workouts) },
-          { path: '/weight', element: lazyElement(WeightTracker) },
-          { path: '/leaderboard', element: <Navigate to="/dashboard" replace /> },
+{ path: '/leaderboard', element: <Navigate to="/dashboard" replace /> },
           { path: '/notifications', element: lazyElement(NotificationsCenter) },
           {
             path: '/nutrition',

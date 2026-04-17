@@ -343,7 +343,7 @@ function ExerciseInfoModal({ exercise, onClose, t }) {
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
         </button>
 
-        <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 12 }}>
+        <div className="adm-exercise-info-head">
           <div style={{ width: 84, height: 84, borderRadius: 14, overflow: 'hidden', border: '2px solid #dad4c8', position: 'relative', flexShrink: 0 }}>
             <ExerciseImagePreview
               key={`detail-${exercise.id}-${exercise.imageUrl}-${exercise.altImageUrl || ''}`}
@@ -363,7 +363,7 @@ function ExerciseInfoModal({ exercise, onClose, t }) {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8, marginBottom: 14 }}>
+        <div className="adm-exercise-info-grid">
           <div style={{ border: '2px solid #dad4c8', borderRadius: 12, padding: 10 }}>
             <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#767775' }}>{t('admin.exerciseLibrary.info.muscle').toUpperCase()}</p>
             <p style={{ margin: '4px 0 0', fontSize: 12, fontWeight: 700 }}>{getMuscleLabel(t, exercise.muscle)}</p>

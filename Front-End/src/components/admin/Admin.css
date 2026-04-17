@@ -629,6 +629,50 @@ html[dir='rtl'] .adm-bar-chart {
   gap: 20px;
 }
 
+/* ══ Programs / Exercise detail responsive helpers ═════════════════ */
+.adm-programs-layout {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(280px, 420px) minmax(0, 1fr);
+  align-items: start;
+}
+.adm-programs-list {
+  grid-template-columns: 1fr !important;
+}
+.adm-programs-detail-head,
+.adm-programs-week-head,
+.adm-programs-session-head,
+.adm-programs-assignment-head,
+.adm-programs-assignment-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+.adm-programs-week-actions,
+.adm-programs-session-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.adm-programs-exercise-fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.adm-exercise-info-head {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.adm-exercise-info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
 /* ══ Exercise bento layout ═══════════════════════════════════════ */
 /* Desktop: filters flex | two auto stat cards side-by-side */
 .adm-bento-grid {
@@ -972,9 +1016,38 @@ html[dir='rtl'] .adm-bar-chart {
   .adm-topbar-search:focus { width: min(200px, 100%); }
 }
 
+/* ── Mid desktop / tablet (< 1200px) ─────────────────────────── */
+@media (max-width: 1199px) {
+  .adm-programs-layout {
+    grid-template-columns: minmax(240px, 340px) minmax(0, 1fr);
+  }
+  .adm-exercise-info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 /* ── Tablet (< 900px) ────────────────────────────────────────── */
 @media (max-width: 899px) {
   .adm-grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .adm-programs-layout {
+    grid-template-columns: 1fr;
+  }
+  .adm-programs-detail-head,
+  .adm-programs-week-head,
+  .adm-programs-session-head,
+  .adm-programs-assignment-head,
+  .adm-programs-assignment-row {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .adm-programs-week-actions,
+  .adm-programs-session-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .adm-programs-exercise-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* ── Tablet/large phone (< 768px) ───────────────────────────── */
@@ -1086,6 +1159,9 @@ html[dir='rtl'] .adm-bar-chart {
   /* ─ Coming soon ─ */
   .adm-cs-title { font-size: 32px; }
   .adm-cs-icon { font-size: 52px; }
+  .adm-exercise-info-head {
+    align-items: flex-start;
+  }
 }
 
 /* ── Small mobile (< 480px) ─────────────────────────────────── */
@@ -1096,6 +1172,14 @@ html[dir='rtl'] .adm-bar-chart {
   .adm-page-title { font-size: clamp(26px, 8vw, 36px); }
   /* Chip wrapping in topbar row */
   .adm-chip { font-size: 8px; padding: 3px 8px; }
+  .adm-programs-exercise-fields,
+  .adm-exercise-info-grid {
+    grid-template-columns: 1fr;
+  }
+  .adm-programs-week-actions,
+  .adm-programs-session-actions {
+    justify-content: flex-start;
+  }
 }
 
 /* ── RTL + mobile ─────────────────────────────────────────────── */

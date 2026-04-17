@@ -376,7 +376,7 @@ function SessionModal({ initialValue, onClose, onSave, saving, t }) {
                     </button>
                   </div>
 
-                  <div className="adm-grid-2" style={{ gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' }}>
+                  <div className="adm-programs-exercise-fields">
                     <div className="adm-form-field">
                       <label className="adm-form-label">{t('workouts.history.sets')}</label>
                       <input className="adm-form-input" type="number" min={1} value={exercise.sets} onChange={(e) => updateExercise(index, 'sets', e.target.value)} />
@@ -691,13 +691,13 @@ export default function AdminUserPrograms() {
         <button className={activeFilter === 'inactive' ? 'adm-btn-primary' : 'adm-btn-ghost'} onClick={() => setActiveFilter('inactive')}>{t('admin.userPrograms.status.inactive')}</button>
       </div>
 
-      <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'minmax(320px, 420px) minmax(420px, 1fr)' }}>
+      <div className="adm-programs-layout">
         <div>
           <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
             <span className="adm-chip adm-chip--oat">{t('admin.userPrograms.summary.programs', { count: programs.length })}</span>
             <span className="adm-chip adm-chip--green">{t('admin.userPrograms.summary.active', { count: programs.filter((p) => p.is_active).length })}</span>
           </div>
-          <div className="adm-grid-3" style={{ gridTemplateColumns: '1fr' }}>
+          <div className="adm-grid-3 adm-programs-list">
             {isLoading ? (
               <div className="adm-card" style={{ padding: 20 }}>{t('admin.userPrograms.states.loadingPrograms')}</div>
             ) : filteredPrograms.length === 0 ? (
@@ -752,7 +752,7 @@ export default function AdminUserPrograms() {
             </div>
           ) : (
             <>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginBottom: 14 }}>
+              <div className="adm-programs-detail-head" style={{ marginBottom: 14 }}>
                 <div>
                   <h2 style={{ marginBottom: 4 }}>{selectedProgram?.name || t('admin.userPrograms.labels.program')}</h2>
                   <p style={{ fontSize: 13, color: '#5b5c5a' }}>{selectedProgram?.description || t('admin.userPrograms.labels.noDescription')}</p>
@@ -773,12 +773,12 @@ export default function AdminUserPrograms() {
                       .sort((a, b) => (a.week_number || 0) - (b.week_number || 0))
                       .map((week) => (
                         <div key={week.id} style={{ border: '2px solid #dad4c8', borderRadius: 16, padding: 12 }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                          <div className="adm-programs-week-head" style={{ marginBottom: 8 }}>
                             <div>
                               <strong>{t('admin.userPrograms.labels.weekNumber', { count: week.week_number })}</strong>
                               {week.name ? <span style={{ marginLeft: 8, color: '#5b5c5a' }}>({week.name})</span> : null}
                             </div>
-                            <div style={{ display: 'flex', gap: 6 }}>
+                            <div className="adm-programs-week-actions">
                               <button className="adm-icon-btn adm-icon-btn--edit" onClick={() => setWeekModal(week)}>
                                 <span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>
                               </button>
@@ -799,7 +799,7 @@ export default function AdminUserPrograms() {
                               .sort((a, b) => (a.day_number || 0) - (b.day_number || 0))
                               .map((session) => (
                                 <div key={session.id} style={{ border: '1px dashed #dad4c8', borderRadius: 12, padding: 10 }}>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                                  <div className="adm-programs-session-head">
                                     <div>
                                       <div style={{ fontSize: 13, fontWeight: 600 }}>
                                         {t('admin.userPrograms.labels.dayNumber', { count: session.day_number })}
@@ -807,7 +807,7 @@ export default function AdminUserPrograms() {
                                       </div>
                                       <div style={{ fontSize: 12, color: '#5b5c5a' }}>{session.notes || t('admin.userPrograms.labels.noNotes')}</div>
                                     </div>
-                                    <div style={{ display: 'flex', gap: 6 }}>
+                                    <div className="adm-programs-session-actions">
                                       <button
                                         className="adm-icon-btn adm-icon-btn--edit"
                                         onClick={() => setSessionModal({ ...session, week_id: week.id })}
@@ -832,7 +832,7 @@ export default function AdminUserPrograms() {
               </div>
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <div className="adm-programs-assignment-head" style={{ marginBottom: 8 }}>
                   <h3 style={{ fontSize: 14 }}>{t('admin.userPrograms.sections.assignments')}</h3>
                   <button className="adm-btn-primary" onClick={() => setAssignmentModalOpen(true)}>
                     <span className="material-symbols-outlined" style={{ fontSize: 16 }}>person_add</span>
@@ -852,7 +852,7 @@ export default function AdminUserPrograms() {
                   <div style={{ display: 'grid', gap: 8 }}>
                     {assignments.map((assignment) => (
                       <div key={assignment.id} style={{ border: '2px solid #dad4c8', borderRadius: 12, padding: 10 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center' }}>
+                        <div className="adm-programs-assignment-row">
                           <div>
                             <div style={{ fontSize: 12, color: '#5b5c5a' }}>{t('admin.userPrograms.labels.userId')}</div>
                             <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10 }}>{assignment.user_id}</div>

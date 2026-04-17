@@ -486,15 +486,6 @@ export default function Dashboard() {
               </button>
             </div>
 
-            <button
-              className="dash-log-weight-link"
-              type="button"
-              onClick={() => navigate('/weight')}
-            >
-              <span className="material-symbols-outlined">monitor_weight</span>
-              {t('dashboard.logWeight')}
-            </button>
-
             {/* ── Weekly Counter ── */}
             <section className="dash-card dash-card--counter">
               <div className="dash-counter-top">

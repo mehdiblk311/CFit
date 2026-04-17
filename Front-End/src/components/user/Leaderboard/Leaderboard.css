@@ -917,16 +917,6 @@
     padding: 0 0 10px;
   }
 
-  .lb-score-body {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .lb-score-pts-block {
-    align-items: flex-start;
-    text-align: left;
-  }
-
   .lb-podium-grid {
     grid-template-columns: 1fr;
     align-items: stretch;
@@ -955,7 +945,11 @@
   }
 
   .lb-rank-display {
-    font-size: clamp(2.4rem, 12vw, 3.5rem);
+    font-size: clamp(2rem, 10vw, 3rem);
+  }
+
+  .lb-score-display {
+    font-size: clamp(1.4rem, 5vw, 2rem);
   }
 
   .lb-my-rank-bar {

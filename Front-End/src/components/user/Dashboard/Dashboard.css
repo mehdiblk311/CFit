@@ -482,28 +482,6 @@
   box-shadow: -3px 3px 0 #2e2f2e;
 }
 
-/* Log Weight — small tertiary link below actions */
-.dash-log-weight-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: 'Space Mono', monospace;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: #5b5c5a;
-  padding: 8px;
-  margin-top: -4px;
-  transition: color 0.15s;
-}
-.dash-log-weight-link .material-symbols-outlined { font-size: 16px; }
-.dash-log-weight-link:hover { color: #38671a; }
-
 /* ── Weekly Counter ─────────────────────────────────────────────────── */
 .dash-card--counter { padding: 20px 24px; }
 

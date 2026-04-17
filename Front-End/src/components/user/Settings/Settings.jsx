@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../../hooks/useAuth';
@@ -106,85 +106,41 @@ function AvatarArtwork({ avatar, name, className, fallbackClassName }) {
   return <span className={fallbackClassName}>{getInitials(name)}</span>;
 }
 
-/* ── ProfileSection ──────────────────────────────────────────────── */
+/* ── ProfileSection (profile + body metrics merged) ─────────────── */
 
-function ProfileSection({ profile, onSave, saving }) {
+function ProfileSection({ profile, latestWeightEntry, onSave, saving }) {
   const t = useT();
-  const fileRef = useRef(null);
-  const [avatarPreview, setAvatarPreview] = useState(profile?.avatar || '');
-  const [fileError, setFileError] = useState(null);
-
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      setFileError(t('imageTooLarge'));
-      return;
-    }
-    setFileError(null);
-    const reader = new FileReader();
-    reader.onload = (ev) => setAvatarPreview(ev.target.result);
-    reader.readAsDataURL(file);
-  };
+  const age = calculateAge(profile?.date_of_birth, profile?.age);
 
   async function handleSubmit(e) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const name = String(fd.get('name') || '').trim();
     if (!name) { uiStore.getState().addToast(t('nameRequired'), 'error'); return; }
-    const normalizedName = String(profile?.name || '').trim();
-    const isNameChanged = name !== normalizedName;
-    const isAvatarChanged = avatarPreview !== (profile?.avatar || '');
-
-    if (!isNameChanged && !isAvatarChanged) {
-      uiStore.getState().addToast(t('noProfileChanges'), 'info');
-      return;
-    }
-
-    const patch = {};
-    if (isNameChanged) patch.name = name;
-    if (isAvatarChanged) {
-      patch.avatar = avatarPreview;
-    }
+    const patch = { name };
+    const heightRaw = String(fd.get('height') || '').trim();
+    const weightRaw = String(fd.get('weight') || '').trim();
+    if (heightRaw !== '') patch.height = Number(heightRaw);
+    if (weightRaw !== '') patch.weight = Number(weightRaw);
     await onSave(patch);
   }
 
   return (
     <section className="st-profile-card">
-      <input
-        type="file"
-        ref={fileRef}
-        hidden
-        accept="image/*"
-        onChange={handleFileChange}
-      />
-
-      <button
-        className="st-avatar-center-btn"
-        type="button"
-        onClick={() => fileRef.current?.click()}
-        title={t('tapToChangePhoto')}
-      >
+      <div className="st-avatar-center-btn">
         <div className="st-profile-avatar">
           <AvatarArtwork
-            key={avatarPreview || 'p-fallback'}
-            avatar={avatarPreview}
+            key={profile?.avatar || 'p-fallback'}
+            avatar={profile?.avatar}
             name={profile?.name}
             className="st-profile-avatar-image"
             fallbackClassName="st-profile-avatar-fallback"
           />
-          <div className="st-avatar-edit">
-            <span className="material-symbols-outlined" style={{ fontSize: 13 }}>photo_camera</span>
-          </div>
         </div>
-      </button>
-
-      {fileError && (
-        <p style={{ color: '#b02500', fontSize: 13, margin: '0 0 4px', textAlign: 'center' }}>{fileError}</p>
-      )}
+      </div>
 
       <form
-        key={`${profile?.id || 'prof'}-${profile?.updated_at || ''}-${profile?.name || ''}`}
+        key={`${profile?.id || 'prof'}-${profile?.updated_at || ''}-${profile?.name || ''}-${profile?.height || ''}`}
         className="st-profile-form"
         onSubmit={handleSubmit}
       >
@@ -205,43 +161,7 @@ function ProfileSection({ profile, onSave, saving }) {
           <div className="st-input-static">{profile?.email || t('noEmail')}</div>
         </div>
 
-        <button className="st-save-btn st-save-btn--full" type="submit" disabled={saving}>
-          {saving ? t('saving') : t('saveProfile')}
-        </button>
-      </form>
-    </section>
-  );
-}
-
-/* ── BodyMetricsSection ──────────────────────────────────────────── */
-
-function BodyMetricsSection({ profile, latestWeightEntry, onSave, saving }) {
-  const t = useT();
-  const age = calculateAge(profile?.date_of_birth, profile?.age);
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    const heightRaw = String(fd.get('height') || '').trim();
-    const weightRaw = String(fd.get('weight') || '').trim();
-
-    const payload = {};
-    if (heightRaw !== '') payload.height = Number(heightRaw);
-    if (weightRaw !== '') payload.weight = Number(weightRaw);
-
-    await onSave(payload);
-  }
-
-  return (
-    <div className="st-metrics-section">
-      <h2 className="st-raw-title">{t('bodyMetrics')}</h2>
-
-      <form
-        key={`bm-${profile?.id || ''}-${profile?.updated_at || ''}-${profile?.height || ''}`}
-        onSubmit={handleSubmit}
-      >
         <div className="st-metrics-grid">
-          {/* Height */}
           <div className="st-metric-card">
             <label className="st-metric-card-label" htmlFor="s-height">{t('heightCm')}</label>
             <input
@@ -256,7 +176,6 @@ function BodyMetricsSection({ profile, latestWeightEntry, onSave, saving }) {
             />
           </div>
 
-          {/* Weight */}
           <div className="st-metric-card">
             <label className="st-metric-card-label" htmlFor="s-weight">{t('weightKg')}</label>
             <input
@@ -274,48 +193,41 @@ function BodyMetricsSection({ profile, latestWeightEntry, onSave, saving }) {
             )}
           </div>
 
-          {/* Age — read-only */}
           <div className="st-metric-card st-metric-card--readonly">
             <label className="st-metric-card-label">{t('age')}</label>
             <div className="st-metric-card-value">{age || '--'}</div>
           </div>
         </div>
 
-        <button
-          className="st-save-btn st-save-btn--full"
-          type="submit"
-          disabled={saving}
-          style={{ marginTop: 12 }}
-        >
-          {saving ? t('saving') : t('saveMetrics')}
+        <button className="st-save-btn st-save-btn--full" type="submit" disabled={saving} style={{ marginTop: 12 }}>
+          {saving ? t('saving') : t('saveProfile')}
         </button>
       </form>
-    </div>
+    </section>
   );
 }
 
 /* ── FitnessGoalsSection ─────────────────────────────────────────── */
 
 function FitnessGoalsSection({
-  profile, initialWorkoutFrequency = 5,
-  onSave, saving, onRecalculate, recalculating,
+  profile,
+  onSave, saving,
+  targets, targetsLoading, targetsError,
 }) {
   const t = useT();
   const [goal, setGoal] = useState(normalizeGoal(profile?.goal));
   const [activityLevel, setActivityLevel] = useState(normalizeActivity(profile?.activity_level));
-  const [workoutFrequency, setWorkoutFrequency] = useState(initialWorkoutFrequency);
 
-  useEffect(() => {
-    setWorkoutFrequency(Math.min(7, Math.max(1, Number(initialWorkoutFrequency) || 5)));
-  }, [initialWorkoutFrequency]);
+  const resolved = {
+    calories: targets?.calories ?? profile?.tdee ?? null,
+    protein: targets?.protein ?? null,
+    carbs: targets?.carbs ?? null,
+    fat: targets?.fat ?? null,
+  };
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    const twRaw = String(fd.get('target_weight') || '').trim();
-    const payload = { goal, activity_level: activityLevel };
-    if (twRaw !== '') payload.target_weight = Number(twRaw);
-    await onSave(payload, { workoutFrequency });
+    await onSave({ goal, activity_level: activityLevel });
   }
 
   return (
@@ -344,21 +256,6 @@ function FitnessGoalsSection({
           </div>
         </div>
 
-        {/* Target Weight */}
-        <div className="st-input-group">
-          <label className="st-field-label" htmlFor="s-tw">{t('targetWeightKg')}</label>
-          <input
-            id="s-tw"
-            className="st-input"
-            type="number"
-            name="target_weight"
-            min="0"
-            step="0.1"
-            defaultValue={profile?.target_weight || ''}
-            placeholder="75"
-          />
-        </div>
-
         {/* Activity Level */}
         <div className="st-input-group">
           <label className="st-field-label" htmlFor="s-activity">{t('activityLevel')}</label>
@@ -374,85 +271,42 @@ function FitnessGoalsSection({
           </select>
         </div>
 
-        {/* Workout Frequency */}
-        <div className="st-input-group">
-          <div className="st-freq-header">
-            <label className="st-field-label">{t('workoutFrequency')}</label>
-            <span className="st-freq-days">{workoutFrequency} {t('days')}</span>
-          </div>
-          <input
-            className="st-range"
-            type="range"
-            min="1"
-            max="7"
-            value={workoutFrequency}
-            onChange={(e) => setWorkoutFrequency(Number(e.target.value))}
-          />
-        </div>
-
         <button className="st-save-btn st-save-btn--full" type="submit" disabled={saving}>
           {saving ? t('saving') : t('saveGoals')}
         </button>
       </form>
 
-      <button
-        className="st-recalc-btn"
-        type="button"
-        onClick={onRecalculate}
-        disabled={recalculating}
-        style={{ marginTop: 16 }}
-      >
-        <span className="material-symbols-outlined" style={{ fontSize: 17 }}>calculate</span>
-        {recalculating ? '…' : t('recalculateTdee')}
-      </button>
-    </section>
-  );
-}
-
-/* ── TargetsSection ──────────────────────────────────────────────── */
-
-function TargetsSection({ profile, targets, isLoading, isError, onRefresh }) {
-  const t = useT();
-  const resolved = {
-    calories: targets?.calories ?? profile?.tdee ?? null,
-    protein: targets?.protein ?? null,
-    carbs: targets?.carbs ?? null,
-    fat: targets?.fat ?? null,
-  };
-
-  return (
-    <section className="st-tdee-card">
-      <div className="st-tdee-top">
-        <div>
-          <span className="st-tdee-eyebrow">{t('dailyTdee')}</span>
-          <div className="st-tdee-number">
-            {isLoading ? '…' : formatNumber(resolved.calories)}
-            <span className="st-tdee-unit">{t('kcal')}</span>
+      {/* ── Daily TDEE (embedded) ── */}
+      <div className="st-tdee-card">
+        <div className="st-tdee-top">
+          <div>
+            <span className="st-tdee-eyebrow">{t('dailyTdee')}</span>
+            <div className="st-tdee-number">
+              {targetsLoading ? '…' : formatNumber(resolved.calories)}
+              <span className="st-tdee-unit">{t('kcal')}</span>
+            </div>
           </div>
         </div>
-        <button className="st-reset-link" type="button" onClick={onRefresh}>
-          {t('resetToCalculated')}
-        </button>
-      </div>
 
-      <div className="st-macro-row">
-        {[
-          ['protein', resolved.protein, 'g'],
-          ['carbs', resolved.carbs, 'g'],
-          ['fat', resolved.fat, 'g'],
-        ].map(([key, value, unit]) => (
-          <div key={key} className="st-macro-pill">
-            <span className="st-macro-pill-label">{t(key)}</span>
-            <span className="st-macro-pill-value">
-              {isLoading ? '…' : formatNumber(value, unit)}
-            </span>
-          </div>
-        ))}
-      </div>
+        <div className="st-macro-row">
+          {[
+            ['protein', resolved.protein, 'g'],
+            ['carbs', resolved.carbs, 'g'],
+            ['fat', resolved.fat, 'g'],
+          ].map(([key, value, unit]) => (
+            <div key={key} className="st-macro-pill">
+              <span className="st-macro-pill-label">{t(key)}</span>
+              <span className="st-macro-pill-value">
+                {targetsLoading ? '…' : formatNumber(value, unit)}
+              </span>
+            </div>
+          ))}
+        </div>
 
-      {isError && (
-        <p className="st-tdee-footnote">{t('tdeeRefreshFailed')}</p>
-      )}
+        {targetsError && (
+          <p className="st-tdee-footnote">{t('tdeeRefreshFailed')}</p>
+        )}
+      </div>
     </section>
   );
 }
@@ -463,10 +317,6 @@ export default function Settings() {
   const { user, logout, updateProfile } = useAuth();
   const navigate = useNavigate();
   const { t, language, setLanguage } = useI18n('settings');
-  const workoutFrequencyByUser = uiStore((s) => s.workoutFrequencyByUser);
-  const getWorkoutFrequencyForUser = uiStore((s) => s.getWorkoutFrequencyForUser);
-  const setWorkoutFrequencyForUser = uiStore((s) => s.setWorkoutFrequencyForUser);
-  const migrateLegacyWorkoutFrequencyForUser = uiStore((s) => s.migrateLegacyWorkoutFrequencyForUser);
 
   const [show2FA, setShow2FA] = useState(false);
   const [showSessions, setShowSessions] = useState(false);
@@ -476,19 +326,7 @@ export default function Settings() {
   const [showTerms, setShowTerms] = useState(false);
 
   const [profileSaving, setProfileSaving] = useState(false);
-  const [bodySaving, setBodySaving] = useState(false);
   const [goalsSaving, setGoalsSaving] = useState(false);
-  const [recalculating, setRecalculating] = useState(false);
-
-  const workoutFrequency = useMemo(() => {
-    if (!user?.id) return 5;
-    return getWorkoutFrequencyForUser(user.id);
-  }, [user?.id, workoutFrequencyByUser, getWorkoutFrequencyForUser]);
-
-  useEffect(() => {
-    if (!user?.id) return;
-    migrateLegacyWorkoutFrequencyForUser(user.id);
-  }, [user?.id, migrateLegacyWorkoutFrequencyForUser]);
 
   const profileQuery = useQuery({
     queryKey: ['settings', 'profile', user?.id],
@@ -522,39 +360,21 @@ export default function Settings() {
     ]);
   }
 
-  async function saveProfilePatch(patch, type = 'profile', options = {}) {
+  async function saveProfilePatch(patch, type = 'profile') {
     if (!user?.id) return;
-    const setSaving = { body: setBodySaving, goals: setGoalsSaving }[type] ?? setProfileSaving;
-    const msgMap = { body: t('bodyMetricsUpdated'), goals: t('goalsUpdated') };
-    const msg = msgMap[type] ?? t('profileUpdated');
-    const errorMap = {
-      profile: t('profileUpdateFailed'),
-      body: t('bodyMetricsUpdateFailed'),
-      goals: t('goalsUpdateFailed'),
-    };
+    const setSaving = type === 'goals' ? setGoalsSaving : setProfileSaving;
+    const msg = type === 'goals' ? t('goalsUpdated') : t('profileUpdated');
+    const errorMsg = type === 'goals' ? t('goalsUpdateFailed') : t('profileUpdateFailed');
     setSaving(true);
     try {
       await updateProfile(user.id, patch, { showErrorToast: false });
-      if (type === 'goals' && options?.workoutFrequency !== undefined) {
-        setWorkoutFrequencyForUser(user.id, options.workoutFrequency);
-      }
       uiStore.getState().addToast(msg, 'success');
       await refreshQueries();
     } catch (err) {
       console.error('Settings update failed', err);
-      uiStore.getState().addToast(errorMap[type] || errorMap.profile, 'error');
+      uiStore.getState().addToast(errorMsg, 'error');
     } finally {
       setSaving(false);
-    }
-  }
-
-  async function handleRecalculate() {
-    setRecalculating(true);
-    try {
-      await nutritionTargetsQuery.refetch();
-      uiStore.getState().addToast(t('tdeeRecalculated'), 'success');
-    } finally {
-      setRecalculating(false);
     }
   }
 
@@ -596,41 +416,24 @@ export default function Settings() {
 
       <main className="st-main">
 
-        {/* ── Profile ── */}
+        {/* ── Profile + Body Metrics ── */}
         <ProfileSection
           key={`ps-${profile?.id || ''}-${profile?.updated_at || ''}-${profile?.avatar || ''}`}
           profile={profile}
+          latestWeightEntry={latestWeightEntry}
           onSave={(patch) => saveProfilePatch(patch, 'profile')}
           saving={profileSaving}
         />
 
-        {/* ── Body Metrics ── */}
-        <BodyMetricsSection
-          key={`bm-${profile?.id || ''}-${profile?.updated_at || ''}`}
-          profile={profile}
-          latestWeightEntry={latestWeightEntry}
-          onSave={(patch) => saveProfilePatch(patch, 'body')}
-          saving={bodySaving}
-        />
-
-        {/* ── Fitness Goals + Recalculate ── */}
+        {/* ── Fitness Goals + Daily TDEE ── */}
         <FitnessGoalsSection
           key={`fg-${profile?.id || ''}-${profile?.updated_at || ''}-${profile?.goal || ''}`}
           profile={profile}
-          initialWorkoutFrequency={workoutFrequency}
-          onSave={(patch, options) => saveProfilePatch(patch, 'goals', options)}
+          onSave={(patch) => saveProfilePatch(patch, 'goals')}
           saving={goalsSaving}
-          onRecalculate={handleRecalculate}
-          recalculating={recalculating}
-        />
-
-        {/* ── TDEE / Targets ── */}
-        <TargetsSection
-          profile={profile}
           targets={nutritionTargetsQuery.data}
-          isLoading={nutritionTargetsQuery.isLoading}
-          isError={nutritionTargetsQuery.isError}
-          onRefresh={() => nutritionTargetsQuery.refetch()}
+          targetsLoading={nutritionTargetsQuery.isLoading}
+          targetsError={nutritionTargetsQuery.isError}
         />
 
         {/* ── Security ── */}
