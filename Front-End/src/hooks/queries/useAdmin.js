@@ -136,6 +136,7 @@ export function useDeleteAdminUser() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'logs'] });
     },
   });
 }

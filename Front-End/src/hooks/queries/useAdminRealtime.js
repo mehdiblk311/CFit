@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import client from '../../api/client';
+import { readPublicConfig } from '../../config/runtimeConfig';
 import { authStore } from '../../stores/authStore';
 
 const BASE_RECONNECT_DELAY_MS = 1200;
@@ -32,7 +33,7 @@ function normalizeRealtimePayload(rawMessage) {
 }
 
 function resolveAuthMode() {
-  const raw = String(import.meta.env.VITE_ADMIN_REALTIME_WS_AUTH_MODE || 'header').trim().toLowerCase();
+  const raw = String(readPublicConfig('VITE_ADMIN_REALTIME_WS_AUTH_MODE', 'header')).trim().toLowerCase();
   if (raw === 'query' || raw === 'none' || raw === 'off') return raw;
   return 'header';
 }
@@ -42,7 +43,16 @@ function toWsUrl(baseURL, accessToken, authMode) {
   if (authMode === 'off' || authMode === 'header') return null;
 
   try {
-    const url = new URL('/v1/admin/dashboard/realtime', baseURL);
+    const resolvedBaseUrl =
+      typeof window !== 'undefined' && /^\/(?!\/)/.test(baseURL)
+        ? new URL(baseURL, window.location.origin)
+        : new URL(baseURL);
+    const basePath = resolvedBaseUrl.pathname === '/' ? '' : resolvedBaseUrl.pathname.replace(/\/$/, '');
+    const url = new URL(resolvedBaseUrl.toString());
+
+    url.pathname = `${basePath}/v1/admin/dashboard/realtime`;
+    url.search = '';
+    url.hash = '';
     url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
 
     if (authMode === 'query' && accessToken) {
