@@ -76,6 +76,7 @@
 
 .notifs-item-main {
   flex: 1;
+  min-width: 0;
 }
 
 .notifs-item-title {
@@ -88,6 +89,7 @@
   margin: 4px 0 0;
   font-size: 13px;
   color: #5a5a56;
+  overflow-wrap: anywhere;
 }
 
 .notifs-item-time {
@@ -111,4 +113,37 @@
   margin: 24px 4px;
   font-size: 14px;
   color: #767775;
+}
+
+@media (max-width: 420px) {
+  .notifs-header {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px 12px;
+  }
+
+  .notifs-title {
+    order: 2;
+    width: 100%;
+    font-size: 18px;
+  }
+
+  .notifs-mark-all {
+    order: 3;
+    width: 100%;
+  }
+
+  .notifs-main {
+    padding: 10px 12px 92px;
+  }
+
+  .notifs-item {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .notifs-item-action {
+    width: 100%;
+  }
 }

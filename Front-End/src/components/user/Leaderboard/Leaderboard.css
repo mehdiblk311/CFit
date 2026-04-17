@@ -940,6 +940,22 @@
 
 /* ── Responsive ───────────────────────────────────────────────────── */
 
+@media (min-width: 992px) {
+  .lb-main {
+    max-width: 1020px;
+    padding: 28px 24px 140px;
+    gap: 16px;
+  }
+
+  .lb-score-inner {
+    padding: 28px;
+  }
+
+  .lb-score-body {
+    gap: 20px;
+  }
+}
+
 @media (max-width: 520px) {
   .lb-main {
     padding: 16px 14px 110px;

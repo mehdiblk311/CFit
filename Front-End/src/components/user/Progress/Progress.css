@@ -892,3 +892,94 @@
     max-width: 600px;
   }
 }
+
+@media (min-width: 992px) {
+  .prog-main {
+    max-width: 1120px;
+    padding: 28px 24px 12px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+    align-items: start;
+  }
+
+  .prog-main > .prog-section:nth-of-type(1),
+  .prog-main > .prog-section:nth-of-type(4),
+  .prog-main > .prog-section:nth-of-type(5),
+  .prog-main > .prog-bottom-spacer {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 520px) {
+  .prog-main {
+    padding: 16px 14px 0;
+    gap: 16px;
+  }
+
+  .prog-section {
+    padding: 16px;
+  }
+
+  .prog-streaks-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .prog-streak-col {
+    align-items: flex-start;
+    text-align: left;
+    padding: 14px 12px;
+  }
+
+  .prog-streak-num {
+    font-size: 1.7rem;
+  }
+
+  .prog-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .prog-adherence-row {
+    gap: 8px;
+  }
+
+  .prog-adherence-label {
+    width: 40px;
+    font-size: 8px;
+  }
+
+  .prog-calendar-legend {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .prog-pr-item {
+    align-items: flex-start;
+  }
+
+  .prog-pr-exercise {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .prog-pr-value {
+    min-width: 0;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 380px) {
+  .prog-title {
+    font-size: 1.35rem;
+  }
+
+  .prog-subtitle {
+    letter-spacing: 1px;
+  }
+
+  .prog-section {
+    padding: 14px;
+  }
+}

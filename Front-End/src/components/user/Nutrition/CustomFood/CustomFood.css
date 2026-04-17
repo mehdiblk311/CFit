@@ -350,3 +350,37 @@
   box-shadow: none;
   transform: none;
 }
+
+@media (min-width: 992px) {
+  .cf-main {
+    max-width: 1040px;
+    padding: 112px 28px 28px;
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    align-items: start;
+    gap: 24px;
+  }
+
+  .cf-hero {
+    align-items: flex-start;
+    text-align: left;
+    position: sticky;
+    top: 124px;
+  }
+
+  .cf-hero-desc {
+    max-width: 320px;
+  }
+
+  .cf-form-card {
+    min-height: 100%;
+  }
+
+  .cf-sticky-cta {
+    padding-inline: 24px;
+  }
+
+  .cf-cta-inner {
+    max-width: 1040px;
+  }
+}

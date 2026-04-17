@@ -14,7 +14,7 @@
 }
 
 .weight-root {
-  min-height: 100vh;
+  min-height: 100dvh;
   background-color: var(--canvas-cream);
   color: var(--clay-black);
   padding: 40px 24px;
@@ -36,6 +36,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  min-width: 0;
 }
 
 .weight-back-btn {
@@ -60,7 +61,7 @@
 }
 
 .weight-title-display {
-  font-size: 60px;
+  font-size: clamp(2.2rem, 7vw, 3.75rem);
   font-weight: 600;
   line-height: 1.0;
   letter-spacing: -2.4px;
@@ -107,7 +108,7 @@
 }
 
 .weight-hero-num {
-  font-size: 80px;
+  font-size: clamp(3rem, 12vw, 5rem);
   font-weight: 600;
   letter-spacing: -3.2px;
   color: var(--clay-black);
@@ -242,7 +243,7 @@
 
 /* History Section */
 .weight-section-title {
-  font-size: 44px;
+  font-size: clamp(1.9rem, 8vw, 2.75rem);
   font-weight: 600;
   letter-spacing: -1.32px;
   margin: 0 0 24px 0;
@@ -332,4 +333,103 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@media (min-width: 992px) {
+  .weight-header,
+  .weight-main {
+    max-width: 1180px;
+  }
+
+  .weight-content-grid {
+    grid-template-columns: minmax(320px, 0.95fr) minmax(0, 1.05fr);
+    gap: 28px;
+  }
+
+  .weight-hero-card {
+    padding: 46px 48px;
+  }
+}
+
+@media (max-width: 900px) {
+  .weight-root {
+    padding: 28px 16px;
+  }
+
+  .weight-header {
+    margin-bottom: 24px;
+  }
+
+  .weight-main {
+    gap: 24px;
+  }
+
+  .weight-hero-card {
+    padding: 30px;
+    border-radius: 32px;
+  }
+
+  .weight-card {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  .weight-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .weight-header-left {
+    width: 100%;
+  }
+
+  .weight-title-display {
+    font-size: 34px;
+    letter-spacing: -1.2px;
+  }
+
+  .weight-hero-card {
+    padding: 24px 18px;
+    border-radius: 24px;
+  }
+
+  .weight-trend {
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+
+  .weight-card-title {
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+
+  .weight-history-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .weight-history-info {
+    width: 100%;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .weight-history-val {
+    min-width: 0;
+    font-size: 22px;
+  }
+
+  .weight-history-notes {
+    width: 100%;
+    font-size: 12px;
+  }
+
+  .weight-icon-btn {
+    width: 36px;
+    height: 36px;
+  }
 }

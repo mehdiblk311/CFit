@@ -535,3 +535,29 @@
   color: #555148;
   line-height: 1.5;
 }
+
+@media (min-width: 992px) {
+  .cr-main {
+    max-width: 1120px;
+    padding: 112px 28px 28px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    align-items: start;
+    gap: 24px;
+  }
+
+  .cr-total-card,
+  .cr-ingredients,
+  .cr-recipe-library,
+  .cr-actions,
+  .cr-save-error {
+    grid-column: 1;
+  }
+
+  .cr-image-card {
+    grid-column: 2;
+    grid-row: 1 / span 5;
+    position: sticky;
+    top: 124px;
+  }
+}

@@ -641,3 +641,114 @@
   font-weight: 700;
   font-size: 13px;
 }
+
+@media (min-width: 992px) {
+  .nh-main {
+    max-width: 1160px;
+    padding: 108px 28px 28px;
+    gap: 32px;
+  }
+
+  .nh-cal-section {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  }
+
+  .nh-charts-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .nh-chart-card--wide {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 620px) {
+  .nh-header {
+    padding: 12px 14px;
+    box-shadow: -5px 5px 0 rgba(46,47,46,1);
+  }
+
+  .nh-title {
+    font-size: 18px;
+    letter-spacing: -1px;
+  }
+
+  .nh-main {
+    padding: 92px 14px 16px;
+    gap: 20px;
+  }
+
+  .nh-cal-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .nh-cal-month {
+    font-size: 16px;
+  }
+
+  .nh-cal-cell {
+    height: 38px;
+    font-size: 12px;
+  }
+
+  .nh-summary-date {
+    font-size: 22px;
+    letter-spacing: -1.2px;
+  }
+
+  .nh-day-log-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .nh-macros-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .nh-range-wrap {
+    justify-content: stretch;
+  }
+
+  .nh-range-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .nh-range-btn {
+    flex: 1;
+    padding: 8px 6px;
+  }
+
+  .nh-insights-strip {
+    gap: 10px;
+  }
+
+  .nh-insight-card {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .nh-cal-grid {
+    gap: 2px;
+  }
+
+  .nh-cal-day-label {
+    font-size: 8px;
+  }
+
+  .nh-cal-cell {
+    height: 36px;
+  }
+
+  .nh-range-btn {
+    font-size: 9px;
+  }
+
+  .nh-macros-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -4537,6 +4537,52 @@
   box-shadow: -8px 8px 0 #2e2f2e;
 }
 
+@media (min-width: 992px) {
+  .wk-view {
+    max-width: 760px;
+    padding: 32px 24px 24px;
+  }
+
+  .wk-view--wide {
+    max-width: 1280px;
+  }
+
+  .wk-summary-root {
+    max-width: 860px;
+    padding: 0 24px 140px;
+  }
+
+  .wk-session-scroll {
+    max-width: 900px;
+    padding: 92px 24px 48px;
+  }
+
+  .wk-modal-overlay {
+    align-items: center;
+    padding: 24px;
+  }
+
+  .wk-modal {
+    max-width: 720px;
+    max-height: min(88dvh, 820px);
+    border-radius: 24px;
+    border: 2px solid #dad4c8;
+  }
+
+  .wk-history-layout {
+    grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+    gap: 36px;
+  }
+
+  .wk-history-insights {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .wk-history-insight-copy {
+    max-width: none;
+  }
+}
+
 @media (max-width: 760px) {
   .wk-history-hero,
   .wk-history-archive-head,
@@ -4616,5 +4662,24 @@
 
   .wk-history-archive-stat {
     flex: 1 1 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .wk-history-glance {
+    grid-template-columns: 1fr;
+  }
+
+  .wk-hist-focus-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .wk-workout-exercise-list-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .wk-history-card-date {
+    width: 72px;
+    min-width: 72px;
   }
 }

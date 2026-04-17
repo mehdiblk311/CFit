@@ -995,3 +995,30 @@
   font-size: 13px;
   color: var(--nd-on-surface-var);
 }
+
+@media (min-width: 992px) {
+  .nd-main {
+    max-width: 1160px;
+    padding: 120px 28px 28px;
+  }
+
+  .nd-macro-inner {
+    gap: 36px;
+  }
+
+  .nd-meals-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .nd-weight-top {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+@media (min-width: 1280px) {
+  .nd-meals-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

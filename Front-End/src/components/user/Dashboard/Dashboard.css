@@ -667,6 +667,74 @@
   line-height: 1.5;
 }
 
+@media (min-width: 992px) {
+  .dash-main {
+    max-width: 1120px;
+    padding: 28px 24px 16px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+    align-items: start;
+  }
+
+  .dash-main > .dash-actions,
+  .dash-main > #dashboard-leaderboard {
+    grid-column: 1 / -1;
+  }
+
+  .dash-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .dash-header {
+    padding: 14px;
+  }
+
+  .dash-greeting {
+    font-size: clamp(1.3rem, 6vw, 1.6rem);
+  }
+
+  .dash-tagline {
+    font-size: 8px;
+    letter-spacing: 1.1px;
+  }
+
+  .dash-main {
+    padding: 16px 14px 0;
+    gap: 16px;
+  }
+
+  .dash-card {
+    padding: 20px;
+  }
+
+  .dash-leaderboard-block {
+    padding: 14px 12px 12px;
+  }
+
+  .dash-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-streak-top {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .dash-calendar {
+    justify-content: flex-start;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .dash-day-col {
+    min-width: 34px;
+  }
+}
+
 @media (max-width: 420px) {
   .dash-summary-grid {
     grid-template-columns: 1fr;
@@ -691,5 +759,13 @@
 
   .dash-action-btn {
     padding: 26px 12px;
+  }
+
+  .dash-header-right {
+    gap: 8px;
+  }
+
+  .dash-card {
+    padding: 18px;
   }
 }
