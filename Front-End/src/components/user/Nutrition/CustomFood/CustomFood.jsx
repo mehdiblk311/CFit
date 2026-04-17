@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useCreateFood } from '../../../../hooks/queries/useNutrition';
+import { useI18n } from '../../../../i18n/useI18n';
 import './CustomFood.css';
 
 export default function CustomFood() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [searchParams] = useSearchParams();
   const createFood = useCreateFood();
   const [formData, setFormData] = useState({
@@ -61,7 +63,7 @@ export default function CustomFood() {
       navigate(`/nutrition/add-quantity?${params.toString()}`);
     } catch (error) {
       console.error('Error saving custom food:', error);
-      setError(error?.response?.data?.error || 'Failed to save custom food.');
+      setError(error?.response?.data?.error || t('customFoodPage.errors.saveFailed'));
     }
   };
 
@@ -74,11 +76,11 @@ export default function CustomFood() {
             id="cf-back-btn"
             className="cf-back-btn"
             onClick={() => navigate(-1)}
-            aria-label="Go back"
+            aria-label={t('common.actions.goBack')}
           >
             <span className="material-symbols-outlined" style={{ color: '#38671a' }}>arrow_back</span>
           </button>
-          <h1 className="cf-header-title">Create Custom Food</h1>
+          <h1 className="cf-header-title">{t('customFoodPage.title')}</h1>
         </div>
         <div className="cf-avatar">
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: 20, color: '#38671a' }}>person</span>
@@ -91,23 +93,23 @@ export default function CustomFood() {
           <div className="cf-hero-icon">
             <span className="material-symbols-outlined">inventory_2</span>
           </div>
-          <h2 className="cf-hero-title">New Food Entry</h2>
-          <p className="cf-hero-desc">Add a custom food item to your database for accurate macro tracking.</p>
+          <h2 className="cf-hero-title">{t('customFoodPage.hero.title')}</h2>
+          <p className="cf-hero-desc">{t('customFoodPage.hero.description')}</p>
         </section>
 
         {/* ── Form Canvas ──────────────────────────────────────────── */}
         <form className="cf-form-card" onSubmit={handleSave}>
           <div className="cf-form-section">
-            <h3 className="cf-section-label">General Info</h3>
+            <h3 className="cf-section-label">{t('customFoodPage.sections.generalInfo')}</h3>
 
             <div className="cf-input-group">
-              <label htmlFor="name" className="cf-label">Food Name *</label>
+              <label htmlFor="name" className="cf-label">{t('customFoodPage.fields.foodNameRequired')}</label>
               <input
                 type="text"
                 id="name"
                 name="name"
                 className="cf-input"
-                placeholder="e.g. Grandma's Lasagna"
+                placeholder={t('customFoodPage.placeholders.foodName')}
                 value={formData.name}
                 onChange={handleChange}
                 required
@@ -115,13 +117,13 @@ export default function CustomFood() {
             </div>
 
             <div className="cf-input-group">
-              <label htmlFor="brand" className="cf-label">Brand (Optional)</label>
+              <label htmlFor="brand" className="cf-label">{t('customFoodPage.fields.brandOptional')}</label>
               <input
                 type="text"
                 id="brand"
                 name="brand"
                 className="cf-input"
-                placeholder="e.g. Homemade"
+                placeholder={t('customFoodPage.placeholders.brand')}
                 value={formData.brand}
                 onChange={handleChange}
               />
@@ -129,7 +131,7 @@ export default function CustomFood() {
 
             <div className="cf-serving-grid">
               <div className="cf-input-group">
-                <label htmlFor="servingSize" className="cf-label">Serving Size</label>
+                <label htmlFor="servingSize" className="cf-label">{t('customFoodPage.fields.servingSize')}</label>
                 <input
                   type="number"
                   id="servingSize"
@@ -145,13 +147,13 @@ export default function CustomFood() {
               </div>
 
               <div className="cf-input-group">
-                <label htmlFor="servingUnit" className="cf-label">Serving Unit</label>
+                <label htmlFor="servingUnit" className="cf-label">{t('customFoodPage.fields.servingUnit')}</label>
                 <input
                   type="text"
                   id="servingUnit"
                   name="servingUnit"
                   className="cf-input"
-                  placeholder="g"
+                  placeholder={t('common.units.grams')}
                   value={formData.servingUnit}
                   onChange={handleChange}
                   required
@@ -162,13 +164,13 @@ export default function CustomFood() {
 
           <div className="cf-form-section">
             <div className="cf-section-header">
-              <h3 className="cf-section-label">Macros (per 100g or 1 serving)</h3>
-              <div className="cf-serving-chip">PER SERVING</div>
+              <h3 className="cf-section-label">{t('customFoodPage.sections.macros')}</h3>
+              <div className="cf-serving-chip">{t('customFoodPage.labels.perServing')}</div>
             </div>
 
             <div className="cf-macros-grid">
               <div className="cf-input-group cf-input-group--macro cf-input-group--kcal">
-                <label htmlFor="kcal" className="cf-label">Calories</label>
+                <label htmlFor="kcal" className="cf-label">{t('customFoodPage.fields.calories')}</label>
                 <div className="cf-macro-input-wrap">
                   <input
                     type="number"
@@ -186,12 +188,12 @@ export default function CustomFood() {
               </div>
 
               {[
-                { id: 'protein', label: 'Protein' },
-                { id: 'carbohydrates', label: 'Carbs' },
-                { id: 'fat', label: 'Fats' },
-                { id: 'fiber', label: 'Fiber' },
-                { id: 'sugar', label: 'Sugar' },
-                { id: 'sodium', label: 'Sodium (mg)' },
+                  { id: 'protein', label: t('customFoodPage.fields.protein') },
+                  { id: 'carbohydrates', label: t('customFoodPage.fields.carbs') },
+                  { id: 'fat', label: t('customFoodPage.fields.fats') },
+                  { id: 'fiber', label: t('customFoodPage.fields.fiber') },
+                  { id: 'sugar', label: t('customFoodPage.fields.sugar') },
+                  { id: 'sodium', label: t('customFoodPage.fields.sodiumMg') },
               ].map(macro => (
                 <div key={macro.id} className="cf-input-group cf-input-group--macro">
                   <label htmlFor={macro.id} className="cf-label">{macro.label}</label>
@@ -228,7 +230,7 @@ export default function CustomFood() {
             disabled={!formData.name || !formData.calories || createFood.isPending}
           >
             <span className="material-symbols-outlined">{createFood.isPending ? 'progress_activity' : 'check_circle'}</span>
-            {createFood.isPending ? 'Saving...' : 'Create & Continue'}
+            {createFood.isPending ? t('customFoodPage.actions.saving') : t('customFoodPage.actions.createAndContinue')}
           </button>
         </div>
       </div>

@@ -6,19 +6,20 @@ import {
   useSendChatMessage,
   useSubmitChatFeedback,
 } from '../../../hooks/queries/useChat';
+import { getLocaleForLanguage, useI18n } from '../../../i18n/useI18n';
 import './AIAssistant.css';
 
 const STARTER_PROMPTS = [
-  { label: 'Weekly analysis', prompt: 'Analyze my week and tell me what to improve' },
-  { label: 'Recovery day', prompt: 'Build me a recovery-focused training day' },
-  { label: 'Protein check', prompt: 'Am I hitting enough protein for muscle gain?' },
-  { label: 'Meal plan', prompt: 'Give me a practical meal plan for today' },
+  { id: 'weeklyAnalysis', labelKey: 'aiAssistant.starter.weeklyAnalysisLabel', promptKey: 'aiAssistant.starter.weeklyAnalysisPrompt' },
+  { id: 'recoveryDay', labelKey: 'aiAssistant.starter.recoveryDayLabel', promptKey: 'aiAssistant.starter.recoveryDayPrompt' },
+  { id: 'proteinCheck', labelKey: 'aiAssistant.starter.proteinCheckLabel', promptKey: 'aiAssistant.starter.proteinCheckPrompt' },
+  { id: 'mealPlan', labelKey: 'aiAssistant.starter.mealPlanLabel', promptKey: 'aiAssistant.starter.mealPlanPrompt' },
 ];
 
 const CONTEXT_LINKS = [
   {
     id: 'workouts',
-    label: 'Workouts',
+    labelKey: 'aiAssistant.context.workouts',
     icon: 'fitness_center',
     path: '/workouts',
     state: { tab: 'programs' },
@@ -26,14 +27,14 @@ const CONTEXT_LINKS = [
   },
   {
     id: 'nutrition',
-    label: 'Nutrition',
+    labelKey: 'aiAssistant.context.nutrition',
     icon: 'restaurant',
     path: '/nutrition',
     keywords: ['nutrition', 'meal', 'calorie', 'protein', 'carbs', 'fat', 'macro', 'food'],
   },
   {
     id: 'exercise-library',
-    label: 'Exercises',
+    labelKey: 'aiAssistant.context.exercises',
     icon: 'menu_book',
     path: '/workouts',
     state: { tab: 'library' },
@@ -45,21 +46,21 @@ function toArray(value) {
   return Array.isArray(value) ? value : [];
 }
 
-function formatClock(value) {
+function formatClock(value, locale) {
   if (!value) return '';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '';
-  return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 }
 
-function formatThreadDate(value) {
-  if (!value) return 'Just now';
+function formatThreadDate(value, locale, t) {
+  if (!value) return t('aiAssistant.time.justNow');
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'Just now';
+  if (Number.isNaN(date.getTime())) return t('aiAssistant.time.justNow');
   const now = new Date();
   const sameDay = date.toDateString() === now.toDateString();
-  if (sameDay) return `Today · ${formatClock(value)}`;
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  if (sameDay) return t('aiAssistant.time.todayAt', { time: formatClock(value, locale) });
+  return date.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
 }
 
 function inferContextLinks(content) {
@@ -78,12 +79,12 @@ function getConversationPreview(conversation) {
   return candidate?.content || '';
 }
 
-function getConversationTitle(conversation) {
+function getConversationTitle(conversation, t) {
   const rawTitle = (conversation?.title || '').trim();
   if (rawTitle && rawTitle.toLowerCase() !== 'new conversation') return rawTitle;
   const preview = getConversationPreview(conversation);
   if (preview) return preview;
-  return 'New coaching conversation';
+  return t('aiAssistant.newConversationTitle');
 }
 
 function sortMessagesChronologically(messages) {
@@ -101,6 +102,8 @@ function sortMessagesChronologically(messages) {
 /* ── Message Bubble ────────────────────────────────────────────── */
 
 function MessageBubble({ message, onFeedback, feedbackPending, onNavigate }) {
+  const { t, language } = useI18n();
+  const locale = getLocaleForLanguage(language);
   const isUser = message.role === 'user';
   const links = isUser ? [] : inferContextLinks(message.content);
 
@@ -110,7 +113,7 @@ function MessageBubble({ message, onFeedback, feedbackPending, onNavigate }) {
     >
       <div className={`coach-bubble${isUser ? ' coach-bubble--user' : ' coach-bubble--assistant'}`}>
         {!isUser && (
-          <span className="coach-badge">Coach AI</span>
+          <span className="coach-badge">{t('aiAssistant.badge')}</span>
         )}
 
         <div className="coach-bubble__copy">
@@ -123,7 +126,7 @@ function MessageBubble({ message, onFeedback, feedbackPending, onNavigate }) {
         </div>
 
         {!isUser && links.length > 0 && (
-          <div className="coach-bubble__links" role="group" aria-label="Context links">
+          <div className="coach-bubble__links" role="group" aria-label={t('aiAssistant.aria.contextLinks')}>
             {links.map((link) => (
               <button
                 key={`${message.id || message.created_at || 'm'}-${link.id}`}
@@ -132,20 +135,20 @@ function MessageBubble({ message, onFeedback, feedbackPending, onNavigate }) {
                 onClick={() => onNavigate(link.path, link.state)}
               >
                 <span className="material-symbols-outlined">{link.icon}</span>
-                <span>{link.label}</span>
+                <span>{t(link.labelKey)}</span>
               </button>
             ))}
           </div>
         )}
 
         {!isUser && message.id && (
-          <div className="coach-feedback" role="group" aria-label="Rate this answer">
+          <div className="coach-feedback" role="group" aria-label={t('aiAssistant.aria.rateAnswer')}>
             <button
               type="button"
               className={`coach-feedback__btn${message.feedback === 1 ? ' coach-feedback__btn--up' : ''}`}
               onClick={() => onFeedback(message.id, 1)}
               disabled={feedbackPending}
-              aria-label="Helpful"
+              aria-label={t('aiAssistant.aria.helpful')}
             >
               <span className="material-symbols-outlined">thumb_up</span>
             </button>
@@ -154,7 +157,7 @@ function MessageBubble({ message, onFeedback, feedbackPending, onNavigate }) {
               className={`coach-feedback__btn${message.feedback === -1 ? ' coach-feedback__btn--down' : ''}`}
               onClick={() => onFeedback(message.id, -1)}
               disabled={feedbackPending}
-              aria-label="Needs improvement"
+              aria-label={t('aiAssistant.aria.needsImprovement')}
             >
               <span className="material-symbols-outlined">thumb_down</span>
             </button>
@@ -162,7 +165,7 @@ function MessageBubble({ message, onFeedback, feedbackPending, onNavigate }) {
         )}
       </div>
 
-      <span className="coach-msg__time">{formatClock(message.created_at)}</span>
+      <span className="coach-msg__time">{formatClock(message.created_at, locale)}</span>
     </article>
   );
 }
@@ -171,6 +174,8 @@ function MessageBubble({ message, onFeedback, feedbackPending, onNavigate }) {
 
 export default function AIAssistant() {
   const navigate = useNavigate();
+  const { t, language } = useI18n();
+  const locale = getLocaleForLanguage(language);
 
   const [activeConversationId, setActiveConversationId] = useState(null);
   const [composerValue, setComposerValue] = useState('');
@@ -242,7 +247,7 @@ export default function AIAssistant() {
     selectConversation(null);
     setHistoryOpen(false);
     setPendingMessage(null);
-  }, [selectConversation]);
+  }, [selectConversation, setHistoryOpen, setPendingMessage]);
 
   const handleSend = useCallback(
     (raw) => {
@@ -278,7 +283,13 @@ export default function AIAssistant() {
         }
       );
     },
-    [activeConversationId, sendMessage]
+    [
+      activeConversationId,
+      sendMessage,
+      setPendingMessage,
+      setComposerValue,
+      setActiveConversationId,
+    ]
   );
 
   const handleFeedback = useCallback(
@@ -299,6 +310,15 @@ export default function AIAssistant() {
     [navigate]
   );
 
+  const starterPrompts = useMemo(
+    () => STARTER_PROMPTS.map((item) => ({
+      id: item.id,
+      label: t(item.labelKey),
+      prompt: t(item.promptKey),
+    })),
+    [t]
+  );
+
   return (
     <div className="coach">
       {/* ── Top Bar ─────────────────────────────────────────── */}
@@ -308,13 +328,13 @@ export default function AIAssistant() {
             type="button"
             className="coach-topbar__menu"
             onClick={() => setHistoryOpen(true)}
-            aria-label="Conversation history"
+            aria-label={t('aiAssistant.aria.conversationHistory')}
           >
             <span className="material-symbols-outlined">history</span>
           </button>
           <div className="coach-topbar__brand">
-            <span className="coach-topbar__eyebrow">Coach</span>
-            <h1 className="coach-topbar__title">Kinetic AI</h1>
+            <span className="coach-topbar__eyebrow">{t('aiAssistant.topbar.eyebrow')}</span>
+            <h1 className="coach-topbar__title">{t('aiAssistant.topbar.title')}</h1>
           </div>
         </div>
 
@@ -325,7 +345,7 @@ export default function AIAssistant() {
             onClick={startNewConversation}
           >
             <span className="material-symbols-outlined">add</span>
-            <span>New chat</span>
+            <span>{t('aiAssistant.topbar.newChat')}</span>
           </button>
         </div>
       </header>
@@ -335,10 +355,10 @@ export default function AIAssistant() {
         {/* ── History Drawer ──────────────────────────────── */}
         <aside className={`coach-history${historyOpen ? ' coach-history--open' : ''}`}>
           <div className="coach-history__head">
-            <h2>Threads</h2>
+            <h2>{t('aiAssistant.history.threads')}</h2>
             <button type="button" className="coach-history__fresh" onClick={startNewConversation}>
               <span className="material-symbols-outlined">add</span>
-              <span>New</span>
+              <span>{t('aiAssistant.history.new')}</span>
             </button>
           </div>
 
@@ -352,12 +372,12 @@ export default function AIAssistant() {
             ) : conversations.length === 0 ? (
               <div className="coach-history__empty">
                 <span className="material-symbols-outlined">chat_bubble_outline</span>
-                <p>No saved threads yet</p>
+                <p>{t('aiAssistant.history.noSavedThreads')}</p>
               </div>
             ) : (
               conversations.map((conv) => {
-                const title = getConversationTitle(conv);
-                const preview = getConversationPreview(conv) || 'Continue this thread';
+                const title = getConversationTitle(conv, t);
+                const preview = getConversationPreview(conv) || t('aiAssistant.history.continueThread');
                 const isActive = conv.id === activeConversationId;
                 return (
                   <button
@@ -372,7 +392,7 @@ export default function AIAssistant() {
                     <span className="coach-history__card-title">{title}</span>
                     <span className="coach-history__card-preview">{preview}</span>
                     <span className="coach-history__card-date">
-                      {formatThreadDate(conv.updated_at)}
+                      {formatThreadDate(conv.updated_at, locale, t)}
                     </span>
                   </button>
                 );
@@ -388,20 +408,20 @@ export default function AIAssistant() {
             {activeConversationId && conversationLoading ? (
               <div className="coach-thread__loading">
                 <div className="coach-thread__spinner" />
-                <span>Loading conversation…</span>
+                <span>{t('aiAssistant.thread.loadingConversation')}</span>
               </div>
             ) : renderedMessages.length === 0 ? (
               <div className="coach-thread__empty">
                 <div className="coach-thread__empty-icon">
                   <span className="material-symbols-outlined">smart_toy</span>
                 </div>
-                <h3>Ask your coach anything</h3>
+                <h3>{t('aiAssistant.thread.emptyTitle')}</h3>
                 <p>
-                  Workouts, nutrition, recovery, progress — your coach is rooted in your real data.
+                  {t('aiAssistant.thread.emptyBody')}
                 </p>
                 <div className="coach-thread__empty-hint">
                   <span className="material-symbols-outlined">touch_app</span>
-                  <span>Tap a suggestion below or type your question</span>
+                  <span>{t('aiAssistant.thread.emptyHint')}</span>
                 </div>
               </div>
             ) : (
@@ -421,7 +441,7 @@ export default function AIAssistant() {
             {sendMessage.isPending && (
               <article className="coach-msg coach-msg--assistant">
                 <div className="coach-bubble coach-bubble--assistant coach-bubble--typing">
-                  <span className="coach-badge">Coach AI</span>
+                  <span className="coach-badge">{t('aiAssistant.badge')}</span>
                   <div className="coach-typing">
                     <span /><span /><span />
                   </div>
@@ -441,10 +461,10 @@ export default function AIAssistant() {
             }}
           >
             {renderedMessages.length === 0 && (
-              <div className="coach-prompts" role="group" aria-label="Starter prompts">
-                {STARTER_PROMPTS.map((sp) => (
+              <div className="coach-prompts" role="group" aria-label={t('aiAssistant.aria.starterPrompts')}>
+                {starterPrompts.map((sp) => (
                   <button
-                    key={sp.label}
+                    key={sp.id}
                     type="button"
                     className="coach-prompt"
                     onClick={() => handleSend(sp.prompt)}
@@ -462,7 +482,7 @@ export default function AIAssistant() {
                 className="coach-composer__input"
                 value={composerValue}
                 rows={1}
-                placeholder="Ask about training, nutrition, or recovery…"
+                placeholder={t('aiAssistant.composer.placeholder')}
                 onChange={(e) => setComposerValue(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
@@ -475,7 +495,7 @@ export default function AIAssistant() {
                 type="submit"
                 className="coach-composer__send"
                 disabled={!composerValue.trim() || sendMessage.isPending}
-                aria-label="Send message"
+                aria-label={t('aiAssistant.aria.sendMessage')}
               >
                 <span className="material-symbols-outlined">arrow_upward</span>
               </button>
@@ -489,7 +509,7 @@ export default function AIAssistant() {
         <button
           type="button"
           className="coach-backdrop"
-          aria-label="Close history"
+          aria-label={t('aiAssistant.aria.closeHistory')}
           onClick={() => setHistoryOpen(false)}
         />
       )}

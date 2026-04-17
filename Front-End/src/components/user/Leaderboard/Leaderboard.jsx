@@ -4,20 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import { leaderboardAPI } from '../../../api/leaderboard';
 import { useAuth } from '../../../hooks/useAuth';
 import { useLeaderboard } from '../../../hooks/queries/useLeaderboard';
+import { useI18n } from '../../../i18n/useI18n';
 import './Leaderboard.css';
 
 // ── Constants ──────────────────────────────────────────────────────────
 
-const PERIOD_FILTERS = [
-  { value: 'weekly',  label: 'Weekly' },
-  { value: 'monthly', label: 'Monthly' },
-  { value: 'yearly',  label: 'Yearly' },
-];
+const PERIOD_FILTERS = ['weekly', 'monthly', 'yearly'];
 
 const PILLAR_META = {
-  training:    { icon: 'fitness_center', label: 'Iron Engine',     tone: 'training' },
-  nutrition:   { icon: 'restaurant',     label: 'Fuel Master',     tone: 'nutrition' },
-  consistency: { icon: 'event_repeat',   label: 'Rhythm Keeper',   tone: 'consistency' },
+  training:    { icon: 'fitness_center', tone: 'training' },
+  nutrition:   { icon: 'restaurant',     tone: 'nutrition' },
+  consistency: { icon: 'event_repeat',   tone: 'consistency' },
 };
 
 const LIMIT = 20;
@@ -55,12 +52,13 @@ function getPillarMedal(entry) {
 // ── Sub-components ─────────────────────────────────────────────────────
 
 function MedalBadge({ entry }) {
+  const { t } = useI18n();
   const medal = getPillarMedal(entry);
   if (!medal) return null;
   return (
     <span className={`lb-medal lb-medal--${medal.tone}`}>
       <span className="material-symbols-outlined">{medal.icon}</span>
-      {medal.label}
+      {t(`leaderboardPage.medals.${medal.key}`)}
     </span>
   );
 }
@@ -78,6 +76,7 @@ function Avatar({ entry, size = 'md' }) {
 // ── Score Section ──────────────────────────────────────────────────────
 
 function ScoreSection({ currentEntry, percentile, period, onJoinBoard, isFindingEntry }) {
+  const { t } = useI18n();
   const hasEntry = !!currentEntry;
   const rank     = currentEntry?.rank;
   const score    = hasEntry ? (Number(currentEntry.score) || 0) : 0;
@@ -90,20 +89,20 @@ function ScoreSection({ currentEntry, percentile, period, onJoinBoard, isFinding
         <div className="lb-score-body">
           {/* Rank */}
           <div className="lb-score-rank-block">
-            <span className="lb-eyebrow">Your Ranking</span>
+            <span className="lb-eyebrow">{t('leaderboardPage.rank.title')}</span>
             <p className="lb-rank-display">{hasEntry ? `#${rank}` : '—'}</p>
             <p className="lb-rank-context">
               {hasEntry
-                ? `Top ${percentile}% this ${period}`
-                : 'Start logging to claim your spot'}
+                ? t('leaderboardPage.rank.topPercentile', { percentile, period: t(`leaderboardPage.periods.${period}`) })
+                : t('leaderboardPage.rank.startLogging')}
             </p>
           </div>
 
           {/* Score */}
           <div className="lb-score-pts-block">
-            <span className="lb-eyebrow">Score</span>
+            <span className="lb-eyebrow">{t('leaderboardPage.score.title')}</span>
             <p className="lb-score-display">{hasEntry ? formatScore(score) : '—'}</p>
-            <span className="lb-score-unit">pts</span>
+            <span className="lb-score-unit">{t('leaderboardPage.score.unit')}</span>
             {hasEntry && <MedalBadge entry={currentEntry} />}
           </div>
         </div>
@@ -134,7 +133,7 @@ function ScoreSection({ currentEntry, percentile, period, onJoinBoard, isFinding
             disabled={isFindingEntry}
           >
             <span className="material-symbols-outlined">emoji_events</span>
-            {isFindingEntry ? 'Searching…' : 'Join the board'}
+            {isFindingEntry ? t('leaderboardPage.actions.searching') : t('leaderboardPage.actions.joinBoard')}
           </button>
         )}
       </div>
@@ -145,17 +144,18 @@ function ScoreSection({ currentEntry, percentile, period, onJoinBoard, isFinding
 // ── Period Section ─────────────────────────────────────────────────────
 
 function PeriodSection({ period, onChange }) {
+  const { t } = useI18n();
   return (
-    <section className="lb-period-section" role="tablist" aria-label="Period filter">
+    <section className="lb-period-section" role="tablist" aria-label={t('leaderboardPage.periodFilterAria')}>
       {PERIOD_FILTERS.map((item) => (
         <button
-          key={item.value}
+          key={item}
           role="tab"
-          aria-selected={period === item.value}
-          className={`lb-period-btn${period === item.value ? ' lb-period-btn--active' : ''}`}
-          onClick={() => onChange(item.value)}
+          aria-selected={period === item}
+          className={`lb-period-btn${period === item ? ' lb-period-btn--active' : ''}`}
+          onClick={() => onChange(item)}
         >
-          {item.label}
+          {t(`leaderboardPage.periods.${item}`)}
         </button>
       ))}
     </section>
@@ -165,13 +165,14 @@ function PeriodSection({ period, onChange }) {
 // ── Podium ─────────────────────────────────────────────────────────────
 
 function PodiumCard({ entry, rankNumber, tone }) {
+  const { t } = useI18n();
   if (!entry) return <div className={`lb-podium-card lb-podium-card--empty lb-podium-card--${tone}`} />;
   return (
     <article className={`lb-podium-card lb-podium-card--${tone}`}>
       <span className="lb-podium-pos">#{entry.rank || rankNumber}</span>
       <Avatar entry={entry} size="lg" />
       <h3 className="lb-podium-name">{entry.user_name}</h3>
-      <p className="lb-podium-score">{formatScore(entry.score)} pts</p>
+      <p className="lb-podium-score">{formatScore(entry.score)} {t('leaderboardPage.score.unit')}</p>
     </article>
   );
 }
@@ -179,6 +180,7 @@ function PodiumCard({ entry, rankNumber, tone }) {
 // ── Row ────────────────────────────────────────────────────────────────
 
 function RankingRow({ entry, isMe, rowRef }) {
+  const { t } = useI18n();
   return (
     <article
       ref={rowRef}
@@ -189,13 +191,13 @@ function RankingRow({ entry, isMe, rowRef }) {
       <div className="lb-row-info">
         <div className="lb-row-name-line">
           <h3 className="lb-row-name">{entry.user_name}</h3>
-          {isMe && <span className="lb-you-tag">You</span>}
+          {isMe && <span className="lb-you-tag">{t('leaderboardPage.labels.you')}</span>}
         </div>
         <MedalBadge entry={entry} />
       </div>
       <div className="lb-row-score-col">
         <span className="lb-row-score">{formatScore(entry.score)}</span>
-        <span className="lb-row-unit">pts</span>
+        <span className="lb-row-unit">{t('leaderboardPage.score.unit')}</span>
       </div>
     </article>
   );
@@ -211,12 +213,13 @@ function RankingSection({
   isFindingCurrentEntry,
   showMyRankBar = true,
 }) {
+  const { t } = useI18n();
   return (
     <section className="lb-ranking-section">
       {/* Podium */}
       {podiumEntries.length > 0 && (
         <div className="lb-podium-wrap">
-          <span className="lb-eyebrow">Top Athletes</span>
+          <span className="lb-eyebrow">{t('leaderboardPage.sections.topAthletes')}</span>
           <div className="lb-podium-grid">
             <PodiumCard entry={podiumEntries[1]} rankNumber={2} tone="silver" />
             <PodiumCard entry={podiumEntries[0]} rankNumber={1} tone="gold" />
@@ -227,15 +230,15 @@ function RankingSection({
 
       {/* List header */}
       <div className="lb-list-hd">
-        <span className="lb-eyebrow">Rankings</span>
+        <span className="lb-eyebrow">{t('leaderboardPage.sections.rankings')}</span>
         <div className="lb-list-hd-right">
           {total > 0 && (
-            <span className="lb-total-count">{total.toLocaleString()} athletes</span>
+            <span className="lb-total-count">{t('leaderboardPage.labels.athletesCount', { count: total.toLocaleString() })}</span>
           )}
           {currentEntry && !currentEntryOnPage && (
             <button className="lb-locate-btn" onClick={onJumpToMe} disabled={isFindingCurrentEntry}>
               <span className="material-symbols-outlined">my_location</span>
-              Find me
+              {t('leaderboardPage.actions.findMe')}
             </button>
           )}
         </div>
@@ -251,14 +254,14 @@ function RankingSection({
       ) : isError ? (
         <div className="lb-error-state">
           <span className="material-symbols-outlined">warning</span>
-          <p>Could not load rankings</p>
-          <button className="lb-retry-btn" onClick={onRetry}>Try again</button>
+          <p>{t('leaderboardPage.states.loadError')}</p>
+          <button className="lb-retry-btn" onClick={onRetry}>{t('leaderboardPage.actions.tryAgain')}</button>
         </div>
       ) : entries.length === 0 ? (
         <div className="lb-empty-state">
           <span className="material-symbols-outlined">emoji_events</span>
-          <p className="lb-empty-title">No rankings yet</p>
-          <p className="lb-empty-body">Log workouts and meals to earn points and appear on the board.</p>
+          <p className="lb-empty-title">{t('leaderboardPage.states.noRankings')}</p>
+          <p className="lb-empty-body">{t('leaderboardPage.states.noRankingsBody')}</p>
         </div>
       ) : (
         <div className="lb-list">
@@ -287,14 +290,14 @@ function RankingSection({
         <div className="lb-pagination">
           <button className="lb-page-btn" disabled={!hasPrev} onClick={onPrev}>
             <span className="material-symbols-outlined">west</span>
-            Prev
+            {t('leaderboardPage.pagination.prev')}
           </button>
           <span className="lb-page-info">
             {offset + 1}–{Math.min(offset + LIMIT, total)}
-            {isFetching ? ' · syncing' : ''}
+            {isFetching ? ` · ${t('leaderboardPage.pagination.syncing')}` : ''}
           </span>
           <button className="lb-page-btn" disabled={!hasNext} onClick={onNext}>
-            Next
+            {t('leaderboardPage.pagination.next')}
             <span className="material-symbols-outlined">east</span>
           </button>
         </div>
@@ -310,7 +313,7 @@ function RankingSection({
           </div>
           <button className="lb-locate-btn" onClick={onJumpToMe} disabled={isFindingCurrentEntry}>
             <span className="material-symbols-outlined">my_location</span>
-            Go to my rank
+            {t('leaderboardPage.actions.goToMyRank')}
           </button>
         </div>
       )}
@@ -321,6 +324,7 @@ function RankingSection({
 // ── Main ───────────────────────────────────────────────────────────────
 
 export default function Leaderboard({ embedded = false }) {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { user }  = useAuth();
 
@@ -417,12 +421,12 @@ export default function Leaderboard({ embedded = false }) {
       {/* Header */}
       {!embedded && (
         <header className="lb-header">
-          <button className="lb-back-btn" onClick={() => navigate(-1)} aria-label="Back">
+          <button className="lb-back-btn" onClick={() => navigate(-1)} aria-label={t('common.actions.goBack')}>
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
           <div>
-            <h1 className="lb-title">Kinetic League</h1>
-            <p className="lb-subtitle">Friendly competition. Real consistency.</p>
+            <h1 className="lb-title">{t('leaderboardPage.title')}</h1>
+            <p className="lb-subtitle">{t('leaderboardPage.subtitle')}</p>
           </div>
         </header>
       )}
@@ -430,9 +434,9 @@ export default function Leaderboard({ embedded = false }) {
       <main className="lb-main">
         {embedded && (
           <div className="lb-embed-head">
-            <span className="lb-eyebrow">Community</span>
-            <h2 className="lb-embed-title">Kinetic League</h2>
-            <p className="lb-embed-subtitle">Friendly competition. Real consistency.</p>
+            <span className="lb-eyebrow">{t('leaderboardPage.community')}</span>
+            <h2 className="lb-embed-title">{t('leaderboardPage.title')}</h2>
+            <p className="lb-embed-subtitle">{t('leaderboardPage.subtitle')}</p>
           </div>
         )}
 

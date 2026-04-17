@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { accountAPI } from '../../../api/account';
 import { notificationsAPI } from '../../../api/notifications';
 import { useNavigate } from 'react-router-dom';
+import { getLocaleForLanguage, useI18n } from '../../../i18n/useI18n';
 import './NotificationsCenter.css';
 
 function markNotificationListAsRead(notifications, notificationId = null) {
@@ -48,6 +49,8 @@ function triggerBrowserDownload(blob, filename, contentType) {
 export default function NotificationsCenter() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { t, language } = useI18n();
+  const locale = getLocaleForLanguage(language);
   const [downloadingNotificationId, setDownloadingNotificationId] = useState(null);
 
   const { data: notifications = [], isLoading, isError } = useQuery({
@@ -178,9 +181,9 @@ export default function NotificationsCenter() {
           triggerBrowserDownload(file.blob, file.filename, file.contentType);
         } catch (error) {
           if (error?.response?.status === 409) {
-            alert('Your export is not ready yet. Please try again in a moment.');
+            alert(t('notificationsCenter.alert.exportNotReady'));
           } else {
-            alert('Could not download export data right now.');
+            alert(t('notificationsCenter.alert.exportDownloadFailed'));
           }
           navigate('/settings');
         } finally {
@@ -200,7 +203,7 @@ export default function NotificationsCenter() {
   if (isLoading) {
     return (
       <div className="notif-root notif-loading">
-        <p className="notif-label-mono">LOADING KINETIC DATA...</p>
+        <p className="notif-label-mono">{t('notificationsCenter.loading')}</p>
       </div>
     );
   }
@@ -208,8 +211,10 @@ export default function NotificationsCenter() {
   if (isError) {
     return (
       <div className="notif-root notif-error">
-        <h2 className="notif-title-display">Oops, something went wrong.</h2>
-        <button className="notif-btn-pill notif-btn-matcha" onClick={() => queryClient.invalidateQueries({ queryKey: ['notifications'] })}>Retry</button>
+        <h2 className="notif-title-display">{t('notificationsCenter.error.title')}</h2>
+        <button className="notif-btn-pill notif-btn-matcha" onClick={() => queryClient.invalidateQueries({ queryKey: ['notifications'] })}>
+          {t('notificationsCenter.error.retry')}
+        </button>
       </div>
     );
   }
@@ -224,9 +229,11 @@ export default function NotificationsCenter() {
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
           <div>
-            <h1 className="notif-title-display">Notifications</h1>
+            <h1 className="notif-title-display">{t('notificationsCenter.title')}</h1>
             <p className="notif-header-summary notif-label-mono">
-              {unreadCount > 0 ? `${unreadCount} unread` : 'All read'}
+              {unreadCount > 0
+                ? t('notificationsCenter.unreadCount', { count: unreadCount })
+                : t('notificationsCenter.allRead')}
             </p>
           </div>
         </div>
@@ -237,15 +244,17 @@ export default function NotificationsCenter() {
           <section className="notif-actions-bar">
             <p className="notif-actions-copy">
               {unreadCount > 0
-                ? 'Unread alerts are highlighted below.'
-                : 'Everything is up to date.'}
+                ? t('notificationsCenter.actions.unreadHighlighted')
+                : t('notificationsCenter.actions.everythingUpToDate')}
             </p>
             <button
               className="notif-btn-pill notif-btn-ghost"
               onClick={() => markAllAsReadMutation.mutate()}
               disabled={unreadCount === 0 || isMutatingReadState}
             >
-              {markAllAsReadMutation.isPending ? 'Marking...' : 'Mark all as read'}
+              {markAllAsReadMutation.isPending
+                ? t('notificationsCenter.actions.marking')
+                : t('notificationsCenter.actions.markAllAsRead')}
             </button>
           </section>
         )}
@@ -255,10 +264,10 @@ export default function NotificationsCenter() {
             <div className="notif-empty-icon">
               <span className="material-symbols-outlined">done_all</span>
             </div>
-            <h2 className="notif-empty-title">All caught up!</h2>
-            <p className="notif-empty-desc">Your daily fitness companion has no new alerts for you.</p>
+            <h2 className="notif-empty-title">{t('notificationsCenter.empty.title')}</h2>
+            <p className="notif-empty-desc">{t('notificationsCenter.empty.description')}</p>
             <button className="notif-btn-pill notif-btn-matcha" onClick={() => navigate('/dashboard')}>
-              Go to Dashboard
+              {t('notificationsCenter.empty.goToDashboard')}
             </button>
           </div>
         ) : (
@@ -275,10 +284,10 @@ export default function NotificationsCenter() {
                 <div className="notif-card-content">
                   <h3 className="notif-card-title">{notif.title}</h3>
                   <p className="notif-card-msg">
-                    {downloadingNotificationId === notif.id ? 'Preparing download...' : notif.message}
+                    {downloadingNotificationId === notif.id ? t('notificationsCenter.preparingDownload') : notif.message}
                   </p>
                   <span className="notif-card-time notif-label-mono">
-                    {new Date(notif.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' })}
+                    {new Date(notif.created_at).toLocaleString(locale, { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' })}
                   </span>
                 </div>
                 {!notif.read_at && <div className="notif-unread-dot"></div>}

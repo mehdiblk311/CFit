@@ -9,6 +9,7 @@ import {
   useUpdateRecipe,
 } from '../../../../hooks/queries/useNutrition';
 import { formatMeasurement, getFoodMeasurementMeta } from '../foodMeasurement';
+import { useI18n } from '../../../../i18n/useI18n';
 import './CreateRecipe.css';
 
 function getLocalDateKey(date = new Date()) {
@@ -90,7 +91,7 @@ function getIngredientPresentation(food) {
   return { icon: 'restaurant', iconColor: '#8a5a00', iconBg: '#f7ecd8' };
 }
 
-function buildRecipeIngredient(item) {
+function buildRecipeIngredient(item, t) {
   const food = item?.food || {};
   const { servingSize, servingUnit } = getFoodMeasurementMeta(food);
   const quantity = Number(item?.quantity || 0);
@@ -101,8 +102,8 @@ function buildRecipeIngredient(item) {
     id: item?.id || `${food.id}-${Date.now()}`,
     foodId: food.id,
     quantity,
-    name: food.name || 'Ingredient',
-    desc: [food.brand, food.category].filter(Boolean).join(' / ') || 'Saved ingredient',
+    name: food.name || t('createRecipePage.labels.ingredient'),
+    desc: [food.brand, food.category].filter(Boolean).join(' / ') || t('createRecipePage.labels.savedIngredient'),
     qty: formatMeasurement(totalQuantity, servingUnit),
     icon: presentation.icon,
     iconColor: presentation.iconColor,
@@ -131,6 +132,7 @@ function getItemsSignature(items) {
 }
 
 function RecipesListView() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { data: recipesData, isLoading, isError } = useRecipes({ limit: 50 });
   const deleteRecipe = useDeleteRecipe();
@@ -151,7 +153,7 @@ function RecipesListView() {
 
   const handleDelete = (e, recipeId) => {
     e.stopPropagation();
-    if (window.confirm('Delete this recipe?')) {
+    if (window.confirm(t('createRecipePage.confirm.deleteRecipe'))) {
       deleteRecipe.mutate(recipeId);
     }
   };
@@ -163,27 +165,27 @@ function RecipesListView() {
           <div className="cr-avatar">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: 20, color: '#38671a' }}>person</span>
           </div>
-          <h1 className="cr-header-brand">The Kinetic Craft</h1>
+          <h1 className="cr-header-brand">{t('createRecipePage.brand')}</h1>
         </div>
         <div className="cr-header-right">
           <button
             className="cr-cal-btn"
-            aria-label="Create recipe"
+            aria-label={t('createRecipePage.actions.createRecipe')}
             onClick={() => navigate('/nutrition/recipe', {
               state: { mode: 'builder', recipeId: '', recipeName: '', servings: 1, notes: '', ingredients: [], originalItemsSignature: [] },
             })}
           >
             <span className="material-symbols-outlined" style={{ color: '#38671a' }}>add_circle</span>
           </button>
-          <div className="cr-tag-badge">MY_RECIPES</div>
+          <div className="cr-tag-badge">{t('createRecipePage.badges.myRecipes')}</div>
         </div>
       </header>
 
       <main className="cr-main">
         <section className="cr-total-card">
-          <span className="cr-step-label">Recipe Library</span>
-          <h2 className="cr-recipe-name">My Recipes</h2>
-          <p className="cr-library-copy">Save frequently used meals here, then reuse them without rebuilding from scratch.</p>
+          <span className="cr-step-label">{t('createRecipePage.library.stepLabel')}</span>
+          <h2 className="cr-recipe-name">{t('createRecipePage.library.title')}</h2>
+          <p className="cr-library-copy">{t('createRecipePage.library.description')}</p>
           <button
             id="cr-create-recipe-btn"
             className="cr-save-btn"
@@ -192,20 +194,20 @@ function RecipesListView() {
             })}
           >
             <span className="material-symbols-outlined">add_circle</span>
-            Create Recipe
+            {t('createRecipePage.actions.createRecipe')}
           </button>
         </section>
 
         <section className="cr-ingredients">
           <div className="cr-list-header-row">
-            <h3 className="cr-section-title">Saved Recipes</h3>
-            {!isLoading && !isError && <span className="cr-list-count">{recipes.length} total</span>}
+            <h3 className="cr-section-title">{t('createRecipePage.library.savedRecipes')}</h3>
+            {!isLoading && !isError && <span className="cr-list-count">{t('createRecipePage.library.totalCount', { count: recipes.length })}</span>}
           </div>
 
-          {isLoading && <p className="cr-empty-state">Loading your recipes…</p>}
-          {isError && <p className="cr-empty-state">Could not load your recipes right now.</p>}
+          {isLoading && <p className="cr-empty-state">{t('createRecipePage.states.loadingRecipes')}</p>}
+          {isError && <p className="cr-empty-state">{t('createRecipePage.states.loadRecipesFailed')}</p>}
           {!isLoading && !isError && recipes.length === 0 && (
-            <p className="cr-empty-state">You do not have any saved recipes yet. Tap “Create Recipe” to add your first one.</p>
+            <p className="cr-empty-state">{t('createRecipePage.states.noSavedRecipes')}</p>
           )}
 
           <div className="cr-recipe-library">
@@ -226,11 +228,15 @@ function RecipesListView() {
                     <div>
                       <p className="cr-item-name">{recipe.name}</p>
                       <p className="cr-item-desc">
-                        {recipe.items?.length || 0} ingredients · {servings} serving{servings === 1 ? '' : 's'}
+                        {t('createRecipePage.library.recipeSummary', {
+                          ingredients: recipe.items?.length || 0,
+                          servings,
+                          s: servings === 1 ? '' : 's',
+                        })}
                       </p>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      <span className="cr-recipe-card-chip">{perServing.kcal} kcal / serving</span>
+                      <span className="cr-recipe-card-chip">{t('createRecipePage.library.kcalPerServing', { kcal: perServing.kcal })}</span>
                       <button
                         className="cr-log-btn"
                         onClick={() => navigate('/nutrition/recipe', {
@@ -240,7 +246,7 @@ function RecipesListView() {
                             recipeName: recipe.name,
                             servings,
                             notes: recipe.notes || '',
-                            ingredients: (recipe.items || []).map(buildRecipeIngredient),
+                            ingredients: (recipe.items || []).map((item) => buildRecipeIngredient(item, t)),
                             originalItemsSignature: getItemsSignature(
                               (recipe.items || []).map((item) => ({
                                 foodId: item.food?.id,
@@ -249,14 +255,14 @@ function RecipesListView() {
                             ),
                           },
                         })}
-                        title="Edit Recipe"
+                        title={t('createRecipePage.actions.editRecipe')}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: 18 }}>edit</span>
                       </button>
                       <button
                         className="cr-log-btn"
                         onClick={(e) => { e.stopPropagation(); setLoggingRecipeId(recipe.id); }}
-                        title="Log to Meal"
+                        title={t('createRecipePage.actions.logToMeal')}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: 18 }}>add_task</span>
                       </button>
@@ -264,7 +270,7 @@ function RecipesListView() {
                         className="cr-remove-btn"
                         onClick={(e) => handleDelete(e, recipe.id)}
                         disabled={deleteRecipe.isPending}
-                        title="Delete Recipe"
+                        title={t('createRecipePage.actions.deleteRecipe')}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#f95630' }}>delete</span>
                       </button>
@@ -280,10 +286,10 @@ function RecipesListView() {
                   {!!recipe.items?.length && (
                     <div className="cr-recipe-card-items">
                       {recipe.items.slice(0, 3).map(item => (
-                        <span key={item.id} className="cr-recipe-card-item-pill">{item.food?.name || 'Ingredient'}</span>
+                        <span key={item.id} className="cr-recipe-card-item-pill">{item.food?.name || t('createRecipePage.labels.ingredient')}</span>
                       ))}
                       {recipe.items.length > 3 && (
-                        <span className="cr-recipe-card-item-pill">+{recipe.items.length - 3} more</span>
+                        <span className="cr-recipe-card-item-pill">{t('createRecipePage.labels.moreItems', { count: recipe.items.length - 3 })}</span>
                       )}
                     </div>
                   )}
@@ -296,10 +302,10 @@ function RecipesListView() {
                         className="cr-recipe-input" 
                         style={{ marginTop: 0, padding: '6px 10px', width: 'auto' }}
                       >
-                        <option value="breakfast">Breakfast</option>
-                        <option value="lunch">Lunch</option>
-                        <option value="dinner">Dinner</option>
-                        <option value="snack">Snack</option>
+                        <option value="breakfast">{t('nutrition.mealTypes.breakfast')}</option>
+                        <option value="lunch">{t('nutrition.mealTypes.lunch')}</option>
+                        <option value="dinner">{t('nutrition.mealTypes.dinner')}</option>
+                        <option value="snack">{t('nutrition.mealTypes.snack')}</option>
                       </select>
                       <button
                         className="cr-save-btn"
@@ -327,7 +333,7 @@ function RecipesListView() {
                         }}
                         disabled={logRecipe.isPending}
                       >
-                        {logRecipe.isPending ? 'Logging...' : 'Log 1 Serving'}
+                        {logRecipe.isPending ? t('createRecipePage.actions.logging') : t('createRecipePage.actions.logOneServing')}
                       </button>
                       <button
                         className="cr-remove-btn"
@@ -348,6 +354,7 @@ function RecipesListView() {
 }
 
 function RecipeBuilderView({ initialDraft }) {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const createRecipe = useCreateRecipe();
   const updateRecipe = useUpdateRecipe();
@@ -382,17 +389,17 @@ function RecipeBuilderView({ initialDraft }) {
 
   const handleSaveRecipe = async () => {
     if (!recipeName.trim()) {
-      setSaveError('Please add a recipe name.');
+      setSaveError(t('createRecipePage.errors.missingRecipeName'));
       return;
     }
 
     if (ingredients.length === 0) {
-      setSaveError('Please add at least one ingredient.');
+      setSaveError(t('createRecipePage.errors.missingIngredients'));
       return;
     }
 
     if (validItems.length === 0) {
-      setSaveError('Your selected ingredients are missing food data. Please re-add them.');
+      setSaveError(t('createRecipePage.errors.invalidIngredients'));
       return;
     }
 
@@ -430,7 +437,7 @@ function RecipeBuilderView({ initialDraft }) {
       navigate('/nutrition/recipe', { replace: true });
     } catch (error) {
       console.error('Failed to save recipe:', error);
-      setSaveError(error?.response?.data?.error || 'Failed to save recipe. Please try again.');
+      setSaveError(error?.response?.data?.error || t('createRecipePage.errors.saveFailed'));
     }
   };
 
@@ -442,36 +449,38 @@ function RecipeBuilderView({ initialDraft }) {
             id="cr-back-to-library-btn"
             className="cr-back-btn"
             onClick={() => navigate('/nutrition/recipe')}
-            aria-label="Back to recipes"
+            aria-label={t('createRecipePage.aria.backToRecipes')}
           >
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
           <div className="cr-avatar">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: 20, color: '#38671a' }}>person</span>
           </div>
-          <h1 className="cr-header-brand">The Kinetic Craft</h1>
+          <h1 className="cr-header-brand">{t('createRecipePage.brand')}</h1>
         </div>
         <div className="cr-header-right">
-          <div className="cr-tag-badge">RECIPE_BUILDER</div>
+          <div className="cr-tag-badge">{t('createRecipePage.badges.recipeBuilder')}</div>
         </div>
       </header>
 
       <main className="cr-main">
         <section className="cr-total-card">
-          <span className="cr-step-label">Recipe Builder</span>
-          <h2 className="cr-recipe-name">{recipeName.trim() || (isEditingExistingRecipe ? 'Edit Recipe' : 'New Recipe')}</h2>
+          <span className="cr-step-label">{t('createRecipePage.builder.stepLabel')}</span>
+          <h2 className="cr-recipe-name">
+            {recipeName.trim() || (isEditingExistingRecipe ? t('createRecipePage.builder.editRecipe') : t('createRecipePage.builder.newRecipe'))}
+          </h2>
           <input
             id="cr-recipe-name-input"
             className="cr-recipe-input"
             type="text"
             value={recipeName}
             onChange={event => setRecipeName(event.target.value)}
-            placeholder="Name your recipe (e.g., Protein Pancakes)"
-            aria-label="Recipe name"
+            placeholder={t('createRecipePage.placeholders.recipeName')}
+            aria-label={t('createRecipePage.aria.recipeName')}
           />
 
           <div className="cr-servings-row">
-            <label className="cr-servings-label" htmlFor="cr-servings-input">Servings</label>
+            <label className="cr-servings-label" htmlFor="cr-servings-input">{t('createRecipePage.fields.servings')}</label>
             <input
               id="cr-servings-input"
               className="cr-servings-input"
@@ -483,15 +492,15 @@ function RecipeBuilderView({ initialDraft }) {
           </div>
 
           <div className="cr-sticker-row">
-            <div className="cr-sticker cr-sticker--green cr-sticker--left">Total: {totals.kcal} kcal</div>
+            <div className="cr-sticker cr-sticker--green cr-sticker--left">{t('createRecipePage.labels.totalKcal', { kcal: totals.kcal })}</div>
             <div className="cr-sticker cr-sticker--purple cr-sticker--right">{totals.p}g P</div>
             <div className="cr-sticker cr-sticker--sand">{totals.c}g C</div>
             <div className="cr-sticker cr-sticker--red cr-sticker--left">{totals.f}g F</div>
           </div>
 
           <div className="cr-per-serving-row">
-            <span>Per serving</span>
-            <span>{perServing.kcal} kcal · {perServing.p}g P · {perServing.c}g C · {perServing.f}g F</span>
+            <span>{t('createRecipePage.labels.perServing')}</span>
+            <span>{t('createRecipePage.labels.perServingMacros', { kcal: perServing.kcal, p: perServing.p, c: perServing.c, f: perServing.f })}</span>
           </div>
 
           <textarea
@@ -499,8 +508,8 @@ function RecipeBuilderView({ initialDraft }) {
             value={notes}
             onChange={event => setNotes(event.target.value)}
             rows={3}
-            placeholder="Recipe notes, prep tips, or reminders."
-            aria-label="Recipe notes"
+            placeholder={t('createRecipePage.placeholders.recipeNotes')}
+            aria-label={t('createRecipePage.aria.recipeNotes')}
           />
 
           <div className="cr-deco-icon">
@@ -509,10 +518,10 @@ function RecipeBuilderView({ initialDraft }) {
         </section>
 
         <section className="cr-ingredients">
-          <h3 className="cr-section-title">Current Composition</h3>
+          <h3 className="cr-section-title">{t('createRecipePage.builder.currentComposition')}</h3>
           <div className="cr-ingredient-list">
             {ingredients.length === 0 && (
-              <p className="cr-empty-state">No ingredients yet. Add your first ingredient to get started.</p>
+              <p className="cr-empty-state">{t('createRecipePage.states.noIngredients')}</p>
             )}
 
             {ingredients.map((ingredient, index) => {
@@ -548,14 +557,14 @@ function RecipeBuilderView({ initialDraft }) {
                       onClick={() => navigate(`/nutrition/add-quantity?meal=recipe&foodId=${ingredient.foodId}&ingredientKey=${ingredient.id}&quantity=${ingredient.quantity}`, {
                         state: { mode: 'builder', ingredients, recipeId, recipeName, notes, servings: safeServings, originalItemsSignature },
                       })}
-                      aria-label={`Edit ${ingredient.name}`}
+                      aria-label={t('createRecipePage.aria.editIngredient', { name: ingredient.name })}
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>
                     </button>
                     <button
                       className="cr-remove-btn"
                       onClick={() => removeIngredient(ingredient.id)}
-                      aria-label={`Remove ${ingredient.name}`}
+                      aria-label={t('createRecipePage.aria.removeIngredient', { name: ingredient.name })}
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>
                     </button>
@@ -577,7 +586,7 @@ function RecipeBuilderView({ initialDraft }) {
             })}
           >
             <span className="material-symbols-outlined">add_circle</span>
-            Add Ingredient
+            {t('createRecipePage.actions.addIngredient')}
           </button>
           <button
             id="cr-save-btn"
@@ -586,10 +595,10 @@ function RecipeBuilderView({ initialDraft }) {
             disabled={createRecipe.isPending || updateRecipe.isPending || deleteRecipe.isPending}
           >
             {createRecipe.isPending || updateRecipe.isPending || deleteRecipe.isPending
-              ? 'Saving…'
+              ? t('createRecipePage.actions.saving')
               : isEditingExistingRecipe
-                ? 'Save Changes'
-                : 'Save Recipe'}
+                ? t('createRecipePage.actions.saveChanges')
+                : t('createRecipePage.actions.saveRecipe')}
             <span className="material-symbols-outlined">arrow_forward</span>
           </button>
         </section>
@@ -598,10 +607,10 @@ function RecipeBuilderView({ initialDraft }) {
           <div className="cr-image-area">
             <span className="cr-image-emoji">🥞</span>
             <div className="cr-image-gradient" />
-            <div className="cr-time-badge">EST. 15 MINS</div>
+            <div className="cr-time-badge">{t('createRecipePage.labels.estimatedTime')}</div>
           </div>
           <div className="cr-image-caption">
-            <p className="cr-image-quote">"Build once, save it, and reuse it from your recipes list whenever you need it."</p>
+            <p className="cr-image-quote">{t('createRecipePage.labels.quote')}</p>
           </div>
         </section>
       </main>

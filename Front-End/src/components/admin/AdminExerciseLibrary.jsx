@@ -10,6 +10,7 @@ import {
 } from '../../hooks/queries/useWorkouts';
 import { resolveExerciseImageUrl } from '../../utils/exerciseImages';
 import { uiStore } from '../../stores/uiStore';
+import { getLocaleForLanguage, useI18n } from '../../i18n/useI18n';
 
 const MUSCLE_GROUPS = ['ALL', 'CHEST', 'BACK', 'LEGS', 'SHOULDERS', 'ARMS', 'CORE', 'CARDIO'];
 const DIFFICULTIES  = ['ALL', 'BEGINNER', 'INTERMEDIATE', 'EXPERT'];
@@ -29,10 +30,10 @@ const MUSCLE_COLOR = {
 };
 // Category sub-label
 const CAT_LABEL = {
-  COMPOUND:  'Compound Movement',
-  ISOLATION: 'Isolation Exercise',
-  ISOMETRIC: 'Isometric Hold',
-  CARDIO:    'Cardiovascular',
+  COMPOUND:  'admin.exerciseLibrary.labels.compoundMovement',
+  ISOLATION: 'admin.exerciseLibrary.labels.isolationExercise',
+  ISOMETRIC: 'admin.exerciseLibrary.labels.isometricHold',
+  CARDIO:    'admin.exerciseLibrary.labels.cardiovascular',
 };
 
 const INLINE_IMAGE_LIMIT = 500;
@@ -126,7 +127,25 @@ function upperToken(value, fallback = 'UNKNOWN') {
   return token ? token.replace(/\s+/g, '_').toUpperCase() : fallback;
 }
 
-function mapBackendExercise(exercise) {
+function getTranslatedTokenLabel(t, value, namespace) {
+  const token = normalizeToken(value);
+  if (!token) return value;
+  const key = `${namespace}.${token}`;
+  const translated = t(key);
+  return translated === key ? value : translated;
+}
+
+function getMuscleLabel(t, value) {
+  if (value === 'ALL') return t('admin.exerciseLibrary.filters.allMuscles');
+  return getTranslatedTokenLabel(t, value, 'admin.exerciseLibrary.muscles');
+}
+
+function getDifficultyLabel(t, value) {
+  if (value === 'ALL') return t('admin.exerciseLibrary.filters.allLevels');
+  return getTranslatedTokenLabel(t, value, 'admin.exerciseLibrary.difficulty');
+}
+
+function mapBackendExercise(exercise, locale, recentLabel) {
   const primaryMuscle = splitField(exercise.primary_muscles)[0] || 'chest';
   const level = normalizeToken(exercise.level || 'beginner');
   return {
@@ -134,13 +153,13 @@ function mapBackendExercise(exercise) {
     name: exercise.name,
     muscle: upperToken(primaryMuscle, 'CHEST'),
     cat: upperToken(exercise.category, 'STRENGTH'),
-    equipment: exercise.equipment || 'Bodyweight',
+    equipment: exercise.equipment || '',
     diff: upperToken(level === 'advanced' ? 'expert' : level, 'BEGINNER'),
     imageUrl: exercise.image_url || exercise.alt_image_url || '',
     altImageUrl: exercise.alt_image_url || '',
     addedOn: exercise.created_at
-      ? new Date(exercise.created_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase()
-      : 'RECENT',
+      ? new Date(exercise.created_at).toLocaleDateString(locale, { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase()
+      : recentLabel,
     raw: exercise,
   };
 }
@@ -251,7 +270,7 @@ function FormSelect({ value, onChange, options, disabled = false }) {
   );
 }
 
-function ExerciseFilterModal({ initialFilters, muscleOptions, diffOptions, onApply, onClose }) {
+function ExerciseFilterModal({ initialFilters, muscleOptions, diffOptions, onApply, onClose, t }) {
   const [local, setLocal] = useState(initialFilters);
 
   function setField(key, value) {
@@ -276,17 +295,17 @@ function ExerciseFilterModal({ initialFilters, muscleOptions, diffOptions, onApp
           <button className="adm-modal-close" onClick={onClose}>
             <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
           </button>
-          <h2 className="adm-modal-title">Filter Exercises</h2>
+          <h2 className="adm-modal-title">{t('admin.exerciseLibrary.filterModal.title')}</h2>
 
           <div className="adm-form-field">
-            <label className="adm-form-label">Search</label>
+              <label className="adm-form-label">{t('common.labels.search')}</label>
             <div className="adm-search-wrap">
               <span className="material-symbols-outlined adm-search-icon">search</span>
               <input
                 className="adm-search"
                 value={local.search}
                 onChange={(event) => setField('search', event.target.value)}
-                placeholder="Search exercises..."
+                placeholder={t('admin.exerciseLibrary.search.placeholder')}
                 autoFocus
               />
             </div>
@@ -294,28 +313,28 @@ function ExerciseFilterModal({ initialFilters, muscleOptions, diffOptions, onApp
 
           <div className="adm-grid-2">
             <div className="adm-form-field">
-              <label className="adm-form-label">Muscle Group</label>
+              <label className="adm-form-label">{t('admin.exerciseLibrary.fields.muscleGroup')}</label>
               <FormSelect
                 value={local.muscle}
                 onChange={(value) => setField('muscle', value)}
-                options={muscleOptions.map((value) => ({ value, label: value === 'ALL' ? 'ALL MUSCLES' : value }))}
+                options={muscleOptions.map((value) => ({ value, label: getMuscleLabel(t, value) }))}
               />
             </div>
             <div className="adm-form-field">
-              <label className="adm-form-label">Difficulty</label>
+              <label className="adm-form-label">{t('admin.exerciseLibrary.fields.difficulty')}</label>
               <FormSelect
                 value={local.diff}
                 onChange={(value) => setField('diff', value)}
-                options={diffOptions.map((value) => ({ value, label: value === 'ALL' ? 'ALL LEVELS' : value }))}
+                options={diffOptions.map((value) => ({ value, label: getDifficultyLabel(t, value) }))}
               />
             </div>
           </div>
 
           <div className="adm-form-actions">
-            <button className="adm-btn-ghost" onClick={clearAndApply}>Clear All</button>
+            <button className="adm-btn-ghost" onClick={clearAndApply}>{t('workouts.history.clearFilters')}</button>
             <button className="adm-btn-primary" onClick={applyFilters}>
               <span className="material-symbols-outlined" style={{ fontSize: 16 }}>tune</span>
-              Apply Filters
+              {t('admin.exerciseLibrary.filters.apply')}
             </button>
           </div>
         </div>
@@ -343,7 +362,7 @@ function DiffBars({ diff }) {
   );
 }
 
-function AdminExerciseImageFallback({ exercise }) {
+function AdminExerciseImageFallback({ exercise, fallbackLabel }) {
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
       <img
@@ -365,7 +384,7 @@ function AdminExerciseImageFallback({ exercise }) {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
           <span className="material-symbols-outlined" style={{ fontSize: 22 }}>image</span>
           <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, letterSpacing: '1px', textTransform: 'uppercase' }}>
-            {exercise.muscle || 'Exercise'}
+            {exercise.muscle || fallbackLabel}
           </span>
         </div>
       </div>
@@ -373,18 +392,18 @@ function AdminExerciseImageFallback({ exercise }) {
   );
 }
 
-function getExerciseDescription(exercise) {
+function getExerciseDescription(exercise, fallbackLabel) {
   const raw = exercise?.raw?.instructions || '';
-  if (!raw) return 'No exercise description available yet.';
+  if (!raw) return fallbackLabel;
   if (Array.isArray(raw)) {
     return raw.filter(Boolean).slice(0, 3).join(' ');
   }
   const text = String(raw).trim();
-  if (!text) return 'No exercise description available yet.';
+  if (!text) return fallbackLabel;
   return text;
 }
 
-function ExerciseInfoModal({ exercise, onClose }) {
+function ExerciseInfoModal({ exercise, onClose, t }) {
   if (!exercise) return null;
 
   return (
@@ -403,46 +422,46 @@ function ExerciseInfoModal({ exercise, onClose }) {
               style={{ position: 'absolute', inset: 0 }}
               imgStyle={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
               animate
-              fallback={<AdminExerciseImageFallback exercise={exercise} />}
+               fallback={<AdminExerciseImageFallback exercise={exercise} fallbackLabel={t('admin.exerciseLibrary.labels.exercise')} />}
             />
           </div>
           <div style={{ minWidth: 0 }}>
             <h2 className="adm-modal-title" style={{ margin: 0 }}>{exercise.name}</h2>
             <p style={{ margin: '6px 0 0', fontSize: 12, color: '#5b5c5a' }}>
-              {(CAT_LABEL[exercise.cat] || exercise.cat.replace(/_/g, ' ')).toUpperCase()}
+              {t(CAT_LABEL[exercise.cat] || 'admin.exerciseLibrary.labels.customCategory', { value: exercise.cat.replace(/_/g, ' ') }).toUpperCase()}
             </p>
           </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8, marginBottom: 14 }}>
           <div style={{ border: '2px solid #dad4c8', borderRadius: 12, padding: 10 }}>
-            <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#767775' }}>MUSCLE</p>
-            <p style={{ margin: '4px 0 0', fontSize: 12, fontWeight: 700 }}>{exercise.muscle}</p>
+            <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#767775' }}>{t('admin.exerciseLibrary.info.muscle').toUpperCase()}</p>
+            <p style={{ margin: '4px 0 0', fontSize: 12, fontWeight: 700 }}>{getMuscleLabel(t, exercise.muscle)}</p>
           </div>
           <div style={{ border: '2px solid #dad4c8', borderRadius: 12, padding: 10 }}>
-            <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#767775' }}>EQUIPMENT</p>
-            <p style={{ margin: '4px 0 0', fontSize: 12, fontWeight: 700 }}>{exercise.equipment || 'Bodyweight'}</p>
+            <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#767775' }}>{t('admin.exerciseLibrary.info.equipment').toUpperCase()}</p>
+            <p style={{ margin: '4px 0 0', fontSize: 12, fontWeight: 700 }}>{exercise.equipment || t('workouts.search.bodyweight')}</p>
           </div>
           <div style={{ border: '2px solid #dad4c8', borderRadius: 12, padding: 10 }}>
-            <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#767775' }}>DIFFICULTY</p>
-            <p style={{ margin: '4px 0 0', fontSize: 12, fontWeight: 700 }}>{exercise.diff}</p>
+            <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#767775' }}>{t('admin.exerciseLibrary.info.difficulty').toUpperCase()}</p>
+            <p style={{ margin: '4px 0 0', fontSize: 12, fontWeight: 700 }}>{getDifficultyLabel(t, exercise.diff)}</p>
           </div>
           <div style={{ border: '2px solid #dad4c8', borderRadius: 12, padding: 10 }}>
-            <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#767775' }}>ADDED</p>
+            <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#767775' }}>{t('admin.exerciseLibrary.info.added').toUpperCase()}</p>
             <p style={{ margin: '4px 0 0', fontSize: 12, fontWeight: 700 }}>{exercise.addedOn}</p>
           </div>
         </div>
 
         <div style={{ border: '2px solid #dad4c8', borderRadius: 14, background: '#faf9f7', padding: 12 }}>
-          <p style={{ margin: '0 0 6px', fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: '0.8px', color: '#767775' }}>DESCRIPTION</p>
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: '#2e2f2e' }}>{getExerciseDescription(exercise)}</p>
+          <p style={{ margin: '0 0 6px', fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: '0.8px', color: '#767775' }}>{t('admin.exerciseLibrary.info.description').toUpperCase()}</p>
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: '#2e2f2e' }}>{getExerciseDescription(exercise, t('admin.exerciseLibrary.labels.noDescriptionYet'))}</p>
         </div>
       </div>
     </div>
   );
 }
 
-function ExerciseModal({ exercise, onClose, onSave }) {
+function ExerciseModal({ exercise, onClose, onSave, t }) {
   const [form, setForm] = useState(
     exercise
       ? {
@@ -480,9 +499,9 @@ function ExerciseModal({ exercise, onClose, onSave }) {
         [kind === 'imageUrl' ? 'primary' : 'alternate']: file.name,
         error: '',
       }));
-      uiStore.getState().addToast(`${file.name} imported`, 'success');
+      uiStore.getState().addToast(t('admin.exerciseLibrary.toast.imported', { name: file.name }), 'success');
     } catch (error) {
-      const message = error?.message || 'Could not import that image file.';
+      const message = error?.message || t('admin.exerciseLibrary.toast.importFailed');
       setFileState((prev) => ({ ...prev, error: message }));
       uiStore.getState().addToast(message, 'error');
     }
@@ -494,15 +513,15 @@ function ExerciseModal({ exercise, onClose, onSave }) {
         <button className="adm-modal-close" onClick={onClose}>
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
         </button>
-        <h2 className="adm-modal-title">{exercise ? 'Edit Exercise' : 'Add Exercise'}</h2>
+        <h2 className="adm-modal-title">{exercise ? t('admin.exerciseLibrary.modal.editExercise') : t('admin.exerciseLibrary.modal.addExercise')}</h2>
 
         <div className="adm-form-field" style={{ gridColumn: '1 / -1' }}>
-          <label className="adm-form-label">Exercise Name</label>
+          <label className="adm-form-label">{t('admin.exerciseLibrary.fields.exerciseName')}</label>
           <input
             className="adm-form-input"
             value={form.name}
             onChange={e => set('name', e.target.value)}
-            placeholder="e.g. Barbell Bench Press"
+            placeholder={t('admin.exerciseLibrary.fields.exerciseNamePlaceholder')}
           />
         </div>
 
@@ -511,22 +530,22 @@ function ExerciseModal({ exercise, onClose, onSave }) {
             <div style={{ border: '2px solid #dad4c8', borderRadius: 18, overflow: 'hidden', background: '#f1f1ef', minHeight: 180, position: 'relative' }}>
               <ExerciseImagePreview
                 key={`${form.imageUrl}-${form.altImageUrl}-${form.muscle}-${form.name}`}
-                exercise={{ imageUrl: form.imageUrl, altImageUrl: form.altImageUrl, muscle: form.muscle, name: form.name || 'Exercise' }}
+                exercise={{ imageUrl: form.imageUrl, altImageUrl: form.altImageUrl, muscle: form.muscle, name: form.name || t('admin.exerciseLibrary.labels.exercise') }}
                 alt="preview"
                 style={{ position: 'absolute', inset: 0 }}
                 imgStyle={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 animate={Boolean(form.altImageUrl)}
-                fallback={<AdminExerciseImageFallback exercise={{ imageUrl: '', muscle: form.muscle, name: form.name || 'Exercise' }} />}
+                fallback={<AdminExerciseImageFallback exercise={{ imageUrl: '', muscle: form.muscle, name: form.name || t('admin.exerciseLibrary.labels.exercise') }} fallbackLabel={t('admin.exerciseLibrary.labels.exercise')} />}
               />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div style={{ border: '2px dashed #dad4c8', borderRadius: 18, background: '#faf9f7', padding: 14 }}>
                 <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: '1px', textTransform: 'uppercase', color: '#2e2f2e' }}>
-                  Primary image
+                  {t('admin.exerciseLibrary.fields.primaryImage')}
                 </p>
                 <p style={{ margin: '6px 0 10px', fontSize: 13, lineHeight: 1.5, color: '#5b5c5a' }}>
-                  Pick a file from your computer or paste a hosted image URL.
+                  {t('admin.exerciseLibrary.fields.primaryImageHelp')}
                 </p>
                 <label className="adm-btn-ghost" style={{ width: '100%', justifyContent: 'center', marginBottom: 8, cursor: 'pointer' }}>
                   <input
@@ -536,27 +555,27 @@ function ExerciseModal({ exercise, onClose, onSave }) {
                     onChange={(event) => handleImageImport('imageUrl', event.target.files?.[0])}
                   />
                   <span className="material-symbols-outlined" style={{ fontSize: 16 }}>upload</span>
-                  Import File
+                  {t('admin.exerciseLibrary.actions.importFile')}
                 </label>
                 <input
                   className="adm-form-input"
                   value={form.imageUrl}
                   onChange={e => set('imageUrl', e.target.value)}
-                  placeholder="https://... or /exercise-images/..."
+                  placeholder={t('admin.exerciseLibrary.fields.imageUrlPlaceholder')}
                 />
                 {fileState.primary ? (
                   <p style={{ margin: '8px 0 0', fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '0.5px', color: '#38671a' }}>
-                    Imported: {fileState.primary}
+                    {t('admin.exerciseLibrary.labels.imported')}: {fileState.primary}
                   </p>
                 ) : null}
               </div>
 
               <div style={{ border: '2px dashed #dad4c8', borderRadius: 18, background: '#faf9f7', padding: 14 }}>
                 <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: '1px', textTransform: 'uppercase', color: '#2e2f2e' }}>
-                  Alternate frame
+                  {t('admin.exerciseLibrary.fields.alternateFrame')}
                 </p>
                 <p style={{ margin: '6px 0 10px', fontSize: 13, lineHeight: 1.5, color: '#5b5c5a' }}>
-                  Optional second image for motion-style preview.
+                  {t('admin.exerciseLibrary.fields.alternateFrameHelp')}
                 </p>
                 <label className="adm-btn-ghost" style={{ width: '100%', justifyContent: 'center', marginBottom: 8, cursor: 'pointer' }}>
                   <input
@@ -566,17 +585,17 @@ function ExerciseModal({ exercise, onClose, onSave }) {
                     onChange={(event) => handleImageImport('altImageUrl', event.target.files?.[0])}
                   />
                   <span className="material-symbols-outlined" style={{ fontSize: 16 }}>imagesmode</span>
-                  Import Alt File
+                  {t('admin.exerciseLibrary.actions.importAltFile')}
                 </label>
                 <input
                   className="adm-form-input"
                   value={form.altImageUrl}
                   onChange={e => set('altImageUrl', e.target.value)}
-                  placeholder="https://... or /exercise-images/..."
+                  placeholder={t('admin.exerciseLibrary.fields.imageUrlPlaceholder')}
                 />
                 {fileState.alternate ? (
                   <p style={{ margin: '8px 0 0', fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '0.5px', color: '#38671a' }}>
-                    Imported: {fileState.alternate}
+                    {t('admin.exerciseLibrary.labels.imported')}: {fileState.alternate}
                   </p>
                 ) : null}
               </div>
@@ -584,10 +603,10 @@ function ExerciseModal({ exercise, onClose, onSave }) {
           </div>
 
           <div style={{ marginTop: 10, padding: '12px 14px', borderRadius: 14, background: '#fff8ea', border: '2px solid #f4d28a' }}>
-            <p style={{ margin: 0, fontSize: 12, lineHeight: 1.55, color: '#7c5507' }}>
-              Imported files are compacted into image strings because the current backend only stores image URLs/paths. If a file is too large, use a hosted image URL or a tiny asset.
-            </p>
-          </div>
+              <p style={{ margin: 0, fontSize: 12, lineHeight: 1.55, color: '#7c5507' }}>
+              {t('admin.exerciseLibrary.fields.imageNotice')}
+              </p>
+            </div>
           {fileState.error ? (
             <p style={{ margin: '8px 0 0', fontSize: 12, color: '#b02500' }}>{fileState.error}</p>
           ) : null}
@@ -595,60 +614,60 @@ function ExerciseModal({ exercise, onClose, onSave }) {
 
         <div className="adm-grid-2">
           <div className="adm-form-field">
-            <label className="adm-form-label">Muscle Group</label>
+            <label className="adm-form-label">{t('admin.exerciseLibrary.fields.muscleGroup')}</label>
             <FormSelect
               value={form.muscle}
               onChange={v => set('muscle', v)}
-              options={['CHEST', 'BACK', 'LEGS', 'SHOULDERS', 'ARMS', 'CORE', 'CARDIO']}
+              options={['CHEST', 'BACK', 'LEGS', 'SHOULDERS', 'ARMS', 'CORE', 'CARDIO'].map((value) => ({ value, label: getMuscleLabel(t, value) }))}
             />
           </div>
           <div className="adm-form-field">
-            <label className="adm-form-label">Category</label>
+            <label className="adm-form-label">{t('admin.exerciseLibrary.fields.category')}</label>
             <FormSelect
               value={form.cat}
               onChange={v => set('cat', v)}
-              options={CATEGORIES.filter((item) => item !== 'ALL')}
+              options={CATEGORIES.filter((item) => item !== 'ALL').map((value) => ({ value, label: t(CAT_LABEL[value]) }))}
             />
           </div>
           <div className="adm-form-field">
-            <label className="adm-form-label">Difficulty</label>
+            <label className="adm-form-label">{t('admin.exerciseLibrary.fields.difficulty')}</label>
             <FormSelect
               value={form.diff}
               onChange={v => set('diff', v)}
-              options={['BEGINNER', 'INTERMEDIATE', 'EXPERT']}
+              options={['BEGINNER', 'INTERMEDIATE', 'EXPERT'].map((value) => ({ value, label: getDifficultyLabel(t, value) }))}
             />
           </div>
           <div className="adm-form-field">
-            <label className="adm-form-label">Equipment</label>
+            <label className="adm-form-label">{t('admin.exerciseLibrary.fields.equipment')}</label>
             <input
               className="adm-form-input"
               value={form.equipment}
               onChange={e => set('equipment', e.target.value)}
-              placeholder="e.g. Barbell, Dumbbells"
+              placeholder={t('admin.exerciseLibrary.fields.equipmentPlaceholder')}
             />
           </div>
         </div>
 
         <div className="adm-form-field">
-          <label className="adm-form-label">Instructions</label>
+          <label className="adm-form-label">{t('admin.exerciseLibrary.fields.instructions')}</label>
           <textarea
             className="adm-form-input"
             value={form.instructions}
             onChange={e => set('instructions', e.target.value)}
-            placeholder="Short coaching cues or execution notes..."
+            placeholder={t('admin.exerciseLibrary.fields.instructionsPlaceholder')}
             rows={4}
             style={{ borderRadius: 18, minHeight: 108, resize: 'vertical', paddingTop: 14 }}
           />
         </div>
 
         <div className="adm-form-actions">
-          <button className="adm-btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="adm-btn-ghost" onClick={onClose}>{t('common.actions.close')}</button>
           <button
             className="adm-btn-primary"
             onClick={() => { if (form.name.trim()) onSave(form); }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>save</span>
-            {exercise ? 'Save Changes' : 'Add Exercise'}
+            {exercise ? t('admin.exerciseLibrary.actions.saveChanges') : t('admin.exerciseLibrary.actions.addExercise')}
           </button>
         </div>
       </div>
@@ -659,6 +678,8 @@ function ExerciseModal({ exercise, onClose, onSave }) {
 export { PillSelect, FormSelect };
 
 export default function AdminExerciseLibrary() {
+  const { t, language } = useI18n();
+  const locale = getLocaleForLanguage(language);
   const [filters,   setFilters]   = useState({ search: '', muscle: 'ALL', diff: 'ALL' });
   const [showFilters, setShowFilters] = useState(false);
   const [modal,     setModal]     = useState(null);
@@ -687,8 +708,8 @@ export default function AdminExerciseLibrary() {
 
   const exercises = useMemo(() => {
     const items = exercisesData?.exercises || exercisesData?.data || exercisesData || [];
-    return items.map(mapBackendExercise);
-  }, [exercisesData]);
+    return items.map((item) => mapBackendExercise(item, locale, t('admin.exerciseLibrary.labels.recent')));
+  }, [exercisesData, locale, t]);
   const metadata = exercisesData?.metadata || {};
   const totalEntries = Number(metadata.total_count) || exercises.length;
   const totalPages = Math.max(1, Number(metadata.total_pages) || 1);
@@ -754,12 +775,12 @@ export default function AdminExerciseLibrary() {
       {/* ── Header ────────────────────────────────────────────── */}
       <div className="adm-page-header">
         <div>
-          <p className="adm-page-eyebrow">// CURATED_DIRECTORY</p>
-          <h1 className="adm-page-title">Exercise<br/>Library</h1>
+          <p className="adm-page-eyebrow">{t('admin.exerciseLibrary.header.eyebrow')}</p>
+          <h1 className="adm-page-title">{t('admin.exerciseLibrary.header.titleLine1')}<br/>{t('admin.exerciseLibrary.header.titleLine2')}</h1>
         </div>
         <button className="adm-btn-primary" onClick={() => setModal({})}>
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: 16 }}>add</span>
-          Add Exercise
+          {t('admin.exerciseLibrary.actions.addExercise')}
         </button>
       </div>
 
@@ -773,19 +794,19 @@ export default function AdminExerciseLibrary() {
           padding: '16px 20px',
         }}>
           <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '1.5px', textTransform: 'uppercase', color: '#767775', marginBottom: 10 }}>
-            Quick Filters
+            {t('admin.exerciseLibrary.filters.quickFilters')}
           </p>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {filters.search && <span className="adm-chip adm-chip--oat">Search: {filters.search}</span>}
-              {filters.muscle !== 'ALL' && <span className="adm-chip adm-chip--green">{filters.muscle}</span>}
-              {filters.diff !== 'ALL' && <span className="adm-chip adm-chip--purple">{filters.diff}</span>}
-              {activeFilterCount === 0 && <span className="adm-chip adm-chip--oat">No active filters</span>}
+              {filters.search && <span className="adm-chip adm-chip--oat">{t('admin.exerciseLibrary.search.searchLabel')}: {filters.search}</span>}
+              {filters.muscle !== 'ALL' && <span className="adm-chip adm-chip--green">{getMuscleLabel(t, filters.muscle)}</span>}
+              {filters.diff !== 'ALL' && <span className="adm-chip adm-chip--purple">{getDifficultyLabel(t, filters.diff)}</span>}
+              {activeFilterCount === 0 && <span className="adm-chip adm-chip--oat">{t('admin.exerciseLibrary.filters.noActive')}</span>}
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <button className="adm-btn-ghost" onClick={() => setShowFilters(true)}>
                 <span className="material-symbols-outlined" style={{ fontSize: 16 }}>tune</span>
-                Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
+                {t('admin.exerciseLibrary.filters.button')}{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
               </button>
               {activeFilterCount > 0 && (
                 <button
@@ -796,7 +817,7 @@ export default function AdminExerciseLibrary() {
                   }}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>
-                  Reset
+                  {t('common.actions.reset')}
                 </button>
               )}
             </div>
@@ -810,7 +831,7 @@ export default function AdminExerciseLibrary() {
           boxShadow: '-4px 4px 0 #2e2f2e',
         }}>
           <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '1px', textTransform: 'uppercase', color: '#214f01' }}>
-            Total Exercises
+            {t('admin.exerciseLibrary.stats.totalExercises')}
           </p>
           <p style={{ fontSize: 40, fontWeight: 800, letterSpacing: '-2px', color: '#214f01', lineHeight: 1 }}>
             {totalEntries}
@@ -824,7 +845,7 @@ export default function AdminExerciseLibrary() {
           boxShadow: '-4px 4px 0 #2e2f2e',
         }}>
           <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '1px', textTransform: 'uppercase', color: '#180058' }}>
-            Compound Moves
+            {t('admin.exerciseLibrary.stats.compoundMoves')}
           </p>
           <p style={{ fontSize: 40, fontWeight: 800, letterSpacing: '-2px', color: '#180058', lineHeight: 1 }}>
             {exercises.filter(e => e.cat === 'STRENGTH').length}
@@ -835,7 +856,7 @@ export default function AdminExerciseLibrary() {
       {/* ── Table ─────────────────────────────────────────────── */}
       {isError && (
         <div className="adm-chip adm-chip--red" style={{ marginBottom: 12 }}>
-          {errorMeta?.message || 'Exercise library is unavailable right now.'}
+          {errorMeta?.message || t('admin.exerciseLibrary.error.unavailable')}
         </div>
       )}
 
@@ -843,25 +864,25 @@ export default function AdminExerciseLibrary() {
         <table className="adm-table">
           <thead>
             <tr>
-              <th style={{ width: 80 }}>Preview</th>
-              <th>Exercise Name</th>
-              <th>Muscle Group</th>
-              <th>Equipment</th>
-              <th style={{ textAlign: 'center' }}>Difficulty</th>
-              <th>Added On</th>
-              <th style={{ textAlign: 'right' }}>Actions</th>
+              <th style={{ width: 80 }}>{t('admin.exerciseLibrary.table.preview')}</th>
+              <th>{t('admin.exerciseLibrary.table.exerciseName')}</th>
+              <th>{t('admin.exerciseLibrary.table.muscleGroup')}</th>
+              <th>{t('admin.exerciseLibrary.table.equipment')}</th>
+              <th style={{ textAlign: 'center' }}>{t('admin.exerciseLibrary.table.difficulty')}</th>
+              <th>{t('admin.exerciseLibrary.table.addedOn')}</th>
+              <th style={{ textAlign: 'right' }}>{t('admin.exerciseLibrary.table.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
                 <td colSpan={7}>
-                  <div className="adm-empty">
-                    <span className="material-symbols-outlined adm-empty-icon">sync</span>
-                    <p className="adm-empty-text">Loading exercise library...</p>
-                  </div>
-                </td>
-              </tr>
+                    <div className="adm-empty">
+                      <span className="material-symbols-outlined adm-empty-icon">sync</span>
+                      <p className="adm-empty-text">{t('admin.exerciseLibrary.loading')}</p>
+                    </div>
+                  </td>
+                </tr>
             ) : exercises.map(ex => {
               const mc = MUSCLE_COLOR[ex.muscle] ?? { bg: '#e8e2d6', color: '#555148' };
               return (
@@ -876,7 +897,7 @@ export default function AdminExerciseLibrary() {
                         style={{ position: 'absolute', inset: 0 }}
                         imgStyle={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                         animate={false}
-                        fallback={<AdminExerciseImageFallback exercise={ex} />}
+                        fallback={<AdminExerciseImageFallback exercise={ex} fallbackLabel={t('admin.exerciseLibrary.labels.exercise')} />}
                       />
                     </div>
                   </td>
@@ -892,7 +913,7 @@ export default function AdminExerciseLibrary() {
                       </p>
                     </button>
                     <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '0.8px', textTransform: 'uppercase', color: '#767775' }}>
-                      {CAT_LABEL[ex.cat] || ex.cat.replace(/_/g, ' ')}
+                      {t(CAT_LABEL[ex.cat] || 'admin.exerciseLibrary.labels.customCategory', { value: ex.cat.replace(/_/g, ' ') })}
                     </p>
                   </td>
 
@@ -911,12 +932,12 @@ export default function AdminExerciseLibrary() {
                       padding: '4px 12px',
                       borderRadius: 9999,
                     }}>
-                      {ex.muscle}
+                      {getMuscleLabel(t, ex.muscle)}
                     </span>
                   </td>
 
                   {/* Equipment */}
-                  <td className="adm-td-mono">{ex.equipment}</td>
+                  <td className="adm-td-mono">{ex.equipment || t('workouts.search.bodyweight')}</td>
 
                   {/* Difficulty bars */}
                   <td style={{ textAlign: 'center' }}>
@@ -929,10 +950,10 @@ export default function AdminExerciseLibrary() {
                   {/* Actions */}
                   <td>
                     <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
-                      <button className="adm-icon-btn adm-icon-btn--edit" onClick={() => setModal(ex)} title="Edit">
+                      <button className="adm-icon-btn adm-icon-btn--edit" onClick={() => setModal(ex)} title={t('admin.exerciseLibrary.actions.edit')}>
                         <span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>
                       </button>
-                      <button className="adm-icon-btn adm-icon-btn--danger" onClick={() => setToDelete(ex)} title="Delete">
+                      <button className="adm-icon-btn adm-icon-btn--danger" onClick={() => setToDelete(ex)} title={t('common.actions.delete')}>
                         <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
                       </button>
                     </div>
@@ -944,12 +965,12 @@ export default function AdminExerciseLibrary() {
             {!isLoading && exercises.length === 0 && (
               <tr>
                 <td colSpan={7}>
-                  <div className="adm-empty">
-                    <span className="material-symbols-outlined adm-empty-icon">fitness_center</span>
-                    <p className="adm-empty-text">No exercises match your filters</p>
-                  </div>
-                </td>
-              </tr>
+                    <div className="adm-empty">
+                      <span className="material-symbols-outlined adm-empty-icon">fitness_center</span>
+                      <p className="adm-empty-text">{t('admin.exerciseLibrary.empty.filtered')}</p>
+                    </div>
+                  </td>
+                </tr>
             )}
           </tbody>
         </table>
@@ -958,7 +979,11 @@ export default function AdminExerciseLibrary() {
       {/* ── Pagination ────────────────────────────────────────── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, padding: '0 4px' }}>
         <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '1px', textTransform: 'uppercase', color: '#767775' }}>
-          Showing {totalEntries === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1}–{Math.min((currentPage - 1) * PAGE_SIZE + exercises.length, totalEntries)} of {totalEntries} entries
+          {t('admin.exerciseLibrary.pagination.showingRange', {
+            start: totalEntries === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1,
+            end: Math.min((currentPage - 1) * PAGE_SIZE + exercises.length, totalEntries),
+            total: totalEntries,
+          })}
         </p>
         <div style={{ display: 'flex', gap: 6 }}>
           <button
@@ -1020,12 +1045,14 @@ export default function AdminExerciseLibrary() {
           exercise={modal?.id ? modal : null}
           onClose={() => setModal(null)}
           onSave={handleSave}
+          t={t}
         />
       )}
       {detailExercise && (
         <ExerciseInfoModal
           exercise={detailExercise}
           onClose={() => setDetailExercise(null)}
+          t={t}
         />
       )}
       {toDelete && (
@@ -1034,19 +1061,18 @@ export default function AdminExerciseLibrary() {
             <div style={{ width: 64, height: 64, margin: '0 auto 12px', borderRadius: '50%', background: '#fff4f1', border: '2px solid #f1c2b4', display: 'grid', placeItems: 'center' }}>
               <span className="material-symbols-outlined" style={{ fontSize: 28, color: '#b02500' }}>delete_forever</span>
             </div>
-            <h2 className="adm-modal-title">Delete Exercise?</h2>
+            <h2 className="adm-modal-title">{t('admin.exerciseLibrary.deleteModal.title')}</h2>
             <p style={{ color: '#5b5c5a', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
-              Remove <strong>{toDelete.name}</strong> from the library?
-              Programs using it may be affected.
+              {t('admin.exerciseLibrary.deleteModal.message', { name: toDelete.name })}
             </p>
             <div className="adm-form-actions" style={{ justifyContent: 'center' }}>
-              <button className="adm-btn-ghost" onClick={() => setToDelete(null)}>Cancel</button>
+              <button className="adm-btn-ghost" onClick={() => setToDelete(null)}>{t('common.actions.close')}</button>
               <button
                 className="adm-btn-primary"
                 style={{ background: '#b02500', boxShadow: '-4px 4px 0 #2e2f2e' }}
                 onClick={handleDelete}
               >
-                Delete
+                {t('common.actions.delete')}
               </button>
             </div>
           </div>
@@ -1062,6 +1088,7 @@ export default function AdminExerciseLibrary() {
             setPage(1);
           }}
           onClose={() => setShowFilters(false)}
+          t={t}
         />
       )}
     </div>

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { FormSelect } from './AdminExerciseLibrary';
 import { authStore } from '../../stores/authStore';
+import { useI18n } from '../../i18n/useI18n';
 import {
   useAdminProgram,
   useAdminProgramAssignments,
@@ -38,10 +39,10 @@ function getPrimaryMuscle(exercise) {
   return splitExerciseField(exercise?.primary_muscles)[0] || exercise?.muscle_group || exercise?.primary_muscle || '';
 }
 
-function buildTemplateFromExercises(ownerId, sessionForm, selectedExercises) {
+function buildTemplateFromExercises(ownerId, sessionForm, selectedExercises, programDayLabel) {
   return {
     owner_id: ownerId,
-    name: `Program Day ${Number(sessionForm.day_number) || 1}`,
+    name: `${programDayLabel} ${Number(sessionForm.day_number) || 1}`,
     type: 'strength',
     notes: sessionForm.notes?.trim() || '',
     exercises: selectedExercises.map((exercise, index) => {
@@ -69,7 +70,7 @@ function buildTemplateFromExercises(ownerId, sessionForm, selectedExercises) {
   };
 }
 
-function ProgramModal({ initialValue, onClose, onSave, saving }) {
+function ProgramModal({ initialValue, onClose, onSave, saving, t }) {
   const [form, setForm] = useState(
     initialValue || { name: '', description: '', is_active: true }
   );
@@ -84,49 +85,49 @@ function ProgramModal({ initialValue, onClose, onSave, saving }) {
         <button className="adm-modal-close" onClick={onClose}>
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
         </button>
-        <h2 className="adm-modal-title">{initialValue?.id ? 'Edit Program' : 'Create Program'}</h2>
+        <h2 className="adm-modal-title">{initialValue?.id ? t('admin.userPrograms.modal.editProgram') : t('admin.userPrograms.modal.createProgram')}</h2>
 
         <div className="adm-form-field">
-          <label className="adm-form-label">Program Name</label>
+          <label className="adm-form-label">{t('admin.userPrograms.fields.programName')}</label>
           <input
             className="adm-form-input"
             value={form.name}
             onChange={(e) => setField('name', e.target.value)}
-            placeholder="e.g. PPL Hypertrophy"
+            placeholder={t('admin.userPrograms.fields.programNamePlaceholder')}
           />
         </div>
 
         <div className="adm-form-field">
-          <label className="adm-form-label">Description</label>
+          <label className="adm-form-label">{t('admin.userPrograms.fields.description')}</label>
           <textarea
             className="adm-form-textarea"
             value={form.description}
             onChange={(e) => setField('description', e.target.value)}
-            placeholder="Program intent and target audience..."
+            placeholder={t('admin.userPrograms.fields.descriptionPlaceholder')}
           />
         </div>
 
         <div className="adm-form-field">
-          <label className="adm-form-label">Status</label>
+          <label className="adm-form-label">{t('admin.userPrograms.fields.status')}</label>
           <FormSelect
             value={form.is_active ? 'active' : 'inactive'}
             onChange={(value) => setField('is_active', value === 'active')}
             options={[
-              { value: 'active', label: 'Active' },
-              { value: 'inactive', label: 'Inactive' },
+              { value: 'active', label: t('admin.userPrograms.status.active') },
+              { value: 'inactive', label: t('admin.userPrograms.status.inactive') },
             ]}
           />
         </div>
 
         <div className="adm-form-actions">
-          <button className="adm-btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="adm-btn-ghost" onClick={onClose}>{t('common.actions.close')}</button>
           <button
             className="adm-btn-primary"
             disabled={saving || !form.name?.trim()}
             onClick={() => onSave(form)}
           >
             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>save</span>
-            {saving ? 'Saving...' : initialValue?.id ? 'Save Changes' : 'Create Program'}
+            {saving ? t('settings.saving') : initialValue?.id ? t('admin.userPrograms.actions.saveChanges') : t('admin.userPrograms.actions.createProgram')}
           </button>
         </div>
       </div>
@@ -134,7 +135,7 @@ function ProgramModal({ initialValue, onClose, onSave, saving }) {
   );
 }
 
-function WeekModal({ initialValue, onClose, onSave, saving }) {
+function WeekModal({ initialValue, onClose, onSave, saving, t }) {
   const [form, setForm] = useState(
     initialValue || { week_number: 1, name: '' }
   );
@@ -149,11 +150,11 @@ function WeekModal({ initialValue, onClose, onSave, saving }) {
         <button className="adm-modal-close" onClick={onClose}>
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
         </button>
-        <h2 className="adm-modal-title">{initialValue?.id ? 'Edit Week' : 'Add Week'}</h2>
+        <h2 className="adm-modal-title">{initialValue?.id ? t('admin.userPrograms.modal.editWeek') : t('admin.userPrograms.modal.addWeek')}</h2>
 
         <div className="adm-grid-2">
           <div className="adm-form-field">
-            <label className="adm-form-label">Week Number</label>
+            <label className="adm-form-label">{t('admin.userPrograms.fields.weekNumber')}</label>
             <input
               className="adm-form-input"
               type="number"
@@ -163,21 +164,21 @@ function WeekModal({ initialValue, onClose, onSave, saving }) {
             />
           </div>
           <div className="adm-form-field">
-            <label className="adm-form-label">Week Name (Optional)</label>
+            <label className="adm-form-label">{t('admin.userPrograms.fields.weekNameOptional')}</label>
             <input
               className="adm-form-input"
               value={form.name}
               onChange={(e) => setField('name', e.target.value)}
-              placeholder="e.g. Foundation"
+              placeholder={t('admin.userPrograms.fields.weekNamePlaceholder')}
             />
           </div>
         </div>
 
         <div className="adm-form-actions">
-          <button className="adm-btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="adm-btn-ghost" onClick={onClose}>{t('common.actions.close')}</button>
           <button className="adm-btn-primary" disabled={saving} onClick={() => onSave(form)}>
             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>save</span>
-            {saving ? 'Saving...' : 'Save Week'}
+            {saving ? t('settings.saving') : t('admin.userPrograms.actions.saveWeek')}
           </button>
         </div>
       </div>
@@ -185,7 +186,7 @@ function WeekModal({ initialValue, onClose, onSave, saving }) {
   );
 }
 
-function SessionModal({ initialValue, onClose, onSave, saving }) {
+function SessionModal({ initialValue, onClose, onSave, saving, t }) {
   const currentUserId = authStore((state) => state.user?.id);
   const [form, setForm] = useState(
     initialValue
@@ -261,7 +262,7 @@ function SessionModal({ initialValue, onClose, onSave, saving }) {
 
     try {
       const created = await createTemplateMutation.mutateAsync(
-        buildTemplateFromExercises(currentUserId, form, selectedExercises)
+        buildTemplateFromExercises(currentUserId, form, selectedExercises, t('admin.userPrograms.session.programDay'))
       );
       const templateId = created?.id || created?.workout_template?.id || '';
       onSave({ ...form, workout_template_id: templateId });
@@ -276,11 +277,11 @@ function SessionModal({ initialValue, onClose, onSave, saving }) {
         <button className="adm-modal-close" onClick={onClose}>
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
         </button>
-        <h2 className="adm-modal-title">{initialValue?.id ? 'Edit Session' : 'Add Session'}</h2>
+        <h2 className="adm-modal-title">{initialValue?.id ? t('admin.userPrograms.modal.editSession') : t('admin.userPrograms.modal.addSession')}</h2>
 
         <div className="adm-grid-2">
           <div className="adm-form-field">
-            <label className="adm-form-label">Day Number</label>
+            <label className="adm-form-label">{t('admin.userPrograms.fields.dayNumber')}</label>
             <input
               className="adm-form-input"
               type="number"
@@ -290,13 +291,13 @@ function SessionModal({ initialValue, onClose, onSave, saving }) {
             />
           </div>
           <div className="adm-form-field">
-            <label className="adm-form-label">Build Source</label>
+            <label className="adm-form-label">{t('admin.userPrograms.fields.buildSource')}</label>
             <FormSelect
               value={mode}
               onChange={(value) => setMode(value)}
               options={[
-                { value: 'library', label: 'Exercise Library' },
-                { value: 'template', label: 'Existing Template' },
+                { value: 'library', label: t('admin.userPrograms.session.exerciseLibrary') },
+                { value: 'template', label: t('admin.userPrograms.session.existingTemplate') },
               ]}
             />
           </div>
@@ -304,12 +305,12 @@ function SessionModal({ initialValue, onClose, onSave, saving }) {
 
         {mode === 'template' ? (
           <div className="adm-form-field">
-            <label className="adm-form-label">Workout Template</label>
+            <label className="adm-form-label">{t('admin.userPrograms.fields.workoutTemplate')}</label>
             <FormSelect
               value={form.workout_template_id}
               onChange={(value) => setField('workout_template_id', value)}
               options={[
-                { value: '', label: 'No template selected' },
+                { value: '', label: t('admin.userPrograms.session.noTemplateSelected') },
                 ...templateOptions,
               ]}
             />
@@ -317,20 +318,20 @@ function SessionModal({ initialValue, onClose, onSave, saving }) {
         ) : (
           <div style={{ border: '2px solid #dad4c8', borderRadius: 20, padding: 16, background: '#faf9f7', marginBottom: 14 }}>
             <div className="adm-form-field" style={{ marginBottom: 12 }}>
-              <label className="adm-form-label">Pick Exercises From Library</label>
+              <label className="adm-form-label">{t('admin.userPrograms.session.pickExercises')}</label>
               <input
                 className="adm-form-input"
                 value={exerciseSearch}
                 onChange={(e) => setExerciseSearch(e.target.value)}
-                placeholder="Search exercises..."
+                placeholder={t('admin.userPrograms.search.searchExercises')}
               />
             </div>
 
             <div style={{ display: 'grid', gap: 10, maxHeight: 220, overflowY: 'auto', marginBottom: 12 }}>
               {exerciseLoading ? (
-                <div style={{ fontSize: 13, color: '#767775' }}>Loading exercises...</div>
+                <div style={{ fontSize: 13, color: '#767775' }}>{t('admin.userPrograms.states.loadingExercises')}</div>
               ) : libraryExercises.length === 0 ? (
-                <div style={{ fontSize: 13, color: '#767775' }}>No exercises found.</div>
+                <div style={{ fontSize: 13, color: '#767775' }}>{t('admin.userPrograms.states.noExercisesFound')}</div>
               ) : (
                 libraryExercises.map((exercise) => (
                   <button
@@ -353,7 +354,7 @@ function SessionModal({ initialValue, onClose, onSave, saving }) {
                     <div>
                       <div style={{ fontSize: 14, fontWeight: 700 }}>{exercise.name}</div>
                       <div style={{ fontSize: 12, color: '#5b5c5a' }}>
-                        {getPrimaryMuscle(exercise) || 'Full body'} · {exercise.equipment || 'Bodyweight'}
+                        {getPrimaryMuscle(exercise) || t('workouts.search.fullBody')} · {exercise.equipment || t('workouts.search.bodyweight')}
                       </div>
                     </div>
                     <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#38671a' }}>add_circle</span>
@@ -368,7 +369,7 @@ function SessionModal({ initialValue, onClose, onSave, saving }) {
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 10 }}>
                     <div>
                       <div style={{ fontSize: 14, fontWeight: 700 }}>{exercise.name}</div>
-                      <div style={{ fontSize: 12, color: '#5b5c5a' }}>{exercise.muscle || 'Exercise'}</div>
+                      <div style={{ fontSize: 12, color: '#5b5c5a' }}>{exercise.muscle || t('workouts.search.addExercise')}</div>
                     </div>
                     <button type="button" className="adm-icon-btn adm-icon-btn--danger" onClick={() => removeExercise(index)}>
                       <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
@@ -377,30 +378,30 @@ function SessionModal({ initialValue, onClose, onSave, saving }) {
 
                   <div className="adm-grid-2" style={{ gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' }}>
                     <div className="adm-form-field">
-                      <label className="adm-form-label">Sets</label>
+                      <label className="adm-form-label">{t('workouts.history.sets')}</label>
                       <input className="adm-form-input" type="number" min={1} value={exercise.sets} onChange={(e) => updateExercise(index, 'sets', e.target.value)} />
                     </div>
                     <div className="adm-form-field">
-                      <label className="adm-form-label">Reps</label>
+                      <label className="adm-form-label">{t('workouts.history.reps')}</label>
                       <input className="adm-form-input" type="number" min={0} value={exercise.reps} onChange={(e) => updateExercise(index, 'reps', e.target.value)} />
                     </div>
                     <div className="adm-form-field">
-                      <label className="adm-form-label">Weight</label>
+                      <label className="adm-form-label">{t('workouts.history.weight')}</label>
                       <input className="adm-form-input" type="number" min={0} value={exercise.weight} onChange={(e) => updateExercise(index, 'weight', e.target.value)} />
                     </div>
                     <div className="adm-form-field">
-                      <label className="adm-form-label">Rest (sec)</label>
+                      <label className="adm-form-label">{t('admin.userPrograms.fields.restSeconds')}</label>
                       <input className="adm-form-input" type="number" min={0} value={exercise.rest_time} onChange={(e) => updateExercise(index, 'rest_time', e.target.value)} />
                     </div>
                   </div>
 
                   <div className="adm-form-field">
-                    <label className="adm-form-label">Exercise Notes</label>
+                    <label className="adm-form-label">{t('admin.userPrograms.fields.exerciseNotes')}</label>
                     <textarea
                       className="adm-form-textarea"
                       value={exercise.notes}
                       onChange={(e) => updateExercise(index, 'notes', e.target.value)}
-                      placeholder="Form cues or execution notes..."
+                      placeholder={t('admin.userPrograms.fields.exerciseNotesPlaceholder')}
                     />
                   </div>
                 </div>
@@ -410,20 +411,20 @@ function SessionModal({ initialValue, onClose, onSave, saving }) {
         )}
 
         <div className="adm-form-field">
-          <label className="adm-form-label">Session Notes</label>
+          <label className="adm-form-label">{t('admin.userPrograms.fields.sessionNotes')}</label>
           <textarea
             className="adm-form-textarea"
             value={form.notes}
             onChange={(e) => setField('notes', e.target.value)}
-            placeholder="Coaching notes for the athlete..."
+            placeholder={t('admin.userPrograms.fields.sessionNotesPlaceholder')}
           />
         </div>
 
         <div className="adm-form-actions">
-          <button className="adm-btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="adm-btn-ghost" onClick={onClose}>{t('common.actions.close')}</button>
           <button className="adm-btn-primary" disabled={saving || createTemplateMutation.isPending} onClick={handleSave}>
             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>save</span>
-            {saving || createTemplateMutation.isPending ? 'Saving...' : 'Save Session'}
+            {saving || createTemplateMutation.isPending ? t('settings.saving') : t('admin.userPrograms.actions.saveSession')}
           </button>
         </div>
       </div>
@@ -431,7 +432,7 @@ function SessionModal({ initialValue, onClose, onSave, saving }) {
   );
 }
 
-function AssignmentModal({ users, onClose, onSave, saving }) {
+function AssignmentModal({ users, onClose, onSave, saving, t }) {
   const [form, setForm] = useState({
     user_id: users[0]?.id || '',
     status: 'assigned',
@@ -447,10 +448,10 @@ function AssignmentModal({ users, onClose, onSave, saving }) {
         <button className="adm-modal-close" onClick={onClose}>
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
         </button>
-        <h2 className="adm-modal-title">Assign Program</h2>
+        <h2 className="adm-modal-title">{t('admin.userPrograms.modal.assignProgram')}</h2>
 
         <div className="adm-form-field">
-          <label className="adm-form-label">User</label>
+          <label className="adm-form-label">{t('admin.userPrograms.fields.user')}</label>
           <FormSelect
             value={form.user_id}
             onChange={(value) => setField('user_id', value)}
@@ -462,23 +463,28 @@ function AssignmentModal({ users, onClose, onSave, saving }) {
         </div>
 
         <div className="adm-form-field">
-          <label className="adm-form-label">Initial Status</label>
+          <label className="adm-form-label">{t('admin.userPrograms.fields.initialStatus')}</label>
           <FormSelect
             value={form.status}
             onChange={(value) => setField('status', value)}
-            options={['assigned', 'in_progress', 'completed', 'cancelled']}
+            options={[
+              { value: 'assigned', label: t('workouts.status.assigned') },
+              { value: 'in_progress', label: t('workouts.status.inProgress') },
+              { value: 'completed', label: t('workouts.status.completed') },
+              { value: 'cancelled', label: t('workouts.status.cancelled') },
+            ]}
           />
         </div>
 
         <div className="adm-form-actions">
-          <button className="adm-btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="adm-btn-ghost" onClick={onClose}>{t('common.actions.close')}</button>
           <button
             className="adm-btn-primary"
             disabled={saving || !form.user_id}
             onClick={() => onSave(form)}
           >
             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>person_add</span>
-            {saving ? 'Assigning...' : 'Assign'}
+            {saving ? t('admin.userPrograms.actions.assigning') : t('admin.userPrograms.actions.assign')}
           </button>
         </div>
       </div>
@@ -494,6 +500,7 @@ function statusChipClass(status) {
 }
 
 export default function AdminUserPrograms() {
+  const { t } = useI18n();
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [selectedProgramId, setSelectedProgramId] = useState(null);
@@ -649,7 +656,11 @@ export default function AdminUserPrograms() {
       <div className="adm-page-header">
         <div>
           <p className="adm-page-eyebrow">// WORKOUT_PROGRAMS</p>
-          <h1 className="adm-page-title">Program<br />Management</h1>
+          <h1 className="adm-page-title">
+            {t('admin.userPrograms.header.titleLine1')}
+            <br />
+            {t('admin.userPrograms.header.titleLine2')}
+          </h1>
         </div>
         <div className="adm-page-actions">
           <div className="adm-search-wrap">
@@ -658,39 +669,39 @@ export default function AdminUserPrograms() {
               className="adm-search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search programs..."
+              placeholder={t('admin.userPrograms.search.programsPlaceholder')}
             />
           </div>
           <button className="adm-btn-primary" onClick={() => setProgramModal({})}>
             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add_circle</span>
-            Create Program
+            {t('admin.userPrograms.actions.createProgram')}
           </button>
         </div>
       </div>
 
       {isError && errorMeta?.shouldFallback && (
         <div className="adm-chip adm-chip--red" style={{ marginBottom: 14 }}>
-          Program service is unstable. Showing currently available data.
+          {t('admin.userPrograms.errors.programServiceUnstable')}
         </div>
       )}
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-        <button className={activeFilter === 'all' ? 'adm-btn-primary' : 'adm-btn-ghost'} onClick={() => setActiveFilter('all')}>All</button>
-        <button className={activeFilter === 'active' ? 'adm-btn-primary' : 'adm-btn-ghost'} onClick={() => setActiveFilter('active')}>Active</button>
-        <button className={activeFilter === 'inactive' ? 'adm-btn-primary' : 'adm-btn-ghost'} onClick={() => setActiveFilter('inactive')}>Inactive</button>
+        <button className={activeFilter === 'all' ? 'adm-btn-primary' : 'adm-btn-ghost'} onClick={() => setActiveFilter('all')}>{t('workouts.search.all')}</button>
+        <button className={activeFilter === 'active' ? 'adm-btn-primary' : 'adm-btn-ghost'} onClick={() => setActiveFilter('active')}>{t('admin.userPrograms.status.active')}</button>
+        <button className={activeFilter === 'inactive' ? 'adm-btn-primary' : 'adm-btn-ghost'} onClick={() => setActiveFilter('inactive')}>{t('admin.userPrograms.status.inactive')}</button>
       </div>
 
       <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'minmax(320px, 420px) minmax(420px, 1fr)' }}>
         <div>
           <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
-            <span className="adm-chip adm-chip--oat">{programs.length} programs</span>
-            <span className="adm-chip adm-chip--green">{programs.filter((p) => p.is_active).length} active</span>
+            <span className="adm-chip adm-chip--oat">{t('admin.userPrograms.summary.programs', { count: programs.length })}</span>
+            <span className="adm-chip adm-chip--green">{t('admin.userPrograms.summary.active', { count: programs.filter((p) => p.is_active).length })}</span>
           </div>
           <div className="adm-grid-3" style={{ gridTemplateColumns: '1fr' }}>
             {isLoading ? (
-              <div className="adm-card" style={{ padding: 20 }}>Loading programs...</div>
+              <div className="adm-card" style={{ padding: 20 }}>{t('admin.userPrograms.states.loadingPrograms')}</div>
             ) : filteredPrograms.length === 0 ? (
-              <div className="adm-card" style={{ padding: 20 }}>No programs found.</div>
+              <div className="adm-card" style={{ padding: 20 }}>{t('admin.userPrograms.states.noPrograms')}</div>
             ) : (
               filteredPrograms.map((program) => (
                 <div
@@ -707,9 +718,9 @@ export default function AdminUserPrograms() {
                       style={{ border: 'none', background: 'transparent', textAlign: 'left', cursor: 'pointer', flex: 1 }}
                     >
                       <h3 style={{ fontSize: 15, marginBottom: 6 }}>{program.name}</h3>
-                      <p style={{ fontSize: 12, color: '#5b5c5a', marginBottom: 8 }}>{program.description || 'No description'}</p>
+                      <p style={{ fontSize: 12, color: '#5b5c5a', marginBottom: 8 }}>{program.description || t('admin.userPrograms.labels.noDescription')}</p>
                       <span className={program.is_active ? 'adm-chip adm-chip--green' : 'adm-chip adm-chip--oat'}>
-                        {program.is_active ? 'ACTIVE' : 'INACTIVE'}
+                        {program.is_active ? t('admin.userPrograms.status.active') : t('admin.userPrograms.status.inactive')}
                       </span>
                     </button>
                     <div style={{ display: 'flex', gap: 4 }}>
@@ -731,31 +742,31 @@ export default function AdminUserPrograms() {
           {!selectedProgramId ? (
             <div className="adm-empty">
               <span className="material-symbols-outlined adm-empty-icon">event_note</span>
-              <p className="adm-empty-text">Select a program to manage weeks, sessions, and assignments.</p>
+              <p className="adm-empty-text">{t('admin.userPrograms.states.selectProgram')}</p>
             </div>
           ) : selectedProgramLoading ? (
-            <div>Loading program details...</div>
+            <div>{t('admin.userPrograms.states.loadingProgramDetails')}</div>
           ) : selectedProgramError ? (
             <div className="adm-chip adm-chip--red">
-              {selectedProgramErrorMeta?.message || 'Could not load selected program.'}
+              {selectedProgramErrorMeta?.message || t('admin.userPrograms.errors.loadSelectedProgram')}
             </div>
           ) : (
             <>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginBottom: 14 }}>
                 <div>
-                  <h2 style={{ marginBottom: 4 }}>{selectedProgram?.name || 'Program'}</h2>
-                  <p style={{ fontSize: 13, color: '#5b5c5a' }}>{selectedProgram?.description || 'No description'}</p>
+                  <h2 style={{ marginBottom: 4 }}>{selectedProgram?.name || t('admin.userPrograms.labels.program')}</h2>
+                  <p style={{ fontSize: 13, color: '#5b5c5a' }}>{selectedProgram?.description || t('admin.userPrograms.labels.noDescription')}</p>
                 </div>
                 <button className="adm-btn-primary" onClick={() => setWeekModal({})}>
                   <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span>
-                  Add Week
+                  {t('admin.userPrograms.actions.addWeek')}
                 </button>
               </div>
 
               <div style={{ marginBottom: 20 }}>
-                <h3 style={{ marginBottom: 8, fontSize: 14 }}>Weeks & Sessions</h3>
+                <h3 style={{ marginBottom: 8, fontSize: 14 }}>{t('admin.userPrograms.sections.weeksAndSessions')}</h3>
                 {(selectedProgram?.weeks || []).length === 0 ? (
-                  <p style={{ fontSize: 13, color: '#767775' }}>No weeks yet.</p>
+                  <p style={{ fontSize: 13, color: '#767775' }}>{t('admin.userPrograms.states.noWeeks')}</p>
                 ) : (
                   <div style={{ display: 'grid', gap: 10 }}>
                     {[...(selectedProgram?.weeks || [])]
@@ -764,7 +775,7 @@ export default function AdminUserPrograms() {
                         <div key={week.id} style={{ border: '2px solid #dad4c8', borderRadius: 16, padding: 12 }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                             <div>
-                              <strong>Week {week.week_number}</strong>
+                              <strong>{t('admin.userPrograms.labels.weekNumber', { count: week.week_number })}</strong>
                               {week.name ? <span style={{ marginLeft: 8, color: '#5b5c5a' }}>({week.name})</span> : null}
                             </div>
                             <div style={{ display: 'flex', gap: 6 }}>
@@ -778,7 +789,7 @@ export default function AdminUserPrograms() {
                                 <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
                               </button>
                               <button className="adm-btn-ghost" onClick={() => setSessionModal({ week_id: week.id })}>
-                                Add Session
+                                {t('admin.userPrograms.actions.addSession')}
                               </button>
                             </div>
                           </div>
@@ -791,10 +802,10 @@ export default function AdminUserPrograms() {
                                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
                                     <div>
                                       <div style={{ fontSize: 13, fontWeight: 600 }}>
-                                        Day {session.day_number}
+                                        {t('admin.userPrograms.labels.dayNumber', { count: session.day_number })}
                                         {session.template?.name ? ` - ${session.template.name}` : ''}
                                       </div>
-                                      <div style={{ fontSize: 12, color: '#5b5c5a' }}>{session.notes || 'No notes'}</div>
+                                      <div style={{ fontSize: 12, color: '#5b5c5a' }}>{session.notes || t('admin.userPrograms.labels.noNotes')}</div>
                                     </div>
                                     <div style={{ display: 'flex', gap: 6 }}>
                                       <button
@@ -822,32 +833,32 @@ export default function AdminUserPrograms() {
 
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <h3 style={{ fontSize: 14 }}>Assignments</h3>
+                  <h3 style={{ fontSize: 14 }}>{t('admin.userPrograms.sections.assignments')}</h3>
                   <button className="adm-btn-primary" onClick={() => setAssignmentModalOpen(true)}>
                     <span className="material-symbols-outlined" style={{ fontSize: 16 }}>person_add</span>
-                    Assign User
+                    {t('admin.userPrograms.actions.assignUser')}
                   </button>
                 </div>
 
                 {assignmentsError && assignmentsErrorMeta?.shouldFallback && (
                   <div className="adm-chip adm-chip--red" style={{ marginBottom: 8 }}>
-                    Assignment service issue. Showing available records.
+                    {t('admin.userPrograms.errors.assignmentServiceIssue')}
                   </div>
                 )}
 
                 {assignments.length === 0 ? (
-                  <p style={{ fontSize: 13, color: '#767775' }}>No assignments yet.</p>
+                  <p style={{ fontSize: 13, color: '#767775' }}>{t('admin.userPrograms.states.noAssignments')}</p>
                 ) : (
                   <div style={{ display: 'grid', gap: 8 }}>
                     {assignments.map((assignment) => (
                       <div key={assignment.id} style={{ border: '2px solid #dad4c8', borderRadius: 12, padding: 10 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center' }}>
                           <div>
-                            <div style={{ fontSize: 12, color: '#5b5c5a' }}>User ID</div>
+                            <div style={{ fontSize: 12, color: '#5b5c5a' }}>{t('admin.userPrograms.labels.userId')}</div>
                             <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10 }}>{assignment.user_id}</div>
                             <div style={{ marginTop: 6 }}>
                               <span className={statusChipClass(assignment.status)}>
-                                {(assignment.status || 'assigned').toUpperCase()}
+                                {t(`workouts.status.${assignment.status === 'in_progress' ? 'inProgress' : assignment.status || 'assigned'}`)}
                               </span>
                             </div>
                           </div>
@@ -856,7 +867,12 @@ export default function AdminUserPrograms() {
                             <FormSelect
                               value={assignment.status || 'assigned'}
                               onChange={(status) => handleUpdateAssignmentStatus(assignment, status)}
-                              options={['assigned', 'in_progress', 'completed', 'cancelled']}
+                              options={[
+                                { value: 'assigned', label: t('workouts.status.assigned') },
+                                { value: 'in_progress', label: t('workouts.status.inProgress') },
+                                { value: 'completed', label: t('workouts.status.completed') },
+                                { value: 'cancelled', label: t('workouts.status.cancelled') },
+                              ]}
                             />
                             <button
                               className="adm-icon-btn adm-icon-btn--danger"
@@ -882,6 +898,7 @@ export default function AdminUserPrograms() {
           onClose={() => setProgramModal(null)}
           onSave={handleSaveProgram}
           saving={createProgramMutation.isPending || updateProgramMutation.isPending}
+          t={t}
         />
       )}
 
@@ -891,6 +908,7 @@ export default function AdminUserPrograms() {
           onClose={() => setWeekModal(null)}
           onSave={handleSaveWeek}
           saving={createWeekMutation.isPending || updateWeekMutation.isPending}
+          t={t}
         />
       )}
 
@@ -900,6 +918,7 @@ export default function AdminUserPrograms() {
           onClose={() => setSessionModal(null)}
           onSave={handleSaveSession}
           saving={createSessionMutation.isPending || updateSessionMutation.isPending}
+          t={t}
         />
       )}
 
@@ -909,6 +928,7 @@ export default function AdminUserPrograms() {
           onClose={() => setAssignmentModalOpen(false)}
           onSave={handleCreateAssignment}
           saving={createAssignmentMutation.isPending}
+          t={t}
         />
       )}
     </div>

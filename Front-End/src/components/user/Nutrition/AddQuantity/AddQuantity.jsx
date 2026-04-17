@@ -8,6 +8,7 @@ import {
   getFoodMeasurementMeta,
   getQuickMeasurePresets,
 } from '../foodMeasurement';
+import { useI18n } from '../../../../i18n/useI18n';
 import './AddQuantity.css';
 
 const RECIPE_INGREDIENT_PRESETS = [
@@ -33,6 +34,7 @@ function StickyCTA({ children }) {
 }
 
 export default function AddQuantity() {
+  const { t } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -46,7 +48,9 @@ export default function AddQuantity() {
   const isRecipeFlow = mealType === 'recipe';
   const isEditIngredientFlow = Boolean(mealFoodId && mealId);
   const isRecipeIngredientEditFlow = Boolean(isRecipeFlow && ingredientKey);
-  const mealLabel = mealType === 'snack' ? 'Snacks' : mealType.charAt(0).toUpperCase() + mealType.slice(1);
+  const mealLabel = mealType === 'snack'
+    ? t('nutrition.mealTypes.snack')
+    : t(`nutrition.mealTypes.${mealType}`);
 
   const { data: food, isLoading, isError } = useFood(foodId);
   const addFoodToMeal = useAddFoodToMeal();
@@ -120,7 +124,7 @@ export default function AddQuantity() {
                     foodId: food.id,
                     quantity: apiMultiplier,
                     name: food.name,
-                    desc: [food.brand, food.category].filter(Boolean).join(' / ') || 'Custom ingredient',
+                    desc: [food.brand, food.category].filter(Boolean).join(' / ') || t('addQuantityPage.labels.customIngredient'),
                     qty: formatMeasurement(qty, servingUnit),
                     icon: presentation.icon,
                     iconColor: presentation.iconColor,
@@ -139,9 +143,9 @@ export default function AddQuantity() {
                 {
                   id: `${food.id}-${Date.now()}`,
                   foodId: food.id,
-                  quantity: apiMultiplier,
-                  name: food.name,
-                  desc: [food.brand, food.category].filter(Boolean).join(' / ') || 'Custom ingredient',
+                    quantity: apiMultiplier,
+                    name: food.name,
+                    desc: [food.brand, food.category].filter(Boolean).join(' / ') || t('addQuantityPage.labels.customIngredient'),
                   qty: formatMeasurement(qty, servingUnit),
                   icon: presentation.icon,
                   iconColor: presentation.iconColor,
@@ -176,7 +180,7 @@ export default function AddQuantity() {
       navigate('/nutrition');
     } catch (err) {
       console.error('Error logging food:', err);
-      setAddError(isEditIngredientFlow ? 'Failed to update ingredient. Please try again.' : 'Failed to add food. Please try again.');
+      setAddError(isEditIngredientFlow ? t('addQuantityPage.errors.updateIngredient') : t('addQuantityPage.errors.addFood'));
     } finally {
       setAdding(false);
     }
@@ -188,7 +192,7 @@ export default function AddQuantity() {
       <div className="aq-root" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
         <div style={{ textAlign: 'center', color: '#888' }}>
           <span className="material-symbols-outlined" style={{ fontSize: 40, display: 'block', marginBottom: 8 }}>progress_activity</span>
-          <p style={{ margin: 0, fontSize: 14 }}>Loading food details…</p>
+          <p style={{ margin: 0, fontSize: 14 }}>{t('addQuantityPage.loadingFoodDetails')}</p>
         </div>
       </div>
     );
@@ -199,16 +203,16 @@ export default function AddQuantity() {
       <div className="aq-root" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
         <div style={{ textAlign: 'center', color: '#888' }}>
           <span className="material-symbols-outlined" style={{ fontSize: 40, display: 'block', marginBottom: 8 }}>error</span>
-          <p style={{ margin: 0, fontSize: 14 }}>Food not found</p>
+          <p style={{ margin: 0, fontSize: 14 }}>{t('addQuantityPage.foodNotFound')}</p>
           <button onClick={() => navigate(-1)} style={{ marginTop: 16, padding: '8px 16px', borderRadius: 8, border: '1px solid #ccc', background: 'transparent', cursor: 'pointer' }}>
-            Go back
+            {t('common.actions.goBack')}
           </button>
         </div>
       </div>
     );
   }
 
-  const displayDesc = [food.brand, food.category].filter(Boolean).join(' · ') || 'Whole food';
+  const displayDesc = [food.brand, food.category].filter(Boolean).join(' · ') || t('addQuantityPage.labels.wholeFood');
 
   return (
     <div className="aq-root">
@@ -219,11 +223,11 @@ export default function AddQuantity() {
             id="aq-back-btn"
             className="aq-back-btn"
             onClick={() => navigate(-1)}
-            aria-label="Go back"
+            aria-label={t('common.actions.goBack')}
           >
             <span className="material-symbols-outlined" style={{ color: '#38671a' }}>arrow_back</span>
           </button>
-          <h1 className="aq-header-title">The Kinetic Craft</h1>
+          <h1 className="aq-header-title">{t('addQuantityPage.header.title')}</h1>
         </div>
         <div className="aq-header-right">
           <span className="material-symbols-outlined" style={{ opacity: 0.5 }}>calendar_today</span>
@@ -238,14 +242,14 @@ export default function AddQuantity() {
         <section className="aq-hero">
           <div className="aq-hero-top">
             <h2 className="aq-food-name">🍽️ {food.name}</h2>
-            <div className="aq-ref-chip">Ref: {referenceLabel}</div>
+            <div className="aq-ref-chip">{t('addQuantityPage.labels.reference', { value: referenceLabel })}</div>
           </div>
           <p className="aq-food-desc">{displayDesc}</p>
 
           <div className="aq-ref-card">
             <div>
               <span className="aq-ref-label">Per {referenceLabel}</span>
-              <span className="aq-ref-kcal">{Math.round(perReference('calories'))} kcal</span>
+              <span className="aq-ref-kcal">{Math.round(perReference('calories'))} {t('common.units.kcal')}</span>
             </div>
             <div className="aq-ref-macros">
               {[
@@ -264,8 +268,8 @@ export default function AddQuantity() {
 
         {/* ── Quantity Input Canvas ─────────────────────────────────── */}
         <section className="aq-input-canvas">
-          <div className="aq-sticker-badge">FRESH BATCH</div>
-          <label className="aq-qty-label">Select Quantity</label>
+          <div className="aq-sticker-badge">{t('addQuantityPage.labels.freshBatch')}</div>
+          <label className="aq-qty-label">{t('addQuantityPage.labels.selectQuantity')}</label>
           <div className="aq-qty-row">
             <input
               id="aq-qty-input"
@@ -275,7 +279,7 @@ export default function AddQuantity() {
               onChange={handleInput}
               min={0}
               step={1}
-              aria-label="Quantity in grams"
+              aria-label={t('addQuantityPage.aria.quantityInput')}
             />
             <span className="aq-qty-unit">{servingUnit}</span>
           </div>
@@ -298,13 +302,13 @@ export default function AddQuantity() {
         {/* ── Live Macros Grid ─────────────────────────────────────── */}
         <section className="aq-macros-grid">
           <div className="aq-macro-chip aq-macro-chip--kcal">
-            <span className="aq-macro-chip-label">Calories</span>
-            <span className="aq-macro-chip-val">{calc('calories')} <span className="aq-macro-chip-unit">kcal</span></span>
+            <span className="aq-macro-chip-label">{t('addQuantityPage.macros.calories')}</span>
+            <span className="aq-macro-chip-val">{calc('calories')} <span className="aq-macro-chip-unit">{t('common.units.kcal')}</span></span>
           </div>
           {[
-            { key: 'protein', label: 'Protein' },
-            { key: 'carbohydrates', label: 'Carbs' },
-            { key: 'fat', label: 'Fats' },
+            { key: 'protein', label: t('addQuantityPage.macros.protein') },
+            { key: 'carbohydrates', label: t('addQuantityPage.macros.carbs') },
+            { key: 'fat', label: t('addQuantityPage.macros.fats') },
           ].map(m => (
             <div key={m.key} className="aq-macro-chip">
               <span className="aq-macro-chip-label">{m.label}</span>
@@ -315,7 +319,7 @@ export default function AddQuantity() {
 
         {food.fiber > 0 && (
           <p style={{ textAlign: 'center', fontSize: 12, color: '#888', margin: '0 16px' }}>
-            Fiber: {calc('fiber')}g · Sodium: {calc('sodium')}mg
+            {t('addQuantityPage.labels.fiberSodium', { fiber: calc('fiber'), sodium: calc('sodium') })}
           </p>
         )}
 
@@ -326,7 +330,11 @@ export default function AddQuantity() {
           </div>
           <div className="aq-image-overlay">
             <p className="aq-image-title">{food.name}</p>
-            <p className="aq-image-subtitle">{food.category || 'Whole food'} · {food.source === 'usda' ? 'USDA Database' : 'Custom Food'}</p>
+            <p className="aq-image-subtitle">
+              {(food.category || t('addQuantityPage.labels.wholeFood'))}
+              {' · '}
+              {food.source === 'usda' ? t('addQuantityPage.labels.usdaDatabase') : t('addQuantityPage.labels.customFood')}
+            </p>
           </div>
         </div>
 
@@ -347,14 +355,14 @@ export default function AddQuantity() {
             >
               <span className="material-symbols-outlined">{adding ? 'progress_activity' : 'add_circle'}</span>
               {adding
-                ? (isEditIngredientFlow ? 'Updating…' : 'Adding…')
+                ? (isEditIngredientFlow ? t('addQuantityPage.actions.updating') : t('addQuantityPage.actions.adding'))
                 : isRecipeFlow
-                  ? 'Add Ingredient'
+                  ? t('addQuantityPage.actions.addIngredient')
                   : isEditIngredientFlow
-                    ? 'Update Ingredient'
+                    ? t('addQuantityPage.actions.updateIngredient')
                     : isRecipeIngredientEditFlow
-                      ? 'Update Ingredient'
-                      : `Add Ingredient to ${mealLabel}`}
+                      ? t('addQuantityPage.actions.updateIngredient')
+                      : t('addQuantityPage.actions.addIngredientToMeal', { meal: mealLabel })}
             </button>
           </div>
         </div>

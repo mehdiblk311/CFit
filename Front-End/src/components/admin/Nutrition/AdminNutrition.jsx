@@ -5,6 +5,7 @@ import {
   useDeleteAdminFood,
   useUpdateAdminFood,
 } from '../../../hooks/queries/useAdmin';
+import { getLocaleForLanguage, useI18n } from '../../../i18n/useI18n';
 import './AdminNutrition.css';
 
 const FOOD_FORM_INITIAL = {
@@ -26,18 +27,18 @@ function toNumber(value, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-function formatCompact(value) {
-  return new Intl.NumberFormat('en-US', {
+function formatCompact(value, locale) {
+  return new Intl.NumberFormat(locale, {
     notation: 'compact',
     maximumFractionDigits: 1,
   }).format(toNumber(value));
 }
 
-function formatDateTime(value) {
-  if (!value) return 'No sync yet';
+function formatDateTime(value, locale, emptyLabel) {
+  if (!value) return emptyLabel;
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'No sync yet';
-  return new Intl.DateTimeFormat('en-US', {
+  if (Number.isNaN(date.getTime())) return emptyLabel;
+  return new Intl.DateTimeFormat(locale, {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
@@ -56,27 +57,43 @@ function sourceTone(source) {
   }
 }
 
-function sourceLabel(source) {
+function sourceLabel(source, t) {
   const normalized = String(source || '').trim().toLowerCase();
-  if (!normalized) return 'manual';
+  if (!normalized) return t('admin.nutrition.sources.manual');
+  if (normalized === 'usda') return t('admin.nutrition.sources.usda');
+  if (normalized === 'user') return t('admin.nutrition.sources.user');
   return normalized.replaceAll('_', ' ');
 }
 
-function categoryLabel(category) {
-  return category || 'uncategorized';
+function categoryLabel(category, t) {
+  return category || t('admin.nutrition.labels.uncategorized');
 }
 
 function macroTotal(food) {
   return toNumber(food?.protein) + toNumber(food?.carbohydrates) + toNumber(food?.fat);
 }
 
-function buildExportRows(items) {
-  const headers = ['Name', 'Brand', 'Source', 'Category', 'Serving Size', 'Serving Unit', 'Calories', 'Protein', 'Carbohydrates', 'Fat', 'Fiber', 'Sugar', 'Sodium'];
+function buildExportRows(items, t) {
+  const headers = [
+    t('admin.nutrition.export.name'),
+    t('admin.nutrition.export.brand'),
+    t('admin.nutrition.export.source'),
+    t('admin.nutrition.export.category'),
+    t('admin.nutrition.export.servingSize'),
+    t('admin.nutrition.export.servingUnit'),
+    t('admin.nutrition.export.calories'),
+    t('admin.nutrition.export.protein'),
+    t('admin.nutrition.export.carbohydrates'),
+    t('admin.nutrition.export.fat'),
+    t('admin.nutrition.export.fiber'),
+    t('admin.nutrition.export.sugar'),
+    t('admin.nutrition.export.sodium'),
+  ];
   const rows = items.map((item) => [
     `"${String(item?.name || '').replace(/"/g, '""')}"`,
     `"${String(item?.brand || '').replace(/"/g, '""')}"`,
-    sourceLabel(item?.source),
-    categoryLabel(item?.category),
+    sourceLabel(item?.source, t),
+    categoryLabel(item?.category, t),
     toNumber(item?.serving_size),
     item?.serving_unit || '',
     toNumber(item?.calories),
@@ -95,6 +112,8 @@ function FoodEditorModal({
   mode,
   food,
   form,
+  t,
+  locale,
   onClose,
   onChange,
   onSubmit,
@@ -103,58 +122,70 @@ function FoodEditorModal({
   return (
     <div className="adm-modal-overlay">
       <div className="adm-modal adm-nut-modal">
-        <button className="adm-modal-close" onClick={onClose} aria-label="Close nutrition editor">
+        <button className="adm-modal-close" onClick={onClose} aria-label={t('admin.nutrition.modal.closeAria')}>
           <span className="material-symbols-outlined">close</span>
         </button>
 
         <div className="adm-nut-modal-copy">
-          <p className="adm-page-eyebrow">Nutrition Control Room</p>
-          <h2 className="adm-modal-title">{mode === 'edit' ? 'Refine Food Entry' : 'Add Manual Food'}</h2>
+          <p className="adm-page-eyebrow">{t('admin.nutrition.modal.eyebrow')}</p>
+          <h2 className="adm-modal-title">
+            {mode === 'edit' ? t('admin.nutrition.modal.editTitle') : t('admin.nutrition.modal.createTitle')}
+          </h2>
           <p className="adm-nut-modal-desc">
-            Taha can only edit the fields the backend truly accepts: label, serving reference, and nutrition values.
+            {t('admin.nutrition.modal.description')}
           </p>
         </div>
 
         <form onSubmit={onSubmit} className="adm-nut-form">
           <div className="adm-grid-2">
             <label className="adm-form-field">
-              <span className="adm-form-label">Food Name</span>
+              <span className="adm-form-label">{t('admin.nutrition.labels.foodName')}</span>
               <input className="adm-form-input" name="name" value={form.name} onChange={onChange} required />
             </label>
             <label className="adm-form-field">
-              <span className="adm-form-label">Brand</span>
-              <input className="adm-form-input" name="brand" value={form.brand} onChange={onChange} placeholder="Optional" />
+              <span className="adm-form-label">{t('admin.nutrition.labels.brand')}</span>
+              <input
+                className="adm-form-input"
+                name="brand"
+                value={form.brand}
+                onChange={onChange}
+                placeholder={t('admin.nutrition.labels.optional')}
+              />
             </label>
           </div>
 
           <div className="adm-grid-2">
             <label className="adm-form-field">
-              <span className="adm-form-label">Serving Size</span>
+              <span className="adm-form-label">{t('admin.nutrition.labels.servingSize')}</span>
               <input className="adm-form-input" type="number" min="0" step="0.01" name="serving_size" value={form.serving_size} onChange={onChange} required />
             </label>
             <label className="adm-form-field">
-              <span className="adm-form-label">Serving Unit</span>
+              <span className="adm-form-label">{t('admin.nutrition.labels.servingUnit')}</span>
               <input className="adm-form-input" name="serving_unit" value={form.serving_unit} onChange={onChange} required />
             </label>
           </div>
 
           {mode === 'edit' ? (
             <div className="adm-nut-modal-meta">
-              <span className={sourceTone(food?.source)}>{sourceLabel(food?.source)}</span>
-              <span className="adm-chip adm-chip--oat">{categoryLabel(food?.category)}</span>
-              <span className="adm-chip adm-chip--oat">Updated {formatDateTime(food?.updated_at || food?.created_at)}</span>
+              <span className={sourceTone(food?.source)}>{sourceLabel(food?.source, t)}</span>
+              <span className="adm-chip adm-chip--oat">{categoryLabel(food?.category, t)}</span>
+              <span className="adm-chip adm-chip--oat">
+                {t('admin.nutrition.labels.updatedAt', {
+                  value: formatDateTime(food?.updated_at || food?.created_at, locale, t('admin.nutrition.time.noSync')),
+                })}
+              </span>
             </div>
           ) : null}
 
           <div className="adm-nut-macro-grid">
             {[
-              ['calories', 'Calories', 'kcal'],
-              ['protein', 'Protein', 'g'],
-              ['carbohydrates', 'Carbs', 'g'],
-              ['fat', 'Fat', 'g'],
-              ['fiber', 'Fiber', 'g'],
-              ['sugar', 'Sugar', 'g'],
-              ['sodium', 'Sodium', 'mg'],
+              ['calories', t('admin.nutrition.export.calories'), 'kcal'],
+              ['protein', t('admin.nutrition.export.protein'), 'g'],
+              ['carbohydrates', t('admin.nutrition.export.carbohydrates'), 'g'],
+              ['fat', t('admin.nutrition.export.fat'), 'g'],
+              ['fiber', t('admin.nutrition.export.fiber'), 'g'],
+              ['sugar', t('admin.nutrition.export.sugar'), 'g'],
+              ['sodium', t('admin.nutrition.export.sodium'), 'mg'],
             ].map(([key, label, unit]) => (
               <label key={key} className="adm-form-field">
                 <span className="adm-form-label">{label}</span>
@@ -175,10 +206,10 @@ function FoodEditorModal({
           </div>
 
           <div className="adm-form-actions">
-            <button type="button" className="adm-btn-ghost" onClick={onClose}>Cancel</button>
+            <button type="button" className="adm-btn-ghost" onClick={onClose}>{t('common.actions.close')}</button>
             <button type="submit" className="adm-btn-primary" disabled={isPending}>
               <span className="material-symbols-outlined">{isPending ? 'progress_activity' : 'check_circle'}</span>
-              {isPending ? 'Saving…' : mode === 'edit' ? 'Save Food' : 'Create Food'}
+              {isPending ? t('settings.saving') : mode === 'edit' ? t('admin.nutrition.actions.saveFood') : t('admin.nutrition.actions.createFood')}
             </button>
           </div>
         </form>
@@ -188,6 +219,8 @@ function FoodEditorModal({
 }
 
 export default function AdminNutrition() {
+  const { t, language } = useI18n();
+  const locale = getLocaleForLanguage(language);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [editorMode, setEditorMode] = useState('create');
@@ -281,24 +314,24 @@ export default function AdminNutrition() {
       }
       handleCloseModal();
     } catch (error) {
-      setActionError(error?.response?.data?.error || 'Could not save this food right now.');
+      setActionError(error?.response?.data?.error || t('admin.nutrition.errors.saveFailed'));
     }
   };
 
   const handleDeleteFood = async (food) => {
     if (!food?.id) return;
-    if (!window.confirm(`Delete "${food.name}" from the library?`)) return;
+    if (!window.confirm(t('admin.nutrition.confirm.deleteFood', { name: food.name }))) return;
 
     try {
       await deleteFood.mutateAsync(food.id);
       setActionError('');
     } catch (error) {
-      setActionError(error?.response?.data?.error || 'Could not delete this food right now.');
+      setActionError(error?.response?.data?.error || t('admin.nutrition.errors.deleteFailed'));
     }
   };
 
   const handleExport = () => {
-    const csvContent = buildExportRows(foods);
+    const csvContent = buildExportRows(foods, t);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -314,17 +347,17 @@ export default function AdminNutrition() {
     <div className="adm-nut-page">
       <div className="adm-page-header">
         <div>
-          <div className="adm-page-eyebrow">Coach Nutrition Ops</div>
-          <h1 className="adm-page-title">Nutrition Library</h1>
+          <div className="adm-page-eyebrow">{t('admin.nutrition.page.eyebrow')}</div>
+          <h1 className="adm-page-title">{t('admin.nutrition.page.title')}</h1>
         </div>
         <div className="adm-page-actions">
           <button className="adm-btn-ghost" onClick={handleExport}>
             <span className="material-symbols-outlined">download</span>
-            Export Current View
+            {t('admin.nutrition.actions.exportCurrentView')}
           </button>
           <button className="adm-btn-primary" onClick={handleOpenCreate}>
             <span className="material-symbols-outlined">add</span>
-            Add Manual Food
+            {t('admin.nutrition.actions.addManualFood')}
           </button>
         </div>
       </div>
@@ -333,13 +366,13 @@ export default function AdminNutrition() {
         <div className="adm-nut-table-toolbar">
           <div className="adm-search-wrap adm-nut-toolbar-search">
             <span className="material-symbols-outlined adm-search-icon">search</span>
-            <input
-              type="text"
-              className="adm-search"
-              placeholder="Search food name..."
-              value={search}
-              onChange={(event) => {
-                setSearch(event.target.value);
+              <input
+                type="text"
+                className="adm-search"
+                placeholder={t('admin.nutrition.search.placeholder')}
+                value={search}
+                onChange={(event) => {
+                  setSearch(event.target.value);
                 setPage(1);
               }}
             />
@@ -347,15 +380,15 @@ export default function AdminNutrition() {
         </div>
 
         {actionError ? <div className="adm-nut-inline-error">{actionError}</div> : null}
-        {foodsQuery.isError ? <div className="adm-nut-inline-error">{foodsQuery.errorMeta?.message || 'Could not load food library.'}</div> : null}
+        {foodsQuery.isError ? <div className="adm-nut-inline-error">{foodsQuery.errorMeta?.message || t('admin.nutrition.errors.loadFailed')}</div> : null}
 
         <div className="adm-nut-table-header">
           <div>
-            <p className="adm-page-eyebrow">Food Library</p>
-            <h3 className="adm-nut-section-title">Backend inventory</h3>
+            <p className="adm-page-eyebrow">{t('admin.nutrition.section.eyebrow')}</p>
+            <h3 className="adm-nut-section-title">{t('admin.nutrition.section.title')}</h3>
           </div>
           <span className="adm-chip adm-chip--oat">
-            {foodsQuery.isFetching ? 'Refreshing…' : `${formatCompact(totalFoods)} foods`}
+            {foodsQuery.isFetching ? t('admin.nutrition.status.refreshing') : t('admin.nutrition.status.foodCount', { count: formatCompact(totalFoods, locale) })}
           </span>
         </div>
 
@@ -363,13 +396,13 @@ export default function AdminNutrition() {
           <table className="adm-table">
             <thead>
               <tr>
-                <th>Food</th>
-                <th>Source</th>
-                <th>Serving</th>
-                <th>Macros</th>
-                <th>Micros</th>
-                <th>Updated</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th>{t('admin.nutrition.table.food')}</th>
+                <th>{t('admin.nutrition.table.source')}</th>
+                <th>{t('admin.nutrition.table.serving')}</th>
+                <th>{t('admin.nutrition.table.macros')}</th>
+                <th>{t('admin.nutrition.table.micros')}</th>
+                <th>{t('admin.nutrition.table.updated')}</th>
+                <th style={{ textAlign: 'right' }}>{t('admin.nutrition.table.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -378,7 +411,7 @@ export default function AdminNutrition() {
                   <td colSpan={7}>
                     <div className="adm-empty">
                       <span className="material-symbols-outlined adm-empty-icon">progress_activity</span>
-                      <div className="adm-empty-text">Loading food database…</div>
+                      <div className="adm-empty-text">{t('admin.nutrition.states.loadingDb')}</div>
                     </div>
                   </td>
                 </tr>
@@ -387,7 +420,7 @@ export default function AdminNutrition() {
                   <td colSpan={7}>
                     <div className="adm-empty">
                       <span className="material-symbols-outlined adm-empty-icon">search_off</span>
-                      <div className="adm-empty-text">No foods match this query.</div>
+                      <div className="adm-empty-text">{t('admin.nutrition.states.noMatch')}</div>
                     </div>
                   </td>
                 </tr>
@@ -401,12 +434,12 @@ export default function AdminNutrition() {
                       <div>
                         <p className="adm-nut-food-name">{food.name}</p>
                         <p className="adm-nut-food-meta">
-                          {[food.brand, categoryLabel(food.category)].filter(Boolean).join(' · ')}
+                          {[food.brand, categoryLabel(food.category, t)].filter(Boolean).join(' · ')}
                         </p>
                       </div>
                     </div>
                   </td>
-                  <td><span className={sourceTone(food.source)}>{sourceLabel(food.source)}</span></td>
+                  <td><span className={sourceTone(food.source)}>{sourceLabel(food.source, t)}</span></td>
                   <td className="adm-td-mono">{toNumber(food.serving_size, 100)} {food.serving_unit || 'g'}</td>
                   <td>
                     <div className="adm-nut-macro-pills">
@@ -414,20 +447,25 @@ export default function AdminNutrition() {
                       <span className="adm-chip adm-chip--purple">C {toNumber(food.carbohydrates)}g</span>
                       <span className="adm-chip adm-chip--oat">F {toNumber(food.fat)}g</span>
                     </div>
-                    <p className="adm-nut-macro-total">{toNumber(food.calories)} kcal · total macro mass {macroTotal(food).toFixed(1)}g</p>
+                    <p className="adm-nut-macro-total">
+                      {t('admin.nutrition.row.totalMacroMass', {
+                        calories: toNumber(food.calories),
+                        mass: macroTotal(food).toFixed(1),
+                      })}
+                    </p>
                   </td>
                   <td className="adm-td-mono">
-                    Fiber {toNumber(food.fiber)}g<br />
-                    Sugar {toNumber(food.sugar)}g<br />
-                    Sodium {toNumber(food.sodium)}mg
+                    {t('admin.nutrition.row.fiber', { value: toNumber(food.fiber) })}<br />
+                    {t('admin.nutrition.row.sugar', { value: toNumber(food.sugar) })}<br />
+                    {t('admin.nutrition.row.sodium', { value: toNumber(food.sodium) })}
                   </td>
-                  <td className="adm-td-mono">{formatDateTime(food.updated_at || food.created_at)}</td>
+                  <td className="adm-td-mono">{formatDateTime(food.updated_at || food.created_at, locale, t('admin.nutrition.time.noSync'))}</td>
                   <td>
                     <div className="adm-nut-actions">
-                      <button className="adm-icon-btn adm-icon-btn--edit" onClick={() => handleOpenEdit(food)} title="Edit food">
+                      <button className="adm-icon-btn adm-icon-btn--edit" onClick={() => handleOpenEdit(food)} title={t('admin.nutrition.actions.editFood')}>
                         <span className="material-symbols-outlined">edit</span>
                       </button>
-                      <button className="adm-icon-btn adm-icon-btn--danger" onClick={() => handleDeleteFood(food)} title="Delete food">
+                      <button className="adm-icon-btn adm-icon-btn--danger" onClick={() => handleDeleteFood(food)} title={t('admin.nutrition.actions.deleteFood')}>
                         <span className="material-symbols-outlined">delete</span>
                       </button>
                     </div>
@@ -441,11 +479,13 @@ export default function AdminNutrition() {
         <div className="adm-nut-pagination">
           <button className="adm-btn-ghost" onClick={() => setPage((prev) => Math.max(1, prev - 1))} disabled={page <= 1}>
             <span className="material-symbols-outlined">chevron_left</span>
-            Prev
+            {t('admin.nutrition.pagination.prev')}
           </button>
-          <span className="adm-chip adm-chip--oat">Page {page} / {Math.max(1, totalPages)}</span>
+          <span className="adm-chip adm-chip--oat">
+            {t('admin.nutrition.pagination.page', { page, total: Math.max(1, totalPages) })}
+          </span>
           <button className="adm-btn-ghost" onClick={() => setPage((prev) => Math.min(Math.max(1, totalPages), prev + 1))} disabled={page >= Math.max(1, totalPages)}>
-            Next
+            {t('admin.nutrition.pagination.next')}
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
         </div>
@@ -456,6 +496,8 @@ export default function AdminNutrition() {
           mode={editorMode}
           food={editingFood}
           form={form}
+          t={t}
+          locale={locale}
           onClose={handleCloseModal}
           onChange={handleFormChange}
           onSubmit={handleSaveFood}

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useAdminDashboard, useAdminLogs, useAdminMetrics } from '../../hooks/queries/useAdmin';
 import { useAdminRealtime } from '../../hooks/queries/useAdminRealtime';
+import { getLocaleForLanguage, useI18n } from '../../i18n/useI18n';
 
 const ROLE_COLOR = { admin: 'adm-chip--green', coach: 'adm-chip--purple', user: 'adm-chip--oat' };
 
@@ -27,17 +28,17 @@ function resolveRealtimeNumber(realtimeValue, fallbackValue) {
   return Number.isFinite(parsed) ? parsed : fallbackValue;
 }
 
-function realtimeStatusMeta(status) {
+function realtimeStatusMeta(status, t) {
   switch (status) {
     case 'live':
-      return { label: '🟢 Live', className: 'adm-chip adm-chip--green' };
+      return { label: `🟢 ${t('admin.dashboard.status.live')}`, className: 'adm-chip adm-chip--green' };
     case 'reconnecting':
     case 'connecting':
-      return { label: '🟡 Reconnecting', className: 'adm-chip adm-chip--oat' };
+      return { label: `🟡 ${t('admin.dashboard.status.reconnecting')}`, className: 'adm-chip adm-chip--oat' };
     case 'disabled':
-      return { label: '🟡 Polling Fallback', className: 'adm-chip adm-chip--oat' };
+      return { label: `🟡 ${t('admin.dashboard.status.pollingFallback')}`, className: 'adm-chip adm-chip--oat' };
     default:
-      return { label: '🔴 Disconnected', className: 'adm-chip adm-chip--red' };
+      return { label: `🔴 ${t('admin.dashboard.status.disconnected')}`, className: 'adm-chip adm-chip--red' };
   }
 }
 
@@ -47,12 +48,12 @@ function safePercent(value, total) {
   return Math.max(0, Math.min(100, (toNumber(value) / base) * 100));
 }
 
-function formatNumber(value) {
-  return new Intl.NumberFormat('en-US').format(toNumber(value));
+function formatNumber(value, locale) {
+  return new Intl.NumberFormat(locale).format(toNumber(value));
 }
 
-function formatCompact(value) {
-  return new Intl.NumberFormat('en-US', {
+function formatCompact(value, locale) {
+  return new Intl.NumberFormat(locale, {
     notation: 'compact',
     maximumFractionDigits: 1,
   }).format(toNumber(value));
@@ -62,11 +63,11 @@ function formatPercent(value, digits = 0) {
   return `${toNumber(value).toFixed(digits)}%`;
 }
 
-function formatTimestamp(value) {
-  if (!value) return 'No sync';
+function formatTimestamp(value, locale, emptyLabel) {
+  if (!value) return emptyLabel;
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'No sync';
-  return new Intl.DateTimeFormat('en-US', {
+  if (Number.isNaN(date.getTime())) return emptyLabel;
+  return new Intl.DateTimeFormat(locale, {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
@@ -74,13 +75,13 @@ function formatTimestamp(value) {
   }).format(date);
 }
 
-function formatRelativeTime(value) {
-  if (!value) return 'just now';
+function formatRelativeTime(value, language, emptyLabel) {
+  if (!value) return emptyLabel;
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'just now';
+  if (Number.isNaN(date.getTime())) return emptyLabel;
   const diffMs = date.getTime() - Date.now();
   const diffMin = Math.round(diffMs / 60000);
-  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+  const rtf = new Intl.RelativeTimeFormat(language, { numeric: 'auto' });
 
   if (Math.abs(diffMin) < 60) return rtf.format(diffMin, 'minute');
   const diffHours = Math.round(diffMin / 60);
@@ -89,29 +90,29 @@ function formatRelativeTime(value) {
   return rtf.format(diffDays, 'day');
 }
 
-function formatGoal(goal) {
-  if (!goal) return 'Unknown';
+function formatGoal(goal, unknownLabel) {
+  if (!goal) return unknownLabel;
   return String(goal)
     .replaceAll('_', ' ')
     .replace(/\b\w/g, (match) => match.toUpperCase());
 }
 
-function formatAction(action) {
-  if (!action) return 'Unknown action';
+function formatAction(action, unknownLabel) {
+  if (!action) return unknownLabel;
   return String(action)
     .replaceAll('_', ' ')
     .replace(/\b\w/g, (match) => match.toUpperCase());
 }
 
-function shortId(value) {
-  if (!value) return 'system';
+function shortId(value, fallback) {
+  if (!value) return fallback;
   return String(value).slice(0, 8);
 }
 
-function buildPopularExercises(rows) {
+function buildPopularExercises(rows, unknownExerciseLabel) {
   const data = asArray(rows)
     .map((row) => ({
-      name: row?.exercise_name || row?.name || 'Unknown exercise',
+      name: row?.exercise_name || row?.name || unknownExerciseLabel,
       logs: toNumber(row?.usage_count || row?.count),
       uniqueUsers: toNumber(row?.unique_users),
     }))
@@ -123,11 +124,11 @@ function buildPopularExercises(rows) {
   }));
 }
 
-function buildGoalBreakdown(rows, totalUsers) {
+function buildGoalBreakdown(rows, totalUsers, unknownGoalLabel) {
   const total = Math.max(1, toNumber(totalUsers));
   return asArray(rows)
     .map((row) => ({
-      goal: formatGoal(row?.goal),
+      goal: formatGoal(row?.goal, unknownGoalLabel),
       count: toNumber(row?.count),
       pct: safePercent(row?.count, total),
     }))
@@ -135,13 +136,15 @@ function buildGoalBreakdown(rows, totalUsers) {
     .slice(0, 4);
 }
 
-function buildRecentActivity(rows) {
+function buildRecentActivity(rows, t, language) {
   return asArray(rows).slice(0, 6).map((row) => ({
     id: row?.id || `${row?.admin_id}-${row?.created_at}`,
-    actor: `Admin ${shortId(row?.admin_id)}`,
-    action: formatAction(row?.action),
-    entity: formatGoal(row?.entity_type),
-    time: formatRelativeTime(row?.created_at),
+    actor: t('admin.dashboard.recent.actorWithId', {
+      id: shortId(row?.admin_id, t('admin.dashboard.recent.system')),
+    }),
+    action: formatAction(row?.action, t('admin.dashboard.unknown.action')),
+    entity: formatGoal(row?.entity_type, t('admin.dashboard.unknown.goal')),
+    time: formatRelativeTime(row?.created_at, language, t('admin.dashboard.time.justNow')),
     role: 'admin',
     createdAt: row?.created_at,
   }));
@@ -183,6 +186,8 @@ function EmptyState({ title, body }) {
 }
 
 export default function AdminDashboard() {
+  const { t, language } = useI18n();
+  const locale = getLocaleForLanguage(language);
   const dashboardQuery = useAdminDashboard();
   const metricsQuery = useAdminMetrics();
   const logsQuery = useAdminLogs({ page: 1, limit: 6 });
@@ -222,19 +227,19 @@ export default function AdminDashboard() {
     firstNumber(nutritionStats.meals_today)
   );
   const lastSyncAt = realtime.metrics?.timestamp || summary.updated_at;
-  const realtimeStatus = realtimeStatusMeta(realtime.connectionStatus);
+  const realtimeStatus = realtimeStatusMeta(realtime.connectionStatus, t);
 
   const cards = [
     {
-      label: 'Total Users',
-      value: formatNumber(totalUsers),
-      badge: `MAU ${formatNumber(mau)}`,
+      label: t('admin.dashboard.cards.totalUsers'),
+      value: formatNumber(totalUsers, locale),
+      badge: t('admin.dashboard.cards.mau', { value: formatNumber(mau, locale) }),
       bar: safePercent(active7d, totalUsers),
       background: '#fff',
     },
     {
-      label: 'Active Today',
-      value: formatNumber(activeToday),
+      label: t('admin.dashboard.cards.activeToday'),
+      value: formatNumber(activeToday, locale),
       badge: formatPercent(firstNumber(summary.dau_mau_ratio), 1),
       bar: safePercent(activeToday, mau),
       background: '#c3fb9c',
@@ -242,16 +247,16 @@ export default function AdminDashboard() {
       labelColor: 'rgba(33,79,1,0.72)',
     },
     {
-      label: 'New This Week',
-      value: formatNumber(newUsers7d),
-      badge: `${formatNumber(active7d)} active / 7d`,
+      label: t('admin.dashboard.cards.newThisWeek'),
+      value: formatNumber(newUsers7d, locale),
+      badge: t('admin.dashboard.cards.active7d', { count: formatNumber(active7d, locale) }),
       bar: safePercent(newUsers7d, totalUsers),
       background: '#fff',
     },
     {
-      label: 'Workouts Logged',
-      value: formatNumber(workoutsToday),
-      badge: `${formatCompact(totalWorkouts)} total`,
+      label: t('admin.dashboard.cards.workoutsLogged'),
+      value: formatNumber(workoutsToday, locale),
+      badge: t('admin.dashboard.cards.total', { value: formatCompact(totalWorkouts, locale) }),
       bar: safePercent(workoutsToday, Math.max(totalWorkouts, workoutsToday, 1)),
       background: '#b4a5ff',
       valueColor: '#180058',
@@ -260,9 +265,13 @@ export default function AdminDashboard() {
     },
   ];
 
-  const popularExercises = buildPopularExercises(workoutStats.popular_exercises);
-  const goalBreakdown = buildGoalBreakdown(userStats.goal_breakdown, firstNumber(userStats.total_users, summary.total_users));
-  const recentActivity = buildRecentActivity(logs);
+  const popularExercises = buildPopularExercises(workoutStats.popular_exercises, t('admin.dashboard.unknown.exercise'));
+  const goalBreakdown = buildGoalBreakdown(
+    userStats.goal_breakdown,
+    firstNumber(userStats.total_users, summary.total_users),
+    t('admin.dashboard.unknown.goal')
+  );
+  const recentActivity = buildRecentActivity(logs, t, language);
 
   const isLoading = dashboardQuery.isLoading || metricsQuery.isLoading;
   const hasCriticalData = Object.keys(summary).length > 0 || Object.keys(metrics).length > 0;
@@ -274,17 +283,24 @@ export default function AdminDashboard() {
         <div className="adm-page-header">
           <div>
             <p className="adm-page-eyebrow">// OVERVIEW_TERMINAL_V1</p>
-            <h1 className="adm-page-title">The Kinetic<br />Dashboard</h1>
+            <h1 className="adm-page-title">
+              {t('admin.dashboard.header.line1')}
+              <br />
+              {t('admin.dashboard.header.line2')}
+            </h1>
           </div>
         </div>
         <div className="adm-grid-4" style={{ marginBottom: 28 }}>
           {Array.from({ length: 4 }).map((_, index) => (
             <div key={index} className="adm-metric-card" style={{ minHeight: 182, opacity: 0.72 }}>
-              <p className="adm-metric-label">Loading metric...</p>
+              <p className="adm-metric-label">{t('admin.dashboard.loading.metric')}</p>
             </div>
           ))}
         </div>
-        <EmptyState title="Loading admin dashboard" body="We are syncing live analytics from users, workouts, nutrition, and audit logs." />
+        <EmptyState
+          title={t('admin.dashboard.loading.title')}
+          body={t('admin.dashboard.loading.body')}
+        />
       </div>
     );
   }
@@ -295,12 +311,16 @@ export default function AdminDashboard() {
         <div className="adm-page-header">
           <div>
             <p className="adm-page-eyebrow">// OVERVIEW_TERMINAL_V1</p>
-            <h1 className="adm-page-title">The Kinetic<br />Dashboard</h1>
+            <h1 className="adm-page-title">
+              {t('admin.dashboard.header.line1')}
+              <br />
+              {t('admin.dashboard.header.line2')}
+            </h1>
           </div>
         </div>
         <EmptyState
-          title="Dashboard data is unavailable"
-          body="The admin analytics endpoints did not respond cleanly. The rest of the admin area can still work, but this overview needs the backend to be reachable."
+          title={t('admin.dashboard.unavailable.title')}
+          body={t('admin.dashboard.unavailable.body')}
         />
       </div>
     );
@@ -311,18 +331,24 @@ export default function AdminDashboard() {
       <div className="adm-page-header">
         <div>
           <p className="adm-page-eyebrow">// OVERVIEW_TERMINAL_V1</p>
-          <h1 className="adm-page-title">The Kinetic<br />Dashboard</h1>
+          <h1 className="adm-page-title">
+            {t('admin.dashboard.header.line1')}
+            <br />
+            {t('admin.dashboard.header.line2')}
+          </h1>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
           <div className="adm-sticker adm-sticker--rotate-r" style={{ background: hasErrors ? '#f8cc65' : '#c3fb9c' }}>
             <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
               {hasErrors ? 'warning' : 'bolt'}
             </span>
-            Last sync: {formatTimestamp(lastSyncAt)}
+            {t('admin.dashboard.lastSync', {
+              value: formatTimestamp(lastSyncAt, locale, t('admin.dashboard.time.noSync')),
+            })}
           </div>
           <span className={realtimeStatus.className}>{realtimeStatus.label}</span>
           {hasErrors ? (
-            <span className="adm-chip adm-chip--oat">Some panels are using partial data</span>
+            <span className="adm-chip adm-chip--oat">{t('admin.dashboard.partialData')}</span>
           ) : null}
         </div>
       </div>
@@ -346,7 +372,7 @@ export default function AdminDashboard() {
       <div className="adm-grid-2" style={{ marginBottom: 28 }}>
         <div style={{ background: '#faf9f7', border: '2px dashed #dad4c8', borderRadius: 16, padding: 24 }}>
           <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, letterSpacing: '1px', textTransform: 'uppercase', color: '#38671a', fontWeight: 700, marginBottom: 20, textDecoration: 'underline', textDecorationStyle: 'wavy', textUnderlineOffset: 6 }}>
-            Popular Exercises
+            {t('admin.dashboard.sections.popularExercises')}
           </p>
           {popularExercises.length ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -354,25 +380,29 @@ export default function AdminDashboard() {
                 <div key={exercise.name}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '1px', textTransform: 'uppercase', fontWeight: 700, marginBottom: 4 }}>
                     <span>{exercise.name}</span>
-                    <span style={{ color: '#5b5c5a' }}>{formatNumber(exercise.logs)} logs</span>
+                    <span style={{ color: '#5b5c5a' }}>
+                      {t('admin.dashboard.sections.logs', { count: formatNumber(exercise.logs, locale) })}
+                    </span>
                   </div>
                   <div style={{ height: 8, background: '#e8e2d6', borderRadius: 9999, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${exercise.pct}%`, background: '#38671a', borderRadius: 9999 }} />
                   </div>
                   <div style={{ marginTop: 6, fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#767775' }}>
-                    {formatNumber(exercise.uniqueUsers)} distinct users
+                    {t('admin.dashboard.sections.distinctUsers', { count: formatNumber(exercise.uniqueUsers, locale) })}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p style={{ color: '#5b5c5a', margin: 0 }}>Popular exercise data will appear once users start logging workouts.</p>
+            <p style={{ color: '#5b5c5a', margin: 0 }}>{t('admin.dashboard.sections.popularEmpty')}</p>
           )}
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div className="adm-metric-card" style={{ background: '#c3fb9c', flex: 1 }}>
-            <p className="adm-metric-label" style={{ color: 'rgba(33,79,1,0.72)' }}>Goal Breakdown</p>
+            <p className="adm-metric-label" style={{ color: 'rgba(33,79,1,0.72)' }}>
+              {t('admin.dashboard.sections.goalBreakdown')}
+            </p>
             {goalBreakdown.length ? (
               <>
                 <p className="adm-metric-value" style={{ color: '#214f01', fontSize: 36 }}>
@@ -383,7 +413,7 @@ export default function AdminDashboard() {
                     <div key={goal.goal}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '1px', textTransform: 'uppercase', color: '#214f01' }}>
                         <span>{goal.goal}</span>
-                        <span>{formatNumber(goal.count)}</span>
+                        <span>{formatNumber(goal.count, locale)}</span>
                       </div>
                       <div style={{ height: 7, background: 'rgba(33,79,1,0.14)', borderRadius: 9999, overflow: 'hidden' }}>
                         <div style={{ height: '100%', width: `${goal.pct}%`, background: '#214f01', borderRadius: 9999 }} />
@@ -393,7 +423,7 @@ export default function AdminDashboard() {
                 </div>
               </>
             ) : (
-              <p style={{ color: '#214f01', margin: 0 }}>User goals have not been categorized yet.</p>
+              <p style={{ color: '#214f01', margin: 0 }}>{t('admin.dashboard.sections.goalEmpty')}</p>
             )}
           </div>
 
@@ -401,15 +431,30 @@ export default function AdminDashboard() {
             <div style={{ position: 'absolute', top: 16, right: 16, width: 40, height: 40, borderRadius: '50%', background: '#f9f2e5', border: '2px dashed #38671a', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'rotate(12deg)' }}>
               <span className="material-symbols-outlined" style={{ color: '#38671a', fontSize: 20 }}>restaurant</span>
             </div>
-            <p className="adm-metric-label">Nutrition & Ops</p>
+            <p className="adm-metric-label">{t('admin.dashboard.sections.nutritionOps')}</p>
             <p className="adm-metric-value">
-              {formatNumber(mealsToday)}
-              <span style={{ fontSize: 20 }}> meals today</span>
+              {formatNumber(mealsToday, locale)}
+              <span style={{ fontSize: 20 }}>
+                {' '}
+                {t('admin.dashboard.sections.mealsToday')}
+              </span>
             </p>
             <div style={{ display: 'flex', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>
-              <span className="adm-chip adm-chip--oat">Total meals: {formatCompact(firstNumber(nutritionStats.total_meals, nutritionStats.total_meals_logged))}</span>
-              <span className="adm-chip adm-chip--purple">Pending exports: {formatNumber(firstNumber(moderationStats.pending_exports))}</span>
-              <span className="adm-chip adm-chip--red">Deletion requests: {formatNumber(firstNumber(moderationStats.deletion_requests))}</span>
+              <span className="adm-chip adm-chip--oat">
+                {t('admin.dashboard.sections.totalMeals', {
+                  count: formatCompact(firstNumber(nutritionStats.total_meals, nutritionStats.total_meals_logged), locale),
+                })}
+              </span>
+              <span className="adm-chip adm-chip--purple">
+                {t('admin.dashboard.sections.pendingExports', {
+                  count: formatNumber(firstNumber(moderationStats.pending_exports), locale),
+                })}
+              </span>
+              <span className="adm-chip adm-chip--red">
+                {t('admin.dashboard.sections.deletionRequests', {
+                  count: formatNumber(firstNumber(moderationStats.deletion_requests), locale),
+                })}
+              </span>
             </div>
           </div>
         </div>
@@ -418,11 +463,15 @@ export default function AdminDashboard() {
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
           <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, letterSpacing: '1.5px', textTransform: 'uppercase', color: '#2e2f2e', fontWeight: 700, margin: 0 }}>
-            Recent Admin Activity
+            {t('admin.dashboard.recent.title')}
           </p>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <span className={`adm-chip ${ROLE_COLOR.admin}`}>audit logs</span>
-            <span className="adm-chip adm-chip--oat">showing latest {recentActivity.length || 0}</span>
+            <span className={`adm-chip ${ROLE_COLOR.admin}`}>{t('admin.dashboard.recent.auditLogs')}</span>
+            <span className="adm-chip adm-chip--oat">
+              {t('admin.dashboard.recent.showingLatest', {
+                count: formatNumber(recentActivity.length || 0, locale),
+              })}
+            </span>
           </div>
         </div>
         <div className="adm-table-wrap">
@@ -430,11 +479,11 @@ export default function AdminDashboard() {
             <table className="adm-table">
               <thead>
                 <tr>
-                  <th>Actor</th>
-                  <th>Action</th>
-                  <th>Entity</th>
-                  <th>Role</th>
-                  <th>Time</th>
+                  <th>{t('admin.dashboard.table.actor')}</th>
+                  <th>{t('admin.dashboard.table.action')}</th>
+                  <th>{t('admin.dashboard.table.entity')}</th>
+                  <th>{t('admin.dashboard.table.role')}</th>
+                  <th>{t('admin.dashboard.table.time')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -443,14 +492,14 @@ export default function AdminDashboard() {
                     <td><strong>{entry.actor}</strong></td>
                     <td style={{ color: '#5b5c5a' }}>{entry.action}</td>
                     <td><span className="adm-chip adm-chip--oat">{entry.entity}</span></td>
-                    <td><span className={`adm-chip ${ROLE_COLOR[entry.role]}`}>{entry.role}</span></td>
+                    <td><span className={`adm-chip ${ROLE_COLOR[entry.role]}`}>{t(`admin.dashboard.roles.${entry.role}`)}</span></td>
                     <td className="adm-td-mono">{entry.time}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           ) : (
-            <div style={{ padding: 24, color: '#5b5c5a' }}>No audit log activity has been returned by the backend yet.</div>
+            <div style={{ padding: 24, color: '#5b5c5a' }}>{t('admin.dashboard.recent.empty')}</div>
           )}
         </div>
       </div>

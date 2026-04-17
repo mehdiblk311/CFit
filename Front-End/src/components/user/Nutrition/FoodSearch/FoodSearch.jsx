@@ -11,9 +11,16 @@ import {
   useRemoveFavorite,
 } from '../../../../hooks/queries/useNutrition';
 import { getFoodMeasurementMeta } from '../foodMeasurement';
+import { useI18n } from '../../../../i18n/useI18n';
 import './FoodSearch.css';
 
-const FILTER_CHIPS = ['All', 'Recent', 'Favorites', 'My Recipes', 'Custom'];
+const FILTER_CHIPS = [
+  { value: 'all', labelKey: 'foodSearchPage.filters.all' },
+  { value: 'recent', labelKey: 'foodSearchPage.filters.recent' },
+  { value: 'favorites', labelKey: 'foodSearchPage.filters.favorites' },
+  { value: 'recipes', labelKey: 'foodSearchPage.filters.myRecipes' },
+  { value: 'custom', labelKey: 'foodSearchPage.filters.custom' },
+];
 
 const CATEGORY_EMOJI = {
   'Dairy': '🥛', 'Milk': '🥛',
@@ -65,16 +72,19 @@ function filterFoods(foods, query) {
 }
 
 export default function FoodSearch() {
+  const { t } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const legacyMeal = searchParams.get('meal') || '';
   const mealId = searchParams.get('mealId') || '';
   const mealType = searchParams.get('mealType') || legacyMeal || 'meal';
-  const mealLabel = mealType === 'snack' ? 'Snacks' : mealType.charAt(0).toUpperCase() + mealType.slice(1);
+  const mealLabel = mealType === 'snack'
+    ? t('nutrition.mealTypes.snack')
+    : t(`nutrition.mealTypes.${mealType}`);
 
   const [query, setQuery] = useState('');
-  const [active, setActive] = useState('All');
+  const [active, setActive] = useState('all');
 
   const isSearching = query.length >= 2;
 
@@ -115,25 +125,27 @@ export default function FoodSearch() {
 
   let foods = defaultFoods;
   let isLoading = isSearching ? searchLoading : suggestedLoading;
-  let resultsLabel = isSearching ? `${defaultFoods.length} Results for "${query}"` : 'Suggested Foods';
+  let resultsLabel = isSearching
+    ? t('foodSearchPage.results.forQuery', { count: defaultFoods.length, query })
+    : t('foodSearchPage.results.suggestedFoods');
 
-  if (active === 'Recent') {
+  if (active === 'recent') {
     foods = filterFoods(recentFoods, query);
     isLoading = recentLoading;
-    resultsLabel = query ? `Recent matches for "${query}"` : 'Recent Foods';
-  } else if (active === 'Favorites') {
+    resultsLabel = query ? t('foodSearchPage.results.recentMatches', { query }) : t('foodSearchPage.results.recentFoods');
+  } else if (active === 'favorites') {
     foods = filterFoods(favoriteFoods, query);
     isLoading = favoritesLoading;
-    resultsLabel = query ? `Favorite matches for "${query}"` : 'Favorite Foods';
-  } else if (active === 'Custom') {
+    resultsLabel = query ? t('foodSearchPage.results.favoriteMatches', { query }) : t('foodSearchPage.results.favoriteFoods');
+  } else if (active === 'custom') {
     foods = customFoods;
     isLoading = customLoading;
-    resultsLabel = query ? `Custom foods for "${query}"` : 'Your Custom Foods';
-  } else if (active === 'My Recipes') {
+    resultsLabel = query ? t('foodSearchPage.results.customForQuery', { query }) : t('foodSearchPage.results.customFoods');
+  } else if (active === 'recipes') {
     isLoading = recipesLoading;
-    resultsLabel = 'Your Recipes';
+    resultsLabel = t('foodSearchPage.results.yourRecipes');
   }
-  const isSuggestedMode = active === 'All' && !isSearching;
+  const isSuggestedMode = active === 'all' && !isSearching;
 
   const handleLogRecipe = async (recipe) => {
     if (!mealType || mealType === 'recipe') return;
@@ -150,7 +162,7 @@ export default function FoodSearch() {
       navigate('/nutrition');
     } catch (err) {
       console.error('Failed to log recipe:', err);
-      alert('Failed to log recipe.');
+      alert(t('foodSearchPage.errors.logRecipeFailed'));
     }
   };
 
@@ -205,11 +217,11 @@ export default function FoodSearch() {
             id="fs-back-btn"
             className="fs-back-btn"
             onClick={handleBack}
-            aria-label="Back"
+            aria-label={t('common.actions.goBack')}
           >
             <span className="material-symbols-outlined fs-back-icon">arrow_back</span>
           </button>
-          <h1 className="fs-title">Add Ingredient to {mealLabel}</h1>
+          <h1 className="fs-title">{t('foodSearchPage.title', { meal: mealLabel })}</h1>
         </div>
         <div className="fs-avatar">
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: 20, color: '#38671a' }}>person</span>
@@ -224,7 +236,7 @@ export default function FoodSearch() {
             id="fs-search-input"
             type="text"
             className="fs-search-input"
-            placeholder="Search foods..."
+            placeholder={t('foodSearchPage.searchPlaceholder')}
             value={query}
             onChange={e => setQuery(e.target.value)}
             autoFocus
@@ -238,12 +250,12 @@ export default function FoodSearch() {
         <div className="fs-chips">
           {FILTER_CHIPS.map(chip => (
             <button
-              key={chip}
-              id={`fs-chip-${chip.toLowerCase().replace(' ', '-')}`}
-              className={`fs-chip${active === chip ? ' fs-chip--active' : ''}`}
-              onClick={() => setActive(chip)}
+              key={chip.value}
+              id={`fs-chip-${chip.value}`}
+              className={`fs-chip${active === chip.value ? ' fs-chip--active' : ''}`}
+              onClick={() => setActive(chip.value)}
             >
-              {chip}
+              {t(chip.labelKey)}
             </button>
           ))}
         </div>
@@ -251,21 +263,21 @@ export default function FoodSearch() {
         {/* Results */}
         <section className="fs-results">
           <div className="fs-results-header">
-            <h2 className="fs-results-title">{isLoading ? 'Loading…' : resultsLabel}</h2>
+            <h2 className="fs-results-title">{isLoading ? t('foodSearchPage.loading') : resultsLabel}</h2>
             <span className="material-symbols-outlined fs-sort-icon">sort</span>
           </div>
 
-          {active === 'My Recipes' ? (
+          {active === 'recipes' ? (
             recipesLoading ? (
               <div style={{ textAlign: 'center', padding: '32px 16px', color: '#888' }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 40, display: 'block', marginBottom: 8, animation: 'spin 1s linear infinite' }}>progress_activity</span>
-                <p style={{ margin: 0, fontSize: 14 }}>Loading recipes...</p>
+                <p style={{ margin: 0, fontSize: 14 }}>{t('foodSearchPage.recipes.loading')}</p>
               </div>
             ) : recipes.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '32px 16px', color: '#888' }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 40, display: 'block', marginBottom: 8 }}>menu_book</span>
-                <p style={{ margin: 0, fontSize: 14 }}>No recipes found.</p>
-                <p style={{ margin: '4px 0 0', fontSize: 12 }}>Create a recipe in the Recipes tab first.</p>
+                <p style={{ margin: 0, fontSize: 14 }}>{t('foodSearchPage.recipes.emptyTitle')}</p>
+                <p style={{ margin: '4px 0 0', fontSize: 12 }}>{t('foodSearchPage.recipes.emptyBody')}</p>
               </div>
             ) : (
               recipes.map((recipe, i) => (
@@ -283,19 +295,19 @@ export default function FoodSearch() {
                         <h3 className="fs-food-name">{recipe.name}</h3>
                       </div>
                       <div className="fs-food-macros">
-                        <span className="fs-macro-tag" style={{ marginTop: '4px' }}>
-                          {recipe.items?.length || 0} ingredients
-                        </span>
+                          <span className="fs-macro-tag" style={{ marginTop: '4px' }}>
+                          {t('foodSearchPage.recipes.ingredientsCount', { count: recipe.items?.length || 0 })}
+                          </span>
                       </div>
                     </div>
                   </div>
                   <div className="fs-row-right">
                     <span className="fs-food-emoji">🥞</span>
                     <button
-                      className="fs-add-btn"
-                      onClick={e => { e.stopPropagation(); handleLogRecipe(recipe); }}
-                      aria-label={`Log ${recipe.name}`}
-                      disabled={logRecipeToMeal.isPending}
+                        className="fs-add-btn"
+                        onClick={e => { e.stopPropagation(); handleLogRecipe(recipe); }}
+                        aria-label={t('foodSearchPage.aria.logRecipe', { name: recipe.name })}
+                        disabled={logRecipeToMeal.isPending}
                     >
                       <span className="material-symbols-outlined">add</span>
                     </button>
@@ -308,30 +320,30 @@ export default function FoodSearch() {
               {!isLoading && foods.length === 0 && isSearching && (
                 <div style={{ textAlign: 'center', padding: '32px 16px', color: '#888' }}>
                   <span className="material-symbols-outlined" style={{ fontSize: 40, display: 'block', marginBottom: 8 }}>search_off</span>
-                  <p style={{ margin: 0, fontSize: 14 }}>No foods found for <strong>"{query}"</strong></p>
+                  <p style={{ margin: 0, fontSize: 14 }}>{t('foodSearchPage.empty.noFoodsForQuery', { query })}</p>
                   <p style={{ margin: '4px 0 0', fontSize: 12 }}>
-                    {active === 'Favorites'
-                      ? 'Favorite a food first, or search another name.'
-                      : active === 'Recent'
-                        ? 'Log a few foods and they will show up here.'
-                        : 'Try a different name or create a custom food below.'}
+                    {active === 'favorites'
+                      ? t('foodSearchPage.empty.favoriteHint')
+                      : active === 'recent'
+                        ? t('foodSearchPage.empty.recentHint')
+                        : t('foodSearchPage.empty.defaultHint')}
                   </p>
                 </div>
               )}
 
-              {!isLoading && foods.length === 0 && !isSearching && active === 'Favorites' && (
+              {!isLoading && foods.length === 0 && !isSearching && active === 'favorites' && (
                 <div style={{ textAlign: 'center', padding: '32px 16px', color: '#888' }}>
                   <span className="material-symbols-outlined" style={{ fontSize: 40, display: 'block', marginBottom: 8 }}>favorite</span>
-                  <p style={{ margin: 0, fontSize: 14 }}>No favorite foods yet.</p>
-                  <p style={{ margin: '4px 0 0', fontSize: 12 }}>Tap the heart on foods you want to reuse quickly.</p>
+                  <p style={{ margin: 0, fontSize: 14 }}>{t('foodSearchPage.empty.noFavorites')}</p>
+                  <p style={{ margin: '4px 0 0', fontSize: 12 }}>{t('foodSearchPage.empty.noFavoritesHint')}</p>
                 </div>
               )}
 
-              {!isLoading && foods.length === 0 && !isSearching && active === 'Recent' && (
+              {!isLoading && foods.length === 0 && !isSearching && active === 'recent' && (
                 <div style={{ textAlign: 'center', padding: '32px 16px', color: '#888' }}>
                   <span className="material-symbols-outlined" style={{ fontSize: 40, display: 'block', marginBottom: 8 }}>history</span>
-                  <p style={{ margin: 0, fontSize: 14 }}>No recent foods yet.</p>
-                  <p style={{ margin: '4px 0 0', fontSize: 12 }}>Your recently logged foods will show up here.</p>
+                  <p style={{ margin: 0, fontSize: 14 }}>{t('foodSearchPage.empty.noRecent')}</p>
+                  <p style={{ margin: '4px 0 0', fontSize: 12 }}>{t('foodSearchPage.empty.noRecentHint')}</p>
                 </div>
               )}
 
@@ -355,7 +367,7 @@ export default function FoodSearch() {
                     <div className="fs-row-left">
                       <div className="fs-thumbnail">{emoji}</div>
                       <div>
-                        {isSuggested && <p className="fs-suggested-kicker">Suggested Pick</p>}
+                        {isSuggested && <p className="fs-suggested-kicker">{t('foodSearchPage.labels.suggestedPick')}</p>}
                         <div className="fs-food-name-row">
                           <h3 className="fs-food-name">{food.name}</h3>
                         </div>
@@ -367,9 +379,11 @@ export default function FoodSearch() {
                           </span>
                           <span className="fs-macro-tag">
                             <span className="fs-dot fs-dot--protein" />
-                            {referenceValue('protein')}g protein
+                            {t('foodSearchPage.labels.proteinValue', { value: referenceValue('protein') })}
                           </span>
-                          <span style={{ fontSize: 10, color: '#aaa', alignSelf: 'center' }}>per {referenceLabel}</span>
+                          <span style={{ fontSize: 10, color: '#aaa', alignSelf: 'center' }}>
+                            {t('foodSearchPage.labels.perReference', { reference: referenceLabel })}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -377,7 +391,9 @@ export default function FoodSearch() {
                       <button
                         className={`fs-fav-btn${isFavorite ? ' fs-fav-btn--active' : ''}`}
                         onClick={(event) => toggleFavorite(event, food)}
-                        aria-label={isFavorite ? `Remove ${food.name} from favorites` : `Add ${food.name} to favorites`}
+                        aria-label={isFavorite
+                          ? t('foodSearchPage.aria.removeFavorite', { name: food.name })
+                          : t('foodSearchPage.aria.addFavorite', { name: food.name })}
                       >
                         <span className="material-symbols-outlined" style={isFavorite ? { fontVariationSettings: "'FILL' 1" } : undefined}>
                           favorite
@@ -387,7 +403,7 @@ export default function FoodSearch() {
                         id={`fs-add-${food.id}`}
                         className="fs-add-btn"
                         onClick={e => { e.stopPropagation(); goToAddQuantity(food); }}
-                        aria-label={`Add ${food.name}`}
+                        aria-label={t('foodSearchPage.aria.addFood', { name: food.name })}
                       >
                         <span className="material-symbols-outlined">add</span>
                       </button>
@@ -403,11 +419,13 @@ export default function FoodSearch() {
         <section className="fs-custom-callout">
           <span className="material-symbols-outlined fs-custom-icon">inventory_2</span>
           <div>
-            <p className="fs-custom-title">{active === 'Custom' ? 'Add a custom food to your library' : "Can't find your food?"}</p>
+            <p className="fs-custom-title">
+              {active === 'custom' ? t('foodSearchPage.customCallout.customTitle') : t('foodSearchPage.customCallout.defaultTitle')}
+            </p>
             <p className="fs-custom-desc">
-              {active === 'Custom'
-                ? 'Create a reusable food entry and log it right away.'
-                : 'Create a unique entry for your macro tracking.'}
+              {active === 'custom'
+                ? t('foodSearchPage.customCallout.customDescription')
+                : t('foodSearchPage.customCallout.defaultDescription')}
             </p>
           </div>
           <button
@@ -420,7 +438,7 @@ export default function FoodSearch() {
               navigate(`/nutrition/custom-food?${params.toString()}`);
             }}
           >
-            Create Custom Food
+            {t('foodSearchPage.customCallout.action')}
           </button>
         </section>
       </main>

@@ -88,9 +88,9 @@ export const translations = {
     // fitness goals
     fitnessGoals: 'Objectifs',
     primaryObjective: 'Objectif principal',
-    lose: 'Perte',
+    lose: 'Perte de poids',
     maintain: 'Maintien',
-    gain: 'Gain',
+    gain: 'Prise de masse',
     targetWeightKg: 'Poids cible (KG)',
     activityLevel: "Niveau d'activité",
     sedentary: 'Sédentaire',
@@ -103,7 +103,7 @@ export const translations = {
     saveGoals: 'Enregistrer',
     recalculateTdee: 'Recalculer le TDEE',
     // tdee card
-    dailyTdee: 'Objectif TDEE',
+    dailyTdee: 'Objectif TDEE quotidien',
     kcal: 'kcal',
     protein: 'Protéines',
     carbs: 'Glucides',
@@ -113,7 +113,7 @@ export const translations = {
     // security
     security: 'Sécurité',
     securityDesc: 'Protection du compte et appareils actifs.',
-    twoFactorAuth: 'Auth. à deux facteurs',
+    twoFactorAuth: 'Authentification à deux facteurs',
     enabled: 'Activé',
     disabled: 'Désactivé',
     manage: 'Gérer',
@@ -123,7 +123,7 @@ export const translations = {
     viewAll: 'Voir tout',
     language: 'Langue',
     // legal
-    privacyPolicy: 'Confidentialité',
+    privacyPolicy: 'Politique de confidentialité',
     termsOfService: "Conditions d'utilisation",
     exportData: 'Exporter mes données',
     deleteAccount: 'Supprimer le compte',
@@ -154,9 +154,9 @@ export const translations = {
     // fitness goals
     fitnessGoals: 'الأهداف',
     primaryObjective: 'الهدف الرئيسي',
-    lose: 'خسارة',
-    maintain: 'حافظة',
-    gain: 'زيادة',
+    lose: 'خسارة الوزن',
+    maintain: 'الحفاظ على الوزن',
+    gain: 'زيادة الكتلة',
     targetWeightKg: 'الوزن المستهدف (كغ)',
     activityLevel: 'مستوى النشاط',
     sedentary: 'خامل',
@@ -170,7 +170,7 @@ export const translations = {
     recalculateTdee: 'إعادة حساب TDEE',
     // tdee card
     dailyTdee: 'هدف السعرات',
-    kcal: 'سعرة',
+    kcal: 'سعرة حرارية',
     protein: 'بروتين',
     carbs: 'كربوهيدرات',
     fat: 'دهون',

@@ -57,7 +57,7 @@ export default function AdminLayout() {
         <div
           className="adm-mobile-overlay adm-mobile-overlay--active"
           onClick={() => setMobileOpen(false)}
-          aria-label="Close menu"
+          aria-label={t('common.labels.closeMenu')}
           role="presentation"
         />
       )}
@@ -67,7 +67,7 @@ export default function AdminLayout() {
         className={`adm-sidenav${expanded ? ' adm-sidenav--open' : ''}${mobileOpen ? ' adm-sidenav--mobile-open' : ''}`}
         onMouseEnter={() => setExpanded(true)}
         onMouseLeave={() => setExpanded(false)}
-        aria-label="Admin navigation"
+        aria-label={t('common.labels.adminNavigation')}
       >
         <div className="adm-sidenav-logo">
           <div className="adm-sidenav-logo-icon">
@@ -119,7 +119,7 @@ export default function AdminLayout() {
               className="adm-hamburger"
               type="button"
               onClick={() => setMobileOpen(true)}
-              aria-label={t('common.labels.openMenu') || 'Open menu'}
+              aria-label={t('common.labels.openMenu')}
               aria-expanded={mobileOpen}
               aria-controls="adm-sidenav"
             >

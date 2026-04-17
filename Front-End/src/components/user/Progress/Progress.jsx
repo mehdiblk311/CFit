@@ -7,15 +7,10 @@ import {
   useStreaks,
   useWeeklySummary,
 } from '../../../hooks/queries/useAnalytics';
+import { getLocaleForLanguage, useI18n } from '../../../i18n/useI18n';
 import './Progress.css';
 
 /* ─── constants ─────────────────────────────────────────────────────── */
-
-const MONTH_NAMES = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-];
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 // Must match CSS: --cal-cell-size + --cal-gap
 const CELL_SIZE = 13;
@@ -42,12 +37,12 @@ function clampPercent(value) {
   return Math.min(Math.max(value ?? 0, 0), 100);
 }
 
-function prTypeLabel(type) {
+function prTypeLabel(type, t) {
   switch (type) {
-    case 'heaviest_set': return 'Heaviest Set';
-    case 'best_1rm':     return 'Best 1RM';
-    case 'best_volume':  return 'Best Volume';
-    case 'best_reps':    return 'Most Reps';
+    case 'heaviest_set': return t('progressPage.pr.types.heaviestSet');
+    case 'best_1rm':     return t('progressPage.pr.types.best1rm');
+    case 'best_volume':  return t('progressPage.pr.types.bestVolume');
+    case 'best_reps':    return t('progressPage.pr.types.bestReps');
     default:             return type;
   }
 }
@@ -74,7 +69,7 @@ function prAccent(type) {
 
 /* ─── Activity Calendar (heatmap) ────────────────────────────────────── */
 
-function ActivityCalendar({ data }) {
+function ActivityCalendar({ data, locale, dayNames, monthNames, t }) {
   const [hovered, setHovered] = useState(null);
 
   // Build last 15 weeks (105 days) ending today
@@ -106,11 +101,11 @@ function ActivityCalendar({ data }) {
       const d  = new Date(week[0].date + 'T12:00:00');
       const pd = wi > 0 ? new Date(weeks[wi - 1][0].date + 'T12:00:00') : null;
       if (!pd || pd.getMonth() !== d.getMonth()) {
-        labels.push({ label: MONTH_NAMES[d.getMonth()], weekIdx: wi });
+        labels.push({ label: monthNames[d.getMonth()], weekIdx: wi });
       }
     });
     return labels;
-  }, [weeks]);
+  }, [weeks, monthNames]);
 
   function intensity(activities) {
     const n = activities?.length ?? 0;
@@ -138,7 +133,7 @@ function ActivityCalendar({ data }) {
       <div className="prog-calendar-grid">
         {/* Day labels */}
         <div className="prog-calendar-daylabels">
-          {DAY_NAMES.map((d, i) => (
+          {dayNames.map((d, i) => (
             <span key={d} className="prog-calendar-daylabel">
               {i % 2 === 1 ? d[0] : ''}
             </span>
@@ -165,7 +160,7 @@ function ActivityCalendar({ data }) {
                     {hovered === cell && (
                       <div className="prog-cal-tooltip">
                         <span className="prog-cal-tooltip-date">
-                          {new Date(cell.date + 'T12:00:00').toLocaleDateString('en-US', {
+                          {new Date(cell.date + 'T12:00:00').toLocaleDateString(locale, {
                             month: 'short', day: 'numeric',
                           })}
                         </span>
@@ -175,7 +170,7 @@ function ActivityCalendar({ data }) {
                           </span>
                         ) : (
                           <span className="prog-cal-tooltip-acts prog-cal-tooltip-acts--empty">
-                            Rest day
+                            {t('progressPage.calendar.restDay')}
                           </span>
                         )}
                       </div>
@@ -189,11 +184,11 @@ function ActivityCalendar({ data }) {
       </div>
 
       <div className="prog-calendar-legend">
-        <span className="prog-legend-label">Less</span>
+        <span className="prog-legend-label">{t('progressPage.calendar.less')}</span>
         {[0, 1, 2, 3].map(lvl => (
           <div key={lvl} className={`prog-cal-cell prog-cal-cell--${lvl} prog-cal-cell--legend`} />
         ))}
-        <span className="prog-legend-label">More</span>
+        <span className="prog-legend-label">{t('progressPage.calendar.more')}</span>
       </div>
     </div>
   );
@@ -201,12 +196,12 @@ function ActivityCalendar({ data }) {
 
 /* ─── Mini Bar Chart (SVG) ────────────────────────────────────────────── */
 
-function MiniBarChart({ data, color = 'oklch(0.44 0.15 140)', height = 88, barWidth = 26, gap = 8 }) {
+function MiniBarChart({ data, t, color = 'oklch(0.44 0.15 140)', height = 88, barWidth = 26, gap = 8 }) {
   if (!data || data.length === 0) {
     return (
       <div className="prog-chart-empty">
         <span className="material-symbols-outlined">bar_chart</span>
-        <span>No data yet</span>
+        <span>{t('progressPage.charts.noData')}</span>
       </div>
     );
   }
@@ -242,12 +237,12 @@ function MiniBarChart({ data, color = 'oklch(0.44 0.15 140)', height = 88, barWi
 
 /* ─── Mini Line Chart (SVG) ──────────────────────────────────────────── */
 
-function MiniLineChart({ data, color = 'oklch(0.44 0.15 140)', height = 88 }) {
+function MiniLineChart({ data, t, color = 'oklch(0.44 0.15 140)', height = 88 }) {
   if (!data || data.length < 2) {
     return (
       <div className="prog-chart-empty">
         <span className="material-symbols-outlined">show_chart</span>
-        <span>Not enough data</span>
+        <span>{t('progressPage.charts.notEnoughData')}</span>
       </div>
     );
   }
@@ -299,6 +294,8 @@ function MiniLineChart({ data, color = 'oklch(0.44 0.15 140)', height = 88 }) {
 
 export default function Progress({ embedded = false }) {
   const navigate  = useNavigate();
+  const { t, language } = useI18n();
+  const locale = getLocaleForLanguage(language);
   const [prFilter, setPrFilter] = useState('all');
 
   const today         = new Date();
@@ -311,8 +308,11 @@ export default function Progress({ embedded = false }) {
   const { data: streaksData,  isLoading: streaksLoading  } = useStreaks();
   const { data: weeklyData,   isLoading: weeklyLoading   } = useWeeklySummary();
 
-  const records  = recordsData?.records || recordsData?.data || (Array.isArray(recordsData) ? recordsData : []);
-  const stats    = statsData || {};
+  const records = useMemo(
+    () => recordsData?.records || recordsData?.data || (Array.isArray(recordsData) ? recordsData : []),
+    [recordsData]
+  );
+  const stats = useMemo(() => statsData || {}, [statsData]);
   const streaks  = streaksData?.streaks || {};
   const adherence = streaksData?.adherence_summary || {};
 
@@ -333,7 +333,7 @@ export default function Progress({ embedded = false }) {
     if (!weeklyData) return [];
     if (Array.isArray(weeklyData.daily_breakdown) && weeklyData.daily_breakdown.length > 0) {
       return weeklyData.daily_breakdown.map(d => ({
-        label: new Date(d.date).toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 2),
+        label: new Date(d.date).toLocaleDateString(locale, { weekday: 'short' }).slice(0, 2),
         value: d.workouts || d.calories || 0,
       }));
     }
@@ -354,16 +354,25 @@ export default function Progress({ embedded = false }) {
       },
     ];
     return totals.some(p => p.value > 0) ? totals : [];
-  }, [weeklyData]);
+  }, [weeklyData, locale]);
 
   const isLoading = recordsLoading || statsLoading || calendarLoading || streaksLoading || weeklyLoading;
 
+  const dayNames = useMemo(
+    () => Array.from({ length: 7 }, (_, i) => new Date(2024, 0, 7 + i).toLocaleDateString(locale, { weekday: 'short' })),
+    [locale]
+  );
+  const monthNames = useMemo(
+    () => Array.from({ length: 12 }, (_, i) => new Date(2024, i, 1).toLocaleDateString(locale, { month: 'short' })),
+    [locale]
+  );
+
   const PR_FILTERS = [
-    { key: 'all',         label: 'All'    },
-    { key: 'heaviest_set', label: 'Weight' },
-    { key: 'best_1rm',    label: '1RM'    },
-    { key: 'best_volume', label: 'Volume' },
-    { key: 'best_reps',   label: 'Reps'   },
+    { key: 'all',         label: t('progressPage.filters.all') },
+    { key: 'heaviest_set', label: t('progressPage.filters.weight') },
+    { key: 'best_1rm',    label: t('progressPage.filters.oneRm') },
+    { key: 'best_volume', label: t('progressPage.filters.volume') },
+    { key: 'best_reps',   label: t('progressPage.filters.reps') },
   ];
 
   return (
@@ -371,18 +380,18 @@ export default function Progress({ embedded = false }) {
       {/* ── Header ── */}
       <header className="prog-header">
         {!embedded && (
-          <button className="prog-back-btn" onClick={() => navigate('/dashboard')} aria-label="Back">
+          <button className="prog-back-btn" onClick={() => navigate('/dashboard')} aria-label={t('common.actions.goBack')}>
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
         )}
         <div className="prog-header-text">
-          <h1 className="prog-title">Progress</h1>
-          <p className="prog-subtitle">Your effort, visualized</p>
+          <h1 className="prog-title">{t('progressPage.title')}</h1>
+          <p className="prog-subtitle">{t('progressPage.subtitle')}</p>
         </div>
         <div className="prog-header-actions">
           <button className="prog-motivate-btn" onClick={() => navigate('/dashboard#dashboard-leaderboard')}>
             <span className="material-symbols-outlined">emoji_events</span>
-            <span>Motivation</span>
+            <span>{t('progressPage.actions.motivation')}</span>
           </button>
         </div>
       </header>
@@ -390,20 +399,20 @@ export default function Progress({ embedded = false }) {
       {isLoading ? (
         <div className="prog-loading">
           <div className="prog-spinner" />
-          <span>Loading your progress…</span>
+          <span>{t('progressPage.loading')}</span>
         </div>
       ) : (
         <main className="prog-main">
 
           {/* ── Streaks & Consistency ── */}
           <section className="prog-section">
-            <span className="prog-section-label">Streaks & Consistency</span>
+            <span className="prog-section-label">{t('progressPage.sections.streaks')}</span>
 
             <div className="prog-streaks-row">
               {[
-                { icon: 'fitness_center',  val: streaks.workout_streak ?? 0,  unit: 'wk',  color: 'green',  label: 'Workout'   },
-                { icon: 'restaurant',      val: streaks.meal_streak ?? 0,     unit: 'day', color: 'purple', label: 'Nutrition' },
-                { icon: 'monitor_weight',  val: streaks.weigh_in_streak ?? 0, unit: 'day', color: 'amber',  label: 'Weigh-in'  },
+                { icon: 'fitness_center',  val: streaks.workout_streak ?? 0,  unit: t('progressPage.units.week'), color: 'green',  label: t('progressPage.labels.workout') },
+                { icon: 'restaurant',      val: streaks.meal_streak ?? 0,     unit: t('progressPage.units.day'), color: 'purple', label: t('progressPage.labels.nutrition') },
+                { icon: 'monitor_weight',  val: streaks.weigh_in_streak ?? 0, unit: t('progressPage.units.day'), color: 'amber',  label: t('progressPage.labels.weighIn') },
               ].map((s, i) => (
                 <div key={i} className={`prog-streak-col prog-streak-col--${s.color}`}>
                   <div className="prog-streak-icon-wrap">
@@ -419,11 +428,11 @@ export default function Progress({ embedded = false }) {
             </div>
 
             <div className="prog-adherence-block">
-              <span className="prog-adherence-title">Adherence</span>
+              <span className="prog-adherence-title">{t('progressPage.sections.adherence')}</span>
               {[
-                { label: '7 days',  val: adherence.days_7  },
-                { label: '30 days', val: adherence.days_30 },
-                { label: '90 days', val: adherence.days_90 },
+                { label: t('progressPage.labels.days7'),  val: adherence.days_7  },
+                { label: t('progressPage.labels.days30'), val: adherence.days_30 },
+                { label: t('progressPage.labels.days90'), val: adherence.days_90 },
               ].map(a => (
                 <div key={a.label} className="prog-adherence-row">
                   <span className="prog-adherence-label">{a.label}</span>
@@ -443,19 +452,19 @@ export default function Progress({ embedded = false }) {
 
           {/* ── Activity Calendar ── */}
           <section className="prog-section">
-            <span className="prog-section-label">Activity Calendar</span>
-            <ActivityCalendar data={calendarData} />
+            <span className="prog-section-label">{t('progressPage.sections.activityCalendar')}</span>
+            <ActivityCalendar data={calendarData} locale={locale} dayNames={dayNames} monthNames={monthNames} t={t} />
           </section>
 
           {/* ── Workout Stats ── */}
           <section className="prog-section">
-            <span className="prog-section-label">Workout Stats</span>
+            <span className="prog-section-label">{t('progressPage.sections.workoutStats')}</span>
             <div className="prog-stats-grid">
               {[
-                { val: fmtNum(stats.total_workouts),          desc: 'Total Workouts' },
-                { val: fmtDuration(stats.avg_workout_duration), desc: 'Avg Duration'   },
-                { val: fmtNum(stats.total_volume),            desc: 'Total Volume kg' },
-                { val: fmtNum(stats.total_sets),              desc: 'Total Sets'      },
+                { val: fmtNum(stats.total_workouts),          desc: t('progressPage.stats.totalWorkouts') },
+                { val: fmtDuration(stats.avg_workout_duration), desc: t('progressPage.stats.avgDuration') },
+                { val: fmtNum(stats.total_volume),            desc: t('progressPage.stats.totalVolume') },
+                { val: fmtNum(stats.total_sets),              desc: t('progressPage.stats.totalSets') },
               ].map((s, i) => (
                 <div key={i} className="prog-stat-tile">
                   <span className="prog-stat-val">{s.val}</span>
@@ -465,8 +474,8 @@ export default function Progress({ embedded = false }) {
             </div>
             {typeBreakdown.length > 0 && (
               <div className="prog-chart-block">
-                <span className="prog-mini-label">By type</span>
-                <MiniBarChart data={typeBreakdown} color="oklch(0.44 0.15 140)" />
+                <span className="prog-mini-label">{t('progressPage.labels.byType')}</span>
+                <MiniBarChart data={typeBreakdown} t={t} color="oklch(0.44 0.15 140)" />
               </div>
             )}
           </section>
@@ -474,7 +483,7 @@ export default function Progress({ embedded = false }) {
           {/* ── Personal Records ── */}
           <section className="prog-section">
             <div className="prog-prs-head">
-              <span className="prog-section-label">Personal Records</span>
+              <span className="prog-section-label">{t('progressPage.sections.personalRecords')}</span>
               <div className="prog-pr-filters">
                 {PR_FILTERS.map(f => (
                   <button
@@ -491,8 +500,8 @@ export default function Progress({ embedded = false }) {
             {filteredRecords.length === 0 ? (
               <div className="prog-empty">
                 <span className="material-symbols-outlined prog-empty-icon">workspace_premium</span>
-                <p className="prog-empty-title">No records yet</p>
-                <span className="prog-empty-hint">Start logging workouts to see your PRs here!</span>
+                <p className="prog-empty-title">{t('progressPage.empty.noRecords')}</p>
+                <span className="prog-empty-hint">{t('progressPage.empty.noRecordsHint')}</span>
               </div>
             ) : (
               <div className="prog-pr-list">
@@ -507,11 +516,11 @@ export default function Progress({ embedded = false }) {
                     <div className="prog-pr-body">
                       <span className="prog-pr-exercise">{pr.exercise_name}</span>
                       <span className="prog-pr-meta">
-                        {prTypeLabel(pr.type)}
+                        {prTypeLabel(pr.type, t)}
                         {pr.date && (
                           <>
                             {' · '}
-                            {new Date(pr.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            {new Date(pr.date).toLocaleDateString(locale, { month: 'short', day: 'numeric' })}
                           </>
                         )}
                       </span>
@@ -519,9 +528,9 @@ export default function Progress({ embedded = false }) {
                     <div className="prog-pr-value">
                       <span className="prog-pr-num">{fmtNum(pr.value)}</span>
                       {pr.type === 'best_reps' ? (
-                        <span className="prog-pr-unit">reps</span>
+                        <span className="prog-pr-unit">{t('progressPage.units.reps')}</span>
                       ) : (
-                        <span className="prog-pr-unit">kg</span>
+                        <span className="prog-pr-unit">{t('common.units.kg')}</span>
                       )}
                     </div>
                   </div>
@@ -532,17 +541,17 @@ export default function Progress({ embedded = false }) {
 
           {/* ── Weekly Trends ── */}
           <section className="prog-section">
-            <span className="prog-section-label">Weekly Trends</span>
+            <span className="prog-section-label">{t('progressPage.sections.weeklyTrends')}</span>
             {weeklyChart.length > 0 ? (
               <div className="prog-chart-block">
-                <span className="prog-mini-label">Weekly snapshot</span>
-                <MiniLineChart data={weeklyChart} color="oklch(0.44 0.15 140)" />
+                <span className="prog-mini-label">{t('progressPage.labels.weeklySnapshot')}</span>
+                <MiniLineChart data={weeklyChart} t={t} color="oklch(0.44 0.15 140)" />
               </div>
             ) : (
               <div className="prog-empty">
                 <span className="material-symbols-outlined prog-empty-icon">trending_up</span>
-                <p className="prog-empty-title">Trends will appear here</p>
-                <span className="prog-empty-hint">Keep logging to see your progress over time!</span>
+                <p className="prog-empty-title">{t('progressPage.empty.trendsTitle')}</p>
+                <span className="prog-empty-hint">{t('progressPage.empty.trendsHint')}</span>
               </div>
             )}
           </section>

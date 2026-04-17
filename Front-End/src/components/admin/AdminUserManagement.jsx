@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom';
 import { useState } from 'react';
 import { FormSelect, PillSelect } from './AdminExerciseLibrary';
+import { getLocaleForLanguage, useI18n } from '../../i18n/useI18n';
 import {
   useAdminUser,
   useAdminUsers,
@@ -18,30 +19,30 @@ const ROLE_CHIP = {
 };
 
 const STATUS_CHIP = {
-  active: { cls: 'adm-chip--green', label: 'ACTIVE' },
-  banned: { cls: 'adm-chip--red', label: 'BANNED' },
+  active: { cls: 'adm-chip--green', labelKey: 'admin.userManagement.status.active' },
+  banned: { cls: 'adm-chip--red', labelKey: 'admin.userManagement.status.banned' },
 };
 
 const GOAL_OPTIONS = [
-  { value: '', label: 'Not set' },
-  { value: 'build_muscle', label: 'Build Muscle' },
-  { value: 'lose_fat', label: 'Lose Fat' },
-  { value: 'maintain', label: 'Maintain' },
+  { value: '', labelKey: 'admin.userManagement.goals.notSet' },
+  { value: 'build_muscle', labelKey: 'admin.userManagement.goals.buildMuscle' },
+  { value: 'lose_fat', labelKey: 'admin.userManagement.goals.loseFat' },
+  { value: 'maintain', labelKey: 'admin.userManagement.goals.maintain' },
 ];
 
 const ACTIVITY_OPTIONS = [
-  { value: '', label: 'Not set' },
-  { value: 'sedentary', label: 'Sedentary' },
-  { value: 'lightly_active', label: 'Lightly Active' },
-  { value: 'moderately_active', label: 'Moderately Active' },
-  { value: 'active', label: 'Active' },
-  { value: 'very_active', label: 'Very Active' },
+  { value: '', labelKey: 'admin.userManagement.activity.notSet' },
+  { value: 'sedentary', labelKey: 'admin.userManagement.activity.sedentary' },
+  { value: 'lightly_active', labelKey: 'admin.userManagement.activity.lightlyActive' },
+  { value: 'moderately_active', labelKey: 'admin.userManagement.activity.moderatelyActive' },
+  { value: 'active', labelKey: 'admin.userManagement.activity.active' },
+  { value: 'very_active', labelKey: 'admin.userManagement.activity.veryActive' },
 ];
 
 const ROLE_OPTIONS = [
-  { value: 'user', label: 'User' },
-  { value: 'moderator', label: 'Moderator' },
-  { value: 'admin', label: 'Admin' },
+  { value: 'user', labelKey: 'admin.userManagement.roles.user' },
+  { value: 'moderator', labelKey: 'admin.userManagement.roles.moderator' },
+  { value: 'admin', labelKey: 'admin.userManagement.roles.admin' },
 ];
 
 const PAGE_SIZE = 20;
@@ -61,32 +62,28 @@ function normalizeRole(role) {
   return String(role || 'user').trim().toLowerCase();
 }
 
-function formatRole(role) {
-  return String(role || 'user').replace(/\b\w/g, (match) => match.toUpperCase());
-}
-
-function formatGoal(goal) {
-  if (!goal) return 'Not set';
+function formatGoal(goal, t) {
+  if (!goal) return t('admin.userManagement.goals.notSet');
   return String(goal).replaceAll('_', ' ').replace(/\b\w/g, (match) => match.toUpperCase());
 }
 
-function formatDate(value) {
-  if (!value) return 'N/A';
+function formatDate(value, locale, fallback) {
+  if (!value) return fallback;
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'N/A';
-  return new Intl.DateTimeFormat('en-US', {
+  if (Number.isNaN(date.getTime())) return fallback;
+  return new Intl.DateTimeFormat(locale, {
     month: 'short',
     day: '2-digit',
     year: 'numeric',
   }).format(date).toUpperCase();
 }
 
-function formatRelativeTime(value) {
-  if (!value) return 'N/A';
+function formatRelativeTime(value, language, fallback) {
+  if (!value) return fallback;
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'N/A';
+  if (Number.isNaN(date.getTime())) return fallback;
   const diffMinutes = Math.round((date.getTime() - Date.now()) / 60000);
-  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+  const rtf = new Intl.RelativeTimeFormat(language, { numeric: 'auto' });
   if (Math.abs(diffMinutes) < 60) return rtf.format(diffMinutes, 'minute');
   const diffHours = Math.round(diffMinutes / 60);
   if (Math.abs(diffHours) < 24) return rtf.format(diffHours, 'hour');
@@ -123,7 +120,7 @@ function buildUserSummary(items) {
   };
 }
 
-function UserModal({ userId, currentUserId, onClose, onSave, isSaving }) {
+function UserModal({ userId, currentUserId, onClose, onSave, isSaving, t, language, locale }) {
   const userQuery = useAdminUser(userId);
   const detail = userQuery.data?.item || {};
   const user = detail.user || null;
@@ -137,23 +134,23 @@ function UserModal({ userId, currentUserId, onClose, onSave, isSaving }) {
           <button className="adm-modal-close" onClick={onClose}>
             <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
           </button>
-          <h2 className="adm-modal-title">Edit User</h2>
+          <h2 className="adm-modal-title">{t('admin.userManagement.modal.editUserTitle')}</h2>
 
           {userQuery.isLoading && !user ? (
-            <p style={{ color: '#5b5c5a', marginTop: 0 }}>Loading user details...</p>
+            <p style={{ color: '#5b5c5a', marginTop: 0 }}>{t('admin.userManagement.modal.loadingDetails')}</p>
           ) : null}
           {userQuery.error && !user ? (
-            <p style={{ color: '#b02500', marginTop: 0 }}>We could not load this user’s details.</p>
+            <p style={{ color: '#b02500', marginTop: 0 }}>{t('admin.userManagement.modal.loadDetailsFailed')}</p>
           ) : null}
 
-          {user ? <UserModalForm key={user.id} user={user} stats={stats} isCurrentUser={isCurrentUser} onClose={onClose} onSave={onSave} isSaving={isSaving} /> : null}
+          {user ? <UserModalForm key={user.id} user={user} stats={stats} isCurrentUser={isCurrentUser} onClose={onClose} onSave={onSave} isSaving={isSaving} t={t} language={language} locale={locale} /> : null}
         </div>
       </div>
     </ModalPortal>
   );
 }
 
-function UserModalForm({ user, stats, isCurrentUser, onClose, onSave, isSaving }) {
+function UserModalForm({ user, stats, isCurrentUser, onClose, onSave, isSaving, t }) {
   const [form, setForm] = useState({
     name: user.name || '',
     email: user.email || '',
@@ -175,66 +172,79 @@ function UserModalForm({ user, stats, isCurrentUser, onClose, onSave, isSaving }
   return (
     <>
       <div style={{ display: 'flex', gap: 10, marginBottom: 18, flexWrap: 'wrap' }}>
-        <span className={`adm-chip ${ROLE_CHIP[normalizeRole(user.role)] || 'adm-chip--oat'}`}>{formatRole(user.role)}</span>
-        <span className={`adm-chip ${STATUS_CHIP[getUserStatus(user)]?.cls || 'adm-chip--oat'}`}>{STATUS_CHIP[getUserStatus(user)]?.label || 'UNKNOWN'}</span>
-        <span className="adm-chip adm-chip--oat">Workouts: {stats.workouts_count ?? 0}</span>
-        <span className="adm-chip adm-chip--oat">Meals: {stats.meals_count ?? 0}</span>
+        <span className={`adm-chip ${ROLE_CHIP[normalizeRole(user.role)] || 'adm-chip--oat'}`}>{t(`admin.userManagement.roles.${normalizeRole(user.role)}`)}</span>
+        <span className={`adm-chip ${STATUS_CHIP[getUserStatus(user)]?.cls || 'adm-chip--oat'}`}>{t(STATUS_CHIP[getUserStatus(user)]?.labelKey || 'admin.userManagement.status.unknown')}</span>
+        <span className="adm-chip adm-chip--oat">{t('admin.userManagement.modal.workoutsCount', { count: stats.workouts_count ?? 0 })}</span>
+        <span className="adm-chip adm-chip--oat">{t('admin.userManagement.modal.mealsCount', { count: stats.meals_count ?? 0 })}</span>
       </div>
 
       <div className="adm-grid-2">
         <div className="adm-form-field">
-          <label className="adm-form-label">Full Name</label>
-          <input className="adm-form-input" value={form.name} onChange={(event) => setField('name', event.target.value)} placeholder="John Doe" />
+          <label className="adm-form-label">{t('admin.userManagement.fields.fullName')}</label>
+          <input className="adm-form-input" value={form.name} onChange={(event) => setField('name', event.target.value)} placeholder={t('admin.userManagement.fields.fullNamePlaceholder')} />
         </div>
         <div className="adm-form-field">
-          <label className="adm-form-label">Email Address</label>
-          <input className="adm-form-input" type="email" value={form.email} onChange={(event) => setField('email', event.target.value)} placeholder="john@example.com" />
-        </div>
-      </div>
-
-      <div className="adm-grid-2">
-        <div className="adm-form-field">
-          <label className="adm-form-label">Role</label>
-          <FormSelect value={form.role} onChange={(value) => setField('role', value)} options={ROLE_OPTIONS} disabled={isCurrentUser} />
-        </div>
-        <div className="adm-form-field">
-          <label className="adm-form-label">Goal</label>
-          <FormSelect value={form.goal} onChange={(value) => setField('goal', value)} options={GOAL_OPTIONS} />
+          <label className="adm-form-label">{t('admin.userManagement.fields.email')}</label>
+          <input className="adm-form-input" type="email" value={form.email} onChange={(event) => setField('email', event.target.value)} placeholder={t('admin.userManagement.fields.emailPlaceholder')} />
         </div>
       </div>
 
       <div className="adm-grid-2">
         <div className="adm-form-field">
-          <label className="adm-form-label">Activity Level</label>
-          <FormSelect value={form.activity_level} onChange={(value) => setField('activity_level', value)} options={ACTIVITY_OPTIONS} />
+          <label className="adm-form-label">{t('admin.userManagement.fields.role')}</label>
+          <FormSelect
+            value={form.role}
+            onChange={(value) => setField('role', value)}
+            options={ROLE_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))}
+            disabled={isCurrentUser}
+          />
         </div>
         <div className="adm-form-field">
-          <label className="adm-form-label">Avatar URL</label>
-          <input className="adm-form-input" value={form.avatar} onChange={(event) => setField('avatar', event.target.value)} placeholder="https://..." />
+          <label className="adm-form-label">{t('admin.userManagement.fields.goal')}</label>
+          <FormSelect
+            value={form.goal}
+            onChange={(value) => setField('goal', value)}
+            options={GOAL_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))}
+          />
+        </div>
+      </div>
+
+      <div className="adm-grid-2">
+        <div className="adm-form-field">
+          <label className="adm-form-label">{t('admin.userManagement.fields.activityLevel')}</label>
+          <FormSelect
+            value={form.activity_level}
+            onChange={(value) => setField('activity_level', value)}
+            options={ACTIVITY_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))}
+          />
+        </div>
+        <div className="adm-form-field">
+          <label className="adm-form-label">{t('admin.userManagement.fields.avatarUrl')}</label>
+          <input className="adm-form-input" value={form.avatar} onChange={(event) => setField('avatar', event.target.value)} placeholder={t('admin.userManagement.fields.avatarPlaceholder')} />
         </div>
       </div>
 
       {isBanned(user) ? (
         <div className="adm-form-field">
-          <label className="adm-form-label">Ban Reason</label>
+          <label className="adm-form-label">{t('admin.userManagement.fields.banReason')}</label>
           <div className="adm-card" style={{ padding: 14, boxShadow: 'none' }}>
-            <p style={{ margin: 0, color: '#5b5c5a' }}>{user.ban_reason || 'No reason provided.'}</p>
+            <p style={{ margin: 0, color: '#5b5c5a' }}>{user.ban_reason || t('admin.userManagement.fields.noReason')}</p>
           </div>
         </div>
       ) : null}
 
       <div className="adm-form-actions">
-        <button className="adm-btn-ghost" onClick={onClose}>Cancel</button>
+        <button className="adm-btn-ghost" onClick={onClose}>{t('common.actions.close')}</button>
         <button className="adm-btn-primary" onClick={handleSave} disabled={isSaving || !user}>
           <span className="material-symbols-outlined" style={{ fontSize: 16 }}>save</span>
-          {isSaving ? 'Saving...' : 'Save Changes'}
+          {isSaving ? t('settings.saving') : t('admin.userManagement.actions.saveChanges')}
         </button>
       </div>
     </>
   );
 }
 
-function BanUserModal({ user, onClose, onConfirm, isSubmitting }) {
+function BanUserModal({ user, onClose, onConfirm, isSubmitting, t }) {
   const [reason, setReason] = useState(user?.ban_reason || '');
   const isUserBanned = isBanned(user);
 
@@ -245,21 +255,21 @@ function BanUserModal({ user, onClose, onConfirm, isSubmitting }) {
           <button className="adm-modal-close" onClick={onClose}>
             <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
           </button>
-          <h2 className="adm-modal-title">{isUserBanned ? 'Unban User' : 'Ban User'}</h2>
+          <h2 className="adm-modal-title">{isUserBanned ? t('admin.userManagement.actions.unbanUser') : t('admin.userManagement.actions.banUser')}</h2>
           <p style={{ color: '#5b5c5a', lineHeight: 1.6 }}>
             {isUserBanned
-              ? `Restore ${user?.name || 'this user'} so they can log in and use the platform again.`
-              : `Ban ${user?.name || 'this user'} to force logout and block access immediately.`}
+              ? t('admin.userManagement.modal.unbanDescription', { name: user?.name || t('admin.userManagement.labels.thisUser') })
+              : t('admin.userManagement.modal.banDescription', { name: user?.name || t('admin.userManagement.labels.thisUser') })}
           </p>
 
           {!isUserBanned ? (
             <div className="adm-form-field">
-              <label className="adm-form-label">Reason</label>
+              <label className="adm-form-label">{t('admin.userManagement.fields.reason')}</label>
               <textarea
                 className="adm-form-input"
                 value={reason}
                 onChange={(event) => setReason(event.target.value)}
-                placeholder="Explain why this account is being banned..."
+                placeholder={t('admin.userManagement.fields.reasonPlaceholder')}
                 rows={4}
                 style={{ borderRadius: 18, resize: 'vertical', minHeight: 108, paddingTop: 14 }}
               />
@@ -267,7 +277,7 @@ function BanUserModal({ user, onClose, onConfirm, isSubmitting }) {
           ) : null}
 
           <div className="adm-form-actions">
-            <button className="adm-btn-ghost" onClick={onClose}>Cancel</button>
+            <button className="adm-btn-ghost" onClick={onClose}>{t('common.actions.close')}</button>
             <button
               className="adm-btn-primary"
               style={isUserBanned ? undefined : { background: '#b02500', boxShadow: '-4px 4px 0 #2e2f2e' }}
@@ -277,7 +287,7 @@ function BanUserModal({ user, onClose, onConfirm, isSubmitting }) {
               <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
                 {isUserBanned ? 'verified_user' : 'block'}
               </span>
-              {isSubmitting ? 'Saving...' : isUserBanned ? 'Unban User' : 'Ban User'}
+              {isSubmitting ? t('settings.saving') : isUserBanned ? t('admin.userManagement.actions.unbanUser') : t('admin.userManagement.actions.banUser')}
             </button>
           </div>
         </div>
@@ -286,18 +296,18 @@ function BanUserModal({ user, onClose, onConfirm, isSubmitting }) {
   );
 }
 
-function DeleteConfirm({ user, onClose, onConfirm, isDeleting }) {
+function DeleteConfirm({ user, onClose, onConfirm, isDeleting, t }) {
   return (
     <ModalPortal>
       <div className="adm-modal-overlay" onClick={(event) => event.target === event.currentTarget && onClose()}>
         <div className="adm-modal" style={{ maxWidth: 420, textAlign: 'center' }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>🗑️</div>
-          <h2 className="adm-modal-title">Delete User?</h2>
+          <h2 className="adm-modal-title">{t('admin.userManagement.modal.deleteUserTitle')}</h2>
           <p style={{ color: '#5b5c5a', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
-            This sends the real destructive delete request for <strong>{user?.name}</strong> with backend confirmation enabled.
+            {t('admin.userManagement.modal.deleteUserBody', { name: user?.name || t('admin.userManagement.labels.thisUser') })}
           </p>
           <div className="adm-form-actions" style={{ justifyContent: 'center' }}>
-            <button className="adm-btn-ghost" onClick={onClose}>Cancel</button>
+            <button className="adm-btn-ghost" onClick={onClose}>{t('common.actions.close')}</button>
             <button
               className="adm-btn-primary"
               style={{ background: '#b02500', boxShadow: '-4px 4px 0 #2e2f2e' }}
@@ -305,7 +315,7 @@ function DeleteConfirm({ user, onClose, onConfirm, isDeleting }) {
               disabled={isDeleting}
             >
               <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete_forever</span>
-              {isDeleting ? 'Deleting...' : 'Delete User'}
+              {isDeleting ? t('admin.userManagement.actions.deleting') : t('admin.userManagement.actions.deleteUser')}
             </button>
           </div>
         </div>
@@ -315,6 +325,8 @@ function DeleteConfirm({ user, onClose, onConfirm, isDeleting }) {
 }
 
 export default function AdminUserManagement() {
+  const { t, language } = useI18n();
+  const locale = getLocaleForLanguage(language);
   const currentUserId = authStore((state) => state.user?.id);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
@@ -399,9 +411,13 @@ export default function AdminUserManagement() {
       <div className="adm-page-header">
         <div>
           <div className="adm-sticker adm-sticker--purple adm-sticker--rotate-l" style={{ marginBottom: 12 }}>
-            DIRECTORY_V.3.0
+            {t('admin.userManagement.header.eyebrow')}
           </div>
-          <h1 className="adm-page-title">User<br />Management</h1>
+          <h1 className="adm-page-title">
+            {t('admin.userManagement.header.titleLine1')}
+            <br />
+            {t('admin.userManagement.header.titleLine2')}
+          </h1>
         </div>
         <div className="adm-page-actions">
           <div className="adm-search-wrap">
@@ -409,7 +425,7 @@ export default function AdminUserManagement() {
             <input
               className="adm-search"
               type="text"
-              placeholder="Search name or email"
+              placeholder={t('admin.userManagement.search.placeholder')}
               value={search}
               onChange={(event) => {
                 setSearch(event.target.value);
@@ -424,10 +440,10 @@ export default function AdminUserManagement() {
               setPage(1);
             }}
             options={[
-              { value: 'ALL', label: 'Role: All' },
-              { value: 'ADMIN', label: 'Admin' },
-              { value: 'MODERATOR', label: 'Moderator' },
-              { value: 'USER', label: 'User' },
+              { value: 'ALL', label: t('admin.userManagement.filters.roleAll') },
+              { value: 'ADMIN', label: t('admin.userManagement.roles.admin') },
+              { value: 'MODERATOR', label: t('admin.userManagement.roles.moderator') },
+              { value: 'USER', label: t('admin.userManagement.roles.user') },
             ]}
           />
           <PillSelect
@@ -437,50 +453,50 @@ export default function AdminUserManagement() {
               setPage(1);
             }}
             options={[
-              { value: 'ALL', label: 'Status: All' },
-              { value: 'ACTIVE', label: 'Active' },
-              { value: 'BANNED', label: 'Banned' },
+              { value: 'ALL', label: t('admin.userManagement.filters.statusAll') },
+              { value: 'ACTIVE', label: t('admin.userManagement.status.active') },
+              { value: 'BANNED', label: t('admin.userManagement.status.banned') },
             ]}
           />
         </div>
       </div>
 
       <div style={{ display: 'flex', gap: 10, marginBottom: 24, flexWrap: 'wrap' }}>
-        <span className="adm-chip adm-chip--oat">Loaded: {summary.total}</span>
-        <span className="adm-chip adm-chip--green">Active: {summary.active}</span>
-        <span className="adm-chip adm-chip--red">Banned: {summary.banned}</span>
-        <span className="adm-chip adm-chip--purple">Moderators: {summary.moderators}</span>
-        <span className="adm-chip adm-chip--green">Admins: {summary.admins}</span>
+        <span className="adm-chip adm-chip--oat">{t('admin.userManagement.summary.loaded', { count: summary.total })}</span>
+        <span className="adm-chip adm-chip--green">{t('admin.userManagement.summary.active', { count: summary.active })}</span>
+        <span className="adm-chip adm-chip--red">{t('admin.userManagement.summary.banned', { count: summary.banned })}</span>
+        <span className="adm-chip adm-chip--purple">{t('admin.userManagement.summary.moderators', { count: summary.moderators })}</span>
+        <span className="adm-chip adm-chip--green">{t('admin.userManagement.summary.admins', { count: summary.admins })}</span>
       </div>
 
       <div className="adm-table-wrap">
         {usersQuery.isLoading && !users.length ? (
           <div className="adm-empty">
             <span className="adm-empty-icon material-symbols-outlined">hourglass_top</span>
-            <p className="adm-empty-text">Loading users...</p>
+            <p className="adm-empty-text">{t('admin.userManagement.states.loadingUsers')}</p>
           </div>
         ) : usersQuery.error && !users.length ? (
           <div className="adm-empty">
             <span className="adm-empty-icon material-symbols-outlined">cloud_off</span>
-            <p className="adm-empty-text">We could not load users from the backend.</p>
+            <p className="adm-empty-text">{t('admin.userManagement.states.loadFailed')}</p>
           </div>
         ) : !users.length ? (
           <div className="adm-empty">
             <span className="adm-empty-icon material-symbols-outlined">search_off</span>
-            <p className="adm-empty-text">No users match these filters.</p>
+            <p className="adm-empty-text">{t('admin.userManagement.states.noMatch')}</p>
           </div>
         ) : (
           <table className="adm-table">
             <thead>
               <tr>
-                <th>User</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Goal</th>
-                <th>Joined</th>
-                <th>Updated</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th>{t('admin.userManagement.table.user')}</th>
+                <th>{t('admin.userManagement.table.email')}</th>
+                <th>{t('admin.userManagement.table.role')}</th>
+                <th>{t('admin.userManagement.table.status')}</th>
+                <th>{t('admin.userManagement.table.goal')}</th>
+                <th>{t('admin.userManagement.table.joined')}</th>
+                <th>{t('admin.userManagement.table.updated')}</th>
+                <th style={{ textAlign: 'right' }}>{t('admin.userManagement.table.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -516,31 +532,31 @@ export default function AdminUserManagement() {
                           {user.avatar ? '' : getInitials(user.name)}
                         </div>
                         <div>
-                          <p style={{ fontWeight: 700, fontSize: 13, color: '#2e2f2e', margin: 0 }}>{user.name || 'Unnamed user'}</p>
+                          <p style={{ fontWeight: 700, fontSize: 13, color: '#2e2f2e', margin: 0 }}>{user.name || t('admin.userManagement.labels.unnamedUser')}</p>
                           <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#767775', letterSpacing: '0.5px', margin: '2px 0 0' }}>
                             {String(user.id).slice(0, 8)}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="adm-td-mono">{user.email || 'N/A'}</td>
-                    <td><span className={`adm-chip ${ROLE_CHIP[role] || 'adm-chip--oat'}`}>{formatRole(role)}</span></td>
-                    <td><span className={`adm-chip ${STATUS_CHIP[status]?.cls || 'adm-chip--oat'}`}>{STATUS_CHIP[status]?.label || 'UNKNOWN'}</span></td>
-                    <td><span className="adm-chip adm-chip--oat">{formatGoal(user.goal)}</span></td>
-                    <td className="adm-td-mono">{formatDate(user.created_at)}</td>
-                    <td className="adm-td-mono">{formatRelativeTime(user.updated_at)}</td>
+                    <td className="adm-td-mono">{user.email || t('admin.userManagement.labels.notAvailable')}</td>
+                    <td><span className={`adm-chip ${ROLE_CHIP[role] || 'adm-chip--oat'}`}>{t(`admin.userManagement.roles.${role}`)}</span></td>
+                    <td><span className={`adm-chip ${STATUS_CHIP[status]?.cls || 'adm-chip--oat'}`}>{t(STATUS_CHIP[status]?.labelKey || 'admin.userManagement.status.unknown')}</span></td>
+                    <td><span className="adm-chip adm-chip--oat">{formatGoal(user.goal, t)}</span></td>
+                    <td className="adm-td-mono">{formatDate(user.created_at, locale, t('admin.userManagement.labels.notAvailable'))}</td>
+                    <td className="adm-td-mono">{formatRelativeTime(user.updated_at, language, t('admin.userManagement.labels.notAvailable'))}</td>
                     <td>
                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
                         <button
                           className="adm-icon-btn adm-icon-btn--edit"
-                          title="Edit user"
+                          title={t('admin.userManagement.actions.editUser')}
                           onClick={() => setSelectedUserId(user.id)}
                         >
                           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>edit_note</span>
                         </button>
                         <button
                           className="adm-icon-btn"
-                          title={status === 'banned' ? 'Unban user' : 'Ban user'}
+                          title={status === 'banned' ? t('admin.userManagement.actions.unbanUser') : t('admin.userManagement.actions.banUser')}
                           onClick={() => setBanTarget(user)}
                           disabled={isCurrentUser}
                           style={status === 'banned' ? { color: '#38671a' } : { color: '#b02500' }}
@@ -551,7 +567,7 @@ export default function AdminUserManagement() {
                         </button>
                         <button
                           className="adm-icon-btn adm-icon-btn--danger"
-                          title="Delete user"
+                          title={t('admin.userManagement.actions.deleteUser')}
                           onClick={() => setDeleteTarget(user)}
                           disabled={isCurrentUser}
                         >
@@ -569,19 +585,21 @@ export default function AdminUserManagement() {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, flexWrap: 'wrap', gap: 8 }}>
         <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '1px', color: '#767775', margin: 0 }}>
-          SHOWING {users.length} USERS
-          {metadata?.total_count ? ` OF ${metadata.total_count}` : ''}
-          {metadata?.page ? ` • PAGE ${metadata.page}` : ''}
+          {t('admin.userManagement.pagination.showing', {
+            loaded: users.length,
+            total: metadata?.total_count || users.length,
+            page: metadata?.page || page,
+          })}
         </p>
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="adm-btn-ghost" style={{ padding: '8px 14px', fontSize: 11 }} onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={!metadata?.page || metadata.page <= 1}>
-            Previous
+            {t('admin.userManagement.pagination.previous')}
           </button>
           <button className="adm-btn-primary" style={{ padding: '8px 14px', fontSize: 11 }}>
             {metadata?.page || page}
           </button>
           <button className="adm-btn-ghost" style={{ padding: '8px 14px', fontSize: 11 }} onClick={() => setPage((current) => current + 1)} disabled={!metadata?.has_next}>
-            Next
+            {t('admin.userManagement.pagination.next')}
           </button>
         </div>
       </div>
@@ -593,6 +611,9 @@ export default function AdminUserManagement() {
           onClose={() => setSelectedUserId(null)}
           onSave={handleSaveUser}
           isSaving={updateUser.isPending}
+          t={t}
+          language={language}
+          locale={locale}
         />
       ) : null}
 
@@ -602,6 +623,7 @@ export default function AdminUserManagement() {
           onClose={() => setBanTarget(null)}
           onConfirm={handleBanToggle}
           isSubmitting={banUser.isPending || unbanUser.isPending}
+          t={t}
         />
       ) : null}
 
@@ -611,6 +633,7 @@ export default function AdminUserManagement() {
           onClose={() => setDeleteTarget(null)}
           onConfirm={handleDeleteUser}
           isDeleting={deleteUser.isPending}
+          t={t}
         />
       ) : null}
     </div>
