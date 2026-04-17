@@ -99,6 +99,7 @@ export function useBanUser() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'users', user_id] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'logs'] });
     },
   });
 }
@@ -112,6 +113,7 @@ export function useUnbanUser() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'users', user_id] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'logs'] });
     },
   });
 }
@@ -124,6 +126,7 @@ export function useUpdateAdminUser() {
     onSuccess: (_, { user_id }) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users', user_id] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'logs'] });
     },
   });
 }
