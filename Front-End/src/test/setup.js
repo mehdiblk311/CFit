@@ -1,7 +1,5 @@
 import '@testing-library/jest-dom/vitest';
 import { afterAll, afterEach, beforeAll, beforeEach, vi } from 'vitest';
-import { workoutStore } from '../stores/workoutStore';
-import { uiStore } from '../stores/uiStore';
 import { server } from './msw/server';
 
 function createMemoryStorage() {
@@ -37,11 +35,21 @@ Object.defineProperty(window, 'sessionStorage', {
   configurable: true,
 });
 
+window.__CFIT_RUNTIME_CONFIG__ = {
+  VITE_API_BASE_URL: 'http://localhost:8080',
+};
+
+const { workoutStore } = await import('../stores/workoutStore');
+const { uiStore } = await import('../stores/uiStore');
+
 beforeAll(() => {
   server.listen({ onUnhandledRequest: 'error' });
 });
 
 beforeEach(() => {
+  window.__CFIT_RUNTIME_CONFIG__ = {
+    VITE_API_BASE_URL: 'http://localhost:8080',
+  };
   localStorage.clear();
   workoutStore.setState({
     activeWorkout: null,

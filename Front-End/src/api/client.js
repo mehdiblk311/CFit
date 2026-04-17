@@ -94,6 +94,10 @@ async function getFreshAccessTokenIfNeeded(currentToken, shouldSkipAuthHeader) {
   }
 }
 
+export async function ensureAccessToken(currentToken = authStore.getState().access_token) {
+  return getFreshAccessTokenIfNeeded(currentToken, false);
+}
+
 // Request interceptor: attach JWT token
 client.interceptors.request.use(
   async (config) => {
