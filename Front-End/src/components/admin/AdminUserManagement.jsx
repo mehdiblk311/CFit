@@ -159,13 +159,24 @@ function UserModalForm({ user, stats, isCurrentUser, onClose, onSave, isSaving, 
     activity_level: user.activity_level || '',
     avatar: user.avatar || '',
   });
+  const [errors, setErrors] = useState({});
 
   function setField(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
+    if (errors[key]) setErrors((prev) => ({ ...prev, [key]: '' }));
+  }
+
+  function validate() {
+    const next = {};
+    if (!form.name.trim()) next.name = t('admin.userManagement.errors.nameRequired');
+    if (!form.email.trim()) next.email = t('admin.userManagement.errors.emailRequired');
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) next.email = t('admin.userManagement.errors.emailInvalid');
+    setErrors(next);
+    return Object.keys(next).length === 0;
   }
 
   function handleSave() {
-    if (!form.name.trim() || !form.email.trim()) return;
+    if (!validate()) return;
     onSave(form);
   }
 
@@ -181,11 +192,26 @@ function UserModalForm({ user, stats, isCurrentUser, onClose, onSave, isSaving, 
       <div className="adm-grid-2">
         <div className="adm-form-field">
           <label className="adm-form-label">{t('admin.userManagement.fields.fullName')}</label>
-          <input className="adm-form-input" value={form.name} onChange={(event) => setField('name', event.target.value)} placeholder={t('admin.userManagement.fields.fullNamePlaceholder')} />
+          <input
+            className="adm-form-input"
+            value={form.name}
+            onChange={(event) => setField('name', event.target.value)}
+            placeholder={t('admin.userManagement.fields.fullNamePlaceholder')}
+            style={errors.name ? { borderColor: '#b02500' } : undefined}
+          />
+          {errors.name && <p style={{ margin: '4px 0 0', fontSize: 12, color: '#b02500' }}>{errors.name}</p>}
         </div>
         <div className="adm-form-field">
           <label className="adm-form-label">{t('admin.userManagement.fields.email')}</label>
-          <input className="adm-form-input" type="email" value={form.email} onChange={(event) => setField('email', event.target.value)} placeholder={t('admin.userManagement.fields.emailPlaceholder')} />
+          <input
+            className="adm-form-input"
+            type="email"
+            value={form.email}
+            onChange={(event) => setField('email', event.target.value)}
+            placeholder={t('admin.userManagement.fields.emailPlaceholder')}
+            style={errors.email ? { borderColor: '#b02500' } : undefined}
+          />
+          {errors.email && <p style={{ margin: '4px 0 0', fontSize: 12, color: '#b02500' }}>{errors.email}</p>}
         </div>
       </div>
 

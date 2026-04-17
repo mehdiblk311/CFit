@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { useI18n } from '../../i18n/useI18n';
+import { LANGUAGE_OPTIONS, useI18n } from '../../i18n/useI18n';
 import './Admin.css';
 
 const NAV_ITEMS = [
@@ -28,7 +28,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout, user } = useAuth();
-  const { t } = useI18n();
+  const { t, language, setLanguage } = useI18n();
   const [expanded, setExpanded] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -128,24 +128,38 @@ export default function AdminLayout() {
             <span className="adm-topbar-title">
               {activeItem?.label ?? t('admin.shell.title')}
             </span>
-            <div className="adm-topbar-search-wrap">
-              <span className="material-symbols-outlined adm-topbar-search-icon">search</span>
-              <input
-                className="adm-topbar-search"
-                type="text"
-                placeholder={t('common.labels.globalSearch')}
-                aria-label={t('common.labels.search')}
-              />
-            </div>
           </div>
           <div className="adm-topbar-right">
             <div className="adm-topbar-status">
               <span className="adm-topbar-status-dot" />
               <span className="adm-topbar-status-label">{t('common.labels.systemOnline')}</span>
             </div>
-            <button className="adm-topbar-notif" type="button" aria-label={t('common.labels.notifications')}>
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
+            <div style={{ display: 'flex', gap: 2 }}>
+              {LANGUAGE_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setLanguage(option.value)}
+                  title={t(option.titleKey)}
+                  aria-label={t(option.titleKey)}
+                  aria-pressed={language === option.value}
+                  style={{
+                    padding: '4px 8px',
+                    border: '2px solid #dad4c8',
+                    borderRadius: 9999,
+                    background: language === option.value ? '#38671a' : 'transparent',
+                    color: language === option.value ? '#d6ffb7' : '#5b5c5a',
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  {option.shortLabel}
+                </button>
+              ))}
+            </div>
             <button
               className="adm-topbar-logout"
               type="button"

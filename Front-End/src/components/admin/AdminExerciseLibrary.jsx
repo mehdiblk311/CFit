@@ -9,7 +9,6 @@ import {
   useUpdateExerciseMutation,
 } from '../../hooks/queries/useWorkouts';
 import { resolveExerciseImageUrl } from '../../utils/exerciseImages';
-import { uiStore } from '../../stores/uiStore';
 import { getLocaleForLanguage, useI18n } from '../../i18n/useI18n';
 
 const MUSCLE_GROUPS = ['ALL', 'CHEST', 'BACK', 'LEGS', 'SHOULDERS', 'ARMS', 'CORE', 'CARDIO'];
@@ -36,8 +35,6 @@ const CAT_LABEL = {
   CARDIO:    'admin.exerciseLibrary.labels.cardiovascular',
 };
 
-const INLINE_IMAGE_LIMIT = 500;
-
 // Muscle group → Unsplash fallback photo
 const MUSCLE_IMAGE = {
   CHEST:     'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=120&h=120&fit=crop&auto=format&q=80',
@@ -55,59 +52,6 @@ function getAdminExerciseImage(ex) {
   return MUSCLE_IMAGE[ex.muscle] || MUSCLE_IMAGE.CHEST;
 }
 
-async function readFileAsDataURL(file) {
-  return await new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || ''));
-    reader.onerror = () => reject(new Error('Could not read the selected file.'));
-    reader.readAsDataURL(file);
-  });
-}
-
-async function loadImageElement(src) {
-  return await new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error('The selected file is not a valid image.'));
-    image.src = src;
-  });
-}
-
-async function compressExerciseImageFile(file) {
-  const source = await readFileAsDataURL(file);
-  const image = await loadImageElement(source);
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
-
-  if (!context) {
-    throw new Error('Image compression is not available in this browser.');
-  }
-
-  let maxSide = 160;
-  let quality = 0.62;
-  while (maxSide >= 48) {
-    const ratio = Math.min(1, maxSide / Math.max(image.width, image.height));
-    canvas.width = Math.max(1, Math.round(image.width * ratio));
-    canvas.height = Math.max(1, Math.round(image.height * ratio));
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    context.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-    let nextQuality = quality;
-    while (nextQuality >= 0.18) {
-      const candidate = canvas.toDataURL('image/webp', nextQuality);
-      if (candidate.length <= INLINE_IMAGE_LIMIT) {
-        return candidate;
-      }
-      nextQuality -= 0.08;
-    }
-
-    maxSide -= 24;
-  }
-
-  throw new Error(
-    `This API currently stores image strings only. "${file.name}" is still too large after compression. Use a hosted image URL or a much smaller asset.`
-  );
-}
 
 function splitField(value) {
   if (!value) return [];
@@ -283,7 +227,7 @@ function ExerciseFilterModal({ initialFilters, muscleOptions, diffOptions, onApp
   }
 
   function clearAndApply() {
-    const cleared = { search: '', muscle: 'ALL', diff: 'ALL' };
+    const cleared = { search: local.search, muscle: 'ALL', diff: 'ALL' };
     onApply(cleared);
     onClose();
   }
@@ -296,20 +240,6 @@ function ExerciseFilterModal({ initialFilters, muscleOptions, diffOptions, onApp
             <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
           </button>
           <h2 className="adm-modal-title">{t('admin.exerciseLibrary.filterModal.title')}</h2>
-
-          <div className="adm-form-field">
-              <label className="adm-form-label">{t('common.labels.search')}</label>
-            <div className="adm-search-wrap">
-              <span className="material-symbols-outlined adm-search-icon">search</span>
-              <input
-                className="adm-search"
-                value={local.search}
-                onChange={(event) => setField('search', event.target.value)}
-                placeholder={t('admin.exerciseLibrary.search.placeholder')}
-                autoFocus
-              />
-            </div>
-          </div>
 
           <div className="adm-grid-2">
             <div className="adm-form-field">
@@ -485,26 +415,20 @@ function ExerciseModal({ exercise, onClose, onSave, t }) {
           instructions: '',
         }
   );
-  const [fileState, setFileState] = useState({ primary: '', alternate: '', error: '' });
-  function set(k, v) { setForm(f => ({ ...f, [k]: v })); }
+  const [errors, setErrors] = useState({});
 
-  async function handleImageImport(kind, file) {
-    if (!file) return;
+  function set(k, v) {
+    setForm(f => ({ ...f, [k]: v }));
+    if (errors[k]) setErrors(prev => ({ ...prev, [k]: '' }));
+  }
 
-    try {
-      const compactImage = await compressExerciseImageFile(file);
-      set(kind, compactImage);
-      setFileState((prev) => ({
-        ...prev,
-        [kind === 'imageUrl' ? 'primary' : 'alternate']: file.name,
-        error: '',
-      }));
-      uiStore.getState().addToast(t('admin.exerciseLibrary.toast.imported', { name: file.name }), 'success');
-    } catch (error) {
-      const message = error?.message || t('admin.exerciseLibrary.toast.importFailed');
-      setFileState((prev) => ({ ...prev, error: message }));
-      uiStore.getState().addToast(message, 'error');
-    }
+  function handleSubmit() {
+    const next = {};
+    if (!form.name.trim()) next.name = t('admin.exerciseLibrary.errors.nameRequired');
+    if (!form.equipment.trim()) next.equipment = t('admin.exerciseLibrary.errors.equipmentRequired');
+    setErrors(next);
+    if (Object.keys(next).length > 0) return;
+    onSave(form);
   }
 
   return (
@@ -522,94 +446,30 @@ function ExerciseModal({ exercise, onClose, onSave, t }) {
             value={form.name}
             onChange={e => set('name', e.target.value)}
             placeholder={t('admin.exerciseLibrary.fields.exerciseNamePlaceholder')}
+            style={errors.name ? { borderColor: '#b02500' } : undefined}
           />
+          {errors.name && <p style={{ margin: '4px 0 0', fontSize: 12, color: '#b02500' }}>{errors.name}</p>}
         </div>
 
-        <div style={{ marginBottom: 14 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 14 }}>
-            <div style={{ border: '2px solid #dad4c8', borderRadius: 18, overflow: 'hidden', background: '#f1f1ef', minHeight: 180, position: 'relative' }}>
-              <ExerciseImagePreview
-                key={`${form.imageUrl}-${form.altImageUrl}-${form.muscle}-${form.name}`}
-                exercise={{ imageUrl: form.imageUrl, altImageUrl: form.altImageUrl, muscle: form.muscle, name: form.name || t('admin.exerciseLibrary.labels.exercise') }}
-                alt="preview"
-                style={{ position: 'absolute', inset: 0 }}
-                imgStyle={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                animate={Boolean(form.altImageUrl)}
-                fallback={<AdminExerciseImageFallback exercise={{ imageUrl: '', muscle: form.muscle, name: form.name || t('admin.exerciseLibrary.labels.exercise') }} fallbackLabel={t('admin.exerciseLibrary.labels.exercise')} />}
-              />
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ border: '2px dashed #dad4c8', borderRadius: 18, background: '#faf9f7', padding: 14 }}>
-                <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: '1px', textTransform: 'uppercase', color: '#2e2f2e' }}>
-                  {t('admin.exerciseLibrary.fields.primaryImage')}
-                </p>
-                <p style={{ margin: '6px 0 10px', fontSize: 13, lineHeight: 1.5, color: '#5b5c5a' }}>
-                  {t('admin.exerciseLibrary.fields.primaryImageHelp')}
-                </p>
-                <label className="adm-btn-ghost" style={{ width: '100%', justifyContent: 'center', marginBottom: 8, cursor: 'pointer' }}>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    onChange={(event) => handleImageImport('imageUrl', event.target.files?.[0])}
-                  />
-                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>upload</span>
-                  {t('admin.exerciseLibrary.actions.importFile')}
-                </label>
-                <input
-                  className="adm-form-input"
-                  value={form.imageUrl}
-                  onChange={e => set('imageUrl', e.target.value)}
-                  placeholder={t('admin.exerciseLibrary.fields.imageUrlPlaceholder')}
-                />
-                {fileState.primary ? (
-                  <p style={{ margin: '8px 0 0', fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '0.5px', color: '#38671a' }}>
-                    {t('admin.exerciseLibrary.labels.imported')}: {fileState.primary}
-                  </p>
-                ) : null}
-              </div>
-
-              <div style={{ border: '2px dashed #dad4c8', borderRadius: 18, background: '#faf9f7', padding: 14 }}>
-                <p style={{ margin: 0, fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: '1px', textTransform: 'uppercase', color: '#2e2f2e' }}>
-                  {t('admin.exerciseLibrary.fields.alternateFrame')}
-                </p>
-                <p style={{ margin: '6px 0 10px', fontSize: 13, lineHeight: 1.5, color: '#5b5c5a' }}>
-                  {t('admin.exerciseLibrary.fields.alternateFrameHelp')}
-                </p>
-                <label className="adm-btn-ghost" style={{ width: '100%', justifyContent: 'center', marginBottom: 8, cursor: 'pointer' }}>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    onChange={(event) => handleImageImport('altImageUrl', event.target.files?.[0])}
-                  />
-                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>imagesmode</span>
-                  {t('admin.exerciseLibrary.actions.importAltFile')}
-                </label>
-                <input
-                  className="adm-form-input"
-                  value={form.altImageUrl}
-                  onChange={e => set('altImageUrl', e.target.value)}
-                  placeholder={t('admin.exerciseLibrary.fields.imageUrlPlaceholder')}
-                />
-                {fileState.alternate ? (
-                  <p style={{ margin: '8px 0 0', fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: '0.5px', color: '#38671a' }}>
-                    {t('admin.exerciseLibrary.labels.imported')}: {fileState.alternate}
-                  </p>
-                ) : null}
-              </div>
-            </div>
+        <div className="adm-grid-2" style={{ marginBottom: 14 }}>
+          <div className="adm-form-field">
+            <label className="adm-form-label">{t('admin.exerciseLibrary.fields.primaryImage')}</label>
+            <input
+              className="adm-form-input"
+              value={form.imageUrl}
+              onChange={e => set('imageUrl', e.target.value)}
+              placeholder={t('admin.exerciseLibrary.fields.imageUrlPlaceholder')}
+            />
           </div>
-
-          <div style={{ marginTop: 10, padding: '12px 14px', borderRadius: 14, background: '#fff8ea', border: '2px solid #f4d28a' }}>
-              <p style={{ margin: 0, fontSize: 12, lineHeight: 1.55, color: '#7c5507' }}>
-              {t('admin.exerciseLibrary.fields.imageNotice')}
-              </p>
-            </div>
-          {fileState.error ? (
-            <p style={{ margin: '8px 0 0', fontSize: 12, color: '#b02500' }}>{fileState.error}</p>
-          ) : null}
+          <div className="adm-form-field">
+            <label className="adm-form-label">{t('admin.exerciseLibrary.fields.alternateFrame')}</label>
+            <input
+              className="adm-form-input"
+              value={form.altImageUrl}
+              onChange={e => set('altImageUrl', e.target.value)}
+              placeholder={t('admin.exerciseLibrary.fields.imageUrlPlaceholder')}
+            />
+          </div>
         </div>
 
         <div className="adm-grid-2">
@@ -644,7 +504,9 @@ function ExerciseModal({ exercise, onClose, onSave, t }) {
               value={form.equipment}
               onChange={e => set('equipment', e.target.value)}
               placeholder={t('admin.exerciseLibrary.fields.equipmentPlaceholder')}
+              style={errors.equipment ? { borderColor: '#b02500' } : undefined}
             />
+            {errors.equipment && <p style={{ margin: '4px 0 0', fontSize: 12, color: '#b02500' }}>{errors.equipment}</p>}
           </div>
         </div>
 
@@ -662,10 +524,7 @@ function ExerciseModal({ exercise, onClose, onSave, t }) {
 
         <div className="adm-form-actions">
           <button className="adm-btn-ghost" onClick={onClose}>{t('common.actions.close')}</button>
-          <button
-            className="adm-btn-primary"
-            onClick={() => { if (form.name.trim()) onSave(form); }}
-          >
+          <button className="adm-btn-primary" onClick={handleSubmit}>
             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>save</span>
             {exercise ? t('admin.exerciseLibrary.actions.saveChanges') : t('admin.exerciseLibrary.actions.addExercise')}
           </button>
@@ -778,10 +637,26 @@ export default function AdminExerciseLibrary() {
           <p className="adm-page-eyebrow">{t('admin.exerciseLibrary.header.eyebrow')}</p>
           <h1 className="adm-page-title">{t('admin.exerciseLibrary.header.titleLine1')}<br/>{t('admin.exerciseLibrary.header.titleLine2')}</h1>
         </div>
-        <button className="adm-btn-primary" onClick={() => setModal({})}>
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: 16 }}>add</span>
-          {t('admin.exerciseLibrary.actions.addExercise')}
-        </button>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div className="adm-search-wrap">
+            <span className="material-symbols-outlined adm-search-icon">search</span>
+            <input
+              className="adm-search"
+              type="text"
+              placeholder={t('admin.exerciseLibrary.search.placeholder')}
+              value={filters.search}
+              onChange={(event) => {
+                setFilters((prev) => ({ ...prev, search: event.target.value }));
+                setPage(1);
+              }}
+              aria-label={t('common.labels.search')}
+            />
+          </div>
+          <button className="adm-btn-primary" onClick={() => setModal({})}>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: 16 }}>add</span>
+            {t('admin.exerciseLibrary.actions.addExercise')}
+          </button>
+        </div>
       </div>
 
       {/* ── Bento filters + stats ─────────────────────────────── */}

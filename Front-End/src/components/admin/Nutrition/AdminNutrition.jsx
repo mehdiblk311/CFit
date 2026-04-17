@@ -108,6 +108,35 @@ function buildExportRows(items, t) {
   return [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
 }
 
+function DeleteFoodModal({ food, onClose, onConfirm, isPending, t }) {
+  return (
+    <div className="adm-modal-overlay" onClick={(event) => event.target === event.currentTarget && onClose()}>
+      <div className="adm-modal" style={{ maxWidth: 420, textAlign: 'center' }}>
+        <div style={{ width: 64, height: 64, margin: '0 auto 12px', borderRadius: '50%', background: '#fff4f1', border: '2px solid #f1c2b4', display: 'grid', placeItems: 'center' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 28, color: '#b02500' }}>delete_forever</span>
+        </div>
+        <h2 className="adm-modal-title">{t('admin.nutrition.deleteModal.title')}</h2>
+        <p style={{ color: '#5b5c5a', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+          {t('admin.nutrition.deleteModal.message', { name: food?.name || '' })}
+        </p>
+        <div className="adm-form-actions" style={{ justifyContent: 'center' }}>
+          <button type="button" className="adm-btn-ghost" onClick={onClose}>{t('common.actions.close')}</button>
+          <button
+            type="button"
+            className="adm-btn-primary"
+            style={{ background: '#b02500', boxShadow: '-4px 4px 0 #2e2f2e' }}
+            onClick={onConfirm}
+            disabled={isPending}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>{isPending ? 'progress_activity' : 'delete_forever'}</span>
+            {isPending ? t('settings.saving') : t('common.actions.delete')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function FoodEditorModal({
   mode,
   food,
@@ -140,16 +169,18 @@ function FoodEditorModal({
           <div className="adm-grid-2">
             <label className="adm-form-field">
               <span className="adm-form-label">{t('admin.nutrition.labels.foodName')}</span>
-              <input className="adm-form-input" name="name" value={form.name} onChange={onChange} required />
+              <input className="adm-form-input" type="text" name="name" value={form.name} onChange={onChange} required maxLength={200} />
             </label>
             <label className="adm-form-field">
               <span className="adm-form-label">{t('admin.nutrition.labels.brand')}</span>
               <input
                 className="adm-form-input"
+                type="text"
                 name="brand"
                 value={form.brand}
                 onChange={onChange}
                 placeholder={t('admin.nutrition.labels.optional')}
+                maxLength={200}
               />
             </label>
           </div>
@@ -161,7 +192,7 @@ function FoodEditorModal({
             </label>
             <label className="adm-form-field">
               <span className="adm-form-label">{t('admin.nutrition.labels.servingUnit')}</span>
-              <input className="adm-form-input" name="serving_unit" value={form.serving_unit} onChange={onChange} required />
+              <input className="adm-form-input" type="text" name="serving_unit" value={form.serving_unit} onChange={onChange} required maxLength={20} placeholder="g, ml, oz..." />
             </label>
           </div>
 
@@ -228,6 +259,7 @@ export default function AdminNutrition() {
   const [form, setForm] = useState(FOOD_FORM_INITIAL);
   const [modalOpen, setModalOpen] = useState(false);
   const [actionError, setActionError] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const deferredSearch = useDeferredValue(search.trim());
 
@@ -284,7 +316,7 @@ export default function AdminNutrition() {
     const numericFields = new Set(['serving_size', 'calories', 'protein', 'carbohydrates', 'fat', 'fiber', 'sugar', 'sodium']);
     setForm((prev) => ({
       ...prev,
-      [name]: numericFields.has(name) ? value : value,
+      [name]: numericFields.has(name) ? (value === '' ? '' : Number(value)) : value,
     }));
   };
 
@@ -318,14 +350,19 @@ export default function AdminNutrition() {
     }
   };
 
-  const handleDeleteFood = async (food) => {
+  const handleDeleteFood = (food) => {
     if (!food?.id) return;
-    if (!window.confirm(t('admin.nutrition.confirm.deleteFood', { name: food.name }))) return;
+    setDeleteTarget(food);
+  };
 
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget?.id) return;
     try {
-      await deleteFood.mutateAsync(food.id);
+      await deleteFood.mutateAsync(deleteTarget.id);
+      setDeleteTarget(null);
       setActionError('');
     } catch (error) {
+      setDeleteTarget(null);
       setActionError(error?.response?.data?.error || t('admin.nutrition.errors.deleteFailed'));
     }
   };
@@ -502,6 +539,16 @@ export default function AdminNutrition() {
           onChange={handleFormChange}
           onSubmit={handleSaveFood}
           isPending={createFood.isPending || updateFood.isPending}
+        />
+      ) : null}
+
+      {deleteTarget ? (
+        <DeleteFoodModal
+          food={deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={handleConfirmDelete}
+          isPending={deleteFood.isPending}
+          t={t}
         />
       ) : null}
     </div>

@@ -461,7 +461,26 @@ function ExerciseSearchModal({ onClose, onSelect }) {
             ) : (
               exercises.map((ex) => (
                 <button key={ex.id} className="wk-modal-ex-row" onClick={() => onSelect(ex)}>
-                  <div className="wk-modal-ex-dot" style={{ background: getAccentForType(ex.type) }} />
+                  <div style={{ width: 40, height: 40, borderRadius: 10, overflow: 'hidden', border: '2px solid #e8e2d6', background: '#f1f1ef', position: 'relative', flexShrink: 0 }}>
+                    <ExerciseImagePreview
+                      key={`picker-${ex.id}`}
+                      exercise={{
+                        imageUrl: resolveExerciseImageUrl(ex.image_url || ex.imageUrl || ''),
+                        altImageUrl: ex.alt_image_url || ex.altImageUrl || '',
+                        muscle: (getExercisePrimaryMuscle(ex) || 'chest').toUpperCase(),
+                        name: ex.name,
+                      }}
+                      alt={ex.name}
+                      style={{ position: 'absolute', inset: 0 }}
+                      imgStyle={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      animate={false}
+                      fallback={
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: getAccentForType(ex.type) + '22' }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: 18, color: getAccentForType(ex.type) }}>fitness_center</span>
+                        </div>
+                      }
+                    />
+                  </div>
                   <div className="wk-modal-ex-info">
                     <span className="wk-lib-name">{ex.name}</span>
                     <span className="wk-lib-muscle">{getExercisePrimaryMuscle(ex) || t('workouts.search.fullBody')} · {ex.equipment || t('workouts.search.bodyweight')}</span>

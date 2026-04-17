@@ -53,8 +53,8 @@ export default function OnboardingYourPlan({ step = 3, totalSteps = 3, onBack, t
     if (!submitted.current && user?.id) {
       submitted.current = true;
       tdeePromise.current = updateProfile(user.id, { tdee: tdeeData.calories })
-        .catch(() => {
-          console.warn('Failed to persist TDEE to backend');
+        .catch((error) => {
+          console.warn('Failed to persist TDEE to backend', error);
         });
     }
   }, [tdeeData, updateProfile, user?.id]);

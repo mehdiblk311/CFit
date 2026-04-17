@@ -328,7 +328,7 @@ function RecipesListView() {
                             setLoggingRecipeId(null);
                             navigate('/nutrition');
                           } catch (err) {
-                            console.error(err);
+                            console.error('Failed to log recipe:', err);
                           }
                         }}
                         disabled={logRecipe.isPending}
