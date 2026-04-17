@@ -617,9 +617,13 @@
   border-color: #f5d9b0;
 }
 
-.dash-card--leaderboard {
+.dash-leaderboard-block {
+  display: flex;
+  flex-direction: column;
   padding: 18px 16px 14px;
   background: #f7f4ee;
+  border: 2px solid #dad4c8;
+  border-radius: 20px;
   border-style: dashed;
   box-shadow: -4px 4px 0 #2e2f2e;
 }

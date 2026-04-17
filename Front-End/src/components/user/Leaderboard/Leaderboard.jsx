@@ -75,7 +75,14 @@ function Avatar({ entry, size = 'md' }) {
 
 // ── Score Section ──────────────────────────────────────────────────────
 
-function ScoreSection({ currentEntry, percentile, period, onJoinBoard, isFindingEntry }) {
+function ScoreSection({
+  currentEntry,
+  percentile,
+  period,
+  onJoinBoard,
+  isFindingEntry,
+  showJoinButton = true,
+}) {
   const { t } = useI18n();
   const hasEntry = !!currentEntry;
   const rank     = currentEntry?.rank;
@@ -89,8 +96,10 @@ function ScoreSection({ currentEntry, percentile, period, onJoinBoard, isFinding
         <div className="lb-score-body">
           {/* Rank */}
           <div className="lb-score-rank-block">
-            <span className="lb-eyebrow">{t('leaderboardPage.rank.title')}</span>
-            <p className="lb-rank-display">{hasEntry ? `#${rank}` : '—'}</p>
+            <div className="lb-score-metric-box">
+              <span className="lb-eyebrow">{t('leaderboardPage.rank.title')}</span>
+              <p className="lb-rank-display">{hasEntry ? `#${rank}` : '—'}</p>
+            </div>
             <p className="lb-rank-context">
               {hasEntry
                 ? t('leaderboardPage.rank.topPercentile', { percentile, period: t(`leaderboardPage.periods.${period}`) })
@@ -100,9 +109,11 @@ function ScoreSection({ currentEntry, percentile, period, onJoinBoard, isFinding
 
           {/* Score */}
           <div className="lb-score-pts-block">
-            <span className="lb-eyebrow">{t('leaderboardPage.score.title')}</span>
-            <p className="lb-score-display">{hasEntry ? formatScore(score) : '—'}</p>
-            <span className="lb-score-unit">{t('leaderboardPage.score.unit')}</span>
+            <div className="lb-score-metric-box lb-score-metric-box--score">
+              <span className="lb-eyebrow">{t('leaderboardPage.score.title')}</span>
+              <p className="lb-score-display">{hasEntry ? formatScore(score) : '—'}</p>
+              <span className="lb-score-unit">{t('leaderboardPage.score.unit')}</span>
+            </div>
             {hasEntry && <MedalBadge entry={currentEntry} />}
           </div>
         </div>
@@ -126,7 +137,7 @@ function ScoreSection({ currentEntry, percentile, period, onJoinBoard, isFinding
         )}
 
         {/* Join board CTA — only when not on board */}
-        {!hasEntry && (
+        {showJoinButton && !hasEntry && (
           <button
             className="lb-join-btn"
             onClick={onJoinBoard}
@@ -447,6 +458,7 @@ export default function Leaderboard({ embedded = false }) {
           period={period}
           onJoinBoard={jumpToMyRank}
           isFindingEntry={isFindingCurrentEntry}
+          showJoinButton={!embedded}
         />
 
         {/* 2 — Period */}

@@ -251,15 +251,11 @@ function DashboardSkeleton() {
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const workoutFrequencyByUser = uiStore((s) => s.workoutFrequencyByUser);
   const getWorkoutFrequencyForUser = uiStore((s) => s.getWorkoutFrequencyForUser);
   const migrateLegacyWorkoutFrequencyForUser = uiStore((s) => s.migrateLegacyWorkoutFrequencyForUser);
   const { t, locale } = useI18n();
 
-  const workoutFrequency = useMemo(() => {
-    if (!user?.id) return 4;
-    return getWorkoutFrequencyForUser(user.id);
-  }, [user?.id, workoutFrequencyByUser, getWorkoutFrequencyForUser]);
+  const workoutFrequency = user?.id ? getWorkoutFrequencyForUser(user.id) : 4;
 
   useEffect(() => {
     if (!user?.id) return;
@@ -552,7 +548,7 @@ export default function Dashboard() {
               </div>
             </section>
 
-            <section className="dash-card dash-card--leaderboard" id="dashboard-leaderboard">
+            <section className="dash-leaderboard-block" id="dashboard-leaderboard">
               <Leaderboard embedded />
             </section>
 

@@ -127,27 +127,32 @@
   max-width: none;
   margin: 0;
   padding: 0 0 12px;
+  gap: 12px;
 }
 
 .lb-embed-head {
-  margin-bottom: 2px;
-  padding: 4px 4px 2px;
+  margin: 0;
+  padding: 14px 16px 12px;
+  border-radius: 18px;
+  border: 2px solid var(--oat);
+  background: var(--white);
+  box-shadow: var(--clay-shadow);
 }
 
 .lb-embed-title {
   margin: 0;
-  font-size: clamp(1.3rem, 4.5vw, 1.8rem);
-  line-height: 1;
-  letter-spacing: -0.8px;
+  font-size: clamp(1.25rem, 4.2vw, 1.65rem);
+  line-height: 1.08;
+  letter-spacing: -0.6px;
   font-weight: 800;
   color: var(--ink);
 }
 
 .lb-embed-subtitle {
-  margin: 6px 0 0;
+  margin: 8px 0 0;
   font-family: 'Space Mono', monospace;
-  font-size: 8px;
-  letter-spacing: 1px;
+  font-size: 8.5px;
+  letter-spacing: 1.1px;
   text-transform: uppercase;
   color: var(--silver);
 }
@@ -162,6 +167,10 @@
   background: var(--white);
   box-shadow: var(--hard-shadow), inset 2px 2px 0 rgba(255, 255, 255, 0.7);
   overflow: hidden;
+}
+
+.lb-root--embedded .lb-score-section {
+  box-shadow: var(--clay-shadow), inset 2px 2px 0 rgba(255, 255, 255, 0.7);
 }
 
 .lb-score-inner {
@@ -194,6 +203,7 @@
 .lb-score-rank-block {
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
 .lb-rank-display {
@@ -219,12 +229,35 @@
   flex-direction: column;
   align-items: flex-end;
   justify-content: flex-start;
-  gap: 4px;
+  gap: 8px;
   text-align: right;
 }
 
-.lb-score-pts-block .lb-eyebrow {
+.lb-score-metric-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 150px;
+  padding: 10px 14px;
+  border-radius: 18px;
+  border: 2px solid var(--oat);
+  background: color-mix(in srgb, var(--lemon-lt) 35%, var(--white));
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.lb-score-metric-box--score {
+  align-items: flex-end;
+  text-align: right;
+  background: color-mix(in srgb, var(--matcha-lt) 18%, var(--white));
+}
+
+.lb-score-metric-box .lb-eyebrow {
   margin-bottom: 2px;
+}
+
+.lb-score-metric-box .lb-rank-display,
+.lb-score-metric-box .lb-score-display {
+  margin: 0;
 }
 
 .lb-score-display {
@@ -950,6 +983,24 @@
 
   .lb-score-display {
     font-size: clamp(1.4rem, 5vw, 2rem);
+  }
+
+  .lb-score-body {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding-left: 12px;
+  }
+
+  .lb-score-pts-block {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .lb-score-metric-box,
+  .lb-score-metric-box--score {
+    align-items: flex-start;
+    text-align: left;
+    width: 100%;
   }
 
   .lb-my-rank-bar {
