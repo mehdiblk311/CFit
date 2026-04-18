@@ -1,0 +1,524 @@
+*This project has been created as part of the 42 curriculum by ebelkadi, msennane, sennakhl, ysbai-jo.*
+
+# UM6P_FIT
+
+## Description
+
+UM6P_FIT is a full-stack fitness platform built as a monorepo with a React/Vite frontend and a Go backend. Its goal is to give users a single place to manage the full fitness loop: onboarding, workouts, nutrition, progress signals, and AI-assisted coaching, while also giving administrators tools to manage users, exercises, food data, and training programs.
+
+The project is organized around two main product surfaces:
+
+- **User application**: authentication, 3-step onboarding, dashboard, workouts, nutrition, AI assistant, notifications, and settings
+- **Admin application**: realtime dashboard, user moderation, exercise library, nutrition management, and workout program management
+
+### Key Features
+
+- Multilingual interface in English, French, and Arabic with RTL support
+- Workout logging with exercises, sets, templates, and assigned programs
+- Nutrition logging with foods, meals, recipes, favorites, and weight tracking
+- AI coach chat with history and feedback
+- Admin realtime metrics over WebSocket
+- JWT auth flow with refresh token support and 2FA management
+
+---
+
+## Instructions
+
+### Prerequisites
+
+You need the following tools installed:
+
+- **Node.js** `18+`
+- **npm**
+- **Go** `1.25+`
+- **Docker** and **Docker Compose**
+- **PostgreSQL** if you do not use the Docker database
+
+### Repository Layout
+
+The project is split into:
+
+- `Front-End/` for the React application
+- `Backend/` for the Go API, worker, seeders, monitoring, and exercise library service
+
+### Backend Setup
+
+From [Backend](/Users/mehdi/Desktop/Cfit/Backend):
+
+```bash
+cp .env.example .env
+docker compose up -d postgres pgadmin exercise-lib
+go run . migrate
+go run seed/main.go
+go run . api
+```
+
+If you also want worker jobs and monitoring:
+
+```bash
+go run . worker
+docker compose up -d prometheus grafana
+```
+
+Default local backend services:
+
+- API: `http://localhost:8080`
+- Swagger UI: `http://localhost:8080/docs`
+- Exercise library service: `http://localhost:8000`
+- pgAdmin: `http://localhost:8081`
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3000`
+
+### Frontend Setup
+
+From [Front-End](/Users/mehdi/Desktop/Cfit/Front-End):
+
+```bash
+npm install
+npm run dev
+```
+
+The frontend runs at:
+
+- `http://localhost:5173`
+
+### Frontend Environment
+
+Create or edit [Front-End/.env](/Users/mehdi/Desktop/Cfit/Front-End/.env) with the correct service URLs:
+
+```env
+VITE_API_BASE_URL=http://localhost:8080
+VITE_EXERCISE_IMAGE_BASE_URL=http://localhost:8000
+VITE_ADMIN_REALTIME_WS_AUTH_MODE=header
+```
+
+What these variables do:
+
+- `VITE_API_BASE_URL`: base URL for the Axios client
+- `VITE_EXERCISE_IMAGE_BASE_URL`: image source for exercise previews
+- `VITE_ADMIN_REALTIME_WS_AUTH_MODE`: admin realtime WebSocket auth strategy
+
+### Useful Commands
+
+Frontend:
+
+```bash
+npm run dev
+npm run build
+npm run lint
+npm run test
+```
+
+Backend:
+
+```bash
+go run . api
+go run . migrate
+go run . worker
+go run seed/main.go
+go test ./...
+```
+
+---
+
+## Team Information
+
+### El Mahdi Belkadi — `ebelkadi`
+
+- **Assigned role(s):** Product Owner, Frontend Developer, UI/UX Lead
+- **Responsibilities:** product direction, user/admin UX decisions, frontend implementation, integration validation, README and presentation alignment
+
+### Mouad Sennane — `msennane`
+
+- **Assigned role(s):** Technical Lead, Backend Developer, DevOps
+- **Responsibilities:** backend architecture, API design, database integration, Docker setup, monitoring stack, production-oriented technical decisions
+
+### Soufiane Ennakhli — `sennakhl`
+
+- **Assigned role(s):** Backend Developer
+- **Responsibilities:** backend feature implementation, service logic, API coverage, and support on data/business workflows
+
+### Yassir Sbai Jouilil — `ysbai-jo`
+
+- **Assigned role(s):** Frontend Developer
+- **Responsibilities:** frontend feature delivery, screen implementation, interface support, and integration on user/admin views
+
+---
+
+## Project Management
+
+### Work Organization
+
+The team organized the project around a split between:
+
+- frontend/user experience work
+- backend/API/data work
+- integration and review passes
+
+Work was distributed by feature domain, with regular sync points to keep frontend contracts aligned with backend routes and payloads.
+
+### Team Rhythm
+
+- short feature planning discussions before implementation
+- integration reviews when backend contracts or UX flows changed
+- iterative fixes after merge and test feedback
+
+### Tools Used
+
+- **Git + feature branches** for code collaboration
+- **README, planning notes, and roadmap files** for delivery tracking
+- **Swagger/OpenAPI + Postman** for API inspection and validation
+- **Graphify/code graph outputs** for architecture understanding
+
+### Communication Channels
+
+- direct team discussions
+- code review feedback in the repository workflow
+- shared planning and implementation documents in the repo
+
+---
+
+## Technical Stack
+
+### Frontend Technologies
+
+- React 19
+- Vite
+- React Router v7
+- TanStack Query
+- Zustand
+- Axios
+- Vitest
+- React Testing Library
+- MSW
+
+### Backend Technologies
+
+- Go 1.25+
+- standard library `net/http`
+- `http.ServeMux`
+- GORM
+- PostgreSQL
+- Gorilla WebSocket
+
+### Database System and Why It Was Chosen
+
+The backend uses **PostgreSQL** because the project needs relational modeling across users, workouts, exercises, meals, foods, templates, recipes, notifications, and program assignments. PostgreSQL fits well because:
+
+- relationships are central to the domain
+- analytics queries benefit from SQL
+- GORM integrates cleanly with it
+- it is reliable for transactional application data
+
+### Other Significant Technologies
+
+- Docker and Docker Compose for local environment orchestration
+- Prometheus and Grafana for monitoring
+- Python-based exercise library service for exercise search, metadata, and image access
+
+### Major Technical Choices and Justification
+
+#### React + Vite
+
+Chosen for fast iteration, simple local development, and a clean component-driven frontend flow.
+
+#### TanStack Query + Zustand
+
+Chosen to separate:
+
+- remote server state and caching
+- local UI/session state
+
+This keeps the frontend more maintainable than pushing everything into one global store.
+
+#### Go + `net/http`
+
+Chosen for a lightweight backend with explicit control, good performance, and simple deployment. The codebase uses the standard HTTP stack instead of a larger framework.
+
+#### GORM
+
+Chosen to move faster on relational models, migrations, and service-layer work while keeping enough control over SQL-backed entities.
+
+#### WebSocket for Admin Realtime
+
+Used specifically for admin metrics updates so the dashboard can refresh without manual polling-heavy UX.
+
+---
+
+## Database Schema
+
+### Structure Overview
+
+The schema is relational and centered around the user.
+
+Main entity groups:
+
+- **Identity and access**: `users`, sessions, 2FA-related records
+- **Workout domain**: `workouts`, `workout_exercises`, `workout_sets`, `workout_cardio_entries`, `workout_templates`, `workout_programs`
+- **Nutrition domain**: `foods`, `nutrients`, `meals`, `meal_foods`, `recipes`, `favorite_foods`, `weight_entries`
+- **System/supporting domain**: `notifications`, exports, audit-style records, leaderboard-related data
+
+### Core Relationships
+
+- A **user** has many workouts, meals, notifications, weight entries, favorite foods, and program assignments
+- A **workout** has many workout exercises and cardio entries
+- A **workout exercise** has many workout sets
+- A **meal** has many meal-food join rows
+- A **recipe** contains many food items
+- A **program** contains weeks, and weeks contain sessions
+- A **program assignment** links a program to a user
+
+### Important Tables and Key Fields
+
+#### `users`
+
+- `id` — UUID
+- `name` — string
+- `email` — string
+- `password_hash` — string
+- `role` — string
+- `weight`, `height`, `goal`, `tdee` — profile and onboarding fields
+
+#### `workouts`
+
+- `id` — UUID
+- `user_id` — UUID
+- `name` — string
+- `workout_type` — string
+- `notes` — text
+- `started_at`, `completed_at` — timestamps
+
+#### `workout_exercises`
+
+- `id` — UUID
+- `workout_id` — UUID
+- `exercise_id` — UUID
+- `notes` — text
+
+#### `workout_sets`
+
+- `id` — UUID
+- `workout_exercise_id` — UUID
+- `weight` — numeric
+- `reps` — integer
+- `completed` — boolean
+
+#### `foods`
+
+- `id` — UUID
+- `name` — string
+- `brand` — string
+- `serving_size` — numeric
+- macro and nutrient fields
+
+#### `meals`
+
+- `id` — UUID
+- `user_id` — UUID
+- `meal_type` — string
+- `date` — date/timestamp
+- `notes` — text
+
+#### `meal_foods`
+
+- `id` — UUID
+- `meal_id` — UUID
+- `food_id` — UUID
+- `quantity` — numeric
+
+#### `weight_entries`
+
+- `id` — UUID
+- `user_id` — UUID
+- `weight` — numeric
+- `date` — date/timestamp
+
+---
+
+## Features List
+
+### Authentication and Account
+
+- **Login, signup, refresh token flow, logout, 2FA setup/challenge/session management**
+- **Worked on by:** `msennane`, `sennakhl`, `ebelkadi`
+- **Functionality:** secure access control, protected routes, refresh-based session continuity, and 2FA management
+
+### Onboarding
+
+- **3-step onboarding flow**
+- **Worked on by:** `ebelkadi`, `ysbai-jo`
+- **Functionality:** collect profile data, collect goals/activity, compute and confirm the daily target plan
+
+### User Dashboard
+
+- **Summary dashboard with recommendations, streaks, and notification awareness**
+- **Worked on by:** `ebelkadi`, `ysbai-jo`, `msennane`
+- **Functionality:** combines backend summary endpoints into a user-facing daily overview
+
+### Workout Tracking
+
+- **Workout creation, exercise logging, set logging, notes, templates, programs**
+- **Worked on by:** `ebelkadi`, `ysbai-jo`, `msennane`, `sennakhl`
+- **Functionality:** supports workout history, active sessions, set-by-set logging, and assigned program consumption
+
+### Exercise Library
+
+- **Exercise search, library metadata, detail views, image proxying, history**
+- **Worked on by:** `ebelkadi`, `ysbai-jo`, `msennane`
+- **Functionality:** lets users and admins browse and use a shared exercise catalog
+
+### Nutrition
+
+- **Meals, foods, favorites, recipes, meal-food joins, weight logging**
+- **Worked on by:** `ebelkadi`, `ysbai-jo`, `msennane`, `sennakhl`
+- **Functionality:** complete food logging and meal management with history and weight tracking
+
+### AI Assistant
+
+- **Chat, chat history, coach summary, feedback**
+- **Worked on by:** `msennane`, `sennakhl`, `ebelkadi`
+- **Functionality:** supports AI-based interaction and coaching summaries
+
+### Notifications
+
+- **Notification listing, unread counts, mark read, mark all read**
+- **Worked on by:** `msennane`, `sennakhl`, `ebelkadi`
+- **Functionality:** user notification center integrated with backend automation
+
+### Admin Dashboard
+
+- **Admin summary, trends, moderation signals, health signals, realtime metrics**
+- **Worked on by:** `msennane`, `ebelkadi`
+- **Functionality:** gives admins a live operational view of the platform
+
+### Admin User Management
+
+- **User list, editing, ban/unban, deletion**
+- **Worked on by:** `ebelkadi`, `ysbai-jo`, `msennane`
+- **Functionality:** user moderation and admin-side account control
+
+### Admin Exercise Library
+
+- **Exercise CRUD, filters, metadata-driven management**
+- **Worked on by:** `ebelkadi`, `ysbai-jo`, `msennane`
+- **Functionality:** lets admins manage the exercise catalog
+
+### Admin Program Management
+
+- **Program CRUD, week/session management, assignment management**
+- **Worked on by:** `ebelkadi`, `msennane`, `sennakhl`
+- **Functionality:** lets admins create and assign training programs to users
+
+---
+
+## Modules
+
+### Chosen Modules and Point Calculation
+
+| Module | Type | Points | Team Member(s) | Why It Was Chosen | How It Was Implemented |
+|------|------|------:|------|------|------|
+| Frontend + Backend Frameworks | Major | 2 | `ebelkadi`, `ysbai-jo`, `msennane`, `sennakhl` | The project needs a full user-facing platform with admin and API layers | React/Vite frontend plus Go backend |
+| Database + ORM | Major | 2 | `msennane`, `sennakhl` | The domain is relational and data-heavy | PostgreSQL + GORM models and migrations |
+| REST API Design | Major | 2 | `msennane`, `sennakhl` | The frontend and admin panels depend on a stable service contract | `/v1/...` route family across auth, workouts, nutrition, admin, and AI |
+| Authentication + Security | Major | 2 | `msennane`, `sennakhl`, `ebelkadi` | The project contains private health-related user data | JWT access/refresh flow, protected routes, 2FA, middleware |
+| Internationalization | Major | 2 | `ebelkadi`, `ysbai-jo` | The platform targets multilingual users and requires Arabic support | English/French/Arabic message catalogs and RTL support |
+| Responsive Frontend | Major | 2 | `ebelkadi`, `ysbai-jo` | The main product target is mobile-first use | custom CSS, mobile layouts, adaptive admin/user screens |
+| WebSocket Realtime | Major | 2 | `msennane`, `ebelkadi` | Admin metrics benefit from live updates | `GET /v1/admin/dashboard/realtime` + frontend socket hook |
+| Monitoring | Major | 2 | `msennane` | The backend stack needs observability | Prometheus + Grafana + metrics middleware |
+| Data Export | Major | 2 | `msennane`, `sennakhl`, `ebelkadi` | Users should be able to retrieve their own data | export endpoints and frontend export handling |
+| Notifications | Major | 2 | `msennane`, `sennakhl`, `ebelkadi` | Engagement and reminders are part of the product loop | notification services, endpoints, and frontend center |
+| AI Integration | Major | 2 | `msennane`, `sennakhl`, `ebelkadi` | Coaching and Q&A are central differentiators | `/v1/chat`, history, feedback, coach-summary |
+| Testing | Minor | 1 | all | Validation is needed across frontend and backend changes | Go tests, Vitest, RTL, MSW |
+
+### Total
+
+- **Major modules:** `11 x 2 = 22`
+- **Minor modules:** `1 x 1 = 1`
+- **Total:** `23 points`
+
+These modules were chosen because they directly support the delivered product instead of being added only to increase the score. Each one corresponds to an actual visible or testable part of the platform.
+
+---
+
+## Individual Contributions
+
+### El Mahdi Belkadi — `ebelkadi`
+
+- Led product direction and interface consistency
+- Worked heavily on frontend architecture and user/admin screens
+- Contributed to onboarding, workouts, nutrition, settings, dashboard, i18n, and README quality
+- Helped bridge backend contracts to frontend behavior
+
+**Challenges:** aligning fast-moving UX work with backend constraints and merge-heavy integration phases
+
+### Mouad Sennane — `msennane`
+
+- Led backend architecture and technical direction
+- Implemented major parts of auth, API surface, monitoring, database integration, and admin realtime architecture
+- Owned infrastructure-oriented decisions such as Docker and service orchestration
+
+**Challenges:** maintaining a broad backend surface while keeping contracts stable for the frontend
+
+### Soufiane Ennakhli — `sennakhl`
+
+- Contributed backend implementation across services, handlers, and business logic
+- Supported nutrition, programs, exports, and AI-related backend behavior
+- Helped extend API coverage and stabilize business workflows
+
+**Challenges:** coordinating service-layer logic across multiple connected domains
+
+### Yassir Sbai Jouilil — `ysbai-jo`
+
+- Contributed frontend implementation across user and admin surfaces
+- Supported page-level feature delivery and integration work
+- Helped move screens from design/reference state into working application views
+
+**Challenges:** adapting UI implementation to evolving contracts and active product iteration
+
+---
+
+## Resources
+
+### Technical References
+
+- [React Documentation](https://react.dev/)
+- [Vite Documentation](https://vite.dev/)
+- [React Router Documentation](https://reactrouter.com/)
+- [TanStack Query Documentation](https://tanstack.com/query/latest)
+- [Zustand Documentation](https://zustand.docs.pmnd.rs/)
+- [Go Documentation](https://go.dev/doc/)
+- [GORM Documentation](https://gorm.io/)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+- [Prometheus Documentation](https://prometheus.io/docs/)
+- [Grafana Documentation](https://grafana.com/docs/)
+- [Gorilla WebSocket Documentation](https://pkg.go.dev/github.com/gorilla/websocket)
+
+### How AI Was Used
+
+AI was used as a development support tool, not as a substitute for implementation ownership.
+
+It was used for:
+
+- interface ideation and copy drafting
+- debugging support and refactoring assistance
+- code review help on specific flows
+- documentation restructuring and wording improvements
+- architecture exploration and implementation planning
+
+AI-assisted work still required manual review, integration, testing, and adaptation to the real project constraints by the team.
+
+### Additional Internal References
+
+- [README.md](/Users/mehdi/Desktop/Cfit/README.md)
+- [Backend/README.md](/Users/mehdi/Desktop/Cfit/Backend/README.md)
+- [Front-End/README.md](/Users/mehdi/Desktop/Cfit/Front-End/README.md)
+- [Backend/api/openapi.yaml](/Users/mehdi/Desktop/Cfit/Backend/api/openapi.yaml)
+
+---
+
+## Notes and Limitations
+
+- The current realtime layer is focused on the admin dashboard only
+- The frontend depends on both the Go API and the exercise library service
+- Some earlier planning documents describe aspirational architecture; the repository implementation is the source of truth
+- The project is feature-rich and integration-heavy, so merges and API/frontend alignment were recurring project challenges

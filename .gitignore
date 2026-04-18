@@ -23,9 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 
-#claude 
-.claude
-AgentSkills.worktrees
+#AI
+AI
+.agents
+.claude 
+command_claude.txt
 
 #Backend
 # Backend
