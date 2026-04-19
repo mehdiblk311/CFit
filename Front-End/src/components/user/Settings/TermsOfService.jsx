@@ -1,11 +1,23 @@
+import './Settings.css';
+
+function defaultClose() {
+  if (window.history.length > 1) {
+    window.history.back();
+    return;
+  }
+  window.location.href = '/login';
+}
+
 export default function TermsOfService({ onClose }) {
+  const handleClose = onClose || defaultClose;
+
   return (
     <div
       className="st-modal-overlay"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
     >
       <div className="st-modal-panel st-legal-panel">
-        <button className="st-modal-close" onClick={onClose}>
+        <button className="st-modal-close" onClick={handleClose}>
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
         </button>
 
@@ -112,7 +124,7 @@ export default function TermsOfService({ onClose }) {
           </section>
         </div>
 
-        <button className="st-modal-btn st-modal-btn--primary st-legal-close-btn" onClick={onClose}>
+        <button className="st-modal-btn st-modal-btn--primary st-legal-close-btn" onClick={handleClose}>
           Got it
         </button>
       </div>

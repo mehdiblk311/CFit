@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { readPublicUrl } from '../config/runtimeConfig';
 import { authStore } from '../stores/authStore';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const API_BASE_URL = readPublicUrl('VITE_API_BASE_URL', 'http://localhost:8080');
 
 const client = axios.create({
   baseURL: API_BASE_URL,
@@ -91,6 +92,10 @@ async function getFreshAccessTokenIfNeeded(currentToken, shouldSkipAuthHeader) {
   } finally {
     refreshPromise = null;
   }
+}
+
+export async function ensureAccessToken(currentToken = authStore.getState().access_token) {
+  return getFreshAccessTokenIfNeeded(currentToken, false);
 }
 
 // Request interceptor: attach JWT token

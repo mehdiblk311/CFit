@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useAdminDashboard, useAdminLogs, useAdminMetrics } from '../../hooks/queries/useAdmin';
 import { useAdminRealtime } from '../../hooks/queries/useAdminRealtime';
 import { getLocaleForLanguage, useI18n } from '../../i18n/useI18n';
+import { useQueryClient } from '@tanstack/react-query';
 
 const ROLE_COLOR = { admin: 'adm-chip--green', coach: 'adm-chip--purple', user: 'adm-chip--oat' };
 
@@ -191,14 +192,28 @@ export default function AdminDashboard() {
   const dashboardQuery = useAdminDashboard();
   const metricsQuery = useAdminMetrics();
   const logsQuery = useAdminLogs({ page: 1, limit: 6 });
-  const realtime = useAdminRealtime();
+  const queryClient = useQueryClient();
+  const realtime = useAdminRealtime((eventType) => {
+    // A signup changes both the counters and the user list, so refresh the
+    // affected admin queries immediately instead of waiting for the next poll.
+    if (eventType !== 'user_signup') return;
+
+    queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard'] });
+    queryClient.invalidateQueries({ queryKey: ['admin', 'metrics'] });
+    queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+    queryClient.invalidateQueries({ queryKey: ['admin', 'logs'] });
+  });
 
   useEffect(() => {
-    if (realtime.isLive) return undefined;
+    // When the WebSocket is live we still periodically refresh REST data
+    // because the WS payload does not cover every admin field (e.g. goal
+    // breakdown, popular exercises, etc.).  Use a longer interval since
+    // critical counters (totalUsers, workoutsToday, mealsToday) come from WS.
+    const interval = realtime.isLive ? 30_000 : 5_000;
     const timerId = window.setInterval(() => {
       dashboardQuery.refetch();
       metricsQuery.refetch();
-    }, 5000);
+    }, interval);
     return () => window.clearInterval(timerId);
   }, [realtime.isLive, dashboardQuery, metricsQuery]);
 
@@ -212,11 +227,11 @@ export default function AdminDashboard() {
   const logsPayload = logsQuery.data?.item || {};
   const logs = asArray(logsPayload.data || logsPayload.items || logsPayload.logs || logsPayload);
 
-  const totalUsers = firstNumber(userStats.total_users, summary.total_users);
+  const totalUsers = resolveRealtimeNumber(realtime.metrics?.totalUsers, firstNumber(userStats.total_users, summary.total_users));
   const activeToday = resolveRealtimeNumber(realtime.metrics?.activeUsers, firstNumber(summary.dau));
   const active7d = firstNumber(userStats.active_users_7d);
   const mau = firstNumber(summary.mau, userStats.mau);
-  const newUsers7d = firstNumber(summary.new_users_7d);
+  const newUsers7d = resolveRealtimeNumber(realtime.metrics?.newUsers7d, firstNumber(summary.new_users_7d));
   const totalWorkouts = firstNumber(workoutStats.total_workouts);
   const workoutsToday = resolveRealtimeNumber(
     realtime.metrics?.workoutsToday,

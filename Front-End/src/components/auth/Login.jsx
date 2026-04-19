@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../../i18n/useI18n';
 import AuthLanguageSwitch from './AuthLanguageSwitch';
@@ -17,13 +17,14 @@ export default function Login() {
   const [errors,   setErrors]   = useState({});
   const [loading,  setLoading]  = useState(false);
 
-  const isReady = email.trim() && password.length >= 1;
+  const isReady = email.trim() && password.length >= 8;
 
   function validate() {
     const e = {};
     if (!email.trim()) e.email = t('auth.login.errors.emailRequired');
     else if (!isValidEmail(email)) e.email = t('auth.login.errors.emailInvalid');
     if (!password) e.password = t('auth.login.errors.passwordRequired');
+    else if (password.length < 8) e.password = t('auth.login.errors.passwordShort');
     return e;
   }
 
@@ -41,6 +42,15 @@ export default function Login() {
       }
       // Otherwise auth state update drives routing in App.jsx automatically
     } catch (err) {
+      const fieldErrors = err?.fieldErrors ?? {};
+      if (fieldErrors.email || fieldErrors.password) {
+        setErrors({
+          ...(fieldErrors.email ? { email: fieldErrors.email } : {}),
+          ...(fieldErrors.password ? { password: fieldErrors.password } : {}),
+        });
+        return;
+      }
+
       const detail = err?.detail ?? err?.message ?? '';
       if (err?.status === 401 || detail.toLowerCase().includes('invalid') || detail.toLowerCase().includes('credentials')) {
         setErrors({ email: t('auth.login.errors.invalidCredentials') });
@@ -174,6 +184,11 @@ export default function Login() {
         <div className="login-footer-link">
           <span>{t('auth.login.footerPrompt')}</span>
           <button type="button" onClick={() => navigate('/signup')}>{t('auth.login.footerAction')}</button>
+        </div>
+        <div className="login-legal-links">
+          <Link to="/privacy">{t('settings.privacyPolicy')}</Link>
+          <span aria-hidden="true">•</span>
+          <Link to="/terms">{t('settings.termsOfService')}</Link>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
-const IMAGE_BASE_URL = String(
-  import.meta.env.VITE_EXERCISE_IMAGE_BASE_URL || 'http://localhost:8000'
-).replace(/\/$/, '');
+import { readPublicUrl } from '../config/runtimeConfig';
+
+const IMAGE_BASE_URL = readPublicUrl('VITE_EXERCISE_IMAGE_BASE_URL', 'http://localhost:8000');
 
 export function getExerciseImageBaseUrl() {
   return IMAGE_BASE_URL;

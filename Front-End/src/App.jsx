@@ -25,6 +25,8 @@ const CreateRecipe = lazy(() => import('./components/user/Nutrition/CreateRecipe
 const CustomFood = lazy(() => import('./components/user/Nutrition/CustomFood/CustomFood'));
 const AIAssistant = lazy(() => import('./components/user/AIAssistant/AIAssistant'));
 const Settings = lazy(() => import('./components/user/Settings/Settings'));
+const PrivacyPolicy = lazy(() => import('./components/user/Settings/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./components/user/Settings/TermsOfService'));
 const NotificationsCenter = lazy(() => import('./components/user/Notifications/NotificationsCenter'));
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
@@ -34,9 +36,10 @@ const AdminUserPrograms = lazy(() => import('./components/admin/AdminUserProgram
 const AdminNutrition = lazy(() => import('./components/admin/Nutrition/AdminNutrition'));
 
 function lazyElement(Component) {
+  const Screen = Component;
   return (
     <Suspense fallback={null}>
-      <Component />
+      <Screen />
     </Suspense>
   );
 }
@@ -87,6 +90,8 @@ const router = createBrowserRouter([
     errorElement: <RouteErrorBoundary />,
     children: [
       { path: '/', element: <Navigate to="/login" replace /> },
+      { path: '/privacy', element: lazyElement(PrivacyPolicy) },
+      { path: '/terms', element: lazyElement(TermsOfService) },
 
       {
         element: <PublicRoute />,
